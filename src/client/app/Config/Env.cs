@@ -101,10 +101,7 @@ namespace AnalitF.Net.Client.Config
 			var task = new Task<T>(() => {
 				if (Factory == null)
 					return default(T);
-				if (BackgroundSession == null) {
-					CreateOnThread = Thread.CurrentThread;
-					BackgroundSession = Factory.OpenStatelessSession();
-				}
+				InitSession();
 				CheckThreading();
 				return @select(BackgroundSession);
 			});
@@ -128,10 +125,7 @@ namespace AnalitF.Net.Client.Config
 			var task = new Task(() => {
 				if (Factory == null)
 					return;
-				if (BackgroundSession == null) {
-					CreateOnThread = Thread.CurrentThread;
-					BackgroundSession = Factory.OpenStatelessSession();
-				}
+				InitSession();
 				CheckThreading();
 				action(BackgroundSession);
 			}, token);
@@ -139,6 +133,16 @@ namespace AnalitF.Net.Client.Config
 			if (!task.IsCanceled)
 				task.Start(QueryScheduler);
 			return task;
+		}
+
+		private void InitSession()
+		{
+			if (BackgroundSession == null) {
+#if DEBUG
+				CreateOnThread = Thread.CurrentThread;
+#endif
+				BackgroundSession = Factory.OpenStatelessSession();
+			}
 		}
 
 		public void Dispose()
