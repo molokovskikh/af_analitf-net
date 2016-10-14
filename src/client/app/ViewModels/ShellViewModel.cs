@@ -112,9 +112,6 @@ namespace AnalitF.Net.Client.ViewModels
 				NotifyOfPropertyChange(nameof(LeaderCalculationWasStart));
 			}
 		}
-#if DEBUG
-		public TaskScheduler TestUIScheduler;
-#endif
 
 		//не верь решарперу
 		public ShellViewModel()
@@ -360,7 +357,7 @@ namespace AnalitF.Net.Client.ViewModels
 				else {
 					base.CanClose(callback);
 				}
-			}, GetUIScheduler());
+			}, Env.TplUiScheduler);
 		}
 
 		public void UpdateStat()
@@ -1058,7 +1055,7 @@ namespace AnalitF.Net.Client.ViewModels
 				task.ContinueWith(t => {
 					viewModel.IsCompleted = true;
 					viewModel.TryClose();
-				}, GetUIScheduler());
+				}, Env.TplUiScheduler);
 				task.Start(TaskScheduler.Default);
 
 				windowManager.ShowFixedDialog(viewModel);
@@ -1091,17 +1088,6 @@ namespace AnalitF.Net.Client.ViewModels
 					success?.Invoke(task);
 				}
 			} while (!done);
-		}
-
-		private TaskScheduler GetUIScheduler()
-		{
-			TaskScheduler scheduler = null;
-			if (SynchronizationContext.Current != null)
-				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-#if DEBUG
-			scheduler = scheduler ?? TestUIScheduler;
-#endif
-			return scheduler;
 		}
 
 		public IEnumerable<IScreen> NavigationStack => Navigator.NavigationStack;

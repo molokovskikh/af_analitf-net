@@ -1035,6 +1035,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 					names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(c => c.Id == catalog.Name.Id);
 				});
 			}
+			WaitIdle();
 			Input(view, "CatalogNames", Key.Enter);
 			Assert.That(viewModel.Catalogs.Value.Count, Is.GreaterThan(0),
 				"нет ни одной формы выпуска, для {0}", viewModel.CurrentCatalogName.Value);

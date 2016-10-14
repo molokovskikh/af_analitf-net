@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -17,6 +18,7 @@ using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -62,7 +64,34 @@ namespace AnalitF.Net.Client.ViewModels
 #endif
 				.Merge(ParentModel.ObservableForProperty(m => m.CurrentFilter).Cast<object>())
 				.Merge(ParentModel.ObservableForProperty(m => m.ShowWithoutOffers))
-				.Subscribe(_ => LoadCatalogs(), CloseCancellation.Token);
+				.Select(_ => {
+					if (CurrentCatalogName.Value == null) {
+						return Observable.Return(Enumerable.Empty<Catalog>().ToList());
+					}
+					var nameId = CurrentCatalogName.Value.Id;
+					return Env.RxQuery(s => {
+						var queryable = s.Query<Catalog>()
+							.Fetch(c => c.Name)
+							.ThenFetch(c => c.Mnn)
+							.Where(c => c.Name.Id == nameId);
+
+						if (!ParentModel.ShowWithoutOffers)
+							queryable = queryable.Where(c => c.HaveOffers);
+
+						if (ParentModel.CurrentFilter == ParentModel.Filters[1])
+							queryable = queryable.Where(c => c.VitallyImportant);
+
+						if (ParentModel.CurrentFilter == ParentModel.Filters[2])
+							queryable = queryable.Where(c => c.MandatoryList);
+
+						if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+							queryable = queryable.Where(c => s.Query<AwaitedItem>().Any(i => i.Catalog == c));
+
+						return queryable.OrderBy(c => c.Form).ToList();
+					});
+				})
+				.Switch()
+				.Subscribe(Catalogs, CloseCancellation.Token);
 			ExcelExporter.ActiveProperty.Value = "CatalogNames";
 		}
 
@@ -113,7 +142,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Promotions = new PromotionPopup(Shell.Config, CurrentCatalogName, RxQuery, Env);
+			Promotions = new PromotionPopup(Shell.Config, CurrentCatalogName, Env);
 			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn, skipInitial: false)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
@@ -201,35 +230,6 @@ namespace AnalitF.Net.Client.ViewModels
 			return queryable.OrderBy(c => c.Name)
 				.Fetch(c => c.Mnn)
 				.ToList();
-		}
-
-		private void LoadCatalogs()
-		{
-			if (CurrentCatalogName.Value == null) {
-				Catalogs.Value = Enumerable.Empty<Catalog>().ToList();
-				return;
-			}
-			var nameId = CurrentCatalogName.Value.Id;
-			Env.RxQuery(s => {
-				var queryable = s.Query<Catalog>()
-					.Fetch(c => c.Name)
-					.ThenFetch(c => c.Mnn)
-					.Where(c => c.Name.Id == nameId);
-
-				if (!ParentModel.ShowWithoutOffers)
-					queryable = queryable.Where(c => c.HaveOffers);
-
-				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
-					queryable = queryable.Where(c => c.VitallyImportant);
-
-				if (ParentModel.CurrentFilter == ParentModel.Filters[2])
-					queryable = queryable.Where(c => c.MandatoryList);
-
-				if (ParentModel.CurrentFilter == ParentModel.Filters[3])
-					queryable = queryable.Where(c => s.Query<AwaitedItem>().Any(i => i.Catalog == c));
-
-				return queryable.OrderBy(c => c.Form).ToList();
-			}).Subscribe(Catalogs, CloseCancellation.Token);
 		}
 
 		//todo: если поставить фокус в строку поиска и ввести запрос

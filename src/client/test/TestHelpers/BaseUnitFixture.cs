@@ -49,7 +49,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			manager = ViewModelFixture.StubWindowManager();
 			shell = new ShellViewModel();
-			shell.TestUIScheduler = new CurrentThreadScheduler();
 		}
 
 		[TearDown]

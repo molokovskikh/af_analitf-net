@@ -21,7 +21,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public PromotionPopup(Config.Config config,
 			IObservable<CatalogName> catalog,
-			Func<Func<IStatelessSession, List<Promotion>>, IObservable<List<Promotion>>> rxQuery,
 			Env env)
 		{
 			Name = new NotifyValue<CatalogName>(catalog);
@@ -29,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			Promotions = new NotifyValue<List<Promotion>>(new List<Promotion>());
 			catalog
 				.Throttle(Consts.ScrollLoadTimeout, env.Scheduler)
-				.Select(x => rxQuery(s => {
+				.Select(x => env.RxQuery(s => {
 					if (x == null)
 						return new List<Promotion>();
 					var nameId = x.Id;

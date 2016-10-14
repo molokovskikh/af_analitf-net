@@ -133,13 +133,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			Promotions = new PromotionPopup(Shell.Config,
-				CurrentCatalog.Select(x => x?.Name),
-				RxQuery, Env);
-
-			ProducerPromotions = new ProducerPromotionPopup(Shell.Config,
-				CurrentCatalog.Select(x => x?.Name),
-				Env);
+			Promotions = new PromotionPopup(Shell.Config, CurrentCatalog.Select(x => x?.Name), Env);
+			ProducerPromotions = new ProducerPromotionPopup(Shell.Config, CurrentCatalog.Select(x => x?.Name), Env);
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
