@@ -151,14 +151,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 						.ToList();
 				}
 			})).CatchSubscribe(x => {
-				if (x.Count == 0) {
-					Manager.Warning("Нет предложений");
-					TryClose();
-				}
 				CatalogOffers = x;
 				UpdateFilters();
 				Filter();
 				UpdateOffers(Offers.Value);
+				if (x.Count == 0) {
+					Manager.Warning("Нет предложений");
+					TryClose();
+				}
 			}, CloseCancellation);
 
 			UpdateMaxProducers();

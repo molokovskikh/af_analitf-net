@@ -454,7 +454,7 @@ group by l.ProductId")
 			LoadOrderItems();
 		}
 
-		protected void UpdateOffers(IList<Offer> items)
+		public void UpdateOffers(IList<Offer> items)
 		{
 			Calculate(items);
 			LoadOrderItems(items);
