@@ -105,7 +105,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 
 			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
-			WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
+			if (Session != null)
+				WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
 		}
 
 		public PersistentList<WriteoffReason> WriteoffReasons { get; set; }
