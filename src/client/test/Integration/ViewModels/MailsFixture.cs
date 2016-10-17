@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Helpers;
 using log4net.Appender;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -142,13 +143,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			Env.Barrier = new Barrier(2);
 			var attachment = Download();
+			//используется для выполнения запросов тк запросы должны выполняться в основной нитке тестов
+			Env.UiScheduler = scheduler;
+
 			Close(model);
 			shell.ShowJournal();
 			var journal = (Journal)shell.ActiveItem;
+			scheduler.Start();
 			var oldCount = journal.Items.Value.Count;
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
-			WaitNotification();
-			scheduler.Start();
+			var notification = "";
+			shell.Notifications.Subscribe(x => notification = x);
+			WaitHelper.WaitOrFail(10.Second(), () => {
+				scheduler.Start();
+				return !string.IsNullOrEmpty(notification);
+			});
 			Assert.That(journal.Items.Value.Count, Is.GreaterThan(oldCount));
 		}
 
