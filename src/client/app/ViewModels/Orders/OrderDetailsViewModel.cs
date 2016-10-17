@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return;
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
-				var sentLines =  (IList<SentOrderLine>)Order.Value.Lines;
+				var sentLines = (IList<SentOrderLine>)Order.Value.Lines;
 				sentLines.Each(l => l.Configure(User));
 				Env.RxQuery(s => MatchedWaybills.GetLookUp(s, sentLines))
 					.Subscribe(x => sentLines.Each(y => y.Configure(x)));

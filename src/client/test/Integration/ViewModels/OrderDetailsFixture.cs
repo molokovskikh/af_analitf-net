@@ -148,11 +148,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.EnterLine();
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
 			scheduler.Start();
-			offers.CurrentOffer.Value.OrderCount = 2;
+			var offer = offers.CurrentOffer.Value;
+			Assert.AreEqual(1, offer.OrderCount);
+			offer.OrderCount = 2;
 			offers.OfferUpdated();
 			offers.OfferCommitted();
 			offers.NavigateBackward();
-			((OrderLine)model.CurrentLine.Value).Count = 1;
+			var orderLine = (OrderLine)model.CurrentLine.Value;
+			Assert.AreEqual(2, orderLine.Count);
+			orderLine.Count = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
 			Assert.AreEqual(2, events.Count, $"cost = {cost}, {events.Implode(x => x.Value)}");

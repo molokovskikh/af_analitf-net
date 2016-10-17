@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			config = IntegrationSetup.clientConfig;
 			user = session.Query<User>().FirstOrDefault();
-			address = session.Query<Address>().FirstOrDefault();
+			address = session.Query<Address>().OrderBy(x => x.Name).FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
 		}
 
