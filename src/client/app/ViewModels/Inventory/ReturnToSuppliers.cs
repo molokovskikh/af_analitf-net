@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 
 			CurrentItem.Value.BeforeDelete();
-			StatelessSession.Delete(CurrentItem.Value);
+			Env.Query(s => s.Delete(CurrentItem.Value)).LogResult();
 			Update();
 		}
 

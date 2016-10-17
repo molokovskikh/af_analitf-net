@@ -9,7 +9,6 @@ using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
-using Remotion.Linq.Collections;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -103,7 +102,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода кода");
 				return;
 			}
-			UpdateProduct(StockQuery().FirstOrDefault(x => x.ProductId == id), "Код товара");
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.ProductId == id)).Result;
+			UpdateProduct(stock, "Код товара");
 		}
 
 		public void BarcodeScanned(string barcode)
@@ -115,7 +115,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			UpdateProduct(StockQuery().FirstOrDefault(x => x.Barcode == barcode), "Штрих код");
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == barcode)).Result;
+			UpdateProduct(stock, "Штрих код");
 		}
 
 		public void SearchByBarcode()
@@ -124,12 +125,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			UpdateProduct(StockQuery().FirstOrDefault(x => x.Barcode == Input.Value), "Штрих код");
-		}
-
-		private IQueryable<Stock> StockQuery()
-		{
-			return Stock.AvailableStocks(StatelessSession, Address);
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == Input.Value)).Result;
+			UpdateProduct(stock, "Штрих код");
 		}
 
 		private void UpdateProduct(Stock stock, string operation)
@@ -166,15 +163,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(checkout);
 			Change.Value = checkout.Change.Value;
 
-			using (var trx = StatelessSession.BeginTransaction()) {
-				var check = new Check(Address, Lines);
-				StatelessSession.Insert(check);
-				Lines.Each(x => x.CheckId = check.Id);
-				StatelessSession.InsertEach(Lines);
-				StatelessSession.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
-				StatelessSession.UpdateEach(Lines.Select(x => x.Stock).Distinct());
-				trx.Commit();
-			}
+			Env.Query(s => {
+				using (var trx = s.BeginTransaction()) {
+					var check = new Check(Address, Lines);
+					s.Insert(check);
+					Lines.Each(x => x.CheckId = check.Id);
+					s.InsertEach(Lines);
+					s.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
+					s.UpdateEach(Lines.Select(x => x.Stock).Distinct());
+					trx.Commit();
+				}
+			}).Wait();
 			Bus.SendMessage(nameof(Stock), "db");
 			Bus.SendMessage(nameof(Check), "db");
 			Message("Оплата наличными");

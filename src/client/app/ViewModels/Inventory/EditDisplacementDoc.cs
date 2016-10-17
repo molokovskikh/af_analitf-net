@@ -117,7 +117,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!CanEditLine)
 				yield break;
-			var stock = StatelessSession.Get<Stock>(CurrentLine.Value.SrcStock.Id);
+			var stock = Env.Query(s => s.Get<Stock>(CurrentLine.Value.SrcStock.Id)).Result;
 			stock.Quantity = CurrentLine.Value.Quantity;
 			var edit = new EditStock(stock)
 			{

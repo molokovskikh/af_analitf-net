@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -79,13 +80,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new EditDisplacementDoc(CurrentItem.Value.Id));
 		}
 
-		public void Delete()
+		public async Task Delete()
 		{
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
 
 			CurrentItem.Value.BeforeDelete();
-			StatelessSession.Delete(CurrentItem.Value);
+			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}
 
