@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		public AddressSelector(BaseScreen screen)
 		{
 			this.screen = screen;
-			All = new NotifyValue<bool>(true);
+			All = new NotifyValue<bool>();
 			AddressesEnabled = new NotifyValue<bool>(() => All.Value, All);
 			Addresses = new List<Selectable<Address>>();
 			Description = "Все заказы";
