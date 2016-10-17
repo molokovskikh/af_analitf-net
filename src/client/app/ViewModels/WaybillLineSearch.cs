@@ -47,12 +47,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Lines = SearchBehavior.ActiveSearchTerm
 				.Select(v =>{
-					//это событие произойдет в ui нитке здесь нужно скопировать данные что сохранить их ниже
-					//копируем тк обновление произойдет в другой нитке
-					var toUpdate = dirty.ToArray();
-					dirty.Clear();
+					//перед поиском нам нужно сохранить изменения
+					SaveDirty();
 					return RxQuery(s => {
-						toUpdate.Each(s.Update);
 						var query = s.Query<WaybillLine>()
 							.Where(l => l.Waybill.WriteTime >= begin && l.Waybill.WriteTime < end);
 
@@ -70,7 +67,6 @@ namespace AnalitF.Net.Client.ViewModels
 					});
 			})
 			.Switch()
-			.ObserveOn(UiScheduler)
 			.ToValue(lines => {
 					//тк мы загружаем данные из stateless сессии то отслеживать изменения в них
 					//нужно руками, изменения возникнут из-за загрузки сертификатов
@@ -93,18 +89,20 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 		}
 
-		private void SaveDirty()
-		{
-			if (dirty.Count > 0) {
-				dirty.Each(d => StatelessSession.Update(d));
-				dirty.Clear();
-			}
-		}
-
 		protected override void OnDeactivate(bool close)
 		{
 			SaveDirty();
 			base.OnDeactivate(close);
+		}
+
+		private void SaveDirty()
+		{
+			if (dirty.Count > 0) {
+				var items = dirty.ToArray();
+				dirty.Clear();
+				foreach (var item in items)
+					Session.Update(item);
+			}
 		}
 
 		private void Track(object sender, PropertyChangedEventArgs e)

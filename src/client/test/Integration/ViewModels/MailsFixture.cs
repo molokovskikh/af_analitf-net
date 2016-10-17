@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Helpers;
 using log4net.Appender;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -122,7 +123,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Reassociate_pending_attachments()
 		{
 			Env.Barrier = new Barrier(2);
-			var attachment = Download();
+			var attachment = Download2();
 			Close(model);
 			scheduler.Start();
 			Assert.AreEqual(1, shell.PendingDownloads.Count);
@@ -132,7 +133,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			Assert.IsTrue(reloaded.IsDownloading);
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
-			WaitNotification();
+			WaitNotification2();
 			Assert.IsTrue(reloaded.IsDownloaded, $"{reloaded} {reloaded.GetHashCode()}");
 			Assert.That(changes, Has.Some.EqualTo("IsDownloaded"));
 		}
@@ -141,15 +142,40 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Update_jounal_on_download_complete()
 		{
 			Env.Barrier = new Barrier(2);
-			var attachment = Download();
+			var attachment = Download2();
+
 			Close(model);
 			shell.ShowJournal();
 			var journal = (Journal)shell.ActiveItem;
+			scheduler.Start();
 			var oldCount = journal.Items.Value.Count;
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
-			WaitNotification();
-			scheduler.Start();
+			WaitNotification2();
 			Assert.That(journal.Items.Value.Count, Is.GreaterThan(oldCount));
+		}
+
+		private void WaitNotification2()
+		{
+			var notification = "";
+			shell.Notifications.Subscribe(x => notification = x);
+			WaitHelper.WaitOrFail(10.Second(), () => {
+				scheduler.Start();
+				return !string.IsNullOrEmpty(notification);
+			});
+		}
+
+		private Attachment Download2()
+		{
+			//что бы выполнить запланированную задачу
+			//todo это как то криво лучше не переопределять планировщики а запускать тестовый
+			Env.Scheduler = ImmediateScheduler.Instance;
+
+			var att = session.Query<Attachment>().First(a => a.Name == "отказ.txt");
+			att.IsDownloaded = false;
+
+			var attachment = model.Items.Value.SelectMany(m => m.Attachments).First(a => !a.IsDownloaded);
+			model.Download(attachment);
+			return attachment;
 		}
 
 		private Attachment Download()

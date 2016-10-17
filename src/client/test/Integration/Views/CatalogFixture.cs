@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
@@ -34,6 +35,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 					.First(c => c.HaveOffers && session.Query<Catalog>().Count(x => x.HaveOffers && x.Name == c) > 1)
 					.Id;
 				names.SelectedItem = names.Items.OfType<CatalogName>().First(x => x.Id == id);
+				scheduler.Start();
 				names.RaiseEvent(WpfTestHelper.KeyArgs(names, Key.Enter));
 				await view.WaitIdle();
 				Assert.IsFalse(names.IsKeyboardFocusWithin);

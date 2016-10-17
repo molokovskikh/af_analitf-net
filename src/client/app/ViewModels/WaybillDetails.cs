@@ -194,10 +194,8 @@ namespace AnalitF.Net.Client.ViewModels
 					return s.Get<Reject>(v.RejectId.Value);
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
-				.ObserveOn(UiScheduler)
 				.Subscribe(x => priceTag = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)

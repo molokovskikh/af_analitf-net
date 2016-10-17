@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Config;
 using Caliburn.Micro;
 using Common.Tools;
 using ReactiveUI;
@@ -23,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
-				.Throttle(Consts.WarningTimeout)
+				.Throttle(Consts.WarningTimeout, Env.Current.Scheduler)
 				.ObserveOn(scheduler)
 				.Subscribe(m => { OrderWarning = null; });
 		}
@@ -34,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			set
 			{
 				_orderWarning = value;
-				NotifyOfPropertyChange("OrderWarning");
+				NotifyOfPropertyChange(nameof(OrderWarning));
 			}
 		}
 

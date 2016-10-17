@@ -466,8 +466,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanAddToAwaited.Value)
 				yield break;
 			var item = new AwaitedItem(GuessCatalog());
-			string error;
-			if (!item.TrySave(StatelessSession, out error)) {
+			var error = Env.Query(s => item.TrySave(s)).Result;
+			if (!String.IsNullOrEmpty(error)) {
 				yield return new MessageResult(error, MessageResult.MessageType.Warning);
 			}
 			else {
@@ -482,14 +482,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var addressId = Address.Id;
 			var catalogId = CurrentCatalog.Id;
-			var lines = StatelessSession.Query<SentOrderLine>()
+			var lines = Env.Query(s => s.Query<SentOrderLine>()
 				.Where(o => o.CatalogId == catalogId)
 				.Where(o => o.Order.Address.Id == addressId)
 				.OrderByDescending(o => o.Order.SentOn)
 				.Fetch(l => l.Order)
 				.ThenFetch(o => o.Price)
 				.Take(20)
-				.ToList();
+				.ToList()).Result;
 			if (lines.Count > 0)
 				Shell.Navigate(new HistoryOrdersViewModel(CurrentCatalog, null, lines));
 			else

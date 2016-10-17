@@ -50,9 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			base.OnInitialize();
 
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
-				.ObserveOn(UiScheduler)
-				.Subscribe(Tag);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection)).Subscribe(Tag);
 		}
 
 		public string Text

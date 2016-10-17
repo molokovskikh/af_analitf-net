@@ -67,7 +67,6 @@ namespace AnalitF.Net.Client.ViewModels
 					return result;
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.ToValue(CloseCancellation);
 		}
@@ -83,20 +82,16 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ClearMarks()
 		{
 			Rejects.Value.Each(r => r.Marked = false);
-			StatelessSession
-				.CreateSQLQuery("update rejects set Marked = 0")
-				.ExecuteUpdate();
+			Env.Query(s => s.CreateSQLQuery("update rejects set Marked = 0").ExecuteUpdate()).LogResult();
 		}
 
-		public bool CanPrint
-		{
-			get { return User.CanPrint<RejectsDocument>(); }
-		}
+		public bool CanPrint => User.CanPrint<RejectsDocument>();
 
 		public PrintResult Print()
 		{
-			IList<Reject> toPrint = StatelessSession.Query<Reject>().Where(r => r.Marked)
-				.OrderBy(r => r.LetterDate).ToList();
+			IList<Reject> toPrint = Env
+				.Query(s => s.Query<Reject>().Where(r => r.Marked)
+					.OrderBy(r => r.LetterDate).ToList()).Result;
 			if (toPrint.Count == 0) {
 				toPrint = GetItemsFromView<Reject>("Rejects") ?? Rejects.Value;
 			}
@@ -114,7 +109,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return array;
 			var grid = ((FrameworkElement)view).Descendants<DataGrid>().First(g => g.Name == name);
 			var desc = grid.Items.SortDescriptions.FirstOrDefault();
-			if (desc == null || String.IsNullOrEmpty(desc.PropertyName))
+			if (String.IsNullOrEmpty(desc.PropertyName))
 				return array;
 			var direction = desc.Direction == ListSortDirection.Ascending ? SortDirection.Asc : SortDirection.Desc;
 			Array.Sort(array, new PropertyComparer(direction, desc.PropertyName));

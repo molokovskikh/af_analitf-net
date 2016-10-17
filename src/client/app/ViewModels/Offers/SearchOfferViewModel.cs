@@ -65,7 +65,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 						.OrderBy(p => p.Name)
 						.ToList())
 					.ToList()))
-				.ObserveOn(UiScheduler)
 				.Subscribe(Producers);
 
 			SearchBehavior.ActiveSearchTerm.Cast<object>()
@@ -103,7 +102,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					});
 				})
 				.Switch()
-				.ObserveOn(UiScheduler)
 				//будь бдителен CalculateRetailCost и LoadOrderItems может вызвать обращение к базе если данные еще не загружены
 				//тк синхронизация не производится загрузка должна выполняться в основной нитке
 				.Do(v => {
@@ -118,7 +116,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				DbReloadToken
 					.Do(_ => IsLoading.Value = true)
 					.SelectMany(_ => RxQuery(s => QueryByFullText(s, initTerm)))
-					.ObserveOn(UiScheduler)
 					.Do(v => {
 						LoadOrderItems(v);
 						Calculate(v);

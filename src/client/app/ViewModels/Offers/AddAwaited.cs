@@ -66,7 +66,6 @@ order by Score, {c.FullName}")
 						.ToList();
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
 			IsCatalogOpen = Catalogs.Select(v => v != null && v.Count > 0).Where(v => v).ToValue();
 			CurrentCatalog.Subscribe(v => Item.Catalog = v);
@@ -96,7 +95,6 @@ order by Score, {p.Name}")
 					return new[] { emptyProducer }.Concat(items).ToList();
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
 			IsProducerOpen = Producers.Select(v => v != null && v.Count > 1).Where(v => v).ToValue();
 			CurrentProducer.Subscribe(v => Item.Producer = (v != null && v.Id > 0) ? v : null);
@@ -104,13 +102,12 @@ order by Score, {p.Name}")
 
 		public void OK()
 		{
-			var message = "";
-			if (Item.TrySave(StatelessSession, out message)) {
+			var error = Env.Query(s => Item.TrySave(s)).Result;
+			if (String.IsNullOrEmpty(error)) {
 				WasCancelled = false;
 				TryClose();
-			}
-			else {
-				Manager.Warning(message);
+			} else {
+				Manager.Warning(error);
 			}
 		}
 	}

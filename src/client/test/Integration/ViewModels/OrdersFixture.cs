@@ -44,6 +44,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(model.SentOrders, Is.Null);
 			model.IsSentSelected.Value = true;
 			model.IsCurrentSelected.Value = false;
+			scheduler.Start();
 			Assert.That(model.SentOrders, Is.Not.Null);
 		}
 
@@ -67,6 +68,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.IsSentSelected.Value = true;
 			model.IsCurrentSelected.Value = false;
 			Assert.That(model.CanPrint, Is.True);
+			scheduler.Start();
 			var result = model.Print();
 
 			var paginator = result.Paginator;
@@ -376,6 +378,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			model.IsCurrentSelected.Value = false;
 			model.IsSentSelected.Value = true;
+			scheduler.Start();
 			model.CurrentSentOrder = model.SentOrders.First();
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}

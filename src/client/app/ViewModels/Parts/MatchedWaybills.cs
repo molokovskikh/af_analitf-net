@@ -36,9 +36,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}, isSentSelected, WaybillLines);
 
 			line.Throttle(Consts.ScrollLoadTimeout, screen.UiScheduler)
-				.Select(v => screen.RxQuery(s => LoadMatchedWaybill(v, s)))
-				.Switch()
-				.ObserveOn(screen.UiScheduler)
+				.SelectMany(v => screen.RxQuery(s => LoadMatchedWaybill(v, s)))
 				.Subscribe(WaybillLines, screen.CloseCancellation.Token);
 		}
 

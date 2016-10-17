@@ -55,21 +55,22 @@ namespace AnalitF.Net.Client.ViewModels
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
 			Shell = catalog.Shell;
-			Items = new NotifyValue<List<CatalogDisplayItem>>(new List<CatalogDisplayItem>());
-			CurrentItem = new NotifyValue<CatalogDisplayItem>();
-			CurrentCatalog = CurrentItem
+			InitFields();
+			Items.Value = new List<CatalogDisplayItem>();
+			CurrentItem
 #if !DEBUG
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 #endif
-				.ToValue(_ => {
-					if (CurrentItem.Value == null)
+				.SelectMany(x => Env.RxQuery(s => {
+					if (x == null)
 						return null;
-					var catalogId = CurrentItem.Value.CatalogId;
-					return StatelessSession.Query<Catalog>()
+					var catalogId = x.CatalogId;
+					return s.Query<Catalog>()
 						.Fetch(c => c.Name)
 						.ThenFetch(n => n.Mnn)
 						.FirstOrDefault(c => c.Id == catalogId);
-				});
+				}))
+				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 			ParentModel = catalog;
 			QuickSearch = new QuickSearch<CatalogDisplayItem>(UiScheduler,
 				v => Items.Value.FirstOrDefault(c => c.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
@@ -77,8 +78,7 @@ namespace AnalitF.Net.Client.ViewModels
 			QuickSearch.IsEnabled = false;
 
 			SearchBehavior = new SearchBehavior(this);
-			IsLoading = new NotifyValue<bool>(true);
-			IsQuickSearchEnabled = new NotifyValue<bool>();
+			IsLoading.Value = true;
 			IsQuickSearchEnabled.Subscribe(v => {
 				QuickSearch.IsEnabled = v;
 				SearchBehavior.HandleGridKeyboardInput = !v;
@@ -116,7 +116,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(LoadData))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Items, CloseCancellation.Token);
 

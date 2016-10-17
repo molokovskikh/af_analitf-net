@@ -50,26 +50,21 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Error { get; protected set; }
 
-		public virtual string[] FieldsForValidate
-		{
-			get { return new[] { "Catalog" }; }
-		}
+		public virtual string[] FieldsForValidate => new[] { "Catalog" };
 
-		public virtual bool TrySave(IStatelessSession session, out string error)
+		public virtual string TrySave(IStatelessSession session)
 		{
-			error = "";
 			if (session.Query<AwaitedItem>()
 				.Any(a => a.Catalog == Catalog && (a.Producer == Producer || a.Producer == null))) {
-				error = "Выбранное наименование уже присутствует в списке ожидаемых позиций";
-				return false;
+				return "Выбранное наименование уже присутствует в списке ожидаемых позиций";
 			}
 			foreach (var field in FieldsForValidate) {
-				error = this[field];
+				var error = this[field];
 				if (!string.IsNullOrEmpty(error))
-					return false;
+					return error;
 			}
 			session.Insert(this);
-			return true;
+			return null;
 		}
 	}
 }

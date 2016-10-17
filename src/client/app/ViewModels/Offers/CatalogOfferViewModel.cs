@@ -29,17 +29,15 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
 			: base(initOfferId)
 		{
+			InitFields();
 			NeedToCalculateDiff = true;
 			DisplayName = "Сводный прайс-лист";
 			Filters = new[] { "Все", "Основные", "Неосновные" };
 
-			HideJunk = new NotifyValue<bool>();
-			MaxProducerCosts = new NotifyValue<List<MaxProducerCost>>();
-			CurrentFilter = new NotifyValue<string>(Filters[0]);
-			Regions = new NotifyValue<List<string>>();
-			CurrentRegion = new NotifyValue<string>(Consts.AllRegionLabel);
+			CurrentFilter.Value = Filters[0];
+			CurrentRegion.Value = Consts.AllRegionLabel;
 
-			GroupByProduct = new NotifyValue<bool>(Settings.Value.GroupByProduct);
+			GroupByProduct.Value = Settings.Value.GroupByProduct;
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
 
 			RetailMarkup = new NotifyValue<decimal>(true,
@@ -50,20 +48,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
 				.ToValue();
 
-			//.Skip(1) - пропускаем начальные значения
-			CurrentRegion.Cast<Object>().Skip(1)
-				.Merge(CurrentFilter.Skip(1))
-				.Merge(CurrentProducer.Skip(1))
-				.Merge(HideJunk.Select(v => (object)v).Skip(1))
-				.Subscribe(_ => Update());
-
 			CurrentOffer.Subscribe(_ => RetailMarkup.Recalculate());
 			Persist(HideJunk, "HideJunk");
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");
 			SessionValue(CurrentFilter, "CurrentFilter");
-			DisplayItems = new NotifyValue<List<object>>();
-			CurrentDisplayItem = new NotifyValue<object>();
 		}
 
 		//для восстановления состояния
@@ -134,20 +123,45 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Subscribe(DisplayItems);
 			CurrentDisplayItem.OfType<Offer>().Subscribe(CurrentOffer);
 			CurrentOffer.Subscribe(CurrentDisplayItem);
+			//.Skip(1) - пропускаем начальные значения
+			CurrentRegion.Cast<Object>().Skip(1)
+				.Merge(CurrentFilter.Skip(1))
+				.Merge(CurrentProducer.Skip(1))
+				.Merge(HideJunk.Select(v => (object)v).Skip(1))
+				.Subscribe(_ => Filter());
+			DbReloadToken.SelectMany(_ => Env.RxQuery(s => {
+				if (IsFilterByCatalogName) {
+					var catalogs = s.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.Where(c => c.Name == filterCatalogName).ToArray();
+					var ids = catalogs.Select(c => c.Id).ToArray();
 
-			Update();
+					var result = s.Query<Offer>()
+						.Where(o => ids.Contains(o.CatalogId))
+						.Fetch(o => o.Price)
+						.ToList();
+					result.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId)
+						.Select(c => c.FullName)
+						.FirstOrDefault());
+					return result;
+				} else {
+					var catalogId = filterCatalog.Id;
+					return s.Query<Offer>().Where(o => o.CatalogId == catalogId)
+						.Fetch(o => o.Price)
+						.ToList();
+				}
+			})).CatchSubscribe(x => {
+				CatalogOffers = x;
+				UpdateFilters();
+				Filter();
+				UpdateOffers(Offers.Value);
+				if (x.Count == 0) {
+					Manager.Warning("Нет предложений");
+					TryClose();
+				}
+			}, CloseCancellation);
+
 			UpdateMaxProducers();
-			UpdateFilters();
-		}
-
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-
-			if (CatalogOffers.Count == 0) {
-				Manager.Warning("Нет предложений");
-				IsSuccessfulActivated = false;
-			}
 		}
 
 		protected override void SelectOffer()
@@ -160,23 +174,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		private void UpdateMaxProducers()
 		{
-			if (StatelessSession == null)
-				return;
-
 			if (CurrentCatalog.Value == null) {
 				MaxProducerCosts.Value = new List<MaxProducerCost>();
 				return;
 			}
-
 			var catalogId = CurrentCatalog.Value.Id;
-			MaxProducerCosts.Value = StatelessSession.Query<MaxProducerCost>()
-				.Where(c => c.CatalogId == catalogId)
-				.OrderBy(c => c.Product)
-				.ThenBy(c => c.Producer)
-				.ToList();
+			Env.RxQuery(s => s.Query<MaxProducerCost>()
+					.Where(c => c.CatalogId == catalogId)
+					.OrderBy(c => c.Product)
+					.ThenBy(c => c.Producer)
+					.ToList())
+				.Subscribe(MaxProducerCosts, CloseCancellation.Token);
 		}
 
-		private void UpdateFilters()
+		public void UpdateFilters()
 		{
 			Regions.Value = new[] { Consts.AllRegionLabel }
 				.Concat(CatalogOffers.Select(o => o.Price.RegionName).Distinct()
@@ -184,37 +195,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.ToList();
 
 			FillProducerFilter(CatalogOffers);
-		}
-
-		protected override void Query()
-		{
-			if (StatelessSession == null)
-				return;
-
-			if (CatalogOffers.Count == 0) {
-				if (IsFilterByCatalogName) {
-					var catalogs = StatelessSession.Query<Catalog>()
-						.Fetch(c => c.Name)
-						.Where(c => c.Name == filterCatalogName).ToArray();
-					var ids = catalogs.Select(c => c.Id).ToArray();
-
-					CatalogOffers = StatelessSession.Query<Offer>()
-						.Where(o => ids.Contains(o.CatalogId))
-						.Fetch(o => o.Price)
-						.ToList();
-					CatalogOffers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId)
-						.Select(c => c.FullName)
-						.FirstOrDefault());
-				}
-				else {
-					var catalogId = filterCatalog.Id;
-					CatalogOffers = StatelessSession.Query<Offer>().Where(o => o.CatalogId == catalogId)
-						.Fetch(o => o.Price)
-						.ToList();
-				}
-			}
-
-			Filter();
 		}
 
 		public void Filter()
@@ -311,6 +291,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			ProducerFilterStateSet();
 			base.TryClose();
 		}
+
 		public void Delete()
 		{
 			if (Manager.Question("Удалить значение?") != MessageBoxResult.Yes)
@@ -318,6 +299,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentOffer.Value.OrderCount = null;
 			CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
 		}
+
 #if DEBUG
 		public override object[] GetRebuildArgs()
 		{

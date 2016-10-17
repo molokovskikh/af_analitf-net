@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.ViewModels.Parts;
+using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using NPOI.SS.Formula.Functions;
 
@@ -127,10 +129,23 @@ namespace AnalitF.Net.Client.Config.Caliburn
 
 		public override void DeactivateItem(IScreen item, bool close)
 		{
+			if (close) {
+				//исправление для ошибки
+				//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
+				var view = (ShellView)GetView();
+				if (view != null)
+				{
+					var tabs = view.Items;
+					var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
+					if (tab != null)
+						tab.Template = null;
+				}
+			}
+
 			base.DeactivateItem(item, close);
 
 			if (close) {
-				(item as IDisposable)?.Dispose();
+				Navigator.Release(item);
 			}
 		}
 	}

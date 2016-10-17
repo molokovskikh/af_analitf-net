@@ -35,9 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public void Updated()
 		{
-			if (batch.CurrentReportLine.Value == null)
-				return;
-			if (batch.CurrentReportLine.Value.BatchLine == null)
+			if (batch.CurrentReportLine.Value?.BatchLine == null)
 				return;
 			if (batch.CurrentReportLine.Value.Value == 0)
 				batch.Delete();
@@ -220,18 +218,40 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OnInitialize();
 
 			lastUsedDir = (string)Shell.PersistentContext.GetValueOrDefault("BatchDir", Settings.Value.GetVarRoot());
-			CurrentReportLine.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+			CurrentReportLine
 				.Subscribe(_ => {
-					if (CurrentReportLine.Value != null)
-						CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
-					else
-						CurrentElementAddress = null;
-					Update();
+					CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value?.Address.Id);
 				});
 
+			CurrentReportLine
+				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+				.Merge(DbReloadToken)
+				.SelectMany(x => Env.RxQuery(s => {
+					if (CurrentReportLine.Value?.ProductId == null) {
+						return new List<Offer>();
+					}
+
+					var productId = CurrentReportLine.Value.ProductId;
+					return s.Query<Offer>()
+						.Fetch(o => o.Price)
+						.Where(o => o.ProductId == productId)
+						.OrderBy(o => o.Cost)
+						.ToList()
+						.OrderBy(o => o.ResultCost)
+						.ToList();
+				})).Subscribe(UpdateOffers, CloseCancellation.Token);
+
 			AddressSelector.Init();
-			AddressSelector.FilterChanged.Subscribe(_ => LoadLines(), CloseCancellation.Token);
-			LoadLines();
+			AddressSelector.FilterChanged
+				.Merge(DbReloadToken)
+				.SelectMany(_ => Env.RxQuery(s => {
+					var ids = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
+					return s.Query<BatchLine>()
+						.Fetch(l => l.Address)
+						.Where(l => ids.Contains(l.Address.Id))
+						.ToList();
+				})).CatchSubscribe(BuildLineViews, CloseCancellation);
+
 			if (LastSelectedLine > 0)
 				CurrentReportLine.Value = CurrentReportLine.Value
 					?? ReportLines.Value.FirstOrDefault(v => v.BatchLine?.Id == LastSelectedLine);
@@ -239,36 +259,27 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (Address != null)
 				Bus.RegisterMessageSource(Address.StatSubject);
 
-			if (StatelessSession != null) {
-				CurrentReportLine
-					.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-					.Subscribe(_ => {
-						var line = CurrentReportLine.Value;
-						if (line == null) {
-							CurrentCatalog.Value = null;
-							return;
-						}
-						var catalogId = line.CatalogId;
-						if (catalogId != null) {
-							CurrentCatalog.Value = StatelessSession.Query<Catalog>()
-								.Fetch(c => c.Name)
-								.ThenFetch(n => n.Mnn)
-								.First(c => c.Id == catalogId);
-						}
-						else {
-							CurrentCatalog.Value = null;
-						}
-					}, CloseCancellation.Token);
+			CurrentReportLine
+				.Throttle(Consts.ScrollLoadTimeout, Env.Scheduler)
+				.SelectMany(x => Env.RxQuery(s => {
+					if (x?.CatalogId == null)
+						return null;
+					var catalogId = x.CatalogId;
+					return s.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.ThenFetch(n => n.Mnn)
+						.First(c => c.Id == catalogId);
+				}))
+				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 
-				ReportLines
-					.Select(v => v.Changed())
-					.Switch()
-					.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
-					.Select(x => x.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine).Where(y => y != null))
-					.Where(x => x != null)
-					.CatchSubscribe(x => StatelessSession.DeleteEach(x),
-						CloseCancellation);
-			}
+			ReportLines
+				.Select(v => v.Changed())
+				.Switch()
+				.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
+				.Select(x => x.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine).Where(y => y != null).ToArray())
+				.Where(x => x.Length > 0)
+				.SelectMany(x => Observable.FromAsync(() => Env.Query(s => s.DeleteEach(x))))
+				.CatchSubscribe(_ => {});
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -280,13 +291,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					Shell.PersistentContext["BatchDir"] = lastUsedDir;
 			}
 			base.OnDeactivate(close);
-		}
-
-		protected override void RecreateSession()
-		{
-			base.RecreateSession();
-
-			LoadLines();
 		}
 
 		public void Clear()
@@ -316,19 +320,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Lines.Value.Remove(reportLine);
 			ReportLines.Value.Remove(reportLine);
 			reportLine.OrderLine?.Order.Address.RemoveLine(reportLine.OrderLine);
-		}
-
-		private void LoadLines()
-		{
-			if (StatelessSession == null)
-				return;
-
-			var ids = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
-			var batchLines = StatelessSession.Query<BatchLine>()
-				.Fetch(l => l.Address)
-				.Where(l => ids.Contains(l.Address.Id))
-				.ToList();
-			BuildLineViews(batchLines);
 		}
 
 		public void BuildLineViews(List<BatchLine> batchLines)
@@ -535,25 +526,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}.Concat(exportServiceFields ? l.BatchLine.ParsedServiceFields.Select(f => f.Value) : Enumerable.Empty<object>()).ToArray());
 			var book = ExcelExporter.ExportTable(columns, rows);
 			book.Write(stream);
-		}
-
-		protected override void Query()
-		{
-			if (StatelessSession == null)
-				return;
-			if (CurrentReportLine.Value?.ProductId == null) {
-				Offers.Value = new List<Offer>();
-				return;
-			}
-
-			var productId = CurrentReportLine.Value.ProductId;
-			Offers.Value = StatelessSession.Query<Offer>()
-				.Fetch(o => o.Price)
-				.Where(o => o.ProductId == productId)
-				.OrderBy(o => o.Cost)
-				.ToList()
-				.OrderBy(o => o.ResultCost)
-				.ToList();
 		}
 
 		public PrintResult Print()

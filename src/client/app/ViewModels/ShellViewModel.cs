@@ -102,7 +102,6 @@ namespace AnalitF.Net.Client.ViewModels
 		//параметры авто-комментария должны быть одинаковыми на время работы приложения
 		public bool ResetAutoComment;
 		public string AutoCommentText;
-		public bool RoundToSingleDigit = true;
 
 		private bool _leaderCalculationWasStart;
 		public  bool LeaderCalculationWasStart
@@ -366,7 +365,7 @@ namespace AnalitF.Net.Client.ViewModels
 				else {
 					base.CanClose(callback);
 				}
-			}, GetScheduler());
+			}, Env.TplUiScheduler);
 		}
 
 		public void UpdateStat()
@@ -1076,7 +1075,6 @@ namespace AnalitF.Net.Client.ViewModels
 			do {
 				count++;
 				done = true;
-				var scheduler = GetScheduler();
 
 				//если это вторая итерация то нужно пересоздать cancellation
 				//тк у предыдущего уже будет стоять флаг IsCancellationRequested
@@ -1087,7 +1085,7 @@ namespace AnalitF.Net.Client.ViewModels
 				task.ContinueWith(t => {
 					viewModel.IsCompleted = true;
 					viewModel.TryClose();
-				}, scheduler);
+				}, Env.TplUiScheduler);
 				task.Start(TaskScheduler.Default);
 
 				windowManager.ShowFixedDialog(viewModel);
@@ -1120,16 +1118,6 @@ namespace AnalitF.Net.Client.ViewModels
 					success?.Invoke(task);
 				}
 			} while (!done);
-		}
-
-		private static TaskScheduler GetScheduler()
-		{
-			TaskScheduler scheduler;
-			if (SynchronizationContext.Current != null)
-				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-			else
-				scheduler = TaskScheduler.Current;
-			return scheduler;
 		}
 
 		public IEnumerable<IScreen> NavigationStack => Navigator.NavigationStack;

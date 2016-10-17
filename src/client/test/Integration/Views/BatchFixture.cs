@@ -37,6 +37,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				searchCheck.IsChecked = true;
 
 				var grid = view.Descendants<DataGrid>().First(c => c.Name == "ReportLines");
+				scheduler.Start();
 				grid.CurrentItem = grid.Items[0];
 				await view.WaitIdle();
 

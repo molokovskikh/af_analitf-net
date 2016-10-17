@@ -41,22 +41,26 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			Items.Value = StatelessSession.Query<AwaitedItem>()
+			Env.RxQuery(s => s.Query<AwaitedItem>()
 				.Fetch(i => i.Producer)
 				.Fetch(i => i.Catalog)
 				.ThenFetch(c => c.Name)
 				.OrderBy(i => i.Catalog.Name.Name)
 				.ThenBy(i => i.Catalog.Form)
 				.ThenBy(i => i.Producer.Name)
-				.ToObservableCollection();
-			CurrentItem.Value = Items.Value.FirstOrDefault(i => !i.DoNotHaveOffers);
+				.ToObservableCollection())
+				.Subscribe(x => {
+					Items.Value = x;
+					CurrentItem.Value = Items.Value.FirstOrDefault(i => !i.DoNotHaveOffers);
+				}, CloseCancellation.Token);
 
 			CurrentItem
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => Update(), CloseCancellation.Token);
+				.Merge(DbReloadToken)
+				.Subscribe(_ => UpdateAsync(), CloseCancellation.Token);
 		}
 
-		protected override void Query()
+		private void UpdateAsync()
 		{
 			if (CurrentItem.Value == null) {
 				Offers.Value = new List<Offer>();
@@ -65,17 +69,13 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 
 			var catalogId = CurrentItem.Value.Catalog.Id;
-			CurrentCatalog.Value = StatelessSession.Query<Catalog>()
-				.Fetch(c => c.Name)
-				.ThenFetch(n => n.Mnn)
-				.First(c => c.Id == catalogId);
-
-			Offers.Value = StatelessSession.Query<Offer>()
+			Env.RxQuery(s => s.Query<Offer>()
 				.Fetch(o => o.Price)
 				.Where(o => o.CatalogId == catalogId)
 				.ToList()
 				.OrderBy(o => o.ResultCost)
-				.ToList();
+				.ToList())
+				.Subscribe(UpdateOffers, CloseCancellation.Token);
 		}
 
 		public IEnumerable<IResult> Add()
@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			if (!CanDelete.Value)
 				return;
-			StatelessSession.Delete(CurrentItem.Value);
+			Env.Query(s => s.Delete(CurrentItem.Value)).LogResult();
 			Items.Value.Remove(CurrentItem.Value);
 		}
 

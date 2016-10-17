@@ -218,13 +218,11 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine { Address = address1 }, new BatchLine(line) });
 
 			batch.CurrentReportLine.Value = batch.Lines.Value[1];
-			batch.Offers.Value = new List<Offer> {
+			batch.UpdateOffers(new List<Offer> {
 				offer
-			};
-			batch.Update();
+			});
 			scheduler.AdvanceByMs(1000);
 
-			batch.CurrentOffer.Value = batch.Offers.Value[0];
 			Assert.AreEqual(5, batch.CurrentOffer.Value.OrderCount);
 			Order(0);
 			Order(10);
@@ -264,11 +262,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
 			batch.CurrentReportLine.Value = batch.Lines.Value[0];
-			batch.Offers.Value = new List<Offer> {
+			batch.UpdateOffers(new List<Offer> {
 				offer,
-			};
-			batch.Update();
-			batch.CurrentOffer.Value = batch.Offers.Value.First();
+			});
 			Assert.AreEqual(5, batch.CurrentOffer.Value.OrderCount);
 			Order(0);
 			Assert.AreEqual(0, batch.ReportLines.Value.Count);
@@ -337,11 +333,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			batch.BuildLineViews(new List<BatchLine>());
 
 			batch.CurrentReportLine.Value = batch.Lines.Value[0];
-			batch.Offers.Value = new List<Offer> {
+			batch.UpdateOffers(new List<Offer> {
 				offer,
-			};
-			batch.Update();
-			batch.CurrentOffer.Value = batch.Offers.Value.First();
+			});
 			Assert.AreEqual(1, batch.CurrentOffer.Value.OrderCount);
 			Order(0);
 			Assert.AreEqual(0, batch.ReportLines.Value.Count);

@@ -21,7 +21,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public ProducerPromotionPopup(Config.Config config,
 			IObservable<CatalogName> catalog,
-			Func<Func<IStatelessSession, List<ProducerPromotion>>, IObservable<List<ProducerPromotion>>> rxQuery,
 			Env env)
 		{
 			Name = new NotifyValue<CatalogName>(catalog);
@@ -29,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			ProducerPromotions = new NotifyValue<List<ProducerPromotion>>(new List<ProducerPromotion>());
 			catalog
 				.Throttle(Consts.ScrollLoadTimeout, env.Scheduler)
-				.Select(x => rxQuery(s => {
+				.SelectMany(x => env.RxQuery(s => {
 					if (x == null)
 						return new List<ProducerPromotion>();
 					var nameId = x.Id;
@@ -39,8 +38,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 						.Fetch(p => p.Producer)
 						.ToList();
 				}))
-				.Switch()
-				.ObserveOn(env.UiScheduler)
 				.Subscribe(x => {
 					ProducerPromotions.Value = x;
 					ProducerPromotions.Value?.Each(p => p.Init(config));

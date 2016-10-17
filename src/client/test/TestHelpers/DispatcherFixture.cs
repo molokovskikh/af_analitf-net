@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
 using System.IO;
@@ -49,9 +50,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			windows = new List<Window>();
 			activeWindow = null;
 			dispatcher = null;
-			shell.Config.Quiet = true;
-			shell.ViewModelSettings.Clear();
-
+			config.Quiet = true;
 
 			manager.UnitTesting = false;
 			manager.SkipApp = true;
@@ -136,7 +135,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		private void InternalClick(string name)
 		{
 			var el = activeWindow.FindName(name)
-				?? activeWindow.Descendants<ButtonBase>().First(b => b.Name.Match(name));
+				?? activeWindow.Descendants<ButtonBase>().FirstOrDefault(b => b.Name.Match(name));
 			if (el == null)
 				throw new Exception($"Не могу найти кнопку '{name}'");
 			if (el is SplitButton)
@@ -262,12 +261,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected async Task Start()
 		{
 			session.Flush();
-			//данные могут измениться, нужно перезагрузить данные в shell
-			shell.Reload();
 
 			var loaded = new SemaphoreSlim(0, 1);
 
 			dispatcher = WpfTestHelper.WithDispatcher(() => {
+				Env.TplUiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 				//wpf обеспечивает синхронизацию объектов ui
 				//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
 				//в других нитках что бы избежать ошибок очищаем статические структуры
@@ -283,8 +281,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				//что бы тесты не лезли на первый план
 				activeWindow.ShowActivated = false;
 				activeWindow.ShowInTaskbar = false;
-				var objs = activeWindow.Descendants<DispatcherObject>().Where(x => x.Dispatcher != activeWindow.Dispatcher);
-				Console.WriteLine(objs.Implode());
 				activeWindow.Show();
 			});
 			Env.UiScheduler = new MixedScheduler((TestScheduler)Env.UiScheduler, new DispatcherScheduler(dispatcher));

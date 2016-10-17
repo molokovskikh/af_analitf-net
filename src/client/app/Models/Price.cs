@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
@@ -43,7 +45,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("{0} - {1} | {2}", DayOfWeek, OtherDelay, VitallyImportantDelay);
+			return $"{DayOfWeek} - {OtherDelay} | {VitallyImportantDelay}";
 		}
 	}
 
@@ -83,7 +85,7 @@ namespace AnalitF.Net.Client.Models
 
 			var id = obj as PriceComposedId;
 			if (id == null)
-				throw new Exception(String.Format("Unexpected object type {0} {1}", obj, obj.GetType()));
+				throw new Exception($"Unexpected object type {obj} {obj.GetType()}");
 
 			if (PriceId != id.PriceId)
 				if (PriceId > id.PriceId)
@@ -110,7 +112,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("PriceId: {0}, RegionId: {1}", PriceId, RegionId);
+			return $"PriceId: {PriceId}, RegionId: {RegionId}";
 		}
 	}
 
@@ -127,13 +129,15 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("{0} {1}", Uri, Name);
+			return $"{Uri} {Name}";
 		}
 	}
 
 	public class Price : BaseNotify
 	{
 		private Order order;
+		private decimal? _weeklyOrderSum;
+		private decimal? _monthlyOrderSum;
 
 		public Price(string name) : this()
 		{
@@ -209,10 +213,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsOrderDisabled { get; set; }
 
 		[Style("Name")]
-		public virtual bool NotBase
-		{
-			get { return !BasePrice; }
-		}
+		public virtual bool NotBase => !BasePrice;
 
 		[Ignore]
 		public virtual bool Active
@@ -225,11 +226,33 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		//эти данные загружаются асинхронно
 		[Ignore]
-		public virtual decimal? WeeklyOrderSum { get; set; }
+		public virtual decimal? WeeklyOrderSum
+		{
+			get { return _weeklyOrderSum; }
+			set
+			{
+				if (_weeklyOrderSum == value)
+					return;
+				_weeklyOrderSum = value;
+				OnPropertyChanged();
+			}
+		}
 
+		//эти данные загружаются асинхронно
 		[Ignore]
-		public virtual decimal? MonthlyOrderSum { get; set; }
+		public virtual decimal? MonthlyOrderSum
+		{
+			get { return _monthlyOrderSum; }
+			set
+			{
+				if (_monthlyOrderSum == value)
+					return;
+				_monthlyOrderSum = value;
+				OnPropertyChanged();
+			}
+		}
 
 		[Ignore]
 		public virtual List<Mailto> Emails {
@@ -260,40 +283,34 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Ignore, Style]
-		public virtual bool HaveOrder
-		{
-			get { return Order != null; }
-		}
+		public virtual bool HaveOrder => Order != null;
 
 		[Ignore, JsonIgnore]
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
-		private static List<Tuple<PriceComposedId, decimal>> OrderStat(DateTime from,
-			Address address, IStatelessSession session)
+		private static async Task<List<Tuple<PriceComposedId, decimal>>> OrderStat(Env env, DateTime from, Address address)
 		{
 			var addressId = address.Id;
 			//g.Key != null ? g.Key.Id : null - на первый взгляд это выражение не имеет смысла
 			//но в этом методе происходит ошибка NRE единственное что подходит под это g.Key.Id
-			return session.Query<SentOrder>()
+			return await env.Query(s => s.Query<SentOrder>()
 				.Where(o => o.Address.Id == addressId && o.SentOn >= @from)
 				.GroupBy(o => o.Price)
 				.Select(g => Tuple.Create(g.Key != null ? g.Key.Id : null, g.Sum(o => o.Sum)))
 				.ToList()
 				.Where(t => t.Item1 != null)
-				.ToList();
+				.ToList());
 		}
 
-		public static void LoadOrderStat(IEnumerable<Price> prices, Address address, IStatelessSession session)
+		public static async Task LoadOrderStat(Env env, IEnumerable<Price> prices, Address address)
 		{
 			if (address == null)
-				return;
-			if (session == null)
 				return;
 
 			var weekBegin = DateTime.Today.FirstDayOfWeek();
 			var monthBegin = DateTime.Today.FirstDayOfMonth();
-			var monthlyStat = OrderStat(monthBegin, address, session);
-			var weeklyStat = OrderStat(weekBegin, address, session);
+			var monthlyStat = await OrderStat(env, monthBegin, address);
+			var weeklyStat = await OrderStat(env, weekBegin, address);
 
 			prices.Each(p => {
 				//у нас могут быть заказы без прайс листов
