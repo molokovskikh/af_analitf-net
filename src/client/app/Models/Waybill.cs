@@ -308,6 +308,20 @@ namespace AnalitF.Net.Client.Models
 			return Settings.WaybillDoc.Setup(this);
 		}
 
+		public virtual WaybillActDocumentSettings GetWaybillActDocSettings()
+		{
+			if (Settings.WaybillActDoc == null)
+				Settings.WaybillActDoc = new WaybillActDocumentSettings();
+			return Settings.WaybillActDoc.Setup(this);
+		}
+
+		public virtual WaybillProtocolDocumentSettings GetWaybillProtocolDocSettings()
+		{
+			if (Settings.WaybillProtocolDoc == null)
+				Settings.WaybillProtocolDoc = new WaybillProtocolDocumentSettings();
+			return Settings.WaybillProtocolDoc.Setup(this);
+		}
+
 		public virtual RegistryDocumentSettings GetRegistryDocSettings()
 		{
 			if (Settings.RegistryDoc == null)

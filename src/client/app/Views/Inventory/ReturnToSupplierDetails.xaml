@@ -26,7 +26,11 @@
 			<Separator />
 			<Button Name="ExportExcel">Список в Excel</Button>
 			<Button Name="Print">Печать</Button>
-		</ToolBar>
+      <Button Name="PrintReturnLabel">Возврат ярлык</Button>
+      <Button Name="PrintReturnInvoice">Возврат счет-фактура</Button>
+      <Button Name="PrintReturnWaybill">Возврат накладная ТОРГ-12</Button>
+      <Button Name="PrintReturnDivergenceAct">Возврат акт о расхождении ТОРГ-2</Button>
+    </ToolBar>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
 			<Grid.RowDefinitions>
