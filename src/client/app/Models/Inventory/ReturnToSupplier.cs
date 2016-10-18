@@ -53,6 +53,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal SupplierSum { get; set; }
 		public virtual int PosCount { get; set; }
 
+		public virtual string Comment { get; set; }
+
 		public virtual IList<ReturnToSupplierLine> Lines { get; set; }
 
 		public virtual string this[string columnName]

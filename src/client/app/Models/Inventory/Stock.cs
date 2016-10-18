@@ -87,6 +87,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string AltBarcode { get; set; }
 		public virtual string AnalogGroup { get; set; }
 		public virtual string Country { get; set; }
+		public virtual string CountryCode { get; set; }
 		public virtual string Unit { get; set; }
 
 		public virtual string ProductKind { get; set; }
