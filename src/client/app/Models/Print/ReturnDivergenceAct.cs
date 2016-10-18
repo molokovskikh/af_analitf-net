@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models.Print
 		protected override void BuildDoc()
 		{
 			var waybillId = returnToSupplier.Lines.Count == 0 ? "        " : returnToSupplier.Lines.First().Stock.WaybillId.ToString();
-			var waybillDate = returnToSupplier.Lines.Count == 0 ? "       " : returnToSupplier.Lines.First().Stock.DocumentDate;
+			var waybillDate = returnToSupplier.Lines.Count == 0 ? "       " : returnToSupplier.Lines.First().Stock.DocumentDate.ToShortDateString();
 
 			var right = Block("Унифицированная форма № Торг-12 \n" +
 			                  "Утверждена постановлением Госкомстата \n" +

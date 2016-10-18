@@ -319,6 +319,8 @@
     <Compile Include="Models\Print\DisplacementDocument.cs" />
     <Compile Include="Models\Print\WaybillProtocolDocument.cs" />
     <Compile Include="Models\Print\WaybillActDocument.cs" />
+    <Compile Include="Models\Print\ReassessmentDocument.cs" />
+    <Compile Include="Models\Print\ReassessmentActDocument.cs" />
     <Compile Include="Models\Print\WriteoffActDocument.cs" />
     <Compile Include="Models\Print\WriteoffDocument.cs" />
     <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
@@ -453,6 +455,7 @@
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
+    <Compile Include="ViewModels\Inventory\StockGroupSearch.cs" />
     <Compile Include="ViewModels\Inventory\StockSearch.cs" />
     <Compile Include="ViewModels\Inventory\Stocks.cs" />
     <Compile Include="ViewModels\Inventory\WriteoffDocs.cs" />
@@ -599,6 +602,9 @@
     <Compile Include="Views\Inventory\EditDisplacementDoc.xaml.cs">
       <DependentUpon>EditDisplacementDoc.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Inventory\PrintForm\ReassessmentActDocumentForm.xaml.cs">
+      <DependentUpon>ReassessmentActDocumentForm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Inventory\ReturnToSupplierDetails.xaml.cs">
       <DependentUpon>ReturnToSupplierDetails.xaml</DependentUpon>
     </Compile>
@@ -652,6 +658,9 @@
     </Compile>
     <Compile Include="Views\Inventory\Stocks.xaml.cs">
       <DependentUpon>Stocks.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\StockGroupSearch.xaml.cs">
+      <DependentUpon>StockGroupSearch.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\StockSearch.xaml.cs">
       <DependentUpon>StockSearch.xaml</DependentUpon>
@@ -917,6 +926,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\Inventory\PrintForm\ReassessmentActDocumentForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Inventory\ReturnToSupplierDetails.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -988,6 +1001,10 @@
     <Page Include="Views\Inventory\Stocks.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\StockGroupSearch.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\StockSearch.xaml">
       <SubType>Designer</SubType>

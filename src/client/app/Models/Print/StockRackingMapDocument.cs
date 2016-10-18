@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Print
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Right,
 				FontSize = 10,
-				Text = line.DocumentDate,
+				Text = line.DocumentDate.ToShortDateString(),
 				Margin = new Thickness(0, 0, 25, 0),
 				Padding = new Thickness(0)
 			};

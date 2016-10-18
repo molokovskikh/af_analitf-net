@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var rowGroup = table.RowGroups[0];
 			var i = 0;
 			foreach (var row in rows) {
-				BuildRow(headers, rowGroup, row);
+				BuildRow(rowGroup, row);
 
 				var reject = rejects[i];
 				var tableRow = new TableRow();

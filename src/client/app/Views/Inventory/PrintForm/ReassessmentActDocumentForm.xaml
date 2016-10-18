@@ -1,0 +1,230 @@
+﻿<FlowDocument FontFamily="Arial" FontSize="12"
+			x:Class="AnalitF.Net.Client.Views.Inventory.PrintForm.ReassessmentActDocumentForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<FlowDocument.Resources>
+		<Style x:Key="UnderStroke" TargetType="Label">
+			<Setter Property="BorderBrush" Value="Black"/>
+			<Setter Property="BorderThickness" Value="0,1,0,0"/>
+			<Setter Property="FontSize" Value="9"/>
+			<Setter Property="SnapsToDevicePixels" Value="True"/>
+			<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+			<Setter Property="Padding" Value="1"/>
+		</Style>
+	</FlowDocument.Resources>
+	<Section Name="Header">
+		<Paragraph FontSize="8" TextAlignment="Right">
+			Форма No. АП-21
+			<LineBreak/>
+			Утверждена
+			<LineBreak/>
+			приказом Министерства
+			<LineBreak/>
+			здравоохранения  СССР
+			<LineBreak/>
+			от 8 января 1988 г. No. 14
+		</Paragraph>
+		<BlockUIContainer>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<Label Grid.Row="0" Grid.Column="1" HorizontalContentAlignment="Stretch">
+					<TextBlock TextAlignment="Center" Margin="20,0,20,0">код</TextBlock>
+				</Label>
+				<Label Grid.Row="1" Grid.Column="0" Content="Управление (объединение) ____________________________________"/>
+				<Label Grid.Row="2" Grid.Column="0" Content="Аптека № _________________________________________________________________"/>
+				<Label Grid.Row="3" Grid.Column="0" Content="Отдел _______________________________________________________________________"/>
+				<Label Grid.Row="1" Grid.Column="1" Content="" BorderBrush="Black" BorderThickness="1,1,1,1"/>
+				<Label Grid.Row="2" Grid.Column="1" Content="" BorderBrush="Black" BorderThickness="1,0,1,1"/>
+				<Label Grid.Row="3" Grid.Column="1" Content="" BorderBrush="Black" BorderThickness="1,0,1,1"/>
+			</Grid>
+		</BlockUIContainer>
+		<Paragraph FontSize="14" FontWeight="Bold" TextAlignment="Center">АКТ №</Paragraph>
+		<Paragraph FontSize="14" FontWeight="Bold" TextAlignment="Center">о переоценке товаров от "__" _________ 20__ г.</Paragraph>
+		<Paragraph>Комиссия в составе: председатель _________________________________ ,
+			<LineBreak/>
+			члены комиссии _____________________________________________________________
+			<LineBreak/>
+			на основании _______________________________________________________________
+			<LineBreak/>
+			произвела переоценку товара по _____________________________________ ценам.
+		</Paragraph>
+	</Section>
+	<Table CellSpacing="0" BorderBrush="Black" BorderThickness="1,1,0,0" Name="Table">
+		<Table.Resources>
+			<Style x:Key="BodyCellStyle" TargetType="TableCell">
+				<Setter Property="BorderBrush" Value="Black"/>
+				<Setter Property="BorderThickness" Value="0,0,1,1"/>
+				<Setter Property="Padding" Value="2,1,2,1"/>
+				<Setter Property="FontSize" Value="10"/>
+			</Style>
+			<Style x:Key="HeaderCellStyle" TargetType="TableCell">
+				<Setter Property="BorderBrush" Value="Black"/>
+				<Setter Property="BorderThickness" Value="0,0,1,1"/>
+				<Setter Property="Padding" Value="2,1,2,1"/>
+				<Setter Property="FontWeight" Value="Bold"/>
+				<Setter Property="FontSize" Value="10"/>
+				<Setter Property="TextAlignment" Value="Center"/>
+				<Setter Property="LineStackingStrategy" Value="MaxHeight"/>
+			</Style>
+			<Style x:Key="HeaderTableRowGroupStyle" TargetType="{x:Type TableRowGroup}">
+				<Style.Resources>
+					<Style BasedOn="{StaticResource HeaderCellStyle}" TargetType="{x:Type TableCell}" />
+				</Style.Resources>
+			</Style>
+			<Style x:Key="BodyTableRowGroupStyle" TargetType="{x:Type TableRowGroup}">
+				<Style.Resources>
+					<Style BasedOn="{StaticResource BodyCellStyle}" TargetType="{x:Type TableCell}" />
+				</Style.Resources>
+			</Style>
+		</Table.Resources>
+		<Table.Columns>
+			<TableColumn Width="7*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+			<TableColumn Width="*"/>
+		</Table.Columns>
+		<TableRowGroup Style="{StaticResource HeaderTableRowGroupStyle}">
+			<TableRow>
+				<TableCell RowSpan="3">
+					<Paragraph>Наименование, Производитель</Paragraph>
+				</TableCell>
+				<TableCell RowSpan="3">
+					<Paragraph>Кол-во</Paragraph>
+				</TableCell>
+				<TableCell ColumnSpan="4">
+					<Paragraph>Цена с НДС, руб. коп.</Paragraph>
+				</TableCell>
+				<TableCell ColumnSpan="3">
+					<Paragraph>Сумма с НДС, руб. коп.</Paragraph>
+				</TableCell>
+				<TableCell RowSpan="2" ColumnSpan="2">
+					<Paragraph>Розничная наценка, %</Paragraph>
+				</TableCell>
+			</TableRow>
+			<TableRow>
+				<TableCell RowSpan="2">
+					<Paragraph>оптовая</Paragraph>
+				</TableCell>
+				<TableCell ColumnSpan="2">
+					<Paragraph>розничная</Paragraph>
+				</TableCell>
+				<TableCell RowSpan="2">
+					<Paragraph>резуль-тат</Paragraph>
+				</TableCell>
+				<TableCell ColumnSpan="2">
+					<Paragraph>розничная</Paragraph>
+				</TableCell>
+				<TableCell RowSpan="2">
+					<Paragraph>резуль-тат</Paragraph>
+				</TableCell>
+			</TableRow>
+			<TableRow>
+				<TableCell>
+					<Paragraph>до</Paragraph>
+				</TableCell>
+				<TableCell>
+					<Paragraph>после</Paragraph>
+				</TableCell>
+				<TableCell>
+					<Paragraph>до</Paragraph>
+				</TableCell>
+				<TableCell>
+					<Paragraph>после</Paragraph>
+				</TableCell>
+				<TableCell>
+					<Paragraph>до</Paragraph>
+				</TableCell>
+				<TableCell>
+					<Paragraph>после</Paragraph>
+				</TableCell>
+			</TableRow>
+		</TableRowGroup>
+		<TableRowGroup Style="{StaticResource BodyTableRowGroupStyle}">
+		</TableRowGroup>
+	</Table>
+	<Section Name="Caption">
+		<BlockUIContainer>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="10*"></ColumnDefinition>
+					<ColumnDefinition Width="*"></ColumnDefinition>
+					<ColumnDefinition Width="10*"></ColumnDefinition>
+					<ColumnDefinition Width="*"></ColumnDefinition>
+					<ColumnDefinition Width="10*"></ColumnDefinition>
+					<ColumnDefinition Width="*"></ColumnDefinition>
+					<ColumnDefinition Width="10*"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<Label Grid.Row="0" Grid.Column="0" Content="Председатель комиссии"/>
+				<Label Grid.Row="1" Grid.Column="2" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">должность</TextBlock>
+				</Label>
+				<Label Grid.Row="1" Grid.Column="4" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">подпись</TextBlock>
+				</Label>
+				<Label Grid.Row="1" Grid.Column="6" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">фамилия, и.о.</TextBlock>
+				</Label>
+				<Label Grid.Row="2" Grid.Column="0" Content="Члены комиссии"/>
+				<Label Grid.Row="3" Grid.Column="2" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">должность</TextBlock>
+				</Label>
+				<Label Grid.Row="3" Grid.Column="4" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">подпись</TextBlock>
+				</Label>
+				<Label Grid.Row="3" Grid.Column="6" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">фамилия, и.о.</TextBlock>
+				</Label>
+				<Label Grid.Row="4" Grid.Column="0" Content=""/>
+				<Label Grid.Row="5" Grid.Column="2" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">должность</TextBlock>
+				</Label>
+				<Label Grid.Row="5" Grid.Column="4" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">подпись</TextBlock>
+				</Label>
+				<Label Grid.Row="5" Grid.Column="6" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">фамилия, и.о.</TextBlock>
+				</Label>
+				<Label Grid.Row="6" Grid.Column="0">
+					<TextBlock TextWrapping="WrapWithOverflow">Материально-ответственные лица</TextBlock>
+				</Label>
+				<Label Grid.Row="7" Grid.Column="2" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">должность</TextBlock>
+				</Label>
+				<Label Grid.Row="7" Grid.Column="4" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">подпись</TextBlock>
+				</Label>
+				<Label Grid.Row="7" Grid.Column="6" Style="{StaticResource UnderStroke}">
+					<TextBlock TextAlignment="Center">фамилия, и.о.</TextBlock>
+				</Label>
+			</Grid>
+		</BlockUIContainer>
+	</Section>
+</FlowDocument>
+
