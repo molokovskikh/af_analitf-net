@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -75,10 +77,15 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		[Test]
 		public void Create_local_db()
 		{
+			session.CreateSQLQuery("flush tables").ExecuteUpdate();
+			session.Transaction.Commit();
 			session.Disconnect();
 			MySqlConnection.ClearAllPools(true);
 			if (Directory.Exists(config.DbDir))
 				Directory.GetFiles(config.DbDir).Each(f => FileHelper.DeleteFile(f));
+			session.Reconnect();
+			session.Transaction.Begin();
+
 			check.Check();
 			var result = session.CreateSQLQuery("show create table Offers").UniqueResult<object[]>();
 			Assert.That(result[1].ToString(), Does.Contain("FULLTEXT KEY"));
