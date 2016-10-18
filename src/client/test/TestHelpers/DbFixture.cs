@@ -80,7 +80,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected T InitCmd<T>(T cmd) where T : BaseCommand
 		{
 			cmd.Config = config;
-			cmd.Token = new CancellationTokenSource().Token;
 			cmd.Session = session;
 			cmd.StatelessSession = stateless;
 			return cmd;

@@ -75,10 +75,10 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		[Test]
 		public void Create_local_db()
 		{
+			session.Disconnect();
 			MySqlConnection.ClearAllPools(true);
 			if (Directory.Exists(config.DbDir))
-				Directory.GetFiles(config.DbDir).Each(f => File.Delete(f));
-
+				Directory.GetFiles(config.DbDir).Each(f => FileHelper.DeleteFile(f));
 			check.Check();
 			var result = session.CreateSQLQuery("show create table Offers").UniqueResult<object[]>();
 			Assert.That(result[1].ToString(), Does.Contain("FULLTEXT KEY"));

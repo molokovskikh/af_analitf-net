@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public void Execute(ISession session)
 		{
 			var offer = session.Query<Offer>().First();
-			var address = session.Query<Address>().First();
+			var address = session.Query<Address>().OrderBy(x => x.Name).First();
 
 			Order = new Order(offer.Price, address);
 			Order.TryOrder(offer, 1);
