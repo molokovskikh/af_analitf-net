@@ -17,15 +17,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public DisplacementDocs()
 		{
+			Begin.Value = DateTime.Today.AddDays(-7);
+			End.Value = DateTime.Today;
 			SelectedItems = new List<DisplacementDoc>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
 				CanDelete.Value = x?.Status == DisplacementDocStatus.Opened;
 			});
-			DisplayName = "Внутренее перемещение";
+			DisplayName = "Внутреннее перемещение";
 			TrackDb(typeof(DisplacementDoc));
 		}
 
+		public NotifyValue<DateTime> Begin { get; set; }
+		public NotifyValue<DateTime> End { get; set; }
 		[Export]
 		public NotifyValue<List<DisplacementDoc>> Items { get; set; }
 		public NotifyValue<DisplacementDoc> CurrentItem { get; set; }
@@ -38,7 +42,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> IsClosed { get; set; }
 		public NotifyValue<bool> IsEnd { get; set; }
 
-
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -46,6 +49,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(IsOpened.Changed())
 				.Merge(IsClosed.Changed())
 				.Merge(IsEnd.Changed())
+				.Merge(Begin.Changed())
+				.Merge(End.Changed())
 				.SelectMany(_ => RxQuery(LoadItems))
 				.Subscribe(Items);
 		}
@@ -54,6 +59,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var query = session.Query<DisplacementDoc>();
 
+			query = query.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
 			if (IsOpened)
 				query = query.Where(x => x.Status == DisplacementDocStatus.Opened);
 			else if (IsClosed)
