@@ -109,9 +109,9 @@ namespace AnalitF.Net.Client.Views
 				Binding = new Binding("Country"),
 				Width = new DataGridLength(100, DataGridLengthUnitType.Star),
 			});
-			lines.Columns.Add(CheckBoxColumn("Печатать", "Print",
+			lines.Columns.Add(DataGridHelper.CheckBoxColumn("Печатать", "Print",
 				x => lines.Items.OfType<WaybillLine>().Each(l => l.Print = x), true));
-			var column = CheckBoxColumn("Оприходовать", "IsReadyForStock",
+			var column = DataGridHelper.CheckBoxColumn("Оприходовать", "IsReadyForStock",
 				x => {
 					lines.Items.OfType<WaybillLine>().Each(l => {
 						l.Receive(x ? l.Quantity.GetValueOrDefault() : 0);
@@ -288,47 +288,6 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
-		}
-
-		private DataGridColumn CheckBoxColumn(string header, string member, Action<bool> checkAll, bool isChecked)
-		{
-			var column = new CustomDataGridColumn {
-				Header = CheckAllHeader(header, checkAll, isChecked),
-				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
-				SortMemberPath = member,
-				Generator = (c, i) => {
-					var el = new CheckBox {
-						VerticalAlignment = VerticalAlignment.Center,
-						HorizontalAlignment = HorizontalAlignment.Center
-					};
-					BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding(member) {
-						UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-					});
-					return el;
-				}
-			};
-			DataGridHelper.SetColumnDisplayName(column, header);
-			return column;
-		}
-
-		private StackPanel CheckAllHeader(string name, Action<bool> checkAll, bool isChecked)
-		{
-			var check = new CheckBox {
-				IsChecked = isChecked,
-				Focusable = false,
-				VerticalAlignment = VerticalAlignment.Center,
-				Name = "CheckAllPrint"
-			};
-			var textBlock = new TextBlock {
-				Text = name
-			};
-			var header = new StackPanel {
-				Orientation = Orientation.Horizontal,
-				Children = {check, textBlock}
-			};
-			check.Checked += (sender, args) => checkAll(check.IsChecked.GetValueOrDefault());
-			check.Unchecked += (sender, args) => checkAll(check.IsChecked.GetValueOrDefault());
-			return header;
 		}
 
 		public void ApplyStyles()

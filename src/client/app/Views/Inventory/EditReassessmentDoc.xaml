@@ -18,6 +18,7 @@
 			<Button Name="AddLine">Добавить строку</Button>
 			<Button Name="EditLine">Редактировать строку</Button>
 			<Button Name="DeleteLine">Удалить строку</Button>
+			<Button Name="Reasssessment">Переоценка</Button>
 			<Separator />
 			<Button Name="CloseDoc">Закрыть</Button>
 			<Button Name="Save">Сохранить</Button>

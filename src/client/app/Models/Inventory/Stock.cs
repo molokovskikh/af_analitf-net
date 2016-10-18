@@ -161,7 +161,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			OnPropertyChanged(nameof(RetailSum));
 		}
 
-		private void UpdateMarkups(decimal? cost)
+		public virtual void UpdateMarkups(decimal? cost)
 		{
 			if (!IsCalculable())
 				return;
@@ -217,18 +217,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 				baseCost = ProducerCost;
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
-			return Round(NullableHelper.Round(value, 2));
+			return Round(NullableHelper.Round(value, 2), Settings.Rounding);
 		}
 
-		private decimal? Round(decimal? value)
+		public static decimal? Round(decimal? value, Rounding rounding)
 		{
-			if (Settings.Rounding != Rounding.None) {
+			if (rounding != Rounding.None) {
 				var @base = 10;
 				var factor = 1;
-				if (Settings.Rounding == Rounding.To1_00) {
+				if (rounding == Rounding.To1_00) {
 					@base = 1;
 				}
-				else if (Settings.Rounding == Rounding.To0_50) {
+				else if (rounding == Rounding.To0_50) {
 					@factor = 5;
 				}
 				var normalized = (int?)(value * @base);
@@ -380,6 +380,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			item.ServerId = null;
 			item.ServerVersion = null;
 			item.ReservedQuantity = 0;
+			Settings = null;
+			WaybillSettings = null;
 			return item;
 		}
 

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -48,6 +51,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> CanEditLine { get; set; }
 		public NotifyValue<bool> CanSave { get; set; }
 		public NotifyValue<bool> CanCloseDoc { get; set; }
+		public NotifyValue<bool> CanReasssessment { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -65,10 +69,43 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.Opened);
 			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDeleteLine);
-			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.Opened);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanSave);
+			var opened = docStatus.Select(x => x.Value == DocStatus.Opened);
+			opened.Subscribe(CanAddLine);
+			opened.Subscribe(IsDocOpen);
+			opened.Subscribe(CanCloseDoc);
+			opened.Subscribe(CanSave);
+			opened.Subscribe(CanReasssessment);
+		}
+
+		[Description("Переоценка")]
+		public class ReassessmentSettings
+		{
+			public ReassessmentSettings(Settings settings)
+			{
+				Markup = 5;
+				Rounding = settings.Rounding;
+			}
+
+			[Display(Name = "Наценка")]
+			public decimal Markup { get; set; }
+
+			[Display(Name = "Округление")]
+			public Rounding Rounding { get; set; }
+		}
+
+		public IEnumerable<IResult> Reasssessment()
+		{
+			var settings = new ReassessmentSettings(Settings);
+			yield return new DialogResult(new SimpleSettings(settings));
+			foreach(var line in Lines.Where(x => x.Selected)) {
+				line.DstStock.Configure(Settings);
+				line.DstStock.RetailCost = Stock.Round(line.SrcRetailCost * (1 + settings.Markup / 100m), Settings.Value.Rounding);
+				line.RetailCost = line.DstStock.RetailCost;
+				line.RetailMarkup = line.DstStock.RetailMarkup;
+				line.DstStock.Settings = null;
+				line.DstStock.WaybillSettings = null;
+			}
+			Doc.UpdateStat();
 		}
 
 		public IEnumerable<IResult> AddLine()
