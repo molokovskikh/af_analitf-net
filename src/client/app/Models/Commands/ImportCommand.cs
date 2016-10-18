@@ -332,6 +332,12 @@ where p.IsSynced = 1 or p.PriceId is null;";
 				})
 					.ToArray();
 			}
+			if (dbTable.Name.Match("userupdateinfos")) {
+				ignored = ignored.Concat(new[] {
+					"Id"
+				})
+					.ToArray();
+			}
 
 			ignored = ignored.Concat(ignoredColumns.GetValueOrDefault(dbTable.Name, new string[0])).ToArray();
 			var columnsToCheck = tableColumns.Except(ignored, StringComparer.OrdinalIgnoreCase).ToArray();

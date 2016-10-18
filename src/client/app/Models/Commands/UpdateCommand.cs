@@ -107,6 +107,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			Log.InfoFormat("Обновление завершено успешно");
+
+			//var message = Session.CreateSQLQuery("select Message from usersettings.userupdateinfo where UserId = 40769").UniqueResult<string>();
 			return result;
 		}
 

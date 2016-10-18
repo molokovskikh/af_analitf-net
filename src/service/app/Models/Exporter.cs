@@ -978,6 +978,10 @@ where p.UpdateTime > ?lastSync";
 				Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
+			//экспортируем UserUpdateInfo
+			sql = @"select * from usersettings.userupdateinfo where UserID = ?userId";
+			Export(Result, sql, "userupdateinfos", truncate: true, parameters: new { userId = user.Id });
+
 			var lastFormalization = session.CreateSQLQuery(@"
 select if(LastFormalization > PriceDate, LastFormalization, PriceDate)
 from usersettings.priceitems i
