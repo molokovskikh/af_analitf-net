@@ -172,7 +172,7 @@ namespace AnalitF.Net.Client.Models
 				new MarkupConfig(address, 0, 50, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(address, 50, 500, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(address, 500, 1000000, 20, MarkupType.VitallyImportant),
-				new MarkupConfig(address, 0, 10000, 20, MarkupType.Special),
+				new MarkupConfig(address, 0, 1000000, 20, MarkupType.Special),
 			};
 		}
 
