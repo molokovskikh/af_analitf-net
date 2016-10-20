@@ -13,9 +13,13 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public override void Execute(ISession session)
 		{
 			var user = User(session);
-			user.UpdateInfo.Message = "Test Message";
-			user.UpdateInfo.MessageShowCount = 1;
-			session.Flush();
+			session.CreateSQLQuery(@"
+update usersettings.userupdateinfo
+set MessageShowCount = :MessageShowCount, Message = 'Test Message'
+where UserId = :userId;")
+				.SetParameter("MessageShowCount", 1)
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
 		}
 	}
 }
