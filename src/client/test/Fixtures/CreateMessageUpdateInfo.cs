@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = User(session);
 			user.UpdateInfo.Message = "Test Message";
-			user.UpdateInfo.MessageShowCount = 3;
+			user.UpdateInfo.MessageShowCount = 1;
 			session.Flush();
 		}
 	}

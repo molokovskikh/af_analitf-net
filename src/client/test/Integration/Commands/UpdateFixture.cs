@@ -676,5 +676,19 @@ update Addresses set Id =  2575 where Id = :addressId")
 			var orders = localSession.Query<Order>().ToArray();
 			Assert.AreEqual(0, orders.Length);
 		}
+
+		[Test]
+		public void Show_user_update_message()
+		{
+			Fixture(new CreateMessageUpdateInfo());
+			var cmd = new UpdateCommand();
+			Run(cmd);
+			var result = (MessageResult)cmd.Results[0];
+			Assert.AreEqual(cmd.Results.Count, 1);
+			Assert.That(result.Message, Does.Contain("Test Message"));
+			cmd = new UpdateCommand();
+			Run(cmd);
+			Assert.AreEqual(cmd.Results.Count, 0);
+		}
 	}
 }

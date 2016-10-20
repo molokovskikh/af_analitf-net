@@ -27,6 +27,7 @@ using NHibernate;
 using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
+using NHibernate.Util;
 using SmartOrderFactory.Domain;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
@@ -2303,7 +2304,8 @@ and oh.Deleted = 0")
 				.SetParameter("userId", userId)
 				.List<uint>();
 			var orders = session.Query<Order>().Where(o => updateOrders.Contains(o.RowId));
-			foreach (var order in orders) {
+			foreach (var order in orders)
+			{
 				session.Save(new OrderRecordLog(order, user, request.RequestId, RecordType.Confirmed));
 			}
 
@@ -2318,6 +2320,22 @@ where l.UserId = :userId;")
 			session.CreateSQLQuery(@"
 delete from Logs.PendingOrderLogs
 where UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			var messageShowCountList = session.CreateSQLQuery(@"
+select MessageShowCount from usersettings.userupdateinfo where UserID = :userId")
+				.SetParameter("userId", userId).List();
+
+			var messageShowCount = Convert.ToByte(messageShowCountList.First());
+			if (messageShowCount > 0)
+				messageShowCount--;
+
+			session.CreateSQLQuery(@"
+update usersettings.userupdateinfo
+set MessageShowCount = :MessageShowCount
+where UserId = :userId;")
+				.SetParameter("MessageShowCount", messageShowCount)
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 		}
