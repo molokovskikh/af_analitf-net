@@ -66,7 +66,6 @@
 
 		<controls:DataGrid2 Grid.Row="2" x:Name="Lines">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="№№" Binding="{Binding Id}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Название товара" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Фирма-производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Количество" Binding="{Binding Quantity}" Width="*" />

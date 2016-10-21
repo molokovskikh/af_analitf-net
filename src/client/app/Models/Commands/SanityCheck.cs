@@ -132,6 +132,10 @@ namespace AnalitF.Net.Client.Models.Commands
 					.Except(settings.Waybills.Select(w => w.BelongsToAddress))
 					.Select(a => new WaybillSettings(user, a)));
 
+				if (!session.Query<WriteoffReason>().Any()) {
+					session.SaveEach(WriteoffReason.Default());
+				}
+
 				var suppliers = session.Query<Supplier>().ToList();
 				var dirMaps = session.Query<DirMap>().ToList();
 				var newDirMaps = suppliers
