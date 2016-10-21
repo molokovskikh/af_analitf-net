@@ -296,8 +296,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> WaybillMarkupReport()
 		{
 			var commnand = new WaybillMarkupReport();
-			var wManager = (WindowManager)IoC.Get<IWindowManager>();
-			commnand.withNds = wManager.ShowMessageBox("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?",
+			commnand.withNds = Manager.ShowMessageBox("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?",
 				"Отчет по розничным надбавкам к ценам на ЖВНЛП за год", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes;
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);

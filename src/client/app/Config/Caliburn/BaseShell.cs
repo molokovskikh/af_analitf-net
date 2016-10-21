@@ -133,7 +133,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 				//исправление для ошибки
 				//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
 				var view = (ShellView)GetView();
-				if (view != null)
+				if (view?.Items != null)
 				{
 					var tabs = view.Items;
 					var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
