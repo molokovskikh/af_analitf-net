@@ -308,6 +308,7 @@
     <Compile Include="Models\Inventory\StockAction.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
     <Compile Include="Models\Inventory\SyncCommand.cs" />
+    <Compile Include="Models\Inventory\WriteoffDoc.cs" />
     <Compile Include="Models\Inventory\WriteoffReason.cs" />
     <Compile Include="Models\Print\CheckDetailsDocument.cs" />
     <Compile Include="Models\Print\CheckDocument.cs" />

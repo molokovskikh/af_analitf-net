@@ -307,14 +307,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// инвентаризация, снаружи в поставку
 		public virtual StockAction InventoryDoc(decimal quantity)
 		{
-			SupplyQuantity += quantity;
+			ReservedQuantity += quantity;
 			return new StockAction(ActionType.InventoryDoc, this, quantity);
 		}
 
 		// отмена инвентаризации, с поставки наружу
 		public virtual StockAction CancelInventoryDoc(decimal quantity)
 		{
-			SupplyQuantity -= quantity;
+			ReservedQuantity -= quantity;
 			return new StockAction(ActionType.CancelInventoryDoc, this, quantity);
 		}
 
@@ -335,14 +335,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// Перемещение между складами. Снаружи с др. склада в поставку
 		public virtual StockAction DisplacementFrom(decimal quantity)
 		{
-			SupplyQuantity += quantity;
+			ReservedQuantity += quantity;
 			return new StockAction(ActionType.DisplacementFrom, this, quantity);
 		}
 
 		// отмена перемещения между складами. С поставки наружу на др. склад
 		public virtual StockAction CancelDisplacementFrom(decimal quantity)
 		{
-			SupplyQuantity -= quantity;
+			ReservedQuantity -= quantity;
 			return new StockAction(ActionType.CancelDisplacementFrom, this, quantity);
 		}
 
@@ -363,14 +363,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// с поставки на склад
 		public virtual void Incoming(decimal quantity)
 		{
-			SupplyQuantity -= quantity;
+			ReservedQuantity -= quantity;
 			Quantity += quantity;
 		}
 
 		// со склада в поставку
 		public virtual void CancelIncoming(decimal quantity)
 		{
-			SupplyQuantity += quantity;
+			ReservedQuantity += quantity;
 			Quantity -= quantity;
 		}
 
