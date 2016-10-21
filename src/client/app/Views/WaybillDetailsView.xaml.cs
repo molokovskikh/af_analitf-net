@@ -116,7 +116,6 @@ namespace AnalitF.Net.Client.Views
 					lines.Items.OfType<WaybillLine>().Each(l => {
 						l.Receive(x ? l.Quantity.GetValueOrDefault() : 0);
 					});
-
 				}, false);
 			lines.Columns.Add(column);
 			lines.Columns.Add(new DataGridTextColumnEx {
