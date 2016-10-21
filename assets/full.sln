@@ -3,55 +3,72 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "service\app\app.csproj", "{B38A237B-0BF4-4FD0-941D-E3640A3058EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "..\src\service\app\app.csproj", "{B38A237B-0BF4-4FD0-941D-E3640A3058EE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A680813-C83B-497A-85E6-E8F07B7D7650} = {8A680813-C83B-497A-85E6-E8F07B7D7650}
+		{80C9F352-5EED-41B2-989A-6628BCAF4D36} = {80C9F352-5EED-41B2-989A-6628BCAF4D36}
+		{F5D61060-DF73-4B6D-846F-8F60EE2A00A4} = {F5D61060-DF73-4B6D-846F-8F60EE2A00A4}
+		{4D65C8D8-B835-4F03-9606-05A18C3EEE1B} = {4D65C8D8-B835-4F03-9606-05A18C3EEE1B}
+		{72AFCFE8-C9E9-45FA-9698-BEE896A517A3} = {72AFCFE8-C9E9-45FA-9698-BEE896A517A3}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "client", "client", "{F1ABE560-BCB9-4E0D-BDC0-5D401B1B1122}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "service", "service", "{3130DCB6-7D21-471C-B864-16B2FAAD8EFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "client\test\test.csproj", "{F4E5BF74-FD5D-4A1C-AB92-A54A7B79EC42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "..\src\client\test\test.csproj", "{F4E5BF74-FD5D-4A1C-AB92-A54A7B79EC42}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{3E58ADC1-A8F4-4403-AF3A-2C3ED1F86289}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "client\app\app.csproj", "{5878740B-360A-4942-8902-926907209616}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "..\src\client\app\app.csproj", "{5878740B-360A-4942-8902-926907209616}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Support", "Test.Support\Test.Support\Test.Support.csproj", "{A215E837-1208-49E3-AF93-A9612223122C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Support", "..\src\Test.Support\Test.Support\Test.Support.csproj", "{A215E837-1208-49E3-AF93-A9612223122C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Models", "Common.Models\Common.Models\Common.Models.csproj", "{80C9F352-5EED-41B2-989A-6628BCAF4D36}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Models", "..\src\Common.Models\Common.Models\Common.Models.csproj", "{80C9F352-5EED-41B2-989A-6628BCAF4D36}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A680813-C83B-497A-85E6-E8F07B7D7650} = {8A680813-C83B-497A-85E6-E8F07B7D7650}
+		{8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0} = {8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0}
+		{72AFCFE8-C9E9-45FA-9698-BEE896A517A3} = {72AFCFE8-C9E9-45FA-9698-BEE896A517A3}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql", "Common.MySql\Common.MySql\Common.MySql.csproj", "{8A680813-C83B-497A-85E6-E8F07B7D7650}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql", "..\src\Common.MySql\Common.MySql\Common.MySql.csproj", "{8A680813-C83B-497A-85E6-E8F07B7D7650}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools", "Common.Tools\Common.Tools\Common.Tools.csproj", "{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools", "..\src\Common.Tools\Common.Tools\Common.Tools.csproj", "{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools.Tests", "Common.Tools\Common.Tools.Test\Common.Tools.Tests.csproj", "{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools.Tests", "..\src\Common.Tools\Common.Tools.Test\Common.Tools.Tests.csproj", "{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "service\test\test.csproj", "{E12BC78F-C2CC-46E1-AF67-B62D8ACD96F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "..\src\service\test\test.csproj", "{E12BC78F-C2CC-46E1-AF67-B62D8ACD96F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.NHibernate", "Common.MySql\Common.NHibernate\Common.NHibernate.csproj", "{8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.NHibernate", "..\src\Common.MySql\Common.NHibernate\Common.NHibernate.csproj", "{8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Web.Service", "Common.Web\Common.Web.Service\Common.Web.Service.csproj", "{4D65C8D8-B835-4F03-9606-05A18C3EEE1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Web.Service", "..\src\Common.Web\Common.Web.Service\Common.Web.Service.csproj", "{4D65C8D8-B835-4F03-9606-05A18C3EEE1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "updater\app\app.csproj", "{677DB511-BFB9-4FAA-877C-AF00A12487CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "..\src\updater\app\app.csproj", "{677DB511-BFB9-4FAA-877C-AF00A12487CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Models.Tests", "Common.Models\Common.Models.Tests\Common.Models.Tests.csproj", "{75D6B3B6-82B6-448F-8565-DBD2FD467D4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Models.Tests", "..\src\Common.Models\Common.Models.Tests\Common.Models.Tests.csproj", "{75D6B3B6-82B6-448F-8565-DBD2FD467D4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartOrderFactory.Tests", "SmartOrderFactory\SmartOrderFactory.Tests\SmartOrderFactory.Tests.csproj", "{BCCDAED2-0C49-41F7-8073-FDDB810DD379}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.vm", "..\src\client\test\vm\test.vm.csproj", "{8724B58D-B021-4658-AA05-5644A44CD3C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartOrderFactory", "SmartOrderFactory\SmartOrderFactory\SmartOrderFactory.csproj", "{F5D61060-DF73-4B6D-846F-8F60EE2A00A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartOrderFactory.Tests", "..\src\SmartOrderFactory\SmartOrderFactory.Tests\SmartOrderFactory.Tests.csproj", "{BCCDAED2-0C49-41F7-8073-FDDB810DD379}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F5D61060-DF73-4B6D-846F-8F60EE2A00A4} = {F5D61060-DF73-4B6D-846F-8F60EE2A00A4}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.release", "client\test.release\test.release.csproj", "{6A431E24-E989-4641-A9D6-AC0A60E4CADA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartOrderFactory", "..\src\SmartOrderFactory\SmartOrderFactory\SmartOrderFactory.csproj", "{F5D61060-DF73-4B6D-846F-8F60EE2A00A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.release", "..\src\client\test.release\test.release.csproj", "{6A431E24-E989-4641-A9D6-AC0A60E4CADA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "updater", "updater", "{514554E3-AC66-4F5C-86D3-0FB479EACD0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "updater\test\test.csproj", "{18676AB8-9F29-41EC-A633-95CF6F8175C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "..\src\updater\test\test.csproj", "{18676AB8-9F29-41EC-A633-95CF6F8175C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stub", "updater\stub\stub.csproj", "{15062012-5439-48BF-8FB8-62DC3C7B76C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stub", "..\src\updater\stub\stub.csproj", "{15062012-5439-48BF-8FB8-62DC3C7B76C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proxy", "proxy", "{EAE5A359-D061-478B-B381-29FDA921C068}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "proxy\app\app.csproj", "{BB0320E9-5844-4AD0-A17D-355CF556B15C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "..\src\proxy\app\app.csproj", "{BB0320E9-5844-4AD0-A17D-355CF556B15C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql.Tests", "Common.MySql\Common.MySql.Tests\Common.MySql.Tests.csproj", "{98EFE255-60D6-4C1B-95A6-49779D21E94E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql.Tests", "..\src\Common.MySql\Common.MySql.Tests\Common.MySql.Tests.csproj", "{98EFE255-60D6-4C1B-95A6-49779D21E94E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -288,6 +305,23 @@ Global
 		{75D6B3B6-82B6-448F-8565-DBD2FD467D4F}.release-net45|Any CPU.Build.0 = release-net45|Any CPU
 		{75D6B3B6-82B6-448F-8565-DBD2FD467D4F}.release-net45|x86.ActiveCfg = release-net45|Any CPU
 		{75D6B3B6-82B6-448F-8565-DBD2FD467D4F}.release-net45|x86.Build.0 = release-net45|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.ChildrenFolder|Any CPU.ActiveCfg = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.ChildrenFolder|Any CPU.Build.0 = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.ChildrenFolder|x86.ActiveCfg = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.debug-net45|Any CPU.ActiveCfg = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.debug-net45|Any CPU.Build.0 = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.debug-net45|x86.ActiveCfg = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.debug-net45|x86.Build.0 = Debug|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.Release|x86.ActiveCfg = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.release-net45|Any CPU.ActiveCfg = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.release-net45|Any CPU.Build.0 = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.release-net45|x86.ActiveCfg = Release|Any CPU
+		{8724B58D-B021-4658-AA05-5644A44CD3C5}.release-net45|x86.Build.0 = Release|Any CPU
 		{BCCDAED2-0C49-41F7-8073-FDDB810DD379}.ChildrenFolder|Any CPU.ActiveCfg = Release|Any CPU
 		{BCCDAED2-0C49-41F7-8073-FDDB810DD379}.ChildrenFolder|Any CPU.Build.0 = Release|Any CPU
 		{BCCDAED2-0C49-41F7-8073-FDDB810DD379}.ChildrenFolder|x86.ActiveCfg = Release|x86
@@ -434,6 +468,7 @@ Global
 		{4D65C8D8-B835-4F03-9606-05A18C3EEE1B} = {3E58ADC1-A8F4-4403-AF3A-2C3ED1F86289}
 		{677DB511-BFB9-4FAA-877C-AF00A12487CD} = {514554E3-AC66-4F5C-86D3-0FB479EACD0F}
 		{75D6B3B6-82B6-448F-8565-DBD2FD467D4F} = {3E58ADC1-A8F4-4403-AF3A-2C3ED1F86289}
+		{8724B58D-B021-4658-AA05-5644A44CD3C5} = {F1ABE560-BCB9-4E0D-BDC0-5D401B1B1122}
 		{BCCDAED2-0C49-41F7-8073-FDDB810DD379} = {3E58ADC1-A8F4-4403-AF3A-2C3ED1F86289}
 		{F5D61060-DF73-4B6D-846F-8F60EE2A00A4} = {3E58ADC1-A8F4-4403-AF3A-2C3ED1F86289}
 		{6A431E24-E989-4641-A9D6-AC0A60E4CADA} = {F1ABE560-BCB9-4E0D-BDC0-5D401B1B1122}

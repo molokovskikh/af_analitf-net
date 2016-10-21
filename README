@@ -1,9 +1,6 @@
 Зависимости
 
-cygwin - скрипты, cinst cygwin
-wix - установщик, должен быть в PATH
-virtualbox - тесты, должен быть в PATH
-lib/dcmysql[*]std.exe - драйвер mysql
+cygwin - скрипты
 для удобства есть конфигурационный файл зависимостей - choco.config
 для установки choco install choco.config
 
@@ -82,7 +79,12 @@ MSI
 
 В случае проблем с установщиком неудаляемые записи из msi поможем исправил msizap T <{ProductCode}>
 
-Дополнительные инструменты
+Дополнительные зависимости
 
 Для компиляции шейдера нужен Direct3D Shader Compiler - fxc.exe
-должен быть в PATH, есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
+для использования скрипта src\client\app\Assets\shaders\compile.sh должен быть в PATH
+есть в windows sdk 10 C:\Program Files (x86)\Windows Kits\10\bin\x86\
+
+Для сборки установщика wix, должен быть в PATH
+
+Для тестов virtualbox, должен быть в PATH

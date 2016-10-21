@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.SpecialMarkupCheck();
 
 			var markups = model.SpecialMarkups.Value;
-			Assert.AreEqual("Special: 0 - 10000 20%", markups.Implode());
+			Assert.AreEqual("Special: 0 - 1000000 20%", markups.Implode());
 			markups[0].End = 500;
 			var markup = new MarkupConfig();
 			model.NewSpecialMarkup(new InitializingNewItemEventArgs(markup));
