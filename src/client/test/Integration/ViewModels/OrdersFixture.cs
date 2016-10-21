@@ -13,6 +13,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
+using AnalitF.Net.Client.Models.Commands;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -27,13 +28,33 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			shell.UpdateStat();
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 			scheduler.AdvanceByMs(5000);
-
 			Assert.That(model.CanDelete, Is.True);
+
+			// чистим корзину
+			//Run(new UpdateCommand());
+
+			//new UpdateCommand().EmptyTrash(0);
+
+			// перемещаем в корзину
+			session.DeleteEach<DeletedOrder>();
+			session.Flush();
 			model.Delete();
 			scheduler.AdvanceByMs(5000);
-			Close(model);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 
+			model.IsDeletedSelected.Value = true;
+			model.IsCurrentSelected.Value = false;
+			model.CurrentDeletedOrder = model.DeletedOrders.First();
+			model.SelectedDeletedOrders.Add(model.CurrentDeletedOrder);
+			Assert.That(model.DeletedOrders.Count(), Is.EqualTo(1));
+
+			// возвращаем из корзины
+			TaskResult(model.UnDelete());
+			scheduler.AdvanceByMs(5000);
+			Assert.That(model.DeletedOrders.Count(), Is.EqualTo(0));
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
+
+			Close(model);
 			session.Clear();
 			Assert.Null(session.Get<Order>(order.Id));
 		}

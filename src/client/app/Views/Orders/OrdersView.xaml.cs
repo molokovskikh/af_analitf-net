@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
@@ -42,6 +43,9 @@ namespace AnalitF.Net.Client.Views.Orders
 				Commands.CanInvokeViewModel));
 
 			SentOrders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
+				Commands.DoInvokeViewModel,
+				Commands.CanInvokeViewModel));
+			DeletedOrders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
 			Orders.ItemSourceChanged += (sender, args) => {
