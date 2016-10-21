@@ -82,7 +82,7 @@ Global(
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service.Test",
 			@ProxyUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
 		},
-		@Stocks: {
+		@Stock: {
 			@BaseEnv: "Production",
 			@DeployAlias: "stocks",
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\stocks\var\update\""",
