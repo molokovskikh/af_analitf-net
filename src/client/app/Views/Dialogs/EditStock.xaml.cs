@@ -26,7 +26,9 @@ namespace AnalitF.Net.Client.Views.Dialogs
 			InitializeComponent();
 
 			DataContextChanged += (sender, args) => {
-				var model = (ViewModels.Dialogs.EditStock)DataContext;
+				var model = DataContext as ViewModels.Dialogs.EditStock;
+				if (model == null)
+					return;
 				if (model.EditMode == ViewModels.Dialogs.EditStock.Mode.EditQuantity) {
 					this.Descendants<TextBox>().Each(x => x.IsReadOnly = true);
 					Stock_Quantity.IsReadOnly = false;

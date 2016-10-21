@@ -7,7 +7,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 {
 	public partial class Checkout : UserControl
 	{
-		public ViewModels.Inventory.Checkout Model => (ViewModels.Inventory.Checkout)DataContext;
+		public ViewModels.Inventory.Checkout Model => DataContext as ViewModels.Inventory.Checkout;
 
 		public Checkout()
 		{

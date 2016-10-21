@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 
 		private void d(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			var model = (ViewModels.Inventory.EditReassessmentDoc)DataContext;
+			var model = DataContext as ViewModels.Inventory.EditReassessmentDoc;
 			if (model == null)
 				return;
 

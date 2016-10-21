@@ -10,7 +10,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 {
 	public partial class Frontend : UserControl
 	{
-		public ViewModels.Inventory.Frontend Model => (ViewModels.Inventory.Frontend)DataContext;
+		public ViewModels.Inventory.Frontend Model => DataContext as ViewModels.Inventory.Frontend;
 
 		public Frontend()
 		{
