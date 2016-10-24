@@ -45,9 +45,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
 
-			Begin.Mute(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
-			End.Mute(DateTime.Today);
-
 			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected.Value))
 				.Subscribe(_ => {

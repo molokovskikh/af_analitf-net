@@ -15,6 +15,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
+using Common.Tools.Calendar;
 using NHibernate.Linq;
 using ReactiveUI;
 using System.ComponentModel;
@@ -39,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
 			IsCurrentSelected = new NotifyValue<bool>(true);
-			Begin = new NotifyValue<DateTime>(DateTime.Today);
+			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			AddressSelector = new AddressSelector(this);
 
