@@ -1,14 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Service.Models;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using DocType = AnalitF.Net.Client.Models.DocType;
 
 namespace AnalitF.Net.Client.Test.Integration.Commands
 {
@@ -68,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Load_only_waybills()
 		{
 			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-				+ " where UserId = :userId;")
+			                       + " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			var command = new UpdateCommand {
@@ -77,16 +80,25 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			};
 			Run(command);
 
+			var fields = command.GetType().GetRuntimeFields();
+			uint requestId = 0;
+			foreach (FieldInfo field in fields) {
+				if (field.Name.Match("requestId")) {
+					requestId = (uint)field.GetValue(command);
+				}
+			}
+			var localWaybill = session.Query<RequestLog>().Where(x => x.Id == requestId);
 			var files = Directory.GetFiles(clientConfig.UpdateTmpDir).Implode(Path.GetFileName);
 			Assert.AreEqual("Новых файлов документов нет.", command.SuccessMessage);
 			Assert.AreEqual("LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
+			Assert.AreEqual("Новых документов нет", localWaybill.First().ErrorDescription);
 		}
 
 		[Test]
 		public void Load_waybill_without_file()
 		{
 			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-				+ " where UserId = :userId;")
+			                       + " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			session.Transaction.Commit();
@@ -107,7 +119,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Open_waybill_view_after_import()
 		{
 			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-				+ " where UserId = :userId;")
+			                       + " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			session.Transaction.Commit();
@@ -205,6 +217,5 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
 			Assert.AreEqual(fixture.Waybill.Log.FileName, waybill.Filename);
 		}
-
 	}
 }
