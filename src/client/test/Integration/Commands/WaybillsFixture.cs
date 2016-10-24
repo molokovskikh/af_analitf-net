@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Load_only_waybills()
 		{
 			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-			                       + " where UserId = :userId;")
+				+ " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			var command = new UpdateCommand {
@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Load_waybill_without_file()
 		{
 			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-			                       + " where UserId = :userId;")
+				+ " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			session.Transaction.Commit();
@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Open_waybill_view_after_import()
 		{
 			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-			                       + " where UserId = :userId;")
+				+ " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			session.Transaction.Commit();
