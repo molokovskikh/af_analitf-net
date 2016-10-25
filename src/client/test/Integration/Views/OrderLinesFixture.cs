@@ -50,7 +50,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var productId = order.Lines[0].ProductId;
 
 			// детализация текущего заказа
-			var model = new OrderDetailsViewModel(order);
+			var productInFrozenOrders = order.Lines.Select(x => x.ProductId).ToList();
+			var model = new OrderDetailsViewModel(order, productInFrozenOrders);
 			var view = Bind(model);
 			scheduler.Start();
 			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");

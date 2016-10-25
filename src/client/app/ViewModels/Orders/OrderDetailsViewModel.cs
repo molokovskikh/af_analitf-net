@@ -26,8 +26,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		private uint orderId;
 		private Type type;
 		private Editor editor;
+		private List<uint> frozenProducts;
 
-		public OrderDetailsViewModel(IOrder order)
+		public OrderDetailsViewModel(IOrder order, List<uint> fProducts = null)
 		{
 			InitFields();
 			orderId = order.Id;
@@ -43,6 +44,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 				ExcelExporter.Properties = new string[0];
 			ExcelExporter.ActiveProperty.Refresh();
+			frozenProducts = fProducts ?? new List<uint>();
 		}
 
 		public IList<IOrderLine> Source { get; set; }
@@ -140,18 +142,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 			{
 				Order.Value.Lines.Each(l => l.Configure(User));
-
-				Env.RxQuery(s => s.Query<Order>()
-					.Where(x => x.Frozen)
-					.SelectMany(x => x.Lines)
-					.Select(x => x.ProductId)
-					.ToList())
-					.Subscribe(x => {
-						Order.Value.Lines
-							.Cast<OrderLine>()
-							.Where(y => x.Contains(y.ProductId))
-							.Each(y => y.InFrozenOrders = true);
-					});
+				Order.Value.Lines
+					.Cast<OrderLine>()
+					.Where(x => frozenProducts.Contains(x.ProductId))
+					.Each(x => x.InFrozenOrders = true);
 			}
 
 			if (CurrentLine.Value != null)

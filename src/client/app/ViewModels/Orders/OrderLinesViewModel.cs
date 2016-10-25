@@ -208,10 +208,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(DbReloadToken)
 				.Merge(OrdersReloadToken)
 				.Where(_ => IsCurrentSelected && Session != null)
-				.Select(_ => {
-					var lines = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
-						.Where(x => Prices.Where(y => y.IsSelected).Select(y => y.Item.Id).Contains(x.Price.Id))
-						.SelectMany(o => o.Lines)
+				.Select(_ =>
+				{
+					var orders = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
+						.Where(x => Prices.Where(y => y.IsSelected).Select(y => y.Item.Id).Contains(x.Price.Id)).ToList();
+
+					var lines = orders.SelectMany(o => o.Lines)
 						.Where(x => OnlyWarning ? x.SendResult != LineResultStatus.OK : true)
 						.OrderBy(l => l.Id)
 						.ToObservableCollection();
@@ -222,11 +224,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					});
 
 					// #48323 Присутствует в замороженных заказах
-					var productInFrozenOrders = Session.Query<Order>()
-						.Where(x => x.Frozen)
-						.SelectMany(x => x.Lines)
-						.Select(x => x.ProductId)
-						.ToList();
+					var productInFrozenOrders = orders.Where(x => x.Frozen).SelectMany(x => x.Lines)
+						.Select(x => x.ProductId).Distinct().ToList();
 					lines.Where(x => productInFrozenOrders.Contains(x.ProductId))
 						.Each(x => x.InFrozenOrders = true);
 					if (LinesFilter.Value == Orders.LinesFilter.InFrozenOrders)

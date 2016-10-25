@@ -153,6 +153,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (Prices.Value == null)
 				return;
 			var priceIds = Prices.Value.Where(x => x.IsSelected).Select(x => x.Item.Id).ToArray();
+
 			if (IsSentSelected) {
 				var filterAddresses = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 				var begin = Begin.Value;
@@ -175,8 +176,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				});
 			}
 
-			if (IsDeletedSelected)
-			{
+			if (IsDeletedSelected) {
 				Env.RxQuery(s => {
 					var result = s.Query<DeletedOrder>()
 					.OrderByDescending(o => o.DeletedOn)
@@ -565,6 +565,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (CurrentOrder == null)
 				return;
 
+			var frozenProducts = Orders.Where(x => x.Frozen).SelectMany(x => x.Lines).Select(x => x.ProductId).Distinct().ToList();
 			Shell.Navigate(new OrderDetailsViewModel(CurrentOrder));
 		}
 
