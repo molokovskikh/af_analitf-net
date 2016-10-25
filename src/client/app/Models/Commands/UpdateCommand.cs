@@ -1008,12 +1008,24 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));
 			ProcessAttachments(resultDirs);
 
+			Log.Info("Очистка корзины");
+			EmptyTrash();
+
 			if (Clean)
 				FileHelper.DeleteDir(Config.UpdateTmpDir);
 
 			if (request != null)
 				WaitAndLog(Client.PutAsync("Main", request, Formatter), "Отправка лога импорта заявок");
 			Log.Info("Импорт завершен");
+		}
+
+
+		public void EmptyTrash(int days = 7)
+		{
+			var begin = DateTime.Today.AddDays(-days);
+			Session.CreateSQLQuery("delete from deletedorders where DeletedOn < :begin")
+				.SetParameter("begin", begin)
+				.ExecuteUpdate();
 		}
 
 		private bool CalculateAwaited()

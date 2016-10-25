@@ -35,6 +35,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		private ReactiveCollection<Order> orders;
 		private IList<SentOrder> sentOrders;
 		private SentOrder currentSentOrder;
+		private ReactiveCollection<DeletedOrder> deletedOrders;
+		private DeletedOrder currentDeletedOrder;
 
 		public OrdersViewModel()
 		{
@@ -44,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector = new AddressSelector(this);
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
+			SelectedDeletedOrders = new List<DeletedOrder>();
+			deletedOrders = new ReactiveCollection<DeletedOrder>();
 
 			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected.Value))
@@ -68,6 +72,18 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					NotifyOfPropertyChange(nameof(UnfreezeVisible));
 					NotifyOfPropertyChange(nameof(MoveVisible));
 					NotifyOfPropertyChange(nameof(EditableOrder));
+				}));
+
+			OnCloseDisposable.Add(IsDeletedSelected
+				.Subscribe(_ => {
+					NotifyOfPropertyChange(nameof(UnDeleteVisible));
+					NotifyOfPropertyChange(nameof(ReorderVisible));
+				}));
+
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentDeletedOrder)
+				.Subscribe(_ => {
+					NotifyOfPropertyChange(nameof(CanDelete));
+					NotifyOfPropertyChange(nameof(CanUnDelete));
 				}));
 
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentSentOrder)
@@ -103,6 +119,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public List<Address> AddressesToMove { get; set; }
 
 		public Address AddressToMove { get; set; }
+
 		public NotifyValue<List<Selectable<Price>>> Prices { get; set; }
 
 		protected override void OnInitialize()
@@ -153,6 +170,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						x[i].CalculateStyle(Address);
 					SentOrders = x;
 				});
+			}
+
+			if (IsDeletedSelected)
+			{
+				Env.RxQuery(s => {
+					var result = s.Query<DeletedOrder>()
+					.OrderByDescending(o => o.DeletedOn)
+					.ToList();
+					if (CurrentDeletedOrder != null)
+						CurrentDeletedOrder = result.FirstOrDefault(x => x.Id == CurrentDeletedOrder.Id);
+					return new ReactiveCollection<DeletedOrder>(result)
+					{
+						ChangeTrackingEnabled = true
+					};
+				}).CatchSubscribe(x => { DeletedOrders = x; });
 			}
 
 			//обновить данные нужно в нескольких ситуациях
@@ -214,7 +246,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			//после того как мы очистили сессию нам нужно перезагрузить все объекты которые
 			//были связаны с закрытой сессией иначе где нибудь позже мы попробуем обратиться
 			//к объекты закрытой сессии и получим ошибку
-
 			//загружаем все в память что не делать лишних запросов
 			foreach (var item in AddressSelector.Addresses)
 				item.Item = Session.Load<Address>(item.Item.Id);
@@ -241,6 +272,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public List<Order> SelectedOrders { get; set; }
 
+		// список текущих заказов
 		//используется ReactiveCollection тк нужно отслеживать состояние флага отправить
 		//для установки состояния кнопки отправить
 		//BindingList - не пригоден тк он запрещает сортировку
@@ -297,10 +329,40 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
+		public ReactiveCollection<DeletedOrder> DeletedOrders
+		{
+			get { return deletedOrders; }
+			set
+			{
+				deletedOrders = value;
+				NotifyOfPropertyChange(nameof(DeletedOrders));
+			}
+		}
+
+		public List<DeletedOrder> SelectedDeletedOrders { get; set; }
+
+		public DeletedOrder CurrentDeletedOrder
+		{
+			get { return currentDeletedOrder; }
+			set
+			{
+				if (currentDeletedOrder != null)
+					currentDeletedOrder.PropertyChanged -= WatchForUpdate;
+
+				currentDeletedOrder = value;
+
+				if (currentDeletedOrder != null)
+					currentDeletedOrder.PropertyChanged += WatchForUpdate;
+
+				NotifyOfPropertyChange(nameof(CurrentDeletedOrder));
+			}
+		}
+
 		public bool CanDelete
 		{
 			get { return (CurrentOrder != null && IsCurrentSelected)
-				|| (CurrentSentOrder != null && IsSentSelected); }
+				|| (CurrentSentOrder != null && IsSentSelected)
+				|| (CurrentDeletedOrder != null && IsDeletedSelected); }
 		}
 
 		public void Delete()
@@ -316,7 +378,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					DeleteOrder(selected);
 				}
 			}
-			else {
+			else if (IsSentSelected)
+			{
 				foreach (var selected in SelectedSentOrders.ToArray()) {
 					Log.Info($"Удаление отправленного заказа {selected.DisplayId} дата отправки: {selected.SentOn}" +
 						$" прайс-лист: {selected.SafePrice?.Name}" +
@@ -327,13 +390,30 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					SentOrders.Remove(selected);
 				}
 			}
+			else if (IsDeletedSelected)
+			{
+				foreach (var selected in SelectedDeletedOrders.ToArray())
+				{
+					Log.Info($"Удаление текущего заказа {selected.DisplayId} из корзины дата создания: {selected.CreatedOn}" +
+						$" прайс-лист: {selected.SafePrice?.Name}" +
+						$" позиций: {selected.LinesCount}");
+					var order = selected;
+					Env.Query(s => s.Delete(order)).LogResult();
+					DeletedOrders.Remove(selected);
+				}
+			}
 		}
 
 		private void DeleteOrder(Order order)
 		{
-			Log.Info($"Удаление текущего заказа {order.DisplayId} дата создания: {order.CreatedOn}" +
+			Log.Info($"Перемещение в корзину текущего заказа {order.DisplayId} дата создания: {order.CreatedOn}" +
 				$" прайс-лист: {order.SafePrice?.Name}" +
 				$" позиций: {order.LinesCount}");
+
+			var deletedOrder = new DeletedOrder(order);
+			Session.Save(deletedOrder);
+			DeletedOrders.Add(deletedOrder);
+
 			Session.Delete(order);
 			if (order.Address != null && !order.Address.IsProxy()) {
 				order.Address.Orders.Remove(order);
@@ -343,7 +423,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public bool FreezeVisible => IsCurrentSelected;
 
-		public bool CanFreeze => CurrentOrder?.Frozen == false && !IsSentSelected;
+		public bool CanFreeze => CurrentOrder?.Frozen == false && IsCurrentSelected;
 
 		public void Freeze()
 		{
@@ -360,7 +440,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public bool UnfreezeVisible => IsCurrentSelected;
 
-		public bool CanUnfreeze => CurrentOrder?.Frozen == true && !IsSentSelected;
+		public bool CanUnfreeze => CurrentOrder?.Frozen == true && !IsSentSelected && !IsDeletedSelected;
+
+		public bool UnDeleteVisible => IsDeletedSelected;
+
+		public bool CanUnDelete => IsDeletedSelected && CurrentDeletedOrder != null;
 
 		public IEnumerable<IResult> Unfreeze()
 		{
@@ -374,10 +458,26 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			return Run(new UnfreezeCommand<Order>(ids));
 		}
 
+		public IEnumerable<IResult> UnDelete()
+		{
+			if (!CanUnDelete)
+				return null;
+
+			if (!Confirm("Внимание! Восстановленные из корзины заявки будут объединены с текущими заявками.\r\n\r\nВосстановить выбранные заявки?"))
+				return null;
+
+			var ids = SelectedDeletedOrders.Select(o => o.Id).ToArray();
+			return Run(new UnfreezeCommand<DeletedOrder>(ids));
+		}
+
+		public bool ReorderVisible => !IsDeletedSelected;
+
 		public bool CanReorder
 		{
 			get
 			{
+				if (IsDeletedSelected)
+					return false;
 				return Address != null && ((CurrentOrder != null && IsCurrentSelected && Orders.Count > 1)
 						|| (CurrentSentOrder != null && IsSentSelected && Orders.Count > 0));
 			}
@@ -477,6 +577,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			get
 			{
+				if (IsDeletedSelected)
+					return false;
 				if (IsCurrentSelected)
 					return User.CanPrint<OrderDocument, Order>();
 				return User.CanPrint<OrderDocument, SentOrder>();

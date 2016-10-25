@@ -156,7 +156,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			var currentOrder = sourceOrder as Order;
 			if (currentOrder != null && currentOrder.IsEmpty)
 				session.Delete(sourceOrder);
-
+			if (!destOrder.IsEmpty && sourceOrder is DeletedOrder)
+				session.Delete(sourceOrder);
 			if (destOrder.IsEmpty)
 				return null;
 			if (action == "вернуть в работу")
@@ -172,6 +173,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				return "\"разморозить\"";
 			if (sourceOrder is SentOrder)
 				return "вернуть в работу";
+			if (sourceOrder is DeletedOrder)
+				return "вернуть из корзины";
 			return "объединить";
 		}
 

@@ -108,6 +108,22 @@
 					</DataGrid.Columns>
 				</c:DataGrid2>
 			</TabItem>
+			<TabItem Header="Корзина" IsSelected="{Binding IsDeletedSelected.Value}">
+				<c:DataGrid2 x:Name="DeletedOrders" CanUserDeleteRows="True"
+					ShowAddressColumn="{Binding AddressSelector.All.Value}" VerticalAlignment="Top">
+					<DataGrid.Columns>
+						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
+							Visibility="Collapsed" />
+						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding ServerId}" />
+						<c:DataGridTextColumnEx Width="66*" Header="Удалено" Binding="{Binding DeletedOn}" />
+						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}" />
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding PriceName}" />
+						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding SafePrice.RegionName}" />
+						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}" />
+						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}" />
+					</DataGrid.Columns>
+				</c:DataGrid2>
+			</TabItem>
 		</TabControl>
 
 		<StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
@@ -119,6 +135,7 @@
 
 		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
+			<Button x:Name="UnDelete" Style="{StaticResource FilterElement}">Вернуть из удаленных</Button>
 			<Button x:Name="Freeze" Style="{StaticResource FilterElement}">"Заморозить" заказы</Button>
 			<Button x:Name="Unfreeze" Style="{StaticResource FilterElement}">"Разморозить" заказы</Button>
 			<Button x:Name="Move" Style="{StaticResource FilterElement}"

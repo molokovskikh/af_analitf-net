@@ -296,6 +296,8 @@
     <Compile Include="Models\PriceTag.cs" />
     <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />
     <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\DeletedOrder.cs" />
+    <Compile Include="Models\DeletedOrderLine.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
     <Compile Include="Models\ProducerPromotion.cs" />
