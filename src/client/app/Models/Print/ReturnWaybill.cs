@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var rows = returnToSupplier.Lines.Select((o, i) => new object[]
 			{
 				i+1,
-				o.Product + o.Producer + "Прдок" + o.Stock.WaybillId + "от " + o.Stock.DocumentDate,
+				o.Product + o.Producer + "Прдок" + o.Stock.WaybillId + "от " + o.Stock.DocumentDate.ToShortDateString(),
 				o.Id,
 				"упак",
 				"778",

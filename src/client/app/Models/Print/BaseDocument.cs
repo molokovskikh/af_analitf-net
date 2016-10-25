@@ -267,11 +267,11 @@ namespace AnalitF.Net.Client.Models.Print
 			var tableRowGroup = table.RowGroups[0];
 
 			foreach (var data in rows) {
-				BuildRow(headers, tableRowGroup, data);
+				BuildRow(tableRowGroup, data);
 			}
 		}
 
-		protected void BuildRow(PrintColumn[] headers, TableRowGroup tableRowGroup, object[] data)
+		protected void BuildRow(TableRowGroup tableRowGroup, object[] data)
 		{
 			var row = new TableRow();
 			tableRowGroup.Rows.Add(row);

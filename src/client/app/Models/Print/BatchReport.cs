@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Models.Print
 			doc.Blocks.Add(table);
 			var rowGroup = table.RowGroups[0];
 			foreach (var line in lines) {
-				BuildRow(headers, rowGroup, new object[] {
+				BuildRow(rowGroup, new object[] {
 					line.Product,
 					line.Producer,
 					line.OrderLine?.Order.PriceName,

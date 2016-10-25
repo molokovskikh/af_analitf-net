@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -13,15 +14,20 @@ using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
+using AnalitF.Net.Client.Models.Print;
+using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class EditReassessmentDoc : BaseScreen2
 	{
+		private string Name;
+
 		private EditReassessmentDoc()
 		{
 			Lines = new ReactiveCollection<ReassessmentLine>();
 			Session.FlushMode = FlushMode.Never;
+			Name = User?.FullName ?? "";
 		}
 
 		public EditReassessmentDoc(ReassessmentDoc doc)
@@ -124,6 +130,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc.UpdateStat();
 		}
 
+		public IEnumerable<IResult> Search()
+		{
+			var search = new StockGroupSearch();
+			yield return new DialogResult(search);
+
+			if (search.WasCancelled)
+				yield break;
+
+			var ids = search.Items.Value.Select(x => x.Id).ToList();
+			var srcStocks = Session.Query<Stock>().Where(x => ids.Contains(x.Id)).ToList();
+			foreach (var srcStock in srcStocks)
+			{
+				var dstStock = srcStock.Copy();
+				var line = new ReassessmentLine(srcStock, dstStock);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+			}
+			Doc.UpdateStat();
+		}
+
 		public void DeleteLine()
 		{
 			if (!CanDeleteLine)
@@ -167,6 +193,75 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.Flush();
 			Bus.SendMessage(nameof(ReassessmentDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
+		}
+
+		public IResult ExportExcel()
+		{
+			Update();
+			var columns = new[] {
+						"Наименование товара",
+						"Производитель",
+						"Кол-во",
+						"Цена закупки",
+						"Наценка списания, %",
+						"Цена списания",
+						"Сумма списания",
+						"Наценка приходования, %",
+						"Цена приходования",
+						"Сумма приходования",
+					};
+
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var row = 0;
+
+			ExcelExporter.WriteRow(sheet, columns, row++);
+
+			var rows = Lines.Select((o, i) => new object[] {
+						o.Product,
+						o.Producer,
+						o.Quantity,
+						o.SupplierCostWithoutNds,
+						o.SrcRetailMarkup,
+						o.SrcRetailCost,
+						o.SrcRetailSum,
+						o.RetailMarkup,
+						o.RetailCost,
+						o.RetailSum,
+					});
+
+			ExcelExporter.WriteRows(sheet, rows, row);
+
+			return ExcelExporter.Export(book);
+		}
+
+		public IEnumerable<IResult> Print()
+		{
+			return Preview("Переоценка", new ReassessmentDocument(Lines.ToArray()));
+		}
+
+		public IEnumerable<IResult> PrintAct()
+		{
+			return Preview("Акт переоценки", new ReassessmentActDocument(Lines.ToArray()));
+		}
+
+		public IResult PrintStockPriceTags()
+		{
+			return new DialogResult(new PrintPreviewViewModel
+			{
+				DisplayName = "Ценники",
+				Document = new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build()
+			}, fullScreen: true);
+		}
+
+		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
+		{
+			var docSettings = doc.Settings;
+			if (docSettings != null)
+			{
+				yield return new DialogResult(new SimpleSettings(docSettings));
+			}
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 	}
 }

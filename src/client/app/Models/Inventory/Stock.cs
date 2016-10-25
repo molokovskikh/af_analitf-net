@@ -61,6 +61,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Stock()
 		{
+			DocumentDate = DateTime.Now;
 		}
 
 		public Stock(Waybill waybill, WaybillLine line)
@@ -293,7 +294,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Gtd { get; set; }
 		public virtual DateTime? Exp { get; set; }
 		public virtual string Period { get; set; }
-		public virtual string DocumentDate { get; set; }
+		public virtual DateTime DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
