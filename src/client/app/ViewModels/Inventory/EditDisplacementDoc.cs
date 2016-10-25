@@ -220,7 +220,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult PrintStockRackingMaps()
 		{
-			var receivingOrders = Session.Query<ReceivingOrder>().ToList();
+			var receivingOrders = Session.Query<Waybill>().ToList();
 
 			return new DialogResult(new PrintPreviewViewModel
 			{

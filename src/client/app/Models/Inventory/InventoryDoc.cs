@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public InventoryDocLine(Stock stock, decimal quantity, ISession session)
 		{
-			ReceivingLine.Copy(stock, this);
+			Stock.Copy(stock, this);
 			Id = 0;
 			Stock = stock;
 			Quantity = quantity;

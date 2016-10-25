@@ -17,9 +17,9 @@ namespace AnalitF.Net.Client.Models.Print
 	class StockRackingMapDocument
 	{
 		private IList<Stock> _stocks;
-		private IList<ReceivingOrder> _receivingOrders;
+		private IList<Waybill> _receivingOrders;
 
-		public StockRackingMapDocument(IList<ReceivingOrder> receivingOrders, IList<Stock> stocks)
+		public StockRackingMapDocument(IList<Waybill> receivingOrders, IList<Stock> stocks)
 		{
 			_receivingOrders = receivingOrders;
 			_stocks = stocks;
@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var label1 = new TextBlock
 			{
 				FontSize = 10,
-				Text = "Поставка №" + line.ReceivingOrderId,
+				Text = "Поставка №" + line.WaybillId,
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left,
 				Margin = new Thickness(2, 2, 0, 0),
@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.Models.Print
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left,
 				FontSize = 10,
-				Text = "Поставщик " + GetSupplierName(_receivingOrders, line.ReceivingOrderId),
+				Text = "Поставщик " + GetSupplierName(_receivingOrders, line.WaybillId),
 				Margin = new Thickness(2, 32, 0, 0),
 				Padding = new Thickness(0)
 			};
@@ -345,9 +345,9 @@ namespace AnalitF.Net.Client.Models.Print
 			return border;
 		}
 
-		public string GetSupplierName(IList<ReceivingOrder> receivingOrders, uint? id)
+		public string GetSupplierName(IList<Waybill> waybills, uint? id)
 		{
-			return id == null ? "" : receivingOrders.First(r => r.Id == id).Supplier.FullName;
+			return id == null ? "" : waybills.First(r => r.Id == id).Supplier.FullName;
 		}
 	}
 }

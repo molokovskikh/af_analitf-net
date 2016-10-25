@@ -77,23 +77,6 @@
 
 				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Регион:</Label>
 				<Label Grid.Row="1" Grid.Column="5" Content="{Binding Order.Value.SafePrice.RegionName}" FontWeight="Bold" />
-
-				<Label Grid.Row="0" Grid.Column="6" FontWeight="Bold">Заявка на приемку:</Label>
-				<TextBlock Grid.Row="0" Grid.Column="7" FontWeight="Bold" VerticalAlignment="Center" >
-					<Hyperlink Click="Open">
-						<TextBlock>
-							<TextBlock.Style>
-								<Style TargetType="TextBlock">
-									<Style.Triggers>
-										<DataTrigger Binding="{Binding IsCurrentOrder}" Value="false">
-											<Setter Property="Text" Value="{Binding Order.Value.ReceivingOrderId}"/>
-										</DataTrigger>
-									</Style.Triggers>
-								</Style>
-							</TextBlock.Style>
-						</TextBlock>
-					</Hyperlink>
-				</TextBlock>
 			</Grid>
 		</StackPanel>
 

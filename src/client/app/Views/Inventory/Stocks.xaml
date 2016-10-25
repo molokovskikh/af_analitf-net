@@ -55,7 +55,6 @@
 				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnStatus" Header="Статус" Binding="{Binding StatusName}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnWaybill" Header="Накладная" Binding="{Binding WaybillId}" Width="*" />
-				<controls:DataGridTextColumnEx x:Name="ClmnOrder" Header="Заказ на приемку" Binding="{Binding ReceivingOrderId}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCount" Header="Кол-во" Binding="{Binding Quantity}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnReservedQuantity" Header="В резерве" Binding="{Binding ReservedQuantity}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding SupplierCost}" Width="*" TextAlignment="Right" />
@@ -74,7 +73,6 @@
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProducer}, Path=ActualWidth}"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnStatus}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnWaybill}, Path=ActualWidth}" />
-				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnOrder}, Path=ActualWidth}"
 																			 FontWeight="Bold" Binding="{Binding Total}" TextAlignment="Right"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCount}, Path=ActualWidth}"
 																			 FontWeight="Bold" Binding="{Binding TotalCount}" TextAlignment="Right"/>

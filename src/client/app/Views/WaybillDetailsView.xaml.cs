@@ -79,9 +79,6 @@ namespace AnalitF.Net.Client.Views
 
 		private void Init()
 		{
-			var handler = new BarcodeHandler(this, model.Settings);
-			handler.Barcode.Subscribe(x => model.HandleBarCode(x));
-
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
 			//что негативно отражается на производительности
@@ -111,19 +108,6 @@ namespace AnalitF.Net.Client.Views
 			});
 			lines.Columns.Add(DataGridHelper.CheckBoxColumn("Печатать", "Print",
 				x => lines.Items.OfType<WaybillLine>().Each(l => l.Print = x), true));
-			var column = DataGridHelper.CheckBoxColumn("Оприходовать", "IsReadyForStock",
-				x => {
-					lines.Items.OfType<WaybillLine>().Each(l => {
-						l.Receive(x ? l.Quantity.GetValueOrDefault() : 0);
-					});
-				}, false);
-			lines.Columns.Add(column);
-			lines.Columns.Add(new DataGridTextColumnEx {
-				Header = "Оприходовано",
-				Binding = new Binding("ReceivedQuantity"),
-				SortMemberPath = "ReceivedQuantity",
-				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Срок годности",
 				Binding = new Binding("Period"),

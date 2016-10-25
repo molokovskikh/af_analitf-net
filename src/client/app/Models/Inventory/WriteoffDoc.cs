@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public WriteoffLine(Stock stock, decimal quantity)
 		{
-			ReceivingLine.Copy(stock, this);
+			Stock.Copy(stock, this);
 			Id = 0;
 			Stock = stock;
 			Quantity = quantity;

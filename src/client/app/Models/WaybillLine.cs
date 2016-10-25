@@ -255,41 +255,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsMigration { get; set; }
 
 		[Ignore]
-		public virtual bool SkipRequest { get; set; }
-		[Ignore]
-		public virtual bool IsReadyForStock
-		{
-			get { return _isReadyForStock; }
-			set
-			{
-				if (_isReadyForStock == value)
-					return;
-				_isReadyForStock = value;
-				OnPropertyChanged();
-				OnPropertyChanged(nameof(IsFullyStocked));
-				OnPropertyChanged(nameof(IsPartialyStocked));
-			}
-		}
-
-		[Ignore]
-		public virtual int QuantityToReceive
-		{
-			get { return _quantityToReceive; }
-			set
-			{
-				if (_quantityToReceive == value)
-					return;
-				_quantityToReceive = value;
-				OnPropertyChanged();
-				OnPropertyChanged(nameof(IsFullyStocked));
-				OnPropertyChanged(nameof(IsPartialyStocked));
-				OnPropertyChanged(nameof(ReceivedQuantity));
-			}
-		}
-
-		public virtual decimal? ReceivedQuantity => QuantityToReceive + Quantity - Stock?.Quantity;
-
-		[Ignore]
 		public virtual Stock Stock
 		{
 			get { return _stock; }
@@ -298,19 +263,9 @@ namespace AnalitF.Net.Client.Models
 				if (_stock != value) {
 					_stock = value;
 					OnPropertyChanged();
-					OnPropertyChanged(nameof(ReceivedQuantity));
-					OnPropertyChanged(nameof(IsFullyStocked));
-					OnPropertyChanged(nameof(IsPartialyStocked));
 				}
 			}
 		}
-
-		[Style(Description = "Полностью оприходовано")]
-		public virtual bool IsFullyStocked => ReceivedQuantity == Quantity && Quantity > 0;
-
-		[Style(Description = "Частично оприходовано")]
-		public virtual bool IsPartialyStocked => ReceivedQuantity < Quantity && ReceivedQuantity > 0;
-
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
 		private decimal TaxFactor
@@ -596,17 +551,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CancelEdit()
 		{
-		}
-
-		public virtual void Receive(int quantity)
-		{
-			if (Stock == null)
-				return;
-			SkipRequest = true;
-			quantity = Math.Min(quantity, (int)Stock.Quantity);
-			QuantityToReceive = quantity;
-			IsReadyForStock = QuantityToReceive > 0;
-			SkipRequest = false;
 		}
 	}
 }

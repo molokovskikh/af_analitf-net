@@ -451,8 +451,6 @@
     <Compile Include="ViewModels\Inventory\Help.cs" />
     <Compile Include="ViewModels\Inventory\InventoryDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReassessmentDocs.cs" />
-    <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
-    <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
     <Compile Include="ViewModels\Inventory\StockSearch.cs" />
     <Compile Include="ViewModels\Inventory\Stocks.cs" />
@@ -641,12 +639,6 @@
     </Compile>
     <Compile Include="Views\Inventory\ReassessmentDocs.xaml.cs">
       <DependentUpon>ReassessmentDocs.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Inventory\ReceivingDetails.xaml.cs">
-      <DependentUpon>ReceivingDetails.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Inventory\ReceivingOrders.xaml.cs">
-      <DependentUpon>ReceivingOrders.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\CheckDefectSeries.xaml.cs">
       <DependentUpon>CheckDefectSeries.xaml</DependentUpon>
@@ -974,14 +966,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Inventory\ReceivingDetails.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Inventory\ReceivingOrders.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\Inventory\CheckDefectSeries.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1169,7 +1153,7 @@
     <None Include="App.release.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App.stocks.config" />
+    <None Include="App.stock.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
     <None Include="packages.config">

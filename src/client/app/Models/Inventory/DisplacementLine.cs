@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public DisplacementLine(Stock srcStock, Stock dstStock, decimal quantity)
 		{
-			ReceivingLine.Copy(srcStock, this);
+			Stock.Copy(srcStock, this);
 			Id = 0;
 			SrcStock = srcStock;
 			DstStock = dstStock;

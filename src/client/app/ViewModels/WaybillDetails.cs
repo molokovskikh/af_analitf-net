@@ -19,6 +19,7 @@ using Common.Tools;
 using Dapper;
 using NHibernate.Linq;
 using NPOI.SS.UserModel;
+using ReactiveUI;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
 
@@ -60,11 +61,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Детализация накладной";
 			this.id = id;
-			CurrentLine = new NotifyValue<object>();
+			InitFields();
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
-			CurrentTax = new NotifyValue<ValueDescription<int?>>();
-			CurrentOrderLine = new NotifyValue<SentOrderLine>();
-			Lines = new NotifyValue<ListCollectionView>();
 
 			Settings.Changed()
 				.Subscribe(v => Calculate());
@@ -129,6 +127,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Visibility> EmptyLabelVisibility { get; set; }
 		public NotifyValue<bool> IsRejectVisible { get; set; }
 		public NotifyValue<Reject> Reject { get; set; }
+		public NotifyValue<bool> CanStock { get; set; }
 
 		private void Calculate()
 		{
@@ -146,29 +145,11 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			Waybill = Session.Load<Waybill>(id);
+			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
+				.Select(x => x.Value == DocStatus.Opened).Subscribe(CanStock);
 
 			Calculate();
-			Waybill.Lines.Select(x => x.Changed().Where(y => y.EventArgs.PropertyName == "IsReadyForStock"))
-				.Merge()
-				.Subscribe(x => {
-					var line = (WaybillLine)x.Sender;
-					if (line.SkipRequest)
-						return;
-					if (line.IsReadyForStock) {
-						var confirmQuantity = new ConfirmQuantity(line);
-						var dialog = new DialogResult(confirmQuantity);
-						dialog.Completed += (sender, args) => {
-							if (confirmQuantity.WasCancelled || confirmQuantity.Quantity <= 0) {
-								line.Receive(0);
-								return;
-							}
-							line.Receive(confirmQuantity.Quantity);
-						};
-						ResultsSink.OnNext(dialog);
-					} else {
-						line.Receive(0);
-					}
-				});
+
 			var stockids =  Waybill.Lines.Where(x => x.StockId != null).Select(x => x.StockId).ToArray();
 			RxQuery(s => s.Query<Stock>().Where(x => stockids.Contains(x.ServerId)).ToDictionary(x => x.ServerId))
 				.ObserveOn(UiScheduler)
@@ -543,23 +524,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Stock()
 		{
-			if (ReceivingOrder.StockWaybill(Session, Waybill))
-				Manager.Notify("Накладная оприходована");
-			else
-				Manager.Warning("Выберете позиции что бы оприходовать");
-		}
-
-		public void HandleBarCode(string code)
-		{
-			if (string.IsNullOrWhiteSpace(code))
+			if (!CanStock.Value)
 				return;
-			var line = Waybill.Lines.FirstOrDefault(x => x.EAN13 == code);
-			if (line == null) {
-				Manager.Warning($"Товар с кодом '{code}' в накладной не найден");
-				return;
-			}
-			CurrentLine.Value = line;
-			line.IsReadyForStock = true;
+			Waybill.Stock(Session);
+			Manager.Notify("Накладная оприходована");
 		}
 
 #if DEBUG

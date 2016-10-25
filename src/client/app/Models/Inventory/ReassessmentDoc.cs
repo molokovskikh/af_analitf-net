@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public ReassessmentLine(Stock srcStock, Stock dstStock)
 		{
-			ReceivingLine.Copy(dstStock, this);
+			Stock.Copy(dstStock, this);
 			Id = 0;
 			SrcStock = srcStock;
 			SrcStock.Reserve(Quantity);

@@ -63,12 +63,38 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 		}
 
-		public Stock(ReceivingOrder order, ReceivingLine line)
+		public Stock(Waybill waybill, WaybillLine line)
 		{
-			WaybillId = order.WaybillId;
+			WaybillId = waybill.Id;
 			Status = StockStatus.Available;
-			Address = order.Address;
-			line.CopyToStock(this);
+			Address = waybill.Address;
+
+			Product = line.Product;
+			ProductId = line.ProductId;
+			Producer = line.Producer;
+			ProducerId = line.ProductId;
+			Country = line.Country;
+			CountryCode = line.CountryCode;
+			Period = line.Period;
+			Exp = line.Exp;
+			SerialNumber = line.SerialNumber;
+			Certificates = line.Certificates;
+			Unit = line.Unit;
+			ExciseTax = line.ExciseTax;
+			BillOfEntryNumber = line.BillOfEntryNumber;
+			VitallyImportant = line.VitallyImportant;
+			ProducerCost = line.ProducerCost;
+			RegistryCost = line.RegistryCost;
+			SupplierPriceMarkup = line.SupplierPriceMarkup;
+			SupplierCostWithoutNds = line.SupplierCostWithoutNds;
+			Nds = line.Nds;
+			Barcode = line.EAN13;
+
+			Quantity = line.Quantity.GetValueOrDefault();
+			SupplyQuantity = line.Quantity.GetValueOrDefault();
+			SupplierCost = line.SupplierCost.GetValueOrDefault();
+			RetailCost = line.RetailCost.GetValueOrDefault();
+			RetailMarkup = line.RetailMarkup;
 		}
 
 		public virtual uint Id { get; set; }
@@ -79,7 +105,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual Address Address { get; set; }
 		public virtual StockStatus Status { get; set; }
 
-		public virtual uint? ReceivingOrderId { get; set; }
 		public virtual uint? WaybillId { get; set; }
 
 		public virtual string AnalogCode { get; set; }
@@ -230,7 +255,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 					@base = 1;
 				}
 				else if (rounding == Rounding.To0_50) {
-					@factor = 5;
+					factor = 5;
 				}
 				var normalized = (int?)(value * @base);
 				return (normalized - normalized % factor) / (decimal)@base;
@@ -390,6 +415,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Settings = settings;
 			WaybillSettings = settings.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
+		}
+
+		public static void Copy(object srcItem, object dstItem)
+		{
+			var srcProps = srcItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite);
+			var dstProps = dstItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).ToDictionary(x => x.Name);
+			foreach (var srcProp in srcProps) {
+				var dstProp = dstProps.GetValueOrDefault(srcProp.Name);
+				dstProp?.SetValue(dstItem, srcProp.GetValue(srcItem, null), null);
+			}
 		}
 	}
 }

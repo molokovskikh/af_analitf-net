@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Print;
+using Common.NHibernate;
 using Common.Tools;
 using log4net;
+using NHibernate;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -48,6 +51,7 @@ namespace AnalitF.Net.Client.Models
 
 		private bool _vitallyImportant;
 		private Rounding? _rounding;
+		private DocStatus _status;
 
 		public Waybill()
 		{
@@ -83,6 +87,18 @@ namespace AnalitF.Net.Client.Models
 		public virtual Address Address { get; set; }
 		public virtual Supplier Supplier { get; set; }
 		public virtual DocType? DocType { get; set; }
+
+		public virtual DocStatus Status
+		{
+			get { return _status; }
+			set
+			{
+				if (_status == value)
+					return;
+				_status = value;
+				OnPropertyChanged();
+			}
+		}
 
 		public virtual decimal Sum { get; set; }
 		public virtual decimal RetailSum { get; set; }
@@ -341,6 +357,41 @@ namespace AnalitF.Net.Client.Models
 				return null;
 			return new DirectoryInfo(path).GetFiles($"{Id}_*")
 				.Select(x => x.FullName).FirstOrDefault();
+		}
+
+		public virtual bool Stock(ISession session)
+		{
+			Status = DocStatus.Closed;
+			var stockActions = Create();
+			foreach (var action in stockActions) {
+				session.Save(action.DstStock);
+				session.Update(action.SrcStock);
+				action.ClientStockId = action.DstStock.Id;
+			}
+			session.SaveEach(stockActions);
+			return true;
+		}
+
+		public List<StockAction> Create()
+		{
+			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
+			var stockActions = new List<StockAction>();
+			foreach (var line in lines) {
+				var receivingLine = new ReceivingLine(line);
+				line.Stock.Quantity -= line.Quantity.Value;
+				var stock = new Stock(this, line);
+				stockActions.Add(new StockAction {
+					ActionType = ActionType.Stock,
+					SourceStockId = line.StockId,
+					SourceStockVersion = line.StockVersion,
+					Quantity = receivingLine.Quantity,
+					RetailCost = receivingLine.RetailCost,
+					RetailMarkup = receivingLine.RetailMarkup,
+					DstStock = stock,
+					SrcStock = line.Stock,
+				});
+			}
+			return stockActions;
 		}
 	}
 }

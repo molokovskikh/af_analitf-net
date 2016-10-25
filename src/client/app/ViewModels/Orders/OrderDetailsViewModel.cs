@@ -219,10 +219,5 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OfferCommitted();
 			base.TryClose();
 		}
-
-		public void OpenReceivingOrder()
-		{
-			Shell.Navigate(new ReceivingDetails(((SentOrder)Order).ReceivingOrderId.Value));
-		}
 	}
 }
