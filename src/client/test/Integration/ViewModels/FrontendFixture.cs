@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	[TestFixture]
 	public class FrontendFixture : ViewModelFixture<Frontend>
 	{
-	 private uint count;
+		private uint count;
 
 		private void AddFreshStockItem()
 		{
@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ProductId = count,
 				Product = "Папаверин",
 				Status = StockStatus.Available,
-				Address = address,
+				Address = model.Address,
 				Quantity = 5,
 				ReservedQuantity = 0,
 				Barcode = "10",
