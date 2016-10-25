@@ -46,6 +46,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 					Model.SearchByProductId();
 				} else if (args.Key == Key.F3) {
 					Model.SearchByBarcode();
+				} else if (args.Key == Key.F4) {
+					results = Model.SearchByCost();
 				} else if (args.Key == Key.F6) {
 					results = Model.SearchByTerm();
 				} else if (args.Key == Key.Enter) {
