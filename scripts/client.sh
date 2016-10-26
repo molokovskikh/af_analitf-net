@@ -1,5 +1,4 @@
 #!/bin/sh
 
-run=`cygpath -aw src/client/app/bin/run/`
 bin=`cygpath -aw src/client/app/bin/debug/AnalitF.Net.Client.exe`
-bin-guard --dir share --no-stdin $run $bin | iconv --from cp866 --to utf-8
+bin-guard --dir share $bin | iconv --from cp866 --to utf-8

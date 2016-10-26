@@ -1777,6 +1777,9 @@ group by ol.RowId";
 					"LoadedDocuments",
 					new[] { "Id", "Type", "SupplierId", "OriginFilename", "IsDocDelivered" },
 					new object[0][]);
+				if (job.UpdateType.Match("Waybills")) 
+					job.ErrorDescription = "Новых документов нет";
+
 				return;
 			}
 
