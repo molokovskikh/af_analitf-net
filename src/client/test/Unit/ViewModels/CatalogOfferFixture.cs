@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 					},
 				}
 			};
+			model.UpdateFilters();
 			Activate(model);
 		}
 

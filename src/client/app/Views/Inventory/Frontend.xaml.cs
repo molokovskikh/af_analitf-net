@@ -10,7 +10,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 {
 	public partial class Frontend : UserControl
 	{
-		public ViewModels.Inventory.Frontend Model => (ViewModels.Inventory.Frontend)DataContext;
+		public ViewModels.Inventory.Frontend Model => DataContext as ViewModels.Inventory.Frontend;
 
 		public Frontend()
 		{
@@ -47,11 +47,11 @@ namespace AnalitF.Net.Client.Views.Inventory
 				} else if (args.Key == Key.F3) {
 					Model.SearchByBarcode();
 				} else if (args.Key == Key.F4) {
-					results = Model.SearchByCost();
+					Model.Trigger();
 				} else if (args.Key == Key.F6) {
 					results = Model.SearchByTerm();
 				} else if (args.Key == Key.Enter) {
-					results = Model.Checkout();
+					results = Model.Close();
 				}
 				if (results != null) {
 					Coroutine.BeginExecute(results.GetEnumerator(), new ActionExecutionContext { View = this });

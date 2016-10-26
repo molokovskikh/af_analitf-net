@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
 using System.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 
@@ -36,18 +37,18 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			RxQuery(GetRejectsByStock).Subscribe(Rejects);
 		}
 
-		public void Ok()
+		public async Task Ok()
 		{
 			Stock.RejectStatus = RejectStatus.Defective;
-			StatelessSession.Update(Stock);
+			await Env.Query(s => s.Update(Stock));
 			WasCancelled = false;
 			TryClose();
 		}
 
-		public void Not()
+		public async Task Not()
 		{
 			Stock.RejectStatus = RejectStatus.NotDefective;
-			StatelessSession.Update(Stock);
+			await Env.Query(s => s.Update(Stock));
 			WasCancelled = false;
 			TryClose();
 		}

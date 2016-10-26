@@ -12,14 +12,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AnalitF.Net.Client.Views.Inventory
+namespace AnalitF.Net.Client.Views.Inventory.PrintForm
 {
 	/// <summary>
-	/// Interaction logic for ReceivingDetails.xaml
+	/// Логика взаимодействия для ReassessmentActDocumentForm.xaml
 	/// </summary>
-	public partial class ReceivingDetails : UserControl
+	public partial class ReassessmentActDocumentForm : FlowDocument
 	{
-		public ReceivingDetails()
+		public ReassessmentActDocumentForm()
 		{
 			InitializeComponent();
 		}

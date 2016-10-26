@@ -129,11 +129,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool SkipRestoreTable;
 		public NotifyValue<object> DbReloadToken = new NotifyValue<object>();
 		public NotifyValue<object> OrdersReloadToken = new NotifyValue<object>();
-		/// <summary>
-		/// использовать только через RxQuery,
-		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
-		/// </summary>
-		public static IStatelessSession BackgroundSession;
 
 		public BaseScreen()
 		{
@@ -148,8 +143,6 @@ namespace AnalitF.Net.Client.ViewModels
 			//нужно что бы nhibernate делал flush перед запросами
 			//если транзакции нет он это делать не будет
 			Session?.BeginTransaction();
-			//в модульных тестах база не должна использоваться
-			StatelessSession = Env.Factory?.OpenStatelessSession();
 			Load();
 			var properties = GetType().GetProperties()
 				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
@@ -173,7 +166,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public IScheduler UiScheduler => Env.UiScheduler;
 		public IScheduler Scheduler => Env.Scheduler;
 		public ISession Session;
-		public IStatelessSession StatelessSession;
 
 		protected override void OnInitialize()
 		{
@@ -499,12 +491,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void WatchForUpdate(object sender, PropertyChangedEventArgs e)
 		{
-			StatelessSession?.Update(sender);
+			Env.Query(s => s.Update(sender)).LogResult();
 		}
 
 		protected void WatchForUpdate<T>(IObservable<T> value)
 		{
-			value.ChangedValue().Subscribe(x => StatelessSession?.Update(x.Sender));
+			value.ChangedValue().Subscribe(x => Env.Query(s => s.Update(x.Sender)).LogResult());
 		}
 
 		public override string ToString()
@@ -516,8 +508,6 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
-			StatelessSession?.Dispose();
-			StatelessSession = null;
 			Session?.Dispose();
 			Session = null;
 		}
@@ -669,7 +659,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> EditLegend(string name)
 		{
-			var styles = StatelessSession.Query<CustomStyle>().ToArray();
+			var styles = Env.Query(s => s.Query<CustomStyle>().ToArray()).Result;
 			var style = styles.FirstOrDefault(s => s.Name == name);
 			if (style == null)
 				yield break;
@@ -681,7 +671,7 @@ namespace AnalitF.Net.Client.ViewModels
 				yield return result;
 			if (!isDirty)
 				yield break;
-			StatelessSession.Update(style);
+			Env.Query(s => s.Update(style)).LogResult();
 			StyleHelper.BuildStyles(App.Current.Resources, styles);
 			Bus.SendMessage(styles);
 		}
@@ -700,35 +690,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public virtual IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
-			var task = new Task<T>(() => {
-				if (Env.Factory == null)
-					return default(T);
-				if (BackgroundSession == null)
-					BackgroundSession = Env.Factory.OpenStatelessSession();
-				lock (BackgroundSession)
-					return @select(BackgroundSession);
-			}, CloseCancellation.Token);
-			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
-			if (!task.IsCanceled)
-				task.Start(Env.QueryScheduler);
-			//игнорируем отмену задачи, она произойдет если закрыли форму
-			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
+			return Env.RxQuery(select, CloseCancellation.Token);
 		}
 
 		public Task Query(Action<IStatelessSession> action)
 		{
-			var task = new Task(() => {
-				if (Env.Factory == null)
-					return;
-				if (BackgroundSession == null)
-					BackgroundSession = Env.Factory.OpenStatelessSession();
-				lock (BackgroundSession)
-					action(BackgroundSession);
-			}, CloseCancellation.Token);
-			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
-			if (!task.IsCanceled)
-				task.Start(Env.QueryScheduler);
-			return task;
+			return Env.Query(action, CloseCancellation.Token);
 		}
 
 		public Task WaitQueryDrain()

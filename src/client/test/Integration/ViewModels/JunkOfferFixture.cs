@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.ShowCatalog();
 
 			var catalog = (CatalogOfferViewModel)shell.ActiveItem;
+			scheduler.Start();
 			catalog.CurrentOffer.Value = catalog.Offers.Value.First(c => c.Id == model.CurrentOffer.Value.Id);
 			catalog.CurrentOffer.Value.OrderCount = 0;
 			catalog.OfferCommitted();

@@ -48,8 +48,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			if (IsUpdate)
 				CurrentLine
-					.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-					.Subscribe(_ => Update());
+					.Throttle(Consts.ScrollLoadTimeout, Env.Scheduler)
+					.SelectMany(x => Env.RxQuery(s => {
+						if (x == null) {
+							return new List<Offer>();
+						}
+
+						var productId = x.ProductId;
+						return s.Query<Offer>()
+							.Fetch(o => o.Price)
+							.Where(o => o.ProductId == productId)
+							.ToList()
+							.OrderBy(o => o.ResultCost)
+							.ToList();
+					}))
+					.Subscribe(UpdateOffers);
 
 			CanSend = Address.BindableOrders.Changed()
 				.Merge(Observable.Return<object>(null))
@@ -76,22 +89,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			var lines = query.Distinct().ToList();
 			lines.Each(l => l.Configure(User));
 			Lines = lines;
-		}
-
-		protected override void Query()
-		{
-			if (CurrentLine.Value == null) {
-				Offers.Value = new List<Offer>();
-				return;
-			}
-
-			var productId = CurrentLine.Value.ProductId;
-			Offers.Value = StatelessSession.Query<Offer>()
-				.Fetch(o => o.Price)
-				.Where(o => o.ProductId == productId)
-				.ToList()
-				.OrderBy(o => o.ResultCost)
-				.ToList();
 		}
 
 		public IEnumerable<IResult> Save()

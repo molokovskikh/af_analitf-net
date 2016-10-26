@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -9,11 +8,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public BaseScreen2()
 		{
 			InitFields();
-		}
-
-		public override IObservable<T> RxQuery<T>(Func<IStatelessSession, T> @select)
-		{
-			return base.RxQuery(@select).ObserveOn(UiScheduler);
 		}
 
 		protected void TrackDb(Type type)

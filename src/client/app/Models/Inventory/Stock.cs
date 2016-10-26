@@ -61,14 +61,41 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Stock()
 		{
+			DocumentDate = DateTime.Now;
 		}
 
-		public Stock(ReceivingOrder order, ReceivingLine line)
+		public Stock(Waybill waybill, WaybillLine line)
 		{
-			WaybillId = order.WaybillId;
+			WaybillId = waybill.Id;
 			Status = StockStatus.Available;
-			Address = order.Address;
-			line.CopyToStock(this);
+			Address = waybill.Address;
+
+			Product = line.Product;
+			ProductId = line.ProductId;
+			Producer = line.Producer;
+			ProducerId = line.ProductId;
+			Country = line.Country;
+			CountryCode = line.CountryCode;
+			Period = line.Period;
+			Exp = line.Exp;
+			SerialNumber = line.SerialNumber;
+			Certificates = line.Certificates;
+			Unit = line.Unit;
+			ExciseTax = line.ExciseTax;
+			BillOfEntryNumber = line.BillOfEntryNumber;
+			VitallyImportant = line.VitallyImportant;
+			ProducerCost = line.ProducerCost;
+			RegistryCost = line.RegistryCost;
+			SupplierPriceMarkup = line.SupplierPriceMarkup;
+			SupplierCostWithoutNds = line.SupplierCostWithoutNds;
+			Nds = line.Nds;
+			Barcode = line.EAN13;
+
+			Quantity = line.Quantity.GetValueOrDefault();
+			SupplyQuantity = line.Quantity.GetValueOrDefault();
+			SupplierCost = line.SupplierCost.GetValueOrDefault();
+			RetailCost = line.RetailCost.GetValueOrDefault();
+			RetailMarkup = line.RetailMarkup;
 		}
 
 		public virtual uint Id { get; set; }
@@ -79,7 +106,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual Address Address { get; set; }
 		public virtual StockStatus Status { get; set; }
 
-		public virtual uint? ReceivingOrderId { get; set; }
 		public virtual uint? WaybillId { get; set; }
 
 		public virtual string AnalogCode { get; set; }
@@ -87,6 +113,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string AltBarcode { get; set; }
 		public virtual string AnalogGroup { get; set; }
 		public virtual string Country { get; set; }
+		public virtual string CountryCode { get; set; }
 		public virtual string Unit { get; set; }
 
 		public virtual string ProductKind { get; set; }
@@ -161,7 +188,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			OnPropertyChanged(nameof(RetailSum));
 		}
 
-		private void UpdateMarkups(decimal? cost)
+		public virtual void UpdateMarkups(decimal? cost)
 		{
 			if (!IsCalculable())
 				return;
@@ -217,19 +244,19 @@ namespace AnalitF.Net.Client.Models.Inventory
 				baseCost = ProducerCost;
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
-			return Round(NullableHelper.Round(value, 2));
+			return Round(NullableHelper.Round(value, 2), Settings.Rounding);
 		}
 
-		private decimal? Round(decimal? value)
+		public static decimal? Round(decimal? value, Rounding rounding)
 		{
-			if (Settings.Rounding != Rounding.None) {
+			if (rounding != Rounding.None) {
 				var @base = 10;
 				var factor = 1;
-				if (Settings.Rounding == Rounding.To1_00) {
+				if (rounding == Rounding.To1_00) {
 					@base = 1;
 				}
-				else if (Settings.Rounding == Rounding.To0_50) {
-					@factor = 5;
+				else if (rounding == Rounding.To0_50) {
+					factor = 5;
 				}
 				var normalized = (int?)(value * @base);
 				return (normalized - normalized % factor) / (decimal)@base;
@@ -267,7 +294,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Gtd { get; set; }
 		public virtual DateTime? Exp { get; set; }
 		public virtual string Period { get; set; }
-		public virtual string DocumentDate { get; set; }
+		public virtual DateTime DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
@@ -306,14 +333,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// инвентаризация, снаружи в поставку
 		public virtual StockAction InventoryDoc(decimal quantity)
 		{
-			SupplyQuantity += quantity;
+			ReservedQuantity += quantity;
 			return new StockAction(ActionType.InventoryDoc, this, quantity);
 		}
 
 		// отмена инвентаризации, с поставки наружу
 		public virtual StockAction CancelInventoryDoc(decimal quantity)
 		{
-			SupplyQuantity -= quantity;
+			ReservedQuantity -= quantity;
 			return new StockAction(ActionType.CancelInventoryDoc, this, quantity);
 		}
 
@@ -334,14 +361,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// Перемещение между складами. Снаружи с др. склада в поставку
 		public virtual StockAction DisplacementFrom(decimal quantity)
 		{
-			SupplyQuantity += quantity;
+			ReservedQuantity += quantity;
 			return new StockAction(ActionType.DisplacementFrom, this, quantity);
 		}
 
 		// отмена перемещения между складами. С поставки наружу на др. склад
 		public virtual StockAction CancelDisplacementFrom(decimal quantity)
 		{
-			SupplyQuantity -= quantity;
+			ReservedQuantity -= quantity;
 			return new StockAction(ActionType.CancelDisplacementFrom, this, quantity);
 		}
 
@@ -362,14 +389,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// с поставки на склад
 		public virtual void Incoming(decimal quantity)
 		{
-			SupplyQuantity -= quantity;
+			ReservedQuantity -= quantity;
 			Quantity += quantity;
 		}
 
 		// со склада в поставку
 		public virtual void CancelIncoming(decimal quantity)
 		{
-			SupplyQuantity += quantity;
+			ReservedQuantity += quantity;
 			Quantity -= quantity;
 		}
 
@@ -380,6 +407,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			item.ServerId = null;
 			item.ServerVersion = null;
 			item.ReservedQuantity = 0;
+			Settings = null;
+			WaybillSettings = null;
 			return item;
 		}
 
@@ -387,6 +416,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Settings = settings;
 			WaybillSettings = settings.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
+		}
+
+		public static void Copy(object srcItem, object dstItem)
+		{
+			var srcProps = srcItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite);
+			var dstProps = dstItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).ToDictionary(x => x.Name);
+			foreach (var srcProp in srcProps) {
+				var dstProp = dstProps.GetValueOrDefault(srcProp.Name);
+				dstProp?.SetValue(dstItem, srcProp.GetValue(srcItem, null), null);
+			}
 		}
 	}
 }

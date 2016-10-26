@@ -90,12 +90,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(SearchProduct))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Products, CloseCancellation.Token);
 
 			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToObservableCollection())
-				.ObserveOn(UiScheduler)
 				.Subscribe(SpecialMarkupProducts);
 
 			if (string.IsNullOrEmpty(Settings.Value.UserName))
@@ -107,7 +105,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 
 			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
-			WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
+			if (Session != null)
+				WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
 		}
 
 		public PersistentList<WriteoffReason> WriteoffReasons { get; set; }
@@ -257,7 +256,6 @@ limit 300";
 		private void LoadPriceTagPreview()
 		{
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
-				.ObserveOn(UiScheduler)
 				.Subscribe(x => Preview.Value = x.Preview());
 		}
 

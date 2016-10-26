@@ -69,6 +69,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 				var tabs = view.Descendants<TabControl>().First();
 				tabs.SelectedItem = tabs.Items[1];
+				scheduler.Start();
 
 				var grid = (DataGrid)((TabItem)tabs.Items[1]).Content;
 				await grid.WaitLoaded();

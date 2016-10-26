@@ -11,7 +11,6 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using Remotion.Linq.Collections;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -34,6 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				}
 			});
 			Status.Value = "Готов к работе (F1 для справки)";
+			checkType = CheckType.SaleBuyer;
 		}
 
 		public NotifyValue<bool> HasError { get; set; }
@@ -46,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<string> LastOperation { get; set; }
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
+
+		private CheckType checkType { get; set; }
 
 		private void Message(string text)
 		{
@@ -61,6 +63,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			LastOperation.Value = message;
 		}
 
+		// Отменить чек	Alt + Delete
 		public void Cancel()
 		{
 			if (!Confirm("Отменить чек?"))
@@ -69,6 +72,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Reset();
 		}
 
+		// Редактирование количества	Ctrl + Q
 		public void UpdateQuantity()
 		{
 			var value = NullableConvert.ToUInt32(Input.Value);
@@ -86,6 +90,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Message("Ввод количества");
 		}
 
+		// Перенести содержимое поля ввода в поле количество	* (NUM)
 		public void InputQuantity()
 		{
 			var value = NullableConvert.ToUInt32(Input.Value);
@@ -98,6 +103,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Quantity.Value = value.Value;
 		}
 
+		// Поиск по коду	F2
 		public void SearchByProductId()
 		{
 			var id = NullableConvert.ToUInt32(Input.Value);
@@ -105,7 +111,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода кода");
 				return;
 			}
-			UpdateProduct(StockQuery().Where(x => x.ProductId == id), "Код товара");
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.ProductId == id)).Result;
+			UpdateProduct(stock, "Код товара");
 		}
 
 		public void BarcodeScanned(string barcode)
@@ -117,21 +124,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			UpdateProduct(StockQuery().Where(x => x.Barcode == barcode), "Штрих код");
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == barcode)).Result;
+			UpdateProduct(stock, "Штрих код");
 		}
 
+		// Поиск по штрих-коду F3
 		public void SearchByBarcode()
 		{
 			if (String.IsNullOrEmpty(Input.Value)) {
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			UpdateProduct(StockQuery().Where(x => x.Barcode == Input.Value), "Штрих код");
-		}
-
-		private IQueryable<Stock> StockQuery()
-		{
-			return Stock.AvailableStocks(StatelessSession, Address);
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).Where(x => x.Barcode == Input.Value)).Result;
+			UpdateProduct(stock, "Штрих код");
 		}
 
 		private void UpdateProduct(Stock stock, string operation)
@@ -152,7 +157,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			Input.Value = null;
 			Message(operation);
-			var line = new CheckLine(stock, Quantity.Value.Value);
+			var quantity = Quantity.Value.Value;
+			var line = new CheckLine(stock, quantity, checkType);
 			Lines.Add(line);
 			CurrentLine.Value = line;
 			Quantity.Value = null;
@@ -175,41 +181,67 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			var stock = stocks.First();
 			//списывать количество мы должны с загруженного объекта
+			var quantity = Quantity.Value.Value;
 			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
-			if (stock.Quantity < Quantity.Value) {
+			if (checkType == CheckType.SaleBuyer && stock.Quantity < quantity) {
 				Error("Нет требуемого количества");
 				return;
 			}
 			Input.Value = null;
 			Message(operation);
-			var line = new CheckLine(stock, Quantity.Value.Value);
+
+			var line = new CheckLine(stock, quantity, checkType);
 			Lines.Add(line);
 			CurrentLine.Value = line;
 			Quantity.Value = null;
 		}
 
-		public IEnumerable<IResult> Checkout()
+		// Закрыть чек Enter
+		public IEnumerable<IResult> Close()
 		{
 			if (Sum.Value.GetValueOrDefault() == 0) {
 				Error("Чек не открыт");
 				yield break;
 			}
-			var checkout = new Checkout(Sum.Value.Value);
-			yield return new DialogResult(checkout);
-			Change.Value = checkout.Change.Value;
-
-			using (var trx = StatelessSession.BeginTransaction()) {
-				var check = new Check(Address, Lines);
-				StatelessSession.Insert(check);
-				Lines.Each(x => x.CheckId = check.Id);
-				StatelessSession.InsertEach(Lines);
-				StatelessSession.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
-				StatelessSession.UpdateEach(Lines.Select(x => x.Stock).Distinct());
-				trx.Commit();
+			var message = "Возврат по чеку";
+			if (checkType == CheckType.SaleBuyer)
+			{
+				var checkout = new Checkout(Sum.Value.Value);
+				yield return new DialogResult(checkout);
+				Change.Value = checkout.Change.Value;
+				message = "Оплата наличными";
 			}
+
+			Env.Query(s => {
+				using (var trx = s.BeginTransaction()) {
+					var check = new Check(Address, Lines, checkType);
+					s.Insert(check);
+					Lines.Each(x => x.CheckId = check.Id);
+					s.InsertEach(Lines);
+					s.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
+					s.UpdateEach(Lines.Select(x => x.Stock).Distinct());
+					trx.Commit();
+				}
+			}).Wait();
 			Bus.SendMessage(nameof(Stock), "db");
 			Bus.SendMessage(nameof(Check), "db");
-			Message("Оплата наличными");
+			Message(message);
+			Reset();
+		}
+
+		// Оплата/Возврат F4
+		public void Trigger()
+		{
+			if (checkType == CheckType.SaleBuyer)
+			{
+				checkType = CheckType.CheckReturn;
+				Status.Value = "Открыт возврат по чеку";
+			}
+			else if (checkType == CheckType.CheckReturn)
+			{
+				checkType = CheckType.SaleBuyer;
+				Status.Value = "Открыт чек продажи";
+			}
 			Reset();
 		}
 
@@ -220,6 +252,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Quantity.Value = null;
 		}
 
+		// Поиск товара  F6
 		public IEnumerable<IResult> SearchByTerm(string term = "")
 		{
 			if (Quantity.Value == null) {
@@ -246,6 +279,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
 
+		// Вызов справки	F1
 		public IEnumerable<IResult> Help()
 		{
 			yield return new DialogResult(new Help());

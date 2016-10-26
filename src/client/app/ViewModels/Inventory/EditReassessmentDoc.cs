@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -10,15 +14,20 @@ using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
+using AnalitF.Net.Client.Models.Print;
+using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class EditReassessmentDoc : BaseScreen2
 	{
+		private string Name;
+
 		private EditReassessmentDoc()
 		{
 			Lines = new ReactiveCollection<ReassessmentLine>();
 			Session.FlushMode = FlushMode.Never;
+			Name = User?.FullName ?? "";
 		}
 
 		public EditReassessmentDoc(ReassessmentDoc doc)
@@ -48,6 +57,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> CanEditLine { get; set; }
 		public NotifyValue<bool> CanSave { get; set; }
 		public NotifyValue<bool> CanCloseDoc { get; set; }
+		public NotifyValue<bool> CanReasssessment { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -65,10 +75,43 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.Opened);
 			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDeleteLine);
-			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.Opened);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanSave);
+			var opened = docStatus.Select(x => x.Value == DocStatus.Opened);
+			opened.Subscribe(CanAddLine);
+			opened.Subscribe(IsDocOpen);
+			opened.Subscribe(CanCloseDoc);
+			opened.Subscribe(CanSave);
+			opened.Subscribe(CanReasssessment);
+		}
+
+		[Description("Переоценка")]
+		public class ReassessmentSettings
+		{
+			public ReassessmentSettings(Settings settings)
+			{
+				Markup = 5;
+				Rounding = settings.Rounding;
+			}
+
+			[Display(Name = "Наценка")]
+			public decimal Markup { get; set; }
+
+			[Display(Name = "Округление")]
+			public Rounding Rounding { get; set; }
+		}
+
+		public IEnumerable<IResult> Reasssessment()
+		{
+			var settings = new ReassessmentSettings(Settings);
+			yield return new DialogResult(new SimpleSettings(settings));
+			foreach(var line in Lines.Where(x => x.Selected)) {
+				line.DstStock.Configure(Settings);
+				line.DstStock.RetailCost = Stock.Round(line.SrcRetailCost * (1 + settings.Markup / 100m), Settings.Value.Rounding);
+				line.RetailCost = line.DstStock.RetailCost;
+				line.RetailMarkup = line.DstStock.RetailMarkup;
+				line.DstStock.Settings = null;
+				line.DstStock.WaybillSettings = null;
+			}
+			Doc.UpdateStat();
 		}
 
 		public IEnumerable<IResult> AddLine()
@@ -84,6 +127,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var line = new ReassessmentLine(srcStock, dstStock);
 			Lines.Add(line);
 			Doc.Lines.Add(line);
+			Doc.UpdateStat();
+		}
+
+		public IEnumerable<IResult> Search()
+		{
+			var search = new StockGroupSearch();
+			yield return new DialogResult(search);
+
+			if (search.WasCancelled)
+				yield break;
+
+			var ids = search.Items.Value.Select(x => x.Id).ToList();
+			var srcStocks = Session.Query<Stock>().Where(x => ids.Contains(x.Id)).ToList();
+			foreach (var srcStock in srcStocks)
+			{
+				var dstStock = srcStock.Copy();
+				var line = new ReassessmentLine(srcStock, dstStock);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+			}
 			Doc.UpdateStat();
 		}
 
@@ -130,6 +193,75 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.Flush();
 			Bus.SendMessage(nameof(ReassessmentDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
+		}
+
+		public IResult ExportExcel()
+		{
+			Update();
+			var columns = new[] {
+						"Наименование товара",
+						"Производитель",
+						"Кол-во",
+						"Цена закупки",
+						"Наценка списания, %",
+						"Цена списания",
+						"Сумма списания",
+						"Наценка приходования, %",
+						"Цена приходования",
+						"Сумма приходования",
+					};
+
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var row = 0;
+
+			ExcelExporter.WriteRow(sheet, columns, row++);
+
+			var rows = Lines.Select((o, i) => new object[] {
+						o.Product,
+						o.Producer,
+						o.Quantity,
+						o.SupplierCostWithoutNds,
+						o.SrcRetailMarkup,
+						o.SrcRetailCost,
+						o.SrcRetailSum,
+						o.RetailMarkup,
+						o.RetailCost,
+						o.RetailSum,
+					});
+
+			ExcelExporter.WriteRows(sheet, rows, row);
+
+			return ExcelExporter.Export(book);
+		}
+
+		public IEnumerable<IResult> Print()
+		{
+			return Preview("Переоценка", new ReassessmentDocument(Lines.ToArray()));
+		}
+
+		public IEnumerable<IResult> PrintAct()
+		{
+			return Preview("Акт переоценки", new ReassessmentActDocument(Lines.ToArray()));
+		}
+
+		public IResult PrintStockPriceTags()
+		{
+			return new DialogResult(new PrintPreviewViewModel
+			{
+				DisplayName = "Ценники",
+				Document = new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build()
+			}, fullScreen: true);
+		}
+
+		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
+		{
+			var docSettings = doc.Settings;
+			if (docSettings != null)
+			{
+				yield return new DialogResult(new SimpleSettings(docSettings));
+			}
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 	}
 }

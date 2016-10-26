@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -37,31 +38,41 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				new KeyGesture(Key.N, ModifierKeys.Control),
 			});
 
-		private IStatelessSession StatelessSession;
-		private WindowManager Manager;
-		private ShellViewModel Shell;
-
+		private WindowManager manager;
+		private ShellViewModel shell;
 		private BaseOffer currentOffer;
-
 		private OfferComposedId offerId;
 
 		public CommandBinding[] Bindings;
 
-		public ProductInfo(BaseScreen screen, IObservable<BaseOffer> value = null)
+		public ProductInfo(BaseScreen screen, IObservable<BaseOffer> value)
 		{
 			CurrentCatalog = new NotifyValue<Catalog>();
-			StatelessSession = screen.StatelessSession;
-			Manager = screen.Manager;
-			Shell = screen.Shell;
+			manager = screen.Manager;
+			shell = screen.Shell;
 
-			if (value != null)
-				value.Subscribe(v => CurrentOffer = v);
+			value.Subscribe(x => {
+				currentOffer = x;
+				offerId = (x as OrderLine)?.OfferId;
+				NotifyOfPropertyChange(nameof(CurrentOffer));
+			});
+			value.Throttle(Consts.ScrollLoadTimeout, screen.Env.Scheduler)
+				.Where(x => x?.CatalogId != CurrentCatalog.Value?.Id)
+				.SelectMany(x => screen.Env.RxQuery(s => {
+					if (x == null)
+						return null;
+					return s.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.ThenFetch(n => n.Mnn)
+						.First(c => c.Id == x.CatalogId);
+				}))
+				.Subscribe(CurrentCatalog);
 
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("CanShowDescription");
-					NotifyOfPropertyChange("CanShowCatalog");
-					NotifyOfPropertyChange("CanShowCatalogWithMnnFilter");
+					NotifyOfPropertyChange(nameof(CanShowDescription));
+					NotifyOfPropertyChange(nameof(CanShowCatalog));
+					NotifyOfPropertyChange(nameof(CanShowCatalogWithMnnFilter));
 				});
 
 			var binding = new CommandBinding(ShowCatalogCommand,
@@ -84,36 +95,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
-		public BaseOffer CurrentOffer
-		{
-			get { return currentOffer; }
-			set
-			{
-				var line = value as OrderLine;
-				if (line != null)
-					offerId = line.OfferId;
-
-				currentOffer = value;
-				if (value == null) {
-					CurrentCatalog.Value = null;
-				}
-				else if (CurrentCatalog.Value == null || CurrentCatalog.Value.Id != currentOffer.CatalogId) {
-					var catalogId = CurrentOffer.CatalogId;
-					if (StatelessSession == null)
-						return;
-					CurrentCatalog.Value = StatelessSession.Query<Catalog>()
-						.Fetch(c => c.Name)
-						.ThenFetch(n => n.Mnn)
-						.First(c => c.Id == catalogId);
-				}
-				NotifyOfPropertyChange("CurrentOffer");
-				NotifyOfPropertyChange("CurrentCatalog");
-			}
-		}
+		public BaseOffer CurrentOffer => currentOffer;
 
 		public bool CanShowDescription => CurrentCatalog.Value?.Name?.Description != null;
 
-		public bool CanShowCatalog => CurrentCatalog != null;
+		public bool CanShowCatalog => CurrentCatalog.Value != null;
 
 		public bool CanShowCatalogWithMnnFilter => CurrentCatalog.Value?.Name?.Mnn != null;
 
@@ -122,8 +108,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (!CanShowCatalog)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog, offerId);
-			Shell.Navigate(offerViewModel);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog.Value, offerId);
+			shell.Navigate(offerViewModel);
 		}
 
 		public void ShowDescription()
@@ -131,7 +117,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (!CanShowDescription)
 				return;
 
-			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
+			manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}
 
 		public void ShowCatalogWithMnnFilter()
@@ -142,7 +128,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			var catalogViewModel = new CatalogViewModel {
 				FiltredMnn = CurrentCatalog.Value.Name.Mnn
 			};
-			Shell.Navigate(catalogViewModel);
+			shell.Navigate(catalogViewModel);
 		}
 	}
 }

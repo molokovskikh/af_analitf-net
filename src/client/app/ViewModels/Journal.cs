@@ -27,7 +27,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Bus.Listen<JournalRecord>()
 				.Merge(Observable.Return<JournalRecord>(null))
 				.Select(_ => RxQuery(x => x.Query<JournalRecord>().OrderByDescending(o => o.CreateAt).ToList()))
-				.ObserveOn(UiScheduler)
 				.Switch()
 				.Subscribe(Items, CloseCancellation.Token);
 		}

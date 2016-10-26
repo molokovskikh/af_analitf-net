@@ -99,6 +99,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Env = Env.Current = new Env(null, bus, scheduler, IntegrationSetup.Factory);
 			Env.QueryScheduler = new CurrentThreadScheduler();
 			Env.TplUiScheduler = new CurrentThreadScheduler();
+			disposable.Add(Env);
 
 			lazyshell = new Lazy<ShellViewModel>(() => {
 				session.Flush();

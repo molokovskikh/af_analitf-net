@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			// детализация текущего заказа
 			var model = new OrderDetailsViewModel(order);
 			var view = Bind(model);
+			scheduler.Start();
 			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
 			var item = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
 			Assert.IsTrue(item.InFrozenOrders);

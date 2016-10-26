@@ -5,7 +5,7 @@
 	<StackPanel Margin="4">
 		<Label>Поставщик</Label>
 		<ComboBox Name="SupplierName"
-			ItemsSource="{Binding Suppliers}"
+			ItemsSource="{Binding Suppliers.Value}"
 			Text="{Binding Waybill.UserSupplierName}"
 			SelectedItem="{Binding Waybill.Supplier}" DisplayMemberPath="Name" IsEditable="True" />
 		<Label>Номер накладной</Label>

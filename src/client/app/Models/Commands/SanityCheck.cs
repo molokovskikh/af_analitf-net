@@ -132,6 +132,10 @@ namespace AnalitF.Net.Client.Models.Commands
 					.Except(settings.Waybills.Select(w => w.BelongsToAddress))
 					.Select(a => new WaybillSettings(user, a)));
 
+				if (!session.Query<WriteoffReason>().Any()) {
+					session.SaveEach(WriteoffReason.Default());
+				}
+
 				var suppliers = session.Query<Supplier>().ToList();
 				var dirMaps = session.Query<DirMap>().ToList();
 				var newDirMaps = suppliers
@@ -152,19 +156,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				markups
 					.Where(c => c.MaxMarkup < c.Markup)
 					.Each(c => c.MaxMarkup = c.Markup);
-				var markupNds18 = markups.Where(s =>
-					s.Type == MarkupType.Nds18 &&
-					s.End == 10000)
-					.ToList();
-				var markupOver = markups.Where(s =>
-					s.Type == MarkupType.Over &&
-					s.End == 10000)
-					.ToList();
-				if (markupNds18.Count == 1) {
-					markupNds18[0].End = 1000000;
-				}
-				if (markupOver.Count == 1) {
-					markupOver[0].End = 1000000;
+				foreach (var markup in markups) {
+					if (markup.End == 10000) {
+						markup.End = 1000000;
+					}
 				}
 
 				if (!session.Query<WriteoffReason>().Any()) {

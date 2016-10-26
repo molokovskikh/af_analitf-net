@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools.Calendar;
@@ -12,15 +14,21 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.Config
 {
-	public class Env
+	public class Env : IDisposable
 	{
 		private TaskScheduler tplUiScheduler;
+		/// <summary>
+		/// использовать только через RxQuery,
+		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
+		/// </summary>
+		private IStatelessSession BackgroundSession;
 
 		public TimeSpan RequestDelay = TimeSpan.Zero;
 		//механизм синхронизации для тестов
 		public Barrier Barrier;
 #if DEBUG
 		public bool IsUnitTesting;
+		private Thread CreateOnThread;
 #endif
 		public IScheduler Scheduler;
 		public IScheduler UiScheduler;
@@ -78,22 +86,24 @@ namespace AnalitF.Net.Client.Config
 			return result;
 		}
 
-		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select, CancellationToken token = default(CancellationToken))
 		{
 			if (Factory == null)
 				return Observable.Empty<T>();
-			var task = Query(@select);
+			var task = Query(@select, token);
 			//игнорируем отмену задачи, она произойдет если закрыли форму
 			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>())
 				.ObserveOn(UiScheduler);
 		}
 
-		public Task<T> Query<T>(Func<IStatelessSession, T> @select)
+		public Task<T> Query<T>(Func<IStatelessSession, T> @select, CancellationToken token = default(CancellationToken))
 		{
 			var task = new Task<T>(() => {
-				if (BaseScreen.BackgroundSession == null)
-					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
-				return @select(BaseScreen.BackgroundSession);
+				if (Factory == null)
+					return default(T);
+				InitSession();
+				CheckThreading();
+				return @select(BackgroundSession);
 			});
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
@@ -101,19 +111,66 @@ namespace AnalitF.Net.Client.Config
 			return task;
 		}
 
-		public Task Query(Action<IStatelessSession> action)
+		[Conditional("DEBUG")]
+		private void CheckThreading()
+		{
+#if DEBUG
+			if (Thread.CurrentThread != CreateOnThread)
+				throw new Exception("Попытка конкурентного обращения к подключению");
+#endif
+		}
+
+		public Task Query(Action<IStatelessSession> action, CancellationToken token = default(CancellationToken))
 		{
 			var task = new Task(() => {
 				if (Factory == null)
 					return;
-				if (BaseScreen.BackgroundSession == null)
-					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
-				action(BaseScreen.BackgroundSession);
-			});
+				InitSession();
+				CheckThreading();
+				action(BackgroundSession);
+			}, token);
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
 				task.Start(QueryScheduler);
 			return task;
+		}
+
+		private void InitSession()
+		{
+			if (BackgroundSession == null) {
+#if DEBUG
+				CreateOnThread = Thread.CurrentThread;
+#endif
+				BackgroundSession = Factory.OpenStatelessSession();
+			}
+		}
+
+		public void Dispose()
+		{
+			if (BackgroundSession != null) {
+				var task = new Task(() => {
+					BackgroundSession?.Dispose();
+					BackgroundSession = null;
+				});
+				task.Start(QueryScheduler);
+				try {
+					if (!task.Wait(TimeSpan.FromSeconds(20))) {
+						BackgroundSession?.Dispose();
+						BackgroundSession = null;
+					}
+				} catch(Exception) {
+//есть смысл кидать только в дебаге тк в реальной жизни мы ничего сделать не сможем
+#if DEBUG
+					throw;
+#endif
+				}
+			}
+		}
+
+		~Env()
+		{
+			GC.SuppressFinalize(this);
+			Dispose();
 		}
 	}
 }

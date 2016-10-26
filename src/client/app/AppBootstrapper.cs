@@ -348,6 +348,7 @@ namespace AnalitF.Net.Client
 		public void Dispose()
 		{
 			Shell?.Dispose();
+			Env.Current?.Dispose();
 		}
 	}
 }

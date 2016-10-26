@@ -52,10 +52,5 @@ namespace AnalitF.Net.Client.Views.Orders
 				StyleHelper.ApplyStyles(typeof(SentOrderLine), Lines, Application.Current.Resources, Legend);
 			}
 		}
-
-		private void Open(object sender, RoutedEventArgs e)
-		{
-			((OrderDetailsViewModel)DataContext).OpenReceivingOrder();
-		}
 	}
 }

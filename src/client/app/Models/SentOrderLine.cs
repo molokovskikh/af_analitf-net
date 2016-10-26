@@ -8,6 +8,8 @@ namespace AnalitF.Net.Client.Models
 {
 	public class SentOrderLine : BaseOffer, IOrderLine
 	{
+		private bool _isUnmatchedByWaybill;
+
 		public SentOrderLine()
 		{
 		}
@@ -49,8 +51,19 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual string LongSendError { get; set; }
 
+		//загружается асинхронно
 		[Ignore, Style(Description = "Несоответствие в накладной")]
-		public virtual bool IsUnmatchedByWaybill { get; set; }
+		public virtual bool IsUnmatchedByWaybill
+		{
+			get { return _isUnmatchedByWaybill; }
+			set
+			{
+				if (_isUnmatchedByWaybill == value)
+					return;
+				_isUnmatchedByWaybill = value;
+				OnPropertyChanged();
+			}
+		}
 
 		[Style("Order.AddressName")]
 		public virtual bool IsCurrentAddress => Order.IsCurrentAddress;
@@ -58,7 +71,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual void Configure(User user, Dictionary<uint, WaybillLine[]> matchedWaybillLines)
 		{
 			Configure(user);
+			Configure(matchedWaybillLines);
+		}
 
+		public virtual void Configure(Dictionary<uint, WaybillLine[]> matchedWaybillLines)
+		{
 			if (ServerId == null)
 				return;
 			var lines = matchedWaybillLines.GetValueOrDefault(ServerId.Value);

@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.Models.Print
 				"",
 				o.Quantity,
 				o.Period,
-				o.DocumentDate,
+				o.DocumentDate.ToShortDateString(),
 				o.RetailCost
 			});
 

@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public ReturnToSupplierLine(Stock stock, decimal quantity)
 		{
-			ReceivingLine.Copy(stock, this);
+			Stock.Copy(stock, this);
 			Id = 0;
 			Stock = stock;
 			Quantity = quantity;

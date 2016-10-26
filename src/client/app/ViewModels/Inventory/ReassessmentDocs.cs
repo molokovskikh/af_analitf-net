@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
@@ -54,13 +55,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new EditReassessmentDoc(CurrentItem.Value.Id));
 		}
 
-		public void Delete()
+		public async Task Delete()
 		{
 			if (!CanDelete)
 				return;
-			if (!Confirm("Удалить?"))
+			if (!Confirm("Удалить выбранный документ?"))
 				return;
-			StatelessSession.Delete(CurrentItem.Value);
+			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}
 

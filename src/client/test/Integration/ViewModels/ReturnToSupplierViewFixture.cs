@@ -77,6 +77,38 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Print_ReturnToSupplierDetails_ReturnLabel()
+		{
+			var results = modelDetails.PrintReturnLabel().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Print_ReturnToSupplierDetails_ReturnInvoice()
+		{
+			var results = modelDetails.PrintReturnInvoice().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Print_ReturnToSupplierDetails_ReturnWaybill()
+		{
+			var results = modelDetails.PrintReturnWaybill().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Print_ReturnToSupplierDetails_ReturnDivergenceAct()
+		{
+			var results = modelDetails.PrintReturnDivergenceAct().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
 		public void Doc_Flow()
 		{
 			//На складе есть Папаверин в количестве 5шт.

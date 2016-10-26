@@ -12,6 +12,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -48,11 +51,15 @@ namespace AnalitF.Net.Client.Views.Inventory
 		{
 			InitializeComponent();
 			DataContextChanged += d;
+
+			Lines.Columns.Insert(0, DataGridHelper.CheckBoxColumn("", "Selected",
+				x => Lines.Items.OfType<ReassessmentLine>().Each(y => y.Selected = x),
+				false));
 		}
 
 		private void d(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			var model = (ViewModels.Inventory.EditReassessmentDoc)DataContext;
+			var model = DataContext as ViewModels.Inventory.EditReassessmentDoc;
 			if (model == null)
 				return;
 

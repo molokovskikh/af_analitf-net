@@ -24,8 +24,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public override void Execute(ISession session)
 		{
 			//этот товар должен обязательно присутствовать, он проверяется в тестах
-			var product = session.Query<TestProduct>().First(x => x.CatalogProduct.CatalogName.Name == "ПАПАВЕРИНА ГИДРОХЛОРИД"
+			var product = session.Query<TestProduct>().FirstOrDefault(x => x.CatalogProduct.CatalogName.Name == "ПАПАВЕРИНА ГИДРОХЛОРИД"
 				&& x.CatalogProduct.CatalogForm.Form == "супп. 20 мг N10");
+			if (product == null)
+				throw new Exception("Справочник товаров пуст, выполни bake db:setup для загрузки");
 			mandatory = new [] { product };
 
 			var supplier = TestSupplier.CreateNaked(session);

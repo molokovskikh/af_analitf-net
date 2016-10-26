@@ -81,7 +81,8 @@ drop temporary table Leaders;
 update Settings set  LastLeaderCalculation = :today
 ")
 				.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
-				.SetParameter("today", DateTime.Today)
+				//даты в базе хранятся в utc
+				.SetParameter("today", DateTime.Today.ToUniversalTime())
 				.ExecuteUpdate();
 		}
 

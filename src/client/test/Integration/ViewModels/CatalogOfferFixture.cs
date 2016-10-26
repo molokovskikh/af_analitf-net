@@ -340,7 +340,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Reject_activate_if_offers_not_found()
 		{
 			catalog = session.Query<Catalog>().First(c => !c.HaveOffers);
-			Assert.That(model.IsSuccessfulActivated, Is.False);
+			Assert.IsTrue(model.IsSuccessfulActivated);
+			Assert.IsTrue(model.IsInitialized);
+			Assert.IsFalse(model.IsActive);
 			Assert.That(manager.MessageBoxes.Implode(), Is.EqualTo("Нет предложений"));
 		}
 

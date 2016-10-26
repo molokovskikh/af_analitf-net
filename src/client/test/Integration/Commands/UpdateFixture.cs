@@ -20,6 +20,7 @@ using NHibernate.Linq;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.log4net;
 using Test.Support.Suppliers;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
@@ -370,6 +371,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Load_delay_of_payment()
 		{
+			settings.LastLeaderCalculation = DateTime.Today.AddDays(-1);
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
 			DbMaintain.UpdateLeaders(localStateless);
@@ -378,7 +380,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
 			Assert.IsTrue(user.ShowSupplierCost);
 			localSession.Refresh(settings);
-			Assert.AreEqual(DateTime.Today.Date, settings.LastLeaderCalculation.Date);
+			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
 		}
 

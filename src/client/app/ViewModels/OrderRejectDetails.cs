@@ -77,7 +77,6 @@ namespace AnalitF.Net.Client.ViewModels
 						}
 					}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				//будь бдителен CalculateRetailCost и LoadOrderItems может вызвать обращение к базе если данные еще не загружены
 				//тк синхронизация не производится загрузка должна выполняться в основной нитке
 				.Do(v => {

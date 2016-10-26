@@ -105,7 +105,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				"Название товара",
 				"Фирма-производитель",
 				"Статус",
-				"Заказ на приемку",
 				"Кол-во",
 				"Цена закупки",
 				"Цена розничная",
@@ -126,7 +125,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.Product,
 				o.Producer,
 				o.Status,
-				o.ReceivingOrderId,
 				o.Quantity,
 				o.SupplierCost,
 				o.RetailCost,
@@ -184,7 +182,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult PrintStockRackingMaps()
 		{
-			var receivingOrders = Session.Query<ReceivingOrder>().ToList();
+			var receivingOrders = Session.Query<Waybill>().ToList();
 
 			return new DialogResult(new PrintPreviewViewModel
 			{
@@ -213,7 +211,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void ReceivingOrders()
 		{
-			Shell.Navigate(new ReceivingOrders());
+			Shell.Navigate(new WaybillsViewModel());
 		}
 
 		public void Checks()

@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace AnalitF.Net.Client.Views.Inventory
 {
 	/// <summary>
-	/// Interaction logic for ReceivingOrders.xaml
+	/// Interaction logic for StockGroupSearch.xaml
 	/// </summary>
-	public partial class ReceivingOrders : UserControl
+	public partial class StockGroupSearch : UserControl
 	{
-		public ReceivingOrders()
+		public StockGroupSearch()
 		{
 			InitializeComponent();
 		}

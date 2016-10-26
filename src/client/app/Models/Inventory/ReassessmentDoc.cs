@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 
@@ -96,6 +97,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private decimal? _srcRetailMarkup;
 		private decimal? _srcRetailCost;
 		private decimal _quantity;
+		private bool _selected;
+		private decimal? _retailCost;
+		private decimal? _retailMarkup;
 
 		public ReassessmentLine()
 		{
@@ -103,7 +107,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public ReassessmentLine(Stock srcStock, Stock dstStock)
 		{
-			ReceivingLine.Copy(dstStock, this);
+			Stock.Copy(dstStock, this);
 			Id = 0;
 			SrcStock = srcStock;
 			SrcStock.Reserve(Quantity);
@@ -121,6 +125,32 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Period { get; set; }
 
 		public virtual decimal? SupplierSumWithoutNds => SupplierCostWithoutNds * Quantity;
+
+		public override decimal? RetailCost
+		{
+			get { return _retailCost; }
+			set
+			{
+				if (_retailCost == value)
+					return;
+				_retailCost = value;
+				OnPropertyChanged(nameof(RetailSum));
+				OnPropertyChanged();
+			}
+		}
+
+		public override decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				if (_retailMarkup == value)
+					return;
+				_retailMarkup = value;
+				OnPropertyChanged(nameof(RetailSum));
+				OnPropertyChanged();
+			}
+		}
 
 		public virtual decimal? RetailSum => RetailCost * Quantity;
 
@@ -168,6 +198,19 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock SrcStock { get; set; }
 		public virtual Stock DstStock { get; set; }
+
+		[Ignore]
+		public virtual bool Selected
+		{
+			get { return _selected; }
+			set
+			{
+				if (Selected != value) {
+					_selected = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		public virtual void UpdateDst(Stock stock)
 		{

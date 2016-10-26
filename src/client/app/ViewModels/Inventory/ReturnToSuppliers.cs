@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -15,6 +16,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public ReturnToSuppliers()
 		{
+			Begin.Value = DateTime.Today.AddDays(-7);
+			End.Value = DateTime.Today;
 			SelectedItems = new List<ReturnToSupplier>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
@@ -24,6 +27,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			TrackDb(typeof(ReturnToSupplier));
 		}
 
+		public NotifyValue<DateTime> Begin { get; set; }
+		public NotifyValue<DateTime> End { get; set; }
 		[Export]
 		public NotifyValue<List<ReturnToSupplier>> Items { get; set; }
 		public NotifyValue<ReturnToSupplier> CurrentItem { get; set; }
@@ -35,7 +40,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 			DbReloadToken
+				.Merge(Begin.Select(x => (object)x))
+				.Merge(End.Select(x => (object)x))
 				.SelectMany(_ => RxQuery(s => s.Query<ReturnToSupplier>()
+					.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1))
 					.Fetch(x => x.Address)
 					.Fetch(x => x.Supplier)
 					.OrderByDescending(x => x.Date).ToList()))
@@ -54,13 +62,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new ReturnToSupplierDetails(CurrentItem.Value.Id));
 		}
 
-		public void Delete()
+		public async Task Delete()
 		{
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
 
 			CurrentItem.Value.BeforeDelete();
-			StatelessSession.Delete(CurrentItem.Value);
+			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}
 

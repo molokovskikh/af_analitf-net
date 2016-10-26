@@ -275,7 +275,8 @@ namespace AnalitF.Net.Client.Models
 		CancelDisplacementTo,
 		DisplacementFrom,
 		CancelDisplacementFrom,
-		EndDisplacement
+		EndDisplacement,
+		CheckReturn
 	}
 
 	public class StockActionAttrs

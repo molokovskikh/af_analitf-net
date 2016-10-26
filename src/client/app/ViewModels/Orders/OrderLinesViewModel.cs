@@ -277,18 +277,16 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					return lines;
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
-				.Do(_ => { IsLoading.Value = false; })
+				.Do(_ => IsLoading.Value = false)
 				.Subscribe(SentLines, CloseCancellation.Token);
 
 			CurrentLine
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => Update(), CloseCancellation.Token);
+				.Merge(DbReloadToken)
+				.Subscribe(_ => UpdateAsync(), CloseCancellation.Token);
 			CurrentLine
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
-				.Select(x => RxQuery(s => LoadOrderHistory(s, Cache, Settings.Value, x, ActualAddress)))
-				.Switch()
-				.ObserveOn(UiScheduler)
+				.SelectMany(x => Env.RxQuery(s => LoadOrderHistory(s, Cache, Settings.Value, x, ActualAddress)))
 				.Subscribe(HistoryOrders, CloseCancellation.Token);
 		}
 
@@ -299,22 +297,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.OnDeactivate();
 		}
 
-		protected override void Query()
+		private void UpdateAsync()
 		{
-			if (StatelessSession == null)
-				return;
 			if (CurrentLine.Value == null) {
 				Offers.Value = new List<Offer>();
 				return;
 			}
 
 			var productId = CurrentLine.Value.ProductId;
-			Offers.Value = StatelessSession.Query<Offer>()
+			Env.RxQuery(s => s.Query<Offer>()
 				.Fetch(o => o.Price)
 				.Where(o => o.ProductId == productId)
 				.ToList()
 				.OrderBy(o => o.ResultCost)
-				.ToList();
+				.ToList())
+				.Subscribe(UpdateOffers, CloseCancellation.Token);
 		}
 
 		protected void CalculateOrderLine()
