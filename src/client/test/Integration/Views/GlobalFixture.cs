@@ -277,16 +277,10 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var details = (OrderDetailsViewModel)shell.ActiveItem;
 				var view = (FrameworkElement)details.GetView();
-				var check = (CheckBox)view.FindName("OnlyWarning");
-				Assert.IsTrue(check.IsVisible);
-
 				var count = (Label)view.FindName("Source_Count");
 				Assert.AreEqual(2, count.Content);
-				Assert.False(check.IsChecked.Value);
-				check.IsChecked = true;
 
 				details.CurrentLine.Value = details.Lines.Value.First();
-
 				var text = (TextBox)view.FindName("ErrorText");
 				Assert.IsTrue(text.IsVisible);
 				Assert.AreEqual("предложение отсутствует ", text.Text);
