@@ -45,6 +45,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Panel = System.Windows.Controls.Panel;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
+using AnalitF.Net.Client.Controls;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
@@ -279,6 +280,10 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var view = (FrameworkElement)details.GetView();
 				var count = (Label)view.FindName("Source_Count");
 				Assert.AreEqual(2, count.Content);
+
+				details.FilterItems.Where(x => x.Item.Item1 != "OnlyWarning").Each(x => x.IsSelected = false);
+				scheduler.AdvanceByMs(10000);
+				Assert.AreEqual(1, details.Lines.Value.Count);
 
 				details.CurrentLine.Value = details.Lines.Value.First();
 				var text = (TextBox)view.FindName("ErrorText");
