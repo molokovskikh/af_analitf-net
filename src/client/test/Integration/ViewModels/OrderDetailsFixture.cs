@@ -97,28 +97,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Filter_on_warning()
-		{
-			var fixture = Fixture<CorrectOrder>();
-			var order = fixture.Order;
-
-			shell.ShowOrders();
-			scheduler.Start();
-			var orders = (OrdersViewModel)shell.ActiveItem;
-			orders.CurrentOrder = orders.Orders.First(o => o.Id == order.Id);
-			orders.EnterOrder();
-
-			var lines = (OrderDetailsViewModel)shell.ActiveItem;
-			Assert.AreEqual(2, lines.Lines.Value.Count);
-			lines.OnlyWarning.Value = true;
-			Assert.AreEqual(1, lines.Lines.Value.Count);
-			lines.CurrentLine.Value = lines.Lines.Value.First();
-			lines.Delete();
-			Assert.AreEqual(0, lines.Lines.Value.Count);
-			Assert.IsInstanceOf<OrderDetailsViewModel>(shell.ActiveItem);
-		}
-
-		[Test]
 		public void View_mixed_cost()
 		{
 			restore = true;
