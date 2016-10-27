@@ -65,5 +65,30 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var item2 = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
 			Assert.IsTrue(item2.InFrozenOrders);
 		}
+
+		[Test]
+		public void Line_is_MinCost()
+		{
+			var order = MakeOrder();
+			var line = order.Lines[0];
+			line.OptimalFactor = 0;
+			session.Flush();
+			var productId = line.ProductId;
+
+			// детализация текущего заказа
+			var model = new OrderDetailsViewModel(order);
+			var view = Bind(model);
+			scheduler.Start();
+			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
+			var item = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
+			Assert.IsTrue(item.IsMinCost);
+
+			// сводный заказ
+			var model2 = new OrderLinesViewModel();
+			var view2 = Bind(model2);
+			var grid2 = view2.Descendants<DataGrid>().First(g => g.Name == "Lines");
+			var item2 = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
+			Assert.IsTrue(item2.IsMinCost);
+		}
 	}
 }

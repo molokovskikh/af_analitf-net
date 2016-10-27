@@ -28,7 +28,7 @@
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<StackPanel Orientation="Horizontal" Margin="0,0,5,0">
-				<ComboBox Style="{StaticResource Select}" x:Name="LinesFilter" Width="200"/>
+				<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="FilterItems" ButtonContent="Фильтр" Member="Item.Item2"/>
 			</StackPanel>
 			<Button x:Name="ShowCatalog"
 				Command="{x:Static Parts:ProductInfo.ShowCatalogCommand}"
@@ -37,10 +37,6 @@
 				Command="{x:Static Parts:ProductInfo.ShowMnnCommand}"
 				Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>
 			<Button x:Name="ShowPrice" Style="{StaticResource FilterButton}">В прайс</Button>
-			<CheckBox x:Name="OnlyWarning"
-				Style="{StaticResource FilterElement}">
-				Только позиции с корректировкой
-			</CheckBox>
 		</StackPanel>
 
 		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
