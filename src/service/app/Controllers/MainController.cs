@@ -9,6 +9,7 @@ using Common.Tools;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Service.Controllers
 {
@@ -92,6 +93,22 @@ namespace AnalitF.Net.Service.Controllers
 			//если уже подтверждено значит мы получили информацию об импортированных заявках
 			if (log.IsConfirmed) {
 				log.Error += request.Message;
+				var userId = CurrentUser.Id;
+				var messageShowCountList = Session.CreateSQLQuery(@"
+select MessageShowCount from usersettings.userupdateinfo where UserID = :userId")
+				.SetParameter("userId", userId).List();
+
+			var messageShowCount = Convert.ToByte(messageShowCountList.First());
+			if (messageShowCount > 0)
+				messageShowCount--;
+
+			Session.CreateSQLQuery(@"
+update usersettings.userupdateinfo
+set MessageShowCount = :MessageShowCount
+where UserId = :userId;")
+				.SetParameter("MessageShowCount", messageShowCount)
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
 			} else {
 				//записываем информацию о запросе что бы в случае ошибки повторить попытку
 				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
