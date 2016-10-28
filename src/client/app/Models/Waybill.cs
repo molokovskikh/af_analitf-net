@@ -372,7 +372,7 @@ namespace AnalitF.Net.Client.Models
 			return true;
 		}
 
-		public List<StockAction> Create()
+		public virtual List<StockAction> Create()
 		{
 			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
 			var stockActions = new List<StockAction>();

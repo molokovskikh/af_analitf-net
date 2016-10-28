@@ -18,10 +18,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	{
 		private InventoryDoc doc;
 
-		private InventoryDocs model;
-
-		private EditInventoryDoc modelDetails;
-
 		private Stock stock;
 
 		[SetUp]
@@ -33,12 +29,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Status = StockStatus.Available,
 				Address = address,
 				Quantity = 5,
-				ReservedQuantity = 0
+				ReservedQuantity = 0,
+				SupplyQuantity = 5
 			};
 			session.Save(stock);
 
 			session.DeleteEach<ReturnToSupplier>();
-			var supplier = session.Query<Supplier>().First();
 
 			doc = new InventoryDoc
 			{
@@ -46,36 +42,30 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Address = address
 			};
 			session.Save(doc);
-
-			model = Open(new InventoryDocs());
-			modelDetails = Open(new EditInventoryDoc(doc.Id));
 		}
 
 		[Test]
 		public void Doc_Flow()
 		{
-			//Подготовлен(товар на складе отображается в Ожидаемом) и Проведен (товар на складе отображается В наличии)
-
 			//На складе есть Папаверин в количестве 5 шт.
 			Assert.AreEqual(stock.Quantity, 5);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 5);
 
-			//Мы создаем документ излишки на 3 упаковки, после того как строка папаверина
-			//добавлена и документ сохранен, на складе у нас будет - Папаверин 5 шт, 3 шт в поставке
 			var line = new InventoryDocLine(stock, 3, session);
 			doc.Lines.Add(line);
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 5);
-			Assert.AreEqual(stock.SupplyQuantity, 3);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(stock.SupplyQuantity, 5);
 			Assert.AreEqual(line.Quantity, 3);
 
-			//Если мы закроем документ то получим - Папаверен 8 шт, 0 шт в поставке
 			doc.Close();
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 8);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 5);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 5 шт, 3 шт в поставке
@@ -83,7 +73,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 5);
-			Assert.AreEqual(stock.SupplyQuantity, 3);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(stock.SupplyQuantity, 5);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если документ будет удален то на складе получим - Папаверин 5 шт, 0 шт в поставке
@@ -91,7 +82,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Delete(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 5);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 5);
 		}
 	}
 }
