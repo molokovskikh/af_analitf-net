@@ -378,7 +378,6 @@
     <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\TableSettings.cs" />
     <Compile Include="Models\User.cs" />
-    <Compile Include="Models\UserUpdateInfo.cs" />
     <Compile Include="Models\Waybill.cs" />
     <Compile Include="Models\WaybillLine.cs" />
     <Compile Include="Models\WaybillOrder.cs" />

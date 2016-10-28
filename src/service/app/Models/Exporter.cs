@@ -391,6 +391,8 @@ select u.Id,
 	?supportHours as SupportHours,
 	?lastSync as LastSync,
 	rcs.SaveOrders,
+	uup.Message,
+	uup.MessageShowCount,
 	exists(
 		select *
 		from Customers.UserAddresses ua
@@ -402,6 +404,7 @@ select u.Id,
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
+	join Usersettings.Userupdateinfo uup on uup.UserID = u.Id
 where u.Id = ?userId";
 			Export(Result, sql, "Users", truncate: true, parameters: new {
 				userId = user.Id,
@@ -978,10 +981,6 @@ from Catalogs.Producers p
 where p.UpdateTime > ?lastSync";
 				Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
-
-			//экспортируем UserUpdateInfo
-			sql = @"select * from usersettings.userupdateinfo where UserID = ?userId";
-			Export(Result, sql, "userupdateinfos", truncate: true, parameters: new { userId = user.Id });
 
 			var lastFormalization = session.CreateSQLQuery(@"
 select if(LastFormalization > PriceDate, LastFormalization, PriceDate)

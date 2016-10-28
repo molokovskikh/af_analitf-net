@@ -102,6 +102,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<Permission> Permissions { get; set; }
 
+		public virtual string Message { get; set; }
+
+		public virtual uint MessageShowCount { get; set; }
+
 		public virtual bool CanPrint<T>()
 		{
 			return HasPermission(Permission.ShortcutPrintMap, typeof(T));

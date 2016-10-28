@@ -93,7 +93,16 @@ namespace AnalitF.Net.Service.Controllers
 			//если уже подтверждено значит мы получили информацию об импортированных заявках
 			if (log.IsConfirmed) {
 				log.Error += request.Message;
-				var userId = CurrentUser.Id;
+			} else {
+				//записываем информацию о запросе что бы в случае ошибки повторить попытку
+				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
+				File.WriteAllText(failsafe, JsonConvert.SerializeObject(request));
+				var task = RequestLog.RunTask(Session, x => Confirm(x, log.Id, Config, request));
+				if (task.IsFaulted)
+					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+			}
+
+			var userId = CurrentUser.Id;
 				var messageShowCountList = Session.CreateSQLQuery(@"
 select MessageShowCount from usersettings.userupdateinfo where UserID = :userId")
 				.SetParameter("userId", userId).List();
@@ -109,14 +118,6 @@ where UserId = :userId;")
 				.SetParameter("MessageShowCount", messageShowCount)
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
-			} else {
-				//записываем информацию о запросе что бы в случае ошибки повторить попытку
-				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
-				File.WriteAllText(failsafe, JsonConvert.SerializeObject(request));
-				var task = RequestLog.RunTask(Session, x => Confirm(x, log.Id, Config, request));
-				if (task.IsFaulted)
-					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-			}
 
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
