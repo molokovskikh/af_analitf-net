@@ -35,7 +35,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Status = StockStatus.Available,
 				Address = address,
 				Quantity = 5,
-				ReservedQuantity = 0
+				ReservedQuantity = 0,
+				SupplyQuantity = 5
 			};
 			session.Save(stock);
 
@@ -87,7 +88,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			var dstStock = stock.Copy();
 			dstStock.Address = doc.DstAddress;
-			dstStock.Quantity = dstStock.ReservedQuantity = dstStock.SupplyQuantity = 0;
+			dstStock.Quantity = 0;
 			session.Save(dstStock);
 
 			//Мы создаем документ Внутренее перемещение на 3 упаковки, после того как строка папаверина
@@ -99,7 +100,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
-			Assert.AreEqual(dstStock.SupplyQuantity, 0);
+			Assert.AreEqual(dstStock.Quantity, 0);
+			Assert.AreEqual(dstStock.ReservedQuantity, 0);
 			Assert.AreEqual(line.Quantity, 3);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.Opened);
 
@@ -111,23 +113,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 			Assert.AreEqual(line.Quantity, 3);
-			Assert.AreEqual(dstStock.SupplyQuantity, 3);
+			Assert.AreEqual(dstStock.Quantity, 0);
+			Assert.AreEqual(dstStock.ReservedQuantity, 3);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.Closed);
 
 			// по факту получения товара на складе получателя, пользователь переводит документ в Получено. Товар на складе в состоянии В наличии
 			doc.End(session);
 			session.Save(doc);
 			session.Flush();
-			Assert.AreEqual(dstStock.SupplyQuantity, 0);
 			Assert.AreEqual(dstStock.Quantity, 3);
+			Assert.AreEqual(dstStock.ReservedQuantity, 0);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.End);
 
 			// при откате - предыдущее состояние
 			doc.ReEnd(session);
 			session.Save(doc);
 			session.Flush();
-			Assert.AreEqual(dstStock.SupplyQuantity, 3);
 			Assert.AreEqual(dstStock.Quantity, 0);
+			Assert.AreEqual(dstStock.ReservedQuantity, 3);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.Closed);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
@@ -137,7 +140,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
-			Assert.AreEqual(dstStock.SupplyQuantity, 0);
+			Assert.AreEqual(dstStock.SupplyQuantity, 5);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.Opened);
 
 			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве

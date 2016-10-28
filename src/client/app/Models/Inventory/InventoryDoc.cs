@@ -116,7 +116,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual decimal Quantity { get; set; }
 
-		public virtual string DocumentDate { get; set; }
+		public virtual DateTime DocumentDate { get; set; }
 
 		public virtual string WaybillNumber { get; set; }
 
