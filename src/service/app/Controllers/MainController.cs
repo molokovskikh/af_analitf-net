@@ -100,6 +100,7 @@ namespace AnalitF.Net.Service.Controllers
 				if (task.IsFaulted)
 					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
 			}
+
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 
