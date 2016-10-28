@@ -101,24 +101,6 @@ namespace AnalitF.Net.Service.Controllers
 				if (task.IsFaulted)
 					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
 			}
-
-			var userId = CurrentUser.Id;
-				var messageShowCountList = Session.CreateSQLQuery(@"
-select MessageShowCount from usersettings.userupdateinfo where UserID = :userId")
-				.SetParameter("userId", userId).List();
-
-			var messageShowCount = Convert.ToByte(messageShowCountList.First());
-			if (messageShowCount > 0)
-				messageShowCount--;
-
-			Session.CreateSQLQuery(@"
-update usersettings.userupdateinfo
-set MessageShowCount = :MessageShowCount
-where UserId = :userId;")
-				.SetParameter("MessageShowCount", messageShowCount)
-				.SetParameter("userId", userId)
-				.ExecuteUpdate();
-
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 

@@ -108,8 +108,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			Log.InfoFormat("Обновление завершено успешно");
 			var user = Session.Query<User>().FirstOrDefault();
-			if (user != null && user.MessageShowCount <= 0)
-				return result;
 			var message = user?.Message;
 			if (message != null)
 				Results.Add(new MessageResult(message));
