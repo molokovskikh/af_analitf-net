@@ -9,7 +9,6 @@ using Common.Tools;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
-using NHibernate.Util;
 
 namespace AnalitF.Net.Service.Controllers
 {
