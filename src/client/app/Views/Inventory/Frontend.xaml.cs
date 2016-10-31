@@ -50,6 +50,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 					Model.Trigger();
 				} else if (args.Key == Key.F6) {
 					results = Model.SearchByTerm();
+					} else if (args.Key == Key.F7) {
+					results = Model.SearchByCost();
 				} else if (args.Key == Key.Enter) {
 					results = Model.Close();
 				}

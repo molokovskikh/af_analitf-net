@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
 using NUnit.Framework;
 using AnalitF.Net.Client.ViewModels.Inventory;
@@ -6,6 +8,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Helpers;
+using Caliburn.Micro;
 using Common.NHibernate;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
@@ -84,6 +87,32 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.SearchByBarcode();
 			Assert.AreEqual(true, model.HasError.Value);
 			Assert.AreEqual("Товар не найден", model.LastOperation.Value);
+		}
+
+		[Test]
+		public void Find_by_name()
+		{
+			var name = "Папаверин";
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.Input.Value = name;
+			var result = model.SearchByTerm().GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(1, dialog.Items.Value.Count);
+		}
+
+		[Test]
+		public void Find_by_cost()
+		{
+			var cost = "1";
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.Input.Value = cost;
+			var result = model.SearchByCost().GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(1, dialog.Items.Value.Count);
 		}
 
 		[Test]
