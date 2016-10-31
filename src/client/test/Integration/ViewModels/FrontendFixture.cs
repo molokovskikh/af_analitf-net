@@ -20,8 +20,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		private Stock stock;
 
-		private uint count;
-
 		[SetUp]
 		public void Setup()
 		{
