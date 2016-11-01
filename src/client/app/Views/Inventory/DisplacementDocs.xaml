@@ -38,12 +38,12 @@
 		</ToolBar>
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Док. ИД" Binding="{Binding Id}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Отправитель" Binding="{Binding AddressName}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Получатель" Binding="{Binding DstAddressName}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplierSum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding PosCount}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding SupplierSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Кол-во позиций" Binding="{Binding PosCount}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
 			</DataGrid.Columns>
