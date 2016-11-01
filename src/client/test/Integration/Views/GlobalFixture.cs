@@ -45,6 +45,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Panel = System.Windows.Controls.Panel;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
+using AnalitF.Net.Client.Controls;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
@@ -277,16 +278,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var details = (OrderDetailsViewModel)shell.ActiveItem;
 				var view = (FrameworkElement)details.GetView();
-				var check = (CheckBox)view.FindName("OnlyWarning");
-				Assert.IsTrue(check.IsVisible);
-
 				var count = (Label)view.FindName("Source_Count");
 				Assert.AreEqual(2, count.Content);
-				Assert.False(check.IsChecked.Value);
-				check.IsChecked = true;
+
+				details.FilterItems.Where(x => x.Item.Item1 != "OnlyWarning").Each(x => x.IsSelected = false);
+				scheduler.AdvanceByMs(10000);
+				Assert.AreEqual(1, details.Lines.Value.Count);
 
 				details.CurrentLine.Value = details.Lines.Value.First();
-
 				var text = (TextBox)view.FindName("ErrorText");
 				Assert.IsTrue(text.IsVisible);
 				Assert.AreEqual("предложение отсутствует ", text.Text);

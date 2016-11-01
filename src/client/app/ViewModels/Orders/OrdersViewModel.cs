@@ -563,7 +563,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return;
 
 			var frozenProducts = Orders.Where(x => x.Frozen).SelectMany(x => x.Lines).Select(x => x.ProductId).Distinct().ToList();
-			Shell.Navigate(new OrderDetailsViewModel(CurrentOrder));
+			Shell.Navigate(new OrderDetailsViewModel(CurrentOrder, frozenProducts));
 		}
 
 		public void EnterSentOrder()

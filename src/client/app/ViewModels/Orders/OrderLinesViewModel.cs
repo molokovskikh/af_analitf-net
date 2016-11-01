@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using LinqExp = System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Windows;
