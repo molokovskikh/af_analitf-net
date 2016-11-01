@@ -45,6 +45,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? SupplySum { get; set; }
 		public virtual decimal? RetailSum { get; set; }
 		public virtual decimal LinesCount { get; set; }
+		public virtual string Comment { get; set; }
 
 		public virtual IList<WriteoffLine> Lines { get; set; }
 

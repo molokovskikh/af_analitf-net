@@ -46,7 +46,8 @@
 				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
-			</DataGrid.Columns>
+        <controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" />
+      </DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>
 </UserControl>
