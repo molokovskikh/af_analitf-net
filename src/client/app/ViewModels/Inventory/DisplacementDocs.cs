@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public DisplacementDocs()
 		{
-			Begin.Value = DateTime.Today.AddDays(-7);
+			Begin.Value = DateTime.Today.AddDays(-30);
 			End.Value = DateTime.Today;
 			SelectedItems = new List<DisplacementDoc>();
 			CurrentItem.Subscribe(x => {
