@@ -18,7 +18,11 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}" HorizontalAlignment="Left" ToolTip="Удалить">Удалить</Button>
       <Button Name="Edit" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Редактировать</Button>
       <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left" ToolTip="Список в Excel">Список в Excel</Button>
-			<Separator />
+      <Button Name="PrintDocs" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать документов</Button>
+      <Button Name="PrintLabel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать ярлыков</Button>
+      <Button Name="Conduct" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Провести</Button>
+      <Button Name="UnConduct" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Распровести</Button>
+      <Separator />
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
 					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>

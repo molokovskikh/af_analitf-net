@@ -135,5 +135,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			return ExcelExporter.Export(book);
 		}
+
+		public IResult PrintDocs()
+		{
+			return null;
+		}
+
+		public IResult PrintLabel()
+		{
+			return null;
+		}
 	}
 }
