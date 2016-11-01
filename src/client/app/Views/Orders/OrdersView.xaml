@@ -28,9 +28,9 @@
 
 		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<Label>Вывести за период с</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="Begin" />
+			<DatePicker Name="Begin"/>
 			<Label>по</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="End" />
+			<DatePicker Name="End" />
 			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Prices" ButtonContent="Прайс-листы" />
 			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>

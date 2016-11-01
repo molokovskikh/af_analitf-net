@@ -49,9 +49,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			SelectedDeletedOrders = new List<DeletedOrder>();
 			deletedOrders = new ReactiveCollection<DeletedOrder>();
 
-			Begin.Mute(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
-			End.Mute(DateTime.Today);
-
 			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected.Value))
 				.Subscribe(_ => {
