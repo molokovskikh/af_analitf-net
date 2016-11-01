@@ -65,6 +65,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual IList<DisplacementLine> Lines { get; set; }
 
+		public virtual string Comment { get; set; }
+
 		public virtual string this[string columnName]
 		{
 			get

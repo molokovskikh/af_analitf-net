@@ -50,7 +50,8 @@
 				<controls:DataGridTextColumnEx Header="Кол-во позиций" Binding="{Binding PosCount}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
-			</DataGrid.Columns>
+        <controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" />
+      </DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>
 </UserControl>
