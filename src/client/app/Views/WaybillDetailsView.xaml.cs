@@ -254,6 +254,13 @@ namespace AnalitF.Net.Client.Views
 						gridColumn.IsReadOnly = model.Waybill.IsReadOnly;
 					}
 				}
+				model.Waybill.PropertyChanged += (sender, args) => {
+					if (args.PropertyName == "IsCreatedByUser") {
+						MainGrid.Children.Remove(lines);
+						Init();
+						lines.ItemsSource = model.Lines.Value;
+					}
+				};
 			}
 			grid.BeginningEdit += (sender, args) => {
 				var line = args.Row.DataContext as WaybillLine;

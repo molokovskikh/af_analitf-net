@@ -128,7 +128,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsRejectVisible { get; set; }
 		public NotifyValue<Reject> Reject { get; set; }
 		public NotifyValue<bool> CanStock { get; set; }
-
+		public NotifyValue<bool> CanToEditable { get; set; }
+		
 		private void Calculate()
 		{
 			//в случае если мы восстановили значение из сессии
@@ -147,6 +148,13 @@ namespace AnalitF.Net.Client.ViewModels
 			Waybill = Session.Load<Waybill>(id);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.Opened).Subscribe(CanStock);
+
+			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
+			.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
+			.Select(_ => {
+					return Waybill.Status == DocStatus.Opened && !Waybill.IsCreatedByUser;
+			})
+			.Subscribe(CanToEditable);
 
 			Calculate();
 
@@ -489,7 +497,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
-                l.RetailMarkupInRubles,
+        l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum
@@ -528,6 +536,18 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			Waybill.Stock(Session);
 			Manager.Notify("Накладная оприходована");
+		}
+
+		public void ToEditable()
+		{
+			if (!CanToEditable.Value)
+				return;
+
+			if (!Confirm("Накладная будет переведена в редактируемые, продолжить?"))
+				return;
+
+			Waybill.IsCreatedByUser = true;
+			Manager.Notify("Накладная переведена в редактируемые");
 		}
 
 #if DEBUG
