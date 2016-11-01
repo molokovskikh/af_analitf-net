@@ -373,4 +373,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+	<ItemGroup>
+		<ShareFiles Include="..\..\..\lib\libmysqld\**\*.*"/>
+	</ItemGroup>
+
+	<Target Name="BeforeBuild">
+		<Copy SkipUnchangedFiles="True"
+			SourceFiles="@(ShareFiles)"
+			DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
+		/>
+	</Target>
 </Project>

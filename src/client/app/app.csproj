@@ -1010,8 +1010,14 @@
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
+	<ItemGroup>
+		<ShareFiles Include="..\..\..\lib\libmysqld\**\*.*"/>
+	</ItemGroup>
+
+	<Target Name="BeforeBuild">
+		<Copy SkipUnchangedFiles="True"
+			SourceFiles="@(ShareFiles)"
+			DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
+		/>
+	</Target>
 </Project>
