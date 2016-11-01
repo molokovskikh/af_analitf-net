@@ -692,5 +692,21 @@ update Addresses set Id =  2575 where Id = :addressId")
 			Run(cmd);
 			Assert.AreEqual(cmd.Results.Count, 0);
 		}
+
+		[Test]
+		public void Show_user_update_message_waybills()
+		{
+			Fixture(new CreateMessageUpdateInfo());
+			localSession.Query<User>().First().Message = "Test Message";
+			var cmd = new UpdateCommand();
+			Run(cmd);
+			Assert.AreEqual(1, cmd.Results.Count);
+			var result = (MessageResult)cmd.Results[0];
+			Assert.That(result.Message, Does.Contain("Test Message"));
+			cmd = new UpdateCommand();
+			cmd.SyncData = "Waybills";
+			Run(cmd);
+			Assert.AreEqual(0, cmd.Results.Count);
+		}
 	}
 }

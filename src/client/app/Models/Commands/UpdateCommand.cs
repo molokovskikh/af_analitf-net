@@ -109,7 +109,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			Log.InfoFormat("Обновление завершено успешно");
 			var user = Session.Query<User>().FirstOrDefault();
 			var message = user?.Message;
-			if (message != null)
+			if (message != null
+				&& String.IsNullOrEmpty(SyncData))
 				Results.Add(new MessageResult(message));
 			return result;
 		}
