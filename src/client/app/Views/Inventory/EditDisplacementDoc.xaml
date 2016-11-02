@@ -15,18 +15,18 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 
-		<ToolBar Grid.Row="0">
-			<Button Name="AddLine">Добавить</Button>
+		<WrapPanel Grid.Row="0">
+      <Button Name="AddLine" Style="{StaticResource FilterElement}" HorizontalAlignment="Left" ToolTip="Добавить (Ins)">Добавить</Button>
 			<Separator />
-			<Button Name="DeleteLine">Удалить</Button>
+      <Button Name="DeleteLine" Style="{StaticResource FilterElement}" HorizontalAlignment="Left" ToolTip="Удалить (Del)">Удалить</Button>
 			<Separator />
-      <Button Name="ReOpenDoc">Распровести</Button>
-      <Button Name="CloseDoc">Провести</Button>
+      <Button Name="ReOpenDoc" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Распровести</Button>
+      <Button Name="CloseDoc" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Провести</Button>
       <Separator />
-			<Button Name="ExportExcel">Список в Excel</Button>
-      <Button Name="Print">Печать документов</Button>
-      <Button Name="PrintStockPriceTags">Печать ярлыков</Button>
-    </ToolBar>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Список в Excel</Button>
+      <Button Name="Print" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать документов</Button>
+      <Button Name="PrintStockPriceTags" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать ярлыков</Button>
+    </WrapPanel>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
 			<Grid.RowDefinitions>
