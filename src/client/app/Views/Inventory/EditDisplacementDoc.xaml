@@ -16,23 +16,17 @@
 		</Grid.RowDefinitions>
 
 		<ToolBar Grid.Row="0">
-			<Button Name="AddLine">Добавить строку</Button>
+			<Button Name="AddLine">Добавить</Button>
 			<Separator />
-			<Button Name="EditLine">Редактировать строку</Button>
+			<Button Name="DeleteLine">Удалить</Button>
 			<Separator />
-			<Button Name="DeleteLine">Удалить строку</Button>
-			<Separator />
-			<Button Name="ReOpenDoc">Резерв</Button>
-			<Button Name="CloseDoc">Передано</Button>
-			<Button Name="EndDoc">Получено</Button>
-			<Button Name="Save">Сохранить</Button>
-			<Separator />
+      <Button Name="ReOpenDoc">Распровести</Button>
+      <Button Name="CloseDoc">Провести</Button>
+      <Separator />
 			<Button Name="ExportExcel">Список в Excel</Button>
-			<Button Name="Print">Печать</Button>
-			<Button Name="PrintStockPriceTags">Ценники</Button>
-			<Button Name="PrintStockRackingMaps">Постеллажная карта</Button>
-			<Button Name="PrintDisplacementWaybill">Требование-накладная</Button>
-		</ToolBar>
+      <Button Name="Print">Печать документов</Button>
+      <Button Name="PrintStockPriceTags">Печать ярлыков</Button>
+    </ToolBar>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
 			<Grid.RowDefinitions>
@@ -71,8 +65,8 @@
 				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Цена закупки с НДС" Binding="{Binding SupplierCost}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplierSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена розничная" Binding="{Binding SupplierCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding SupplierSum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Серия" Binding="{Binding SerialNumber}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Срок" Binding="{Binding Period}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Штрихкод" Binding="{Binding Barcode}" Width="*" />

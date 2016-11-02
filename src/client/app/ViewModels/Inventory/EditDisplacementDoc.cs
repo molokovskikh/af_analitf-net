@@ -103,6 +103,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Add(line);
 			Doc.Lines.Add(line);
 			Doc.UpdateStat();
+			Save();
 		}
 
 		public void DeleteLine()
@@ -111,6 +112,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Save();
 		}
 
 		public IEnumerable<IResult> EditLine()
@@ -126,6 +128,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(edit);
 			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity);
 			Doc.UpdateStat();
+			Save();
 		}
 
 		public IEnumerable<IResult> EnterLine()
