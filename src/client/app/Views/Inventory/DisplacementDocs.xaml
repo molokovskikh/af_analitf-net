@@ -13,7 +13,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
 		</Grid.RowDefinitions>
-		<ToolBar Grid.Row="0">
+    <WrapPanel Grid.Row="0">
 			<Button Name="Create" Style="{StaticResource FilterElement}" HorizontalAlignment="Left" ToolTip="Создать новый документ">Создать</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}" HorizontalAlignment="Left" ToolTip="Удалить">Удалить</Button>
       <Button Name="Edit" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Редактировать</Button>
@@ -39,7 +39,7 @@
 					<RadioButton GroupName="Source" Name="IsEnd" Margin="5">Получено</RadioButton>
 				</StackPanel>
 			</GroupBox>
-		</ToolBar>
+		</WrapPanel>
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />

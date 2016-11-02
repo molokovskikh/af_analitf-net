@@ -145,5 +145,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			return null;
 		}
+
+		public void Conduct()
+		{
+			if (!CanEdit)
+				return;
+			CurrentItem.Value.Close(Session);
+		}
+
+		public void UnConduct()
+		{
+			if (!CanEdit)
+				return;
+			CurrentItem.Value.ReOpen(Session);
+		}
 	}
 }
