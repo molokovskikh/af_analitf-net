@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public EditDisplacementDoc(uint id)
 			: this()
 		{
-			DisplayName = "Редактирование внутреннего перемещения";
+			DisplayName = "Редактирование внутреннего перемещения " + Session.Load<DisplacementDoc>(id).Id;
 			InitDoc(Session.Load<DisplacementDoc>(id));
 			Lines.AddRange(Doc.Lines);
 		}
