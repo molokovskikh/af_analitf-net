@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using Common.Tools;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
+using Common.NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -133,20 +135,51 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == Input.Value)).Result;
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).Where(x => x.Barcode == Input.Value)).Result;
 			UpdateProduct(stock, "Штрих код");
 		}
 
 		private void UpdateProduct(Stock stock, string operation)
 		{
 			if (stock == null) {
-				Error("Товар не найден");
-				return;
+					Error("Товар не найден");
+					return;
 			}
 			if (Quantity.Value == null) {
 				Error("Введите количество");
 				return;
 			}
+			//списывать количество мы должны с загруженного объекта
+			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
+			if (stock.Quantity < Quantity.Value) {
+				Error("Нет требуемого количества");
+				return;
+			}
+			Input.Value = null;
+			Message(operation);
+			var quantity = Quantity.Value.Value;
+			var line = new CheckLine(stock, quantity, checkType);
+			Lines.Add(line);
+			CurrentLine.Value = line;
+			Quantity.Value = null;
+		}
+
+		private void UpdateProduct(IQueryable<Stock> stocks, string operation)
+		{
+			if (Quantity.Value == null) {
+				Error("Введите количество");
+				return;
+			}
+			if (!stocks.Any()) {
+				Error("Товар не найден");
+				return;
+			}
+			if (stocks.Count() > 1) {
+				var result = SearchByTerm(stocks.First().Product);
+				Coroutine.BeginExecute(result.GetEnumerator(), new ActionExecutionContext());
+				return;
+			}
+			var stock = stocks.First();
 			//списывать количество мы должны с загруженного объекта
 			var quantity = Quantity.Value.Value;
 			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
@@ -220,13 +253,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 		// Поиск товара  F6
-		public IEnumerable<IResult> SearchByTerm()
+		public IEnumerable<IResult> SearchByTerm(string term = "")
 		{
 			if (Quantity.Value == null) {
 				Error("Введите количество");
 				yield break;
 			}
-			var model = new StockSearch(Input.Value);
+			if (String.IsNullOrEmpty(term))
+				term = Input.Value;
+			var model = new StockSearch(term);
+			yield return new DialogResult(model);
+			UpdateProduct(model.CurrentItem, "Поиск товара");
+		}
+
+		public IEnumerable<IResult> SearchByCost(decimal cost = 0)
+		{
+			if (Quantity.Value == null) {
+				Error("Введите количество");
+				yield break;
+			}
+			if (cost == 0)
+				cost = Convert.ToDecimal(Input.Value);
+			var model = new StockSearch(cost);
 			yield return new DialogResult(model);
 			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
