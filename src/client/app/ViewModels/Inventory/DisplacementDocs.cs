@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using Caliburn.Micro;
+using Common.NHibernate;
 using NHibernate;
 using NPOI.HSSF.UserModel;
 
@@ -36,11 +37,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public List<DisplacementDoc> SelectedItems { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanEdit { get; set; }
+		public NotifyValue<bool> CanReOpenDoc { get; set; }
+		public NotifyValue<bool> CanEndDoc { get; set; }
 
 		public NotifyValue<bool> IsAll { get; set; }
 		public NotifyValue<bool> IsOpened { get; set; }
 		public NotifyValue<bool> IsClosed { get; set; }
 		public NotifyValue<bool> IsEnd { get; set; }
+
 
 		protected override void OnInitialize()
 		{
@@ -57,6 +61,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public List<DisplacementDoc> LoadItems(IStatelessSession session)
 		{
+			/*Session.DeleteEach<DisplacementDoc>();
+			var displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
+			displacementDoc.Status = DisplacementDocStatus.Closed;
+			Session.Save(displacementDoc);
+			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
+			displacementDoc.Status = DisplacementDocStatus.Opened;
+			Session.Save(displacementDoc);
+			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
+			displacementDoc.Status = DisplacementDocStatus.End;
+			Session.Save(displacementDoc);*/
+
 			var query = session.Query<DisplacementDoc>();
 
 			query = query.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
@@ -136,27 +151,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return ExcelExporter.Export(book);
 		}
 
-		public IResult PrintDocs()
+		public void EndDoc()
 		{
-			return null;
+			CurrentItem.Value.End(Session);
 		}
 
-		public IResult PrintLabel()
+		public void ReOpenDoc()
 		{
-			return null;
-		}
-
-		public void Conduct()
-		{
-			if (!CanEdit)
-				return;
-			CurrentItem.Value.Close(Session);
-		}
-
-		public void UnConduct()
-		{
-			if (!CanEdit)
-				return;
 			CurrentItem.Value.ReOpen(Session);
 		}
 	}

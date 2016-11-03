@@ -12,6 +12,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -27,6 +31,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 			InitializeComponent();
 
 			Loaded += (sender, args) => {
+				ApplyStyles();
 				Items.Focus();
 			};
 
@@ -43,6 +48,13 @@ namespace AnalitF.Net.Client.Views.Inventory
 					args.Handled = true;
 				}
 			});
+		}
+		public void ApplyStyles()
+		{
+			var context = "";
+			if (((BaseScreen)DataContext).User != null)
+				context = "CorrectionEnabled";
+			StyleHelper.ApplyStyles(typeof(DisplacementDoc), Items, Application.Current.Resources, Legend, context);
 		}
 	}
 }
