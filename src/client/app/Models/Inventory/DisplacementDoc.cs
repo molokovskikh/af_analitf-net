@@ -87,6 +87,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(DstAddress) };
 
+		[Style(Description = "\"Непроведен\"")]
+		public virtual bool IsNotConducted => Status == DisplacementDocStatus.Opened;
+
 		public virtual void Close(ISession session)
 		{
 			CloseDate = DateTime.Now;
