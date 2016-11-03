@@ -5,25 +5,38 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
              xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+						 xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Create" />
+		<KeyBinding Gesture="Enter" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Open" />
+		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Post" />
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel" CommandParameter="UnPost" />
+		<KeyBinding Gesture="F3" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ExportExcel" />
+	</UserControl.InputBindings>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<ToolBar Grid.Row="0">
-			<Button Name="Create">Создать</Button>
-			<Button Name="Edit">Редактировать</Button>
-			<Button Name="Delete">Удалить</Button>
-			<Button Name="ExportExcel">Список в Excel</Button>
-			<Separator />
+		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
+			<Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать (Ctrl+N)">Создать</Button>
+			<Button Name="Open" Style="{StaticResource FilterElement}" ToolTip="Открыть (Enter)">Открыть</Button>
+			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
+			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
+			<Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
+			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>
-					<RadioButton GroupName="Source" Name="IsOpened" Margin="5">Открытые</RadioButton>
-					<RadioButton GroupName="Source" Name="IsClosed" Margin="5">Закрытые</RadioButton>
+					<RadioButton GroupName="Source" Name="IsNotPosted" Margin="5">Непроведенные</RadioButton>
+					<RadioButton GroupName="Source" Name="IsPosted" Margin="5">Проведенные</RadioButton>
 				</StackPanel>
 			</GroupBox>
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
@@ -34,20 +47,20 @@
 					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
 				</StackPanel>
 			</GroupBox>
-		</ToolBar>
+		</WrapPanel>
 
-		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items" IsReadOnly="False">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" IsReadOnly="False" />
+				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Кол-во позиций" Binding="{Binding LinesCount}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" IsReadOnly="False"/>
 			</DataGrid.Columns>
 		</controls:DataGrid2>
+		<StackPanel Grid.Row="2" Name="Legend" />
 	</Grid>
 </UserControl>

@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			End.Value = DateTime.Today;
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
-				CanDelete.Value = x?.Status == DocStatus.Opened;
+				CanDelete.Value = x?.Status == DocStatus.NotPosted;
 			});
 			DisplayName = "Списание";
 			TrackDb(typeof(WriteoffDoc));

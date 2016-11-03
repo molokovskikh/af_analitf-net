@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual void Close(ISession session)
 		{
 			CloseDate = DateTime.Now;
-			Status = DocStatus.Closed;
+			Status = DocStatus.Posted;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.ApplyReserved(line.Quantity));
 

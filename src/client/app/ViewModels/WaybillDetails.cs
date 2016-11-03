@@ -147,12 +147,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Waybill = Session.Load<Waybill>(id);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
-				.Select(x => x.Value == DocStatus.Opened).Subscribe(CanStock);
+				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 
 			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
 			.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
 			.Select(_ => {
-					return Waybill.Status == DocStatus.Opened && !Waybill.IsCreatedByUser;
+					return Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser;
 			})
 			.Subscribe(CanToEditable);
 

@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Address = address;
 			Date = DateTime.Now;
-			Status = DocStatus.Opened;
+			Status = DocStatus.NotPosted;
 			UpdateStat();
 		}
 
@@ -80,7 +80,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual void Close(ISession session)
 		{
 			CloseDate = DateTime.Now;
-			Status = DocStatus.Closed;
+			Status = DocStatus.Posted;
 			foreach (var line in Lines)
 				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
 		}
@@ -88,7 +88,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual void ReOpen(ISession session)
 		{
 			CloseDate = null;
-			Status = DocStatus.Opened;
+			Status = DocStatus.NotPosted;
 			foreach (var line in Lines)
 				session.Save(line.Stock.CancelReturnToSupplier(line.Quantity));
 		}

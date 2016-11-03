@@ -68,13 +68,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
 			var editOrDelete = docStatus
-				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.Opened);
+				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
 			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDeleteLine);
-			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.Opened);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanSave);
+			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.NotPosted);
+			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(IsDocOpen);
+			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanCloseDoc);
+			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanSave);
 		}
 
 		public IEnumerable<IResult> AddLine()

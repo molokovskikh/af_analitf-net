@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SelectedItems = new List<ReturnToSupplier>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
-				CanDelete.Value = x?.Status == DocStatus.Opened;
+				CanDelete.Value = x?.Status == DocStatus.NotPosted;
 			});
 			DisplayName = "Возврат поставщику";
 			TrackDb(typeof(ReturnToSupplier));
