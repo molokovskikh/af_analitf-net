@@ -103,11 +103,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(dstStock.Quantity, 0);
 			Assert.AreEqual(dstStock.ReservedQuantity, 0);
 			Assert.AreEqual(line.Quantity, 3);
-			Assert.AreEqual(doc.Status, DisplacementDocStatus.Opened);
+			Assert.AreEqual(doc.Status, DisplacementDocStatus.NotPosted);
 
 			//Если мы закроем документ то получим - Папаверен 2шт, 0шт в резерве
 			// В пути – документ закрыт и переведен. Товар на складе отправителя списан, на складе получателя находится в ожидаемом
-			doc.Close(session);
+			doc.Post(session);
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(line.Quantity, 3);
 			Assert.AreEqual(dstStock.Quantity, 0);
 			Assert.AreEqual(dstStock.ReservedQuantity, 3);
-			Assert.AreEqual(doc.Status, DisplacementDocStatus.Closed);
+			Assert.AreEqual(doc.Status, DisplacementDocStatus.Posted);
 
 			// по факту получения товара на складе получателя, пользователь переводит документ в Получено. Товар на складе в состоянии В наличии
 			doc.End(session);
@@ -131,17 +131,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			Assert.AreEqual(dstStock.Quantity, 0);
 			Assert.AreEqual(dstStock.ReservedQuantity, 3);
-			Assert.AreEqual(doc.Status, DisplacementDocStatus.Closed);
+			Assert.AreEqual(doc.Status, DisplacementDocStatus.Posted);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
-			doc.ReOpen(session);
+			doc.UnPost(session);
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 			Assert.AreEqual(dstStock.SupplyQuantity, 5);
-			Assert.AreEqual(doc.Status, DisplacementDocStatus.Opened);
+			Assert.AreEqual(doc.Status, DisplacementDocStatus.NotPosted);
 
 			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве
 			doc.BeforeDelete();

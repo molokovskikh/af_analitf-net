@@ -26,9 +26,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			End.Value = DateTime.Today;
 			CurrentItem.Subscribe(x => {
 				CanOpen.Value = x != null;
-				CanDelete.Value = x != null && x.Status == DocStatus.NotPosted;
-				CanPost.Value = x != null && x.Status == DocStatus.NotPosted;
-				CanUnPost.Value = x != null && x.Status == DocStatus.Posted;
+				CanDelete.Value = x?.Status == DocStatus.NotPosted;
+				CanPost.Value = x?.Status == DocStatus.NotPosted;
+				CanUnPost.Value = x?.Status == DocStatus.Posted;
 			});
 			DisplayName = "Излишки";
 			TrackDb(typeof(InventoryDoc));
@@ -36,6 +36,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
+		[Export]
 		public ReactiveCollection<InventoryDoc> Items
 		{
 			get { return items; }
@@ -111,8 +112,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
-			if (CurrentItem.Value == null)
-				return;
 			if (!Confirm("Провести выбранный документ?"))
 				return;
 			Session.Load<InventoryDoc>(CurrentItem.Value.Id).Post();
@@ -121,8 +120,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void UnPost()
 		{
-			if (CurrentItem.Value == null)
-				return;
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
 			Session.Load<InventoryDoc>(CurrentItem.Value.Id).UnPost();

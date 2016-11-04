@@ -10,8 +10,6 @@
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	mc:Ignorable="d"
 	d:DesignHeight="300" d:DesignWidth="300"
-	Width="500"
-	Height="600"
 	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
 
 	<i:Interaction.Behaviors>

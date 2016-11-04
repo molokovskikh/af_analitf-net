@@ -44,15 +44,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 		public InventoryDoc Doc { get; set; }
-		public NotifyValue<bool> IsNotPosted { get; set; }
 		public ReactiveCollection<InventoryDocLine> Lines { get; set; }
 		public NotifyValue<InventoryDocLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanAdd { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanEditLine { get; set; }
-		public NotifyValue<bool> CanSave { get; set; }
-		public NotifyValue<bool> CanCloseDoc { get; set; }
-		public NotifyValue<bool> CanReOpenDoc { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -77,16 +75,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDelete);
 			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
-			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(IsNotPosted);
-			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanSave);
-			docStatus.Select(x => x.Value == DocStatus.Posted).Subscribe(CanReOpenDoc);
+			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
+			docStatus.Select(x => x.Value == DocStatus.Posted).Subscribe(CanUnPost);
 		}
 
 		public IEnumerable<IResult> Add()
 		{
 			var search = new StockSearch();
-			yield return new DialogResult(search);
+			yield return new DialogResult(search, resizable: true);
 			var edit = new EditStock(search.CurrentItem)
 			{
 				EditMode = EditStock.Mode.EditQuantity

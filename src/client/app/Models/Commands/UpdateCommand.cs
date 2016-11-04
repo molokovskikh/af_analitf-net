@@ -1209,7 +1209,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				if (!String.IsNullOrEmpty(report)) {
 					//формы должны показываться в определенном порядке
 					Results.Add(new DialogResult(new DocModel<TextDoc>(new TextDoc("Не найденные позиции", report)),
-						fixedSize: true));
+						resizable: true));
 					Results.Add(new MessageResult(SuccessMessage));
 					result = UpdateResult.SilentOk;
 				}

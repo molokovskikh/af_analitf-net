@@ -47,9 +47,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? Delta => RetailSum - SrcRetailSum;
 		public virtual int LinesCount { get; set; }
 
+		[Ignore]
+		[Style(Description = "Непроведенный документ")]
+		public virtual bool IsNotPosted => Status == DocStatus.NotPosted;
+
 		public virtual IList<ReassessmentLine> Lines { get; set; }
 
-		public virtual void Close(ISession session)
+		public virtual void Post(ISession session)
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
@@ -70,19 +74,19 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SrcRetailSum = Lines.Sum(x => x.SrcStock.RetailCost * x.Quantity);
 		}
 
-			public virtual string this[string columnName]
+		public virtual string this[string columnName]
+		{
+			get
 			{
-				get
-				{
-					if (columnName == nameof(Address) && Address == null) {
-						return "Поле 'Адрес' должно быть заполнено";
-					}
-					return null;
+				if (columnName == nameof(Address) && Address == null) {
+					return "Поле 'Адрес' должно быть заполнено";
 				}
+				return null;
 			}
+		}
 
-			public virtual string Error { get; }
-			public virtual string[] FieldsForValidate => new [] { nameof(Address) };
+		public virtual string Error { get; }
+		public virtual string[] FieldsForValidate => new [] { nameof(Address) };
 
 		public virtual void DeleteLine(ReassessmentLine line)
 		{

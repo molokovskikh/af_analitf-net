@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
 			CurrentItem.Subscribe(x => {
-				CanEdit.Value = x != null;
+				CanOpen.Value = x != null;
 				CanDelete.Value = x?.Status == DocStatus.NotPosted;
 			});
 			DisplayName = "Переоценка";
@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<List<ReassessmentDoc>> Items { get; set; }
 		public NotifyValue<ReassessmentDoc> CurrentItem { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
-		public NotifyValue<bool> CanEdit { get; set; }
+		public NotifyValue<bool> CanOpen { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -48,9 +48,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new EditReassessmentDoc(new ReassessmentDoc(Address)));
 		}
 
-		public void Edit()
+		public void Open()
 		{
-			if (!CanEdit)
+			if (!CanOpen)
 				return;
 			Shell.Navigate(new EditReassessmentDoc(CurrentItem.Value.Id));
 		}
@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void EnterItem()
 		{
-			Edit();
+			Open();
 		}
 	}
 }

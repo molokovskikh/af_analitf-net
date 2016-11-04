@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -48,15 +47,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public ReassessmentDoc Doc { get; set; }
 
-		public NotifyValue<bool> IsDocOpen { get; set; }
 		public ReactiveCollection<ReassessmentLine> Lines { get; set; }
 		public NotifyValue<ReassessmentLine> CurrentLine { get; set; }
 
-		public NotifyValue<bool> CanAddLine { get; set; }
-		public NotifyValue<bool> CanDeleteLine { get; set; }
+		public NotifyValue<bool> CanAdd { get; set; }
+		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanEditLine { get; set; }
-		public NotifyValue<bool> CanSave { get; set; }
-		public NotifyValue<bool> CanCloseDoc { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanReasssessment { get; set; }
 
 		protected override void OnInitialize()
@@ -67,6 +64,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Doc.Address = Address;
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			Save();
+			base.OnDeactivate(close);
+		}
+
 		private void InitDoc(ReassessmentDoc doc)
 		{
 			Doc = doc;
@@ -74,12 +77,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var editOrDelete = docStatus
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
 			editOrDelete.Subscribe(CanEditLine);
-			editOrDelete.Subscribe(CanDeleteLine);
+			editOrDelete.Subscribe(CanDelete);
 			var opened = docStatus.Select(x => x.Value == DocStatus.NotPosted);
-			opened.Subscribe(CanAddLine);
-			opened.Subscribe(IsDocOpen);
-			opened.Subscribe(CanCloseDoc);
-			opened.Subscribe(CanSave);
+			opened.Subscribe(CanAdd);
+			opened.Subscribe(CanPost);
 			opened.Subscribe(CanReasssessment);
 		}
 
@@ -99,7 +100,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			public Rounding Rounding { get; set; }
 		}
 
-		public IEnumerable<IResult> Reasssessment()
+		public IEnumerable<IResult> Reassessment()
 		{
 			var settings = new ReassessmentSettings(Settings);
 			yield return new DialogResult(new SimpleSettings(settings));
@@ -114,7 +115,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc.UpdateStat();
 		}
 
-		public IEnumerable<IResult> AddLine()
+		public IEnumerable<IResult> Add()
 		{
 			var search = new StockSearch();
 			yield return new DialogResult(search);
@@ -150,9 +151,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc.UpdateStat();
 		}
 
-		public void DeleteLine()
+		public void Delete()
 		{
-			if (!CanDeleteLine)
+			if (!CanDelete)
 				return;
 			Doc.DeleteLine(CurrentLine.Value);
 			Lines.Remove(CurrentLine.Value);
@@ -179,13 +180,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return EditLine();
 		}
 
-		public void CloseDoc()
+		public void Post()
 		{
-			Doc.Close(Session);
+			Doc.Post(Session);
 			Save();
 		}
 
-		public void Save()
+		private void Save()
 		{
 			if (!IsValide(Doc))
 				return;
