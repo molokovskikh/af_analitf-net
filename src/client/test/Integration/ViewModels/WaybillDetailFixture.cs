@@ -264,5 +264,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf(typeof (OpenResult), result);
 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
+
+		[Test]
+		public void Waybill_to_editable()
+		{
+			model.Waybill.IsCreatedByUser = false;
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+			model.ToEditable();
+			Assert.IsFalse(model.Waybill.IsReadOnly);
+		}
 	}
 }

@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.Models
 		private bool _vitallyImportant;
 		private Rounding? _rounding;
 		private DocStatus _status;
+		private bool _isCreatedByUser;
 
 		public Waybill()
 		{
@@ -124,7 +125,19 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsReadOnly => !IsCreatedByUser;
 
 		[Style(Description = "Накладная, созданная пользователем")]
-		public virtual bool IsCreatedByUser { get; set; }
+		public virtual bool IsCreatedByUser
+		{
+			get { return _isCreatedByUser; }
+			set
+			{
+				if (_isCreatedByUser != value)
+				{
+					_isCreatedByUser = value;
+					Recalculate();
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		[Style(Description = "Накладная с забраковкой")]
 		public virtual bool IsRejectChanged { get; set; }

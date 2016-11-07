@@ -1,10 +1,14 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
 using NUnit.Framework;
 using AnalitF.Net.Client.ViewModels.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
+using AnalitF.Net.Client.Helpers;
+using Caliburn.Micro;
 using Common.NHibernate;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
@@ -19,6 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
+			session.DeleteEach<Stock>();
 			model = Open(new Frontend());
 			stock = new Stock()
 			{
@@ -27,12 +32,85 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Address = address,
 				RetailCost = 1,
 				Quantity = 5,
-				ReservedQuantity = 0
+				ReservedQuantity = 0,
+				Barcode = "10",
+				ProductId = 1
 			};
 			stateless.Insert(stock);
 
 			session.DeleteEach<Check>();
 			session.Flush();
+		}
+
+		[Test]
+		public void Find_by_barcode_scanned()
+		{
+			var barcode = "10";
+			model.BarcodeScanned(barcode);
+			Assert.AreEqual(false, model.HasError.Value);
+			Assert.AreEqual("Штрих код", model.LastOperation.Value);
+			Assert.AreEqual("Папаверин", model.CurrentLine.Value.Product);
+		}
+
+		[Test]
+		public void Find_by_barcode()
+		{
+			var barcode = "10";
+			model.Input.Value = barcode;
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.SearchByBarcode();
+			Assert.AreEqual(false, model.HasError.Value);
+			Assert.AreEqual("Штрих код", model.LastOperation.Value);
+			Assert.AreEqual("Папаверин", model.CurrentLine.Value.Product);
+		}
+
+		[Test]
+		public void Find_by_id()
+		{
+			var id = "1";
+			model.Input.Value = id;
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.SearchByProductId();
+			Assert.AreEqual(false, model.HasError.Value);
+			Assert.AreEqual("Код товара", model.LastOperation.Value);
+			Assert.AreEqual("Папаверин", model.CurrentLine.Value.Product);
+		}
+
+		[Test]
+		public void Find_by_barcode_error()
+		{
+			var barcode = "11";
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.Input.Value = barcode;
+			model.SearchByBarcode();
+			Assert.AreEqual(true, model.HasError.Value);
+			Assert.AreEqual("Товар не найден", model.LastOperation.Value);
+		}
+
+		[Test]
+		public void Find_by_name()
+		{
+			var name = "Папаверин";
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.Input.Value = name;
+			var result = model.SearchByTerm().GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(1, dialog.Items.Value.Count);
+		}
+
+		[Test]
+		public void Find_by_cost()
+		{
+			var cost = "1";
+			model.Quantity = new NotifyValue<uint?>(1);
+			model.Input.Value = cost;
+			var result = model.SearchByCost().GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(1, dialog.Items.Value.Count);
 		}
 
 		[Test]
