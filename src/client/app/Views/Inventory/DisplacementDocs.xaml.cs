@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 			var context = "";
 			if (((BaseScreen)DataContext).User != null)
 				context = "CorrectionEnabled";
-			StyleHelper.ApplyStyles(typeof(DisplacementDoc), Items, Application.Current.Resources, Legend, context);
+			StyleHelper.ApplyStyles(typeof(DisplacementDoc), Items, Application.Current.Resources, null, context);
 		}
 	}
 }

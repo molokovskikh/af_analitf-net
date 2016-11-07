@@ -24,6 +24,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
 				CanDelete.Value = x?.Status == DisplacementDocStatus.Opened;
+				CanReOpenDoc.Value = x?.Status == DisplacementDocStatus.End;
+				CanEndDoc.Value = x?.Status == DisplacementDocStatus.Opened;
 			});
 			DisplayName = "Внутреннее перемещение";
 			TrackDb(typeof(DisplacementDoc));
@@ -61,7 +63,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public List<DisplacementDoc> LoadItems(IStatelessSession session)
 		{
-			/*Session.DeleteEach<DisplacementDoc>();
+			Session.DeleteEach<DisplacementDoc>();
 			var displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
 			displacementDoc.Status = DisplacementDocStatus.Closed;
 			Session.Save(displacementDoc);
@@ -70,7 +72,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.Save(displacementDoc);
 			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
 			displacementDoc.Status = DisplacementDocStatus.End;
-			Session.Save(displacementDoc);*/
+			Session.Save(displacementDoc);
 
 			var query = session.Query<DisplacementDoc>();
 

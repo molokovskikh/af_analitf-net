@@ -74,10 +74,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			editOrDelete.Subscribe(CanDeleteLine);
 			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DisplacementDocStatus.Opened);
 			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(CanCloseDoc);
+			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(CanEndDoc);
 			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(CanSave);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Closed).Subscribe(CanReOpenDoc);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Closed).Subscribe(CanEndDoc);
+			docStatus.Select(x => x.Value == DisplacementDocStatus.End).Subscribe(CanReOpenDoc);
 		}
 
 		public IEnumerable<IResult> AddLine()
@@ -127,8 +126,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			};
 			yield return new DialogResult(edit);
 			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity);
-			Doc.UpdateStat();
 			Save();
+			Doc.UpdateStat();
 		}
 
 		public IEnumerable<IResult> EnterLine()

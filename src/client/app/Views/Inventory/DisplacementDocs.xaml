@@ -51,19 +51,18 @@
         </GroupBox>
       </Grid>
 
-		<controls:DataGrid2 Grid.Row="2" x:Name="Items">
-			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Отправитель" Binding="{Binding AddressName}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Получатель" Binding="{Binding DstAddressName}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding SupplierSum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Кол-во позиций" Binding="{Binding PosCount}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
+    <controls:DataGrid2 Grid.Row="2" x:Name="Items">
+      <DataGrid.Columns>
+        <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Отправитель" Binding="{Binding AddressName}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Получатель" Binding="{Binding DstAddressName}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding SupplierSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Кол-во позиций" Binding="{Binding PosCount}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
         <controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" />
       </DataGrid.Columns>
-		</controls:DataGrid2>
-    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Name="Legend" />
+    </controls:DataGrid2>
   </Grid>
 </UserControl>

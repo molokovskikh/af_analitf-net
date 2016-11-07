@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
 			TrackDb(typeof(Stock));
-			/*Session.DeleteEach<Stock>();
+			Session.DeleteEach<Stock>();
 			var stock = new Stock
  			{
  				Address = Session.Query<Address>().First(),
@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Quantity = 5,
 				ReservedQuantity = 0
  			};
-			Session.Save(stock);*/
+			Session.Save(stock);
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
