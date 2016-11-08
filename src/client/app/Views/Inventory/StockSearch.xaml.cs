@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 	/// <summary>
 	/// Interaction logic for StockSearch.xaml
 	/// </summary>
-	public partial class StockSearch : UserControl
+	public partial class StockSearch : Window
 	{
 		public StockSearch()
 		{

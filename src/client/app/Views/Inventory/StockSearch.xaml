@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.StockSearch"
+﻿<Window x:Class="AnalitF.Net.Client.Views.Inventory.StockSearch"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -18,30 +18,31 @@
 		<behaviors:Focusable />
 	</i:Interaction.Behaviors>
 
-	<UserControl.Resources>
+	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Assets/styles/Watermark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
-	</UserControl.Resources>
+	</Window.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<ToolBar>
-			<TextBox Name="SearchText"
+    <ToolBar>
+      <TextBox Name="SearchText"
 				Style="{StaticResource SearchTerm}"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				caliburn:SearchBinder.Grid="Items">
-				<i:Interaction.Behaviors>
+        <i:Interaction.Behaviors>
 					<behaviors:Watermark Text="Поиск" />
 				</i:Interaction.Behaviors>
 			</TextBox>
 		</ToolBar>
-		<controls:DataGrid2 Grid.Row="1" x:Name="Items" controls:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items" controls:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
+												>
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Код" Binding="{Binding ProductId}" Width="*" />
 				<controls:SearchableDataGridColumn HighlightStyle="{StaticResource DataGridHighlight}" Header="Наименование" Binding="{Binding Product}" Width="*" />
@@ -51,4 +52,4 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>
-</UserControl>
+</Window>

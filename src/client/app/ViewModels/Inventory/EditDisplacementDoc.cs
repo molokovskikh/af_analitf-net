@@ -217,7 +217,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintDisplacementWaybill()
 		{
-			return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines));
+			return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IResult PrintStockRackingMaps()
@@ -239,6 +239,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			Session.Save(Doc);
+			Session.Flush();
+			base.OnDeactivate(close);
 		}
 	}
 }
