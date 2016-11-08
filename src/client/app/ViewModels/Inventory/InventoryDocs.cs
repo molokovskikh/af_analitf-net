@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
@@ -63,20 +64,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(End.Select(x => (object)x))
 				.Merge(IsNotPosted.Changed())
 				.Merge(IsPosted.Changed())
-				.SelectMany(_ => RxQuery(LoadItems))
-				.CatchSubscribe(BindItems, CloseCancellation);
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
-		public void BindItems(List<InventoryDoc> list)
+		public override void Update()
 		{
-			Items = new ReactiveCollection<InventoryDoc>(list) {
-				ChangeTrackingEnabled = true
-			};
-		}
-
-		public List<InventoryDoc> LoadItems(IStatelessSession session)
-		{
-			var query = session.Query<InventoryDoc>()
+			var query = Session.Query<InventoryDoc>()
 				.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
 
 			if (IsNotPosted)
@@ -87,7 +80,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var items = query.Fetch(x => x.Address)
 				.OrderByDescending(x => x.Date)
 				.ToList();
-			return items;
+
+			Items = new ReactiveCollection<InventoryDoc>(items) {
+					ChangeTrackingEnabled = true
+			};
 		}
 
 		public void Create()
@@ -104,6 +100,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public async Task Delete()
 		{
+			if (!CanDelete)
+				return;
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
 			await Env.Query(s => s.Delete(CurrentItem.Value));
@@ -115,6 +113,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Провести выбранный документ?"))
 				return;
 			Session.Load<InventoryDoc>(CurrentItem.Value.Id).Post();
+			CurrentItem.Refresh();
 			Update();
 		}
 
@@ -123,6 +122,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
 			Session.Load<InventoryDoc>(CurrentItem.Value.Id).UnPost();
+			CurrentItem.Refresh();
 			Update();
 		}
 
