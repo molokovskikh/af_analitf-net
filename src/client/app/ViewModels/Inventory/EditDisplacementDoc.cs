@@ -45,16 +45,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public DisplacementDoc Doc { get; set; }
 
-		public NotifyValue<bool> IsDocOpen { get; set; }
 		public ReactiveCollection<DisplacementLine> Lines { get; set; }
 		public NotifyValue<DisplacementLine> CurrentLine { get; set; }
 
-		public NotifyValue<bool> CanAddLine { get; set; }
-		public NotifyValue<bool> CanDeleteLine { get; set; }
+		public NotifyValue<bool> CanAdd { get; set; }
+		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanEditLine { get; set; }
-		public NotifyValue<bool> CanSave { get; set; }
-		public NotifyValue<bool> CanCloseDoc { get; set; }
-		public NotifyValue<bool> CanReOpenDoc { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanEndDoc { get; set; }
 
 		protected override void OnInitialize()
@@ -64,23 +62,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Doc.Address = Address;
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			Save();
+			base.OnDeactivate(close);
+		}
+
 		private void InitDoc(DisplacementDoc doc)
 		{
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
 			var editOrDelete = docStatus
-				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DisplacementDocStatus.Opened);
+				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DisplacementDocStatus.NotPosted);
 			editOrDelete.Subscribe(CanEditLine);
-			editOrDelete.Subscribe(CanDeleteLine);
-			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DisplacementDocStatus.Opened);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Opened).Subscribe(CanSave);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Closed).Subscribe(CanReOpenDoc);
-			docStatus.Select(x => x.Value == DisplacementDocStatus.Closed).Subscribe(CanEndDoc);
+			editOrDelete.Subscribe(CanDelete);
+			docStatus.Subscribe(x => CanAdd.Value = x.Value == DisplacementDocStatus.NotPosted);
+			docStatus.Select(x => x.Value == DisplacementDocStatus.NotPosted).Subscribe(CanPost);
+			docStatus.Select(x => x.Value == DisplacementDocStatus.Posted).Subscribe(CanUnPost);
+			docStatus.Select(x => x.Value == DisplacementDocStatus.Posted).Subscribe(CanEndDoc);
 		}
 
-		public IEnumerable<IResult> AddLine()
+		public IEnumerable<IResult> Add()
 		{
 			if (!IsValide(Doc))
 				yield break;
@@ -105,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc.UpdateStat();
 		}
 
-		public void DeleteLine()
+		public void Delete()
 		{
 			CurrentLine.Value.SrcStock.Release(CurrentLine.Value.Quantity);
 			Lines.Remove(CurrentLine.Value);
@@ -133,15 +135,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return EditLine();
 		}
 
-		public void CloseDoc()
+		public void Post()
 		{
-			Doc.Close(Session);
+			Doc.Post(Session);
 			Save();
 		}
 
-		public void ReOpenDoc()
+		public void UnPost()
 		{
-			Doc.ReOpen(Session);
+			Doc.UnPost(Session);
 			Save();
 		}
 
@@ -151,7 +153,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Save();
 		}
 
-		public void Save()
+		private void Save()
 		{
 			if (!IsValide(Doc))
 				return;

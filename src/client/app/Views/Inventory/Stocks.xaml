@@ -73,7 +73,6 @@
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProducer}, Path=ActualWidth}"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnStatus}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnWaybill}, Path=ActualWidth}" />
-																			 FontWeight="Bold" Binding="{Binding Total}" TextAlignment="Right"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCount}, Path=ActualWidth}"
 																			 FontWeight="Bold" Binding="{Binding TotalCount}" TextAlignment="Right"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnReservedQuantity}, Path=ActualWidth}"

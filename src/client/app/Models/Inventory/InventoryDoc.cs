@@ -5,13 +5,14 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using NHibernate;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
 	public enum DocStatus
 	{
-		[Description("Открыт")] Opened,
-		[Description("Закрыт")] Closed
+		[Description("Не проведен")] NotPosted,
+		[Description("Проведен")] Posted
 	}
 
 	public class InventoryDoc : BaseNotify
@@ -47,6 +48,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 			}
 		}
 
+		[Ignore]
+		[Style(Description = "Непроведенный документ")]
+		public virtual bool IsNotPosted => Status == DocStatus.NotPosted;
+
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
 		public virtual DateTime? CloseDate { get; set; }
@@ -54,22 +59,23 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? SupplySum { get; set; }
 		public virtual decimal? RetailSum { get; set; }
 		public virtual decimal LinesCount { get; set; }
+		public virtual string Comment { get; set; }
 
 		public virtual IList<InventoryDocLine> Lines { get; set; }
 
-		public virtual void Close()
+		public virtual void Post()
 		{
 			CloseDate = DateTime.Now;
-			Status = DocStatus.Closed;
+			Status = DocStatus.Posted;
 			// с поставки на склад
 			foreach (var line in Lines)
 				line.Stock.Incoming(line.Quantity);
 		}
 
-		public virtual void ReOpen()
+		public virtual void UnPost()
 		{
 			CloseDate = null;
-			Status = DocStatus.Opened;
+			Status = DocStatus.NotPosted;
 			// со склада в поставку
 			foreach (var line in Lines)
 				line.Stock.CancelIncoming(line.Quantity);
@@ -116,9 +122,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual decimal Quantity { get; set; }
 
-		public virtual DateTime DocumentDate { get; set; }
-
-		public virtual string WaybillNumber { get; set; }
+		public virtual string Period { get; set; }
 
 		public virtual Stock Stock { get; set; }
 

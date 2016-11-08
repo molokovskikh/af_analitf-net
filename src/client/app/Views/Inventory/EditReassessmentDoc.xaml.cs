@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 
 			Lines.KeyDown += (o, args) => {
 				if (args.Key == Key.Delete) {
-					model.DeleteLine();
+					model.Delete();
 				}
 			};
 		}

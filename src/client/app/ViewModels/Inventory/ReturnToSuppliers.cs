@@ -21,7 +21,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SelectedItems = new List<ReturnToSupplier>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
-				CanDelete.Value = x?.Status == DocStatus.Opened;
+				CanDelete.Value = x?.Status == DocStatus.NotPosted;
+				CanPost.Value = x?.Status == DocStatus.NotPosted;
+				CanUnPost.Value = x?.Status == DocStatus.Posted;
 			});
 			DisplayName = "Возврат поставщику";
 			TrackDb(typeof(ReturnToSupplier));
@@ -34,6 +36,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<ReturnToSupplier> CurrentItem { get; set; }
 		public List<ReturnToSupplier> SelectedItems { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanEdit { get; set; }
 
 		protected override void OnInitialize()
@@ -69,6 +73,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			CurrentItem.Value.BeforeDelete();
 			await Env.Query(s => s.Delete(CurrentItem.Value));
+			Update();
+		}
+
+		public void Post()
+		{
+			if (!Confirm("Провести выбранный документ?"))
+				return;
+			Session.Load<ReturnToSupplier>(CurrentItem.Value.Id).Post(Session);
+			Update();
+		}
+
+		public void UnPost()
+		{
+			if (!Confirm("Распровести выбранный документ?"))
+				return;
+			Session.Load<ReturnToSupplier>(CurrentItem.Value.Id).UnPost(Session);
 			Update();
 		}
 

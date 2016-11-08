@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SelectedItems = new List<DisplacementDoc>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
-				CanDelete.Value = x?.Status == DisplacementDocStatus.Opened;
+				CanDelete.Value = x?.Status == DisplacementDocStatus.NotPosted;
 			});
 			DisplayName = "Внутреннее перемещение";
 			TrackDb(typeof(DisplacementDoc));
@@ -61,9 +61,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			query = query.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
 			if (IsOpened)
-				query = query.Where(x => x.Status == DisplacementDocStatus.Opened);
+				query = query.Where(x => x.Status == DisplacementDocStatus.NotPosted);
 			else if (IsClosed)
-				query = query.Where(x => x.Status == DisplacementDocStatus.Closed);
+				query = query.Where(x => x.Status == DisplacementDocStatus.Posted);
 			else if (IsEnd)
 				query = query.Where(x => x.Status == DisplacementDocStatus.End);
 

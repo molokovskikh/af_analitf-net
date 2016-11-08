@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -23,10 +25,16 @@ namespace AnalitF.Net.Client.Views.Inventory
 		public DisplacementDocs()
 		{
 			InitializeComponent();
+			ApplyStyles();
 
 			Items.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(DisplacementDoc), Items, Application.Current.Resources, Legend);
 		}
 	}
 }

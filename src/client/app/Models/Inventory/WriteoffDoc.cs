@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -46,6 +47,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? RetailSum { get; set; }
 		public virtual decimal LinesCount { get; set; }
 
+		[Ignore]
+		[Style(Description = "Непроведенный документ")]
+		public virtual bool IsNotPosted => Status == DocStatus.NotPosted;
+
 		public virtual IList<WriteoffLine> Lines { get; set; }
 
 		public virtual string this[string columnName]
@@ -61,10 +66,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Error { get; }
 		public virtual string[] FieldsForValidate => new[] {nameof(Address), nameof(Reason)};
 
-		public virtual void Close(ISession session)
+		public virtual void Post(ISession session)
 		{
 			CloseDate = DateTime.Now;
-			Status = DocStatus.Closed;
+			Status = DocStatus.Posted;
 			foreach (var line in Lines)
 				session.Save(line.Stock.ApplyReserved(line.Quantity));
 		}

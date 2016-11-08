@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +24,12 @@ namespace AnalitF.Net.Client.Views.Inventory
 		public WriteoffDocs()
 		{
 			InitializeComponent();
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(WriteoffDoc), Items, Application.Current.Resources, Legend);
 		}
 	}
 }
