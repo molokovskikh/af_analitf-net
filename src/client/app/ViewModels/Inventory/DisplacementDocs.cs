@@ -23,11 +23,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SelectedItems = new List<DisplacementDoc>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
-				/*
-				CanDelete.Value = x?.Status == DisplacementDocStatus.Opened;
-				CanReOpenDoc.Value = x?.Status == DisplacementDocStatus.End;
-				CanEndDoc.Value = x?.Status == DisplacementDocStatus.Opened;
-				*/
+				CanPost.Value = x?.Status == DisplacementDocStatus.NotPosted;
+				CanUnPost.Value = x?.Status == DisplacementDocStatus.Posted;
 				CanDelete.Value = x?.Status == DisplacementDocStatus.NotPosted;
 			});
 			DisplayName = "Внутреннее перемещение";
@@ -41,9 +38,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<DisplacementDoc> CurrentItem { get; set; }
 		public List<DisplacementDoc> SelectedItems { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanEdit { get; set; }
-		public NotifyValue<bool> CanReOpenDoc { get; set; }
-		public NotifyValue<bool> CanEndDoc { get; set; }
 
 		public NotifyValue<bool> IsAll { get; set; }
 		public NotifyValue<bool> IsOpened { get; set; }
@@ -67,17 +64,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public List<DisplacementDoc> LoadItems(IStatelessSession session)
 		{
-			Session.DeleteEach<DisplacementDoc>();
-			var displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.NotPosted;
-			Session.Save(displacementDoc);
-			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.Posted;
-			Session.Save(displacementDoc);
-			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.End;
-			Session.Save(displacementDoc);
-
 			var query = session.Query<DisplacementDoc>();
 
 			query = query.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
@@ -100,6 +86,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new EditDisplacementDoc(new DisplacementDoc(Address)));
 		}
 
+		public void Open()
+		{
+			Edit();
+		}
+
 		public void Edit()
 		{
 			if (!CanEdit)
@@ -114,6 +105,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			CurrentItem.Value.BeforeDelete();
 			await Env.Query(s => s.Delete(CurrentItem.Value));
+			Items.Value.Remove(CurrentItem.Value);
 			Update();
 		}
 
@@ -164,12 +156,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
+			if (!Confirm("Провести выбранный документ?"))
+				return;
 			CurrentItem.Value.Post(Session);
+			Update();
 		}
 
 		public void UnPost()
 		{
+			if (!Confirm("Распровести выбранный документ?"))
+				return;
 			CurrentItem.Value.UnPost(Session);
+			Update();
 		}
 	}
 }
