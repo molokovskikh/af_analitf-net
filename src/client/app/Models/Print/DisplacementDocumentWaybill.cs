@@ -101,7 +101,6 @@ namespace AnalitF.Net.Client.Models.Print
 			var supplierSum = lines.Sum(l => l.SupplierSum);
 			var result = new TableRow();
 			result.FontWeight = FontWeights.Bold;
-			result.FontSize = 8;
 			result.Cells.Add(Cell("Итого", 4));
 			result.Cells.Add(Cell(supplierSum));
 			dataTable.RowGroups[0].Rows.Add(result);

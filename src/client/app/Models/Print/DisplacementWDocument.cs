@@ -81,12 +81,12 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Срок", 80),
 				new PrintColumn("наименование", 80),
 				new PrintColumn("Код по ОКЕИ", 80),
-				new PrintColumn("Цена", 80),
-				new PrintColumn("Затребовано.", 80),
-				new PrintColumn("Отпущено", 80),
-				new PrintColumn("Сумма, руб", 80),
-				new PrintColumn("Дебет", 80),
-				new PrintColumn("Кредит", 80),
+				new PrintColumn("Цена", 60),
+				new PrintColumn("Затребовано.", 60),
+				new PrintColumn("Отпущено", 60),
+				new PrintColumn("Сумма, руб", 60),
+				new PrintColumn("Дебет", 40),
+				new PrintColumn("Кредит", 40),
 				new PrintColumn("Примечание", 80),
 			};
 				var dataTable = BuildTableHeader(columns, new [] {
@@ -122,7 +122,6 @@ namespace AnalitF.Net.Client.Models.Print
 			var retailSum = lines.Sum(l => l.RetailSum);
 			var result = new TableRow();
 			result.FontWeight = FontWeights.Bold;
-			result.FontSize = 8;
 			result.Cells.Add(Cell("Итого", 5));
 			result.Cells.Add(Cell("X"));
 			result.Cells.Add(Cell("X"));
@@ -236,7 +235,7 @@ namespace AnalitF.Net.Client.Models.Print
 				grid.ColumnDefinitions[column].Width = GridLength.Auto;
 				column++;
 			}
-			grid.ColumnDefinitions[column - 1].Width = new GridLength(1, GridUnitType.Star);
+			grid.ColumnDefinitions[column - 1].Width =  GridLength.Auto;
 			return bodyBlock;
 		}
 
@@ -250,7 +249,7 @@ namespace AnalitF.Net.Client.Models.Print
 				grid.ColumnDefinitions[column].Width = GridLength.Auto;
 				column++;
 			}
-			grid.ColumnDefinitions[column - 1].Width = new GridLength(1, GridUnitType.Star);
+			grid.ColumnDefinitions[column - 1].Width =  GridLength.Auto;
 			return grid;
 		}
 

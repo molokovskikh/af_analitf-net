@@ -234,6 +234,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), req.requirementWaybillName))), fullScreen: true);
 		}
 
+		public IEnumerable<IResult> PrintPriceNegotiationProtocol()
+		{
+			var req = new RequirementNegotiationProtocol();
+			yield return new DialogResult(req);
+			if (req.Fio == null)
+				yield break;
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Протокол согласования цен ЖНВЛП",
+				new PriceNegotiationProtocol(Doc, Lines, req.Fio))), fullScreen: true);
+		}
+
 		public IResult PrintStockRackingMaps()
 		{
 			var receivingOrders = Session.Query<Waybill>().ToList();
