@@ -210,6 +210,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return Preview("Внутренее перемещение", new DisplacementDocument(Lines.ToArray()));
 		}
 
+		public IEnumerable<IResult> PrintDisplacementDocumentWaybill()
+		{
+			return Preview("Внутренее перемещение", new DisplacementDocumentWaybill(Doc, Lines, Session.Query<WaybillSettings>().First()));
+		}
+
 		public IResult PrintStockPriceTags()
 		{
 			return new DialogResult(new PrintPreviewViewModel
@@ -221,26 +226,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintDisplacementWaybill()
 		{
-			/*var req = new RequirementWaybill();
-			yield return new DialogResult(req);
-			var print = new PrintPreviewViewModel{
-				DisplayName = "Требование-накладная",
-				Document = new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), req.requirementWaybillName).Build()
-			};
-			yield return new DialogResult(print);*/
 			var req = new RequirementWaybill();
 			yield return new DialogResult(req);
 			if (req.requirementWaybillName == null)
 				yield break;
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Требование-накладная",
 				new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), req.requirementWaybillName))), fullScreen: true);
-			//return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), null));
-		}
-
-		public IEnumerable<IResult> GetRequirementWaybillName()
-		{
-			var search = new RequirementWaybill();
-			yield return new DialogResult(search);
 		}
 
 		public IResult PrintStockRackingMaps()

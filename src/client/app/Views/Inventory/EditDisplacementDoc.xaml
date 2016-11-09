@@ -37,6 +37,7 @@
       <Button Name="PrintStockPriceTags" Style="{StaticResource FilterElement}" ToolTip="Печать ярлыков (Ctrl+L)">Печать ярлыков</Button>
       <Button Name="PrintStockRackingMaps" Style="{StaticResource FilterElement}" ToolTip="Постеллажная карта">Постеллажная карта</Button>
       <Button Name="PrintDisplacementWaybill" Style="{StaticResource FilterElement}" ToolTip="Требование-накладная">Требование-накладная</Button>
+      <Button Name="PrintDisplacementDocumentWaybill" Style="{StaticResource FilterElement}" ToolTip="Требование-накладная">Внутреннее-перемещение</Button>
     </WrapPanel>
 
     <Grid Grid.Row="1" Margin="0, 10, 0, 10">
