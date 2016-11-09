@@ -6,6 +6,8 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using Common.Tools;
 using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.ViewModels.Dialogs;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -15,9 +17,11 @@ namespace AnalitF.Net.Client.Models.Print
 		private DocumentTemplate template;
 		private IList<DisplacementLine> lines;
 		private WaybillSettings waybillSettings;
+		private RequirementWaybillName requirementWaybillName;
 
-		public DisplacementWDocument(DisplacementDoc d, IList<DisplacementLine> lines, WaybillSettings waybillSettings)
+		public DisplacementWDocument(DisplacementDoc d, IList<DisplacementLine> lines, WaybillSettings waybillSettings, RequirementWaybillName result)
 		{
+			requirementWaybillName = result;
 			doc.PagePadding = new Thickness(29);
 			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
 
@@ -57,69 +61,161 @@ namespace AnalitF.Net.Client.Models.Print
 			header.ColumnDefinitions.Add(new ColumnDefinition {
 				Width = GridLength.Auto,
 			});
-			header.RowDefinitions.Add(new RowDefinition());
-			header.RowDefinitions.Add(new RowDefinition());
 			header
 				.Cell(0, 0, LeftHeaderTable())
 				.Cell(0, 1, RightHeaderTable());
 			doc.Blocks.Add(new BlockUIContainer(header));
-
-
-			Header($"\n                               Наименование организации: \n"
-				+ "             Отдел:______________________________________________\n");
-
-			TwoColumns();
-			var left = Header("Требование №________________________\n"
-				+ "от \"_____\" _______________20__г\n"
-				+ "кому: ___________________________________\n"
-				+ "Основание отпуска________________________\n");
-			left.TextAlignment = TextAlignment.Center;
-			Header($"Накладная № {d.Id}\n"
-				+ $"от  {d.Date:d}\n"
-				+ $"Через кого   \n"
-				+ "Доверенность № _______от \"______\" ________20__г\n");
-
+			Block(new List<Grid>
+			{
+				Text("Затребовал"),
+				TextWithLineSign(requirementWaybillName.DemandPos,"должность"),
+				TextWithLineSign(requirementWaybillName.DemandFio,"фио"),
+				Text("Разрешил"),
+				TextWithLineSign(requirementWaybillName.ReceiptPos,"должность"),
+				TextWithLineSign("              ","подпись"),
+				TextWithLineSign(requirementWaybillName.ReceiptFio,"расшифровка подписи", 150),
+			});
 			var columns = new[] {
-				new PrintColumn("№ пп", 27),
 				new PrintColumn("Наименование", 170),
-				new PrintColumn("Производитель", 170),
 				new PrintColumn("Серия", 80),
 				new PrintColumn("Срок", 80),
+				new PrintColumn("наименование", 80),
+				new PrintColumn("Код по ОКЕИ", 80),
 				new PrintColumn("Цена", 80),
-				new PrintColumn("Затребован.колич.", 80),
-				new PrintColumn("Отпущен.колич.", 80),
+				new PrintColumn("Затребовано.", 80),
+				new PrintColumn("Отпущено", 80),
 				new PrintColumn("Сумма, руб", 80),
+				new PrintColumn("Дебет", 80),
+				new PrintColumn("Кредит", 80),
+				new PrintColumn("Примечание", 80),
 			};
+				var dataTable = BuildTableHeader(columns, new [] {
+				new ColumnGroup("Материальные ценности", 0, 2),
+				new ColumnGroup("Ед.Изм.", 3, 4),
+				new ColumnGroup("Кол-во", 6, 7),
+				new ColumnGroup("Корр. счета", 9, 10),
+			});
+			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
+			var tableHeader = new TableRow();
+				(new [] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"})
+				.Each(i => {
+					var tableCell = Cell(i);
+					tableCell.TextAlignment = TextAlignment.Center;
+					tableHeader.Cells.Add(tableCell);
+				});
 			var rows = lines.Select((l, i) => new object[] {
-				++i,
 				l.Product,
-				l.Producer,
 				l.SerialNumber,
 				l.Period,
+				"упак",
+				"778",
 				l.RetailCost,
 				l.Quantity,
 				l.Quantity,
-				l.RetailSum
+				l.RetailSum,
+				null,
+				null,
+				null
 			});
-			BuildTable(rows, columns);
+			BuildRows(rows, columns, dataTable);
 
 			var retailSum = lines.Sum(l => l.RetailSum);
-			var block = Block("Продажная сумма: " + RusCurrency.Str((double)retailSum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(retailSum.ToString()))) {
-				FontWeight = FontWeights.Bold,
-				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
-				Padding = new Thickness(0),
-				Margin = new Thickness(0)
+			var result = new TableRow();
+			result.FontWeight = FontWeights.Bold;
+			result.FontSize = 8;
+			result.Cells.Add(Cell("Итого", 5));
+			result.Cells.Add(Cell("X"));
+			result.Cells.Add(Cell("X"));
+			result.Cells.Add(Cell("X"));
+			result.Cells.Add(Cell(retailSum));
+			dataTable.RowGroups[0].Rows.Add(result);
+			doc.Blocks.Add(dataTable);
+
+			var body = new Grid();
+			body
+				.Cell(0, 0, new Grid()
+					.Cell(0, 0, BlockInner(new List<Grid> {
+						Text("Отпустил"),
+					}))
+					.Cell(1, 0, BlockInner(new List<Grid> {
+						TextWithLineSign(requirementWaybillName.ResolPos, "должность"),
+						TextWithLineSign("              ", "подпись"),
+						TextWithLineSign(requirementWaybillName.ResolFio, "расшифровка подписи"),
+					}))
+					.Cell(2, 0, BlockInner(new List<Grid> {
+						Text("\"______ \""),
+						Text("__________________ "),
+						Text("_______года"),
+					}))
+					.Cell(3, 0, BlockInner(new List<Grid> {
+						Text("Получил"),
+					}))
+					.Cell(4, 0, BlockInner(new List<Grid> {
+						TextWithLineSign(requirementWaybillName.RemisPos, "должность"),
+						TextWithLineSign("              ", "подпись"),
+						TextWithLineSign(requirementWaybillName.RemisFio, "расшифровка подписи"),
+					}))
+					.Cell(5, 0, BlockInner(new List<Grid> {
+						Text("\"______ \""),
+						Text("__________________ "),
+						Text("_______года"),
+					}))
+				)
+				.Cell(0, 1, new Grid()
+					.Cell(0, 0, BlockInner(new List<Grid> {
+						Text("Ответственный исполнитель"),
+					}))
+					.Cell(1, 0, BlockInner(new List<Grid> {
+						TextWithLineSign(requirementWaybillName.ExecutorPos, "должность"),
+						TextWithLineSign("              ", "подпись"),
+						TextWithLineSign(requirementWaybillName.ExecutorFio, "расшифровка подписи"),
+						Text("")
+					}))
+					.Cell(2, 0, BlockInner(new List<Grid> {
+						Text("\"______ \""),
+						Text("__________________ "),
+						Text("_______года"),
+					})))
+				.Cell(0, 2,
+					new Label {
+						BorderBrush = Brushes.Black,
+						BorderThickness = new Thickness(1, 1, 1, 1),
+						SnapsToDevicePixels = true,
+						Content = new Grid()
+							.Cell(0, 0, BlockInner(new List<Grid> {
+								Text("Отметка бухгалтерии"),
+							}))
+							.Cell(1, 0, BlockInner(new List<Grid> {
+								Text("Корреспонденция счетов (гр. 10-11) отражена"),
+							}))
+							.Cell(2, 0, BlockInner(new List<Grid> {
+								Text("в журнале операций за _______20__ г."),
+							}))
+							.Cell(3, 0, BlockInner(new List<Grid> {
+								Text("Исполнитель"),
+							}))
+							.Cell(4, 0, BlockInner(new List<Grid> {
+								TextWithLineSign("              ", "должность"),
+								TextWithLineSign("         ", "подпись"),
+								TextWithLineSign("              ", "расшифровка подписи"),
+							}))
+							.Cell(5, 0, BlockInner(new List<Grid> {
+								Text("\"______ \""),
+								Text("__________________ "),
+								Text("_______года"),
+							}))
+					});
+			body.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
+			body.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
+			body.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
 			});
 
-			TwoColumns();
-			Block($"Затребовал:  \n\n"
-				+ "место печати       подпись     _________________\n\n"
-				+ "\" ____\" _______________20__г\n");
-			Block($"Отпустил: Сдал (выдал)________________\n\n"
-				+ $"Получил:Принял(получил)______________\n\n"
-				+ $"Руководитель учреждения_____________\n\n"
-				+ $"Главный (старший)бухгалтер ________________\n");
+			doc.Blocks.Add(new BlockUIContainer(body));
 		}
 
 		private BlockUIContainer Block(List<Grid> items)
@@ -131,6 +227,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Margin = new Thickness(0, 0, 0, 0),
 				Width = 1069,
 			};
+			doc.Blocks.Add(bodyBlock);
 			var grid = (Grid)bodyBlock.Child;
 			var column = 0;
 			foreach (var item in items)
@@ -141,6 +238,20 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 			grid.ColumnDefinitions[column - 1].Width = new GridLength(1, GridUnitType.Star);
 			return bodyBlock;
+		}
+
+		private Grid BlockInner(List<Grid> items)
+		{
+			var grid = new Grid();
+			var column = 0;
+			foreach (var item in items)
+			{
+				grid.Cell(0, column, item);
+				grid.ColumnDefinitions[column].Width = GridLength.Auto;
+				column++;
+			}
+			grid.ColumnDefinitions[column - 1].Width = new GridLength(1, GridUnitType.Star);
+			return grid;
 		}
 
 		private Grid Text(string text)
@@ -187,6 +298,73 @@ namespace AnalitF.Net.Client.Models.Print
 			return grid;
 		}
 
+		private Grid TextWithLineSign(string text, string sign)
+		{
+			if (string.IsNullOrEmpty(text)) {
+				text = " ";
+			}
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
+				}
+			};
+			grid
+				.Cell(0, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					BorderBrush = Brushes.Black,
+					BorderThickness = new Thickness(0, 0, 0, 1),
+					Margin = new Thickness(5, 0, 0, 0),
+					SnapsToDevicePixels = true,
+					Content = text,
+				})
+				.Cell(1, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 8,
+					Content = sign,
+					HorizontalContentAlignment = HorizontalAlignment.Center
+				});
+			return grid;
+		}
+
+		private Grid TextWithLineSign(string text, string sign, int size)
+		{
+			if (string.IsNullOrEmpty(text)) {
+				text = " ";
+			}
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
+				}
+			};
+			grid
+				.Cell(0, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					BorderBrush = Brushes.Black,
+					BorderThickness = new Thickness(0, 0, 0, 1),
+					Margin = new Thickness(5, 0, 0, 0),
+					SnapsToDevicePixels = true,
+					Content = text,
+					Width = size
+				})
+				.Cell(1, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 8,
+					Content = sign,
+					HorizontalContentAlignment = HorizontalAlignment.Center
+				});
+			return grid;
+		}
+
 		private Grid RightHeaderTable()
 		{
 			var grid = new Grid()
@@ -214,22 +392,28 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private Grid LeftHeaderTable()
 		{
-			var grid = new Grid()
-				.Cell(0, 0, new Grid()
+			var grid = new Grid();
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = GridLength.Auto,
+			});
+			grid.RowDefinitions.Add(new RowDefinition());
+			grid.RowDefinitions.Add(new RowDefinition());
+				grid.Cell(0, 0, new Grid()
 					.Cell(0, 0, Text("Учреждение"))
 					.Cell(0, 1, TextWithLine(waybillSettings == null ? "" : waybillSettings.FullName)))
-				.Cell(0, 1, new Grid()
-					.Cell(0, 0, Text("Структурное подразделение-\n" +
-						"отправитель"))
+				.Cell(1, 0, new Grid()
+					.Cell(0, 0, Text("Структурное подразделение-отправитель"))
 					.Cell(0, 1, TextWithLine($"{d.AddressName}")))
-				.Cell(0, 2, new Grid()
-					.Cell(0, 0, Text("Структурное подразделение-\n" +
-						"получатель"))
+				.Cell(2, 0, new Grid()
+					.Cell(0, 0, Text("Структурное подразделение-получатель"))
 					.Cell(0, 1, TextWithLine($"{d.DstAddressName}")))
-				.Cell(0, 3, new Grid()
+				.Cell(3, 0, new Grid()
 					.Cell(0, 0, Text("Единица измерения"))
 					.Cell(0, 1, Text("руб (с точностью до второго десятичного знака)")))
-				.Cell(0, 4, new Grid()
+				.Cell(4, 0, new Grid()
 					.Cell(0, 0, Text("Учреждение"))
 					.Cell(0, 1, TextWithLine(waybillSettings == null ? "" : waybillSettings.FullName)))
 				;

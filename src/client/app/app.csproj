@@ -425,6 +425,7 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
     <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
@@ -517,6 +518,9 @@
     <Compile Include="ViewModels\WaybillsViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\RequirementWaybill.xaml.cs">
+      <DependentUpon>RequirementWaybill.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\ScannerConfig.xaml.cs">
       <DependentUpon>ScannerConfig.xaml</DependentUpon>
@@ -880,6 +884,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RequirementWaybill.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

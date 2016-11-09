@@ -221,7 +221,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintDisplacementWaybill()
 		{
-			return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First()));
+			/*var req = new RequirementWaybill();
+			yield return new DialogResult(req);
+			var print = new PrintPreviewViewModel{
+				DisplayName = "Требование-накладная",
+				Document = new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), req.requirementWaybillName).Build()
+			};
+			yield return new DialogResult(print);*/
+			var req = new RequirementWaybill();
+			yield return new DialogResult(req);
+			if (req.requirementWaybillName == null)
+				yield break;
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Требование-накладная",
+				new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), req.requirementWaybillName))), fullScreen: true);
+			//return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), null));
+		}
+
+		public IEnumerable<IResult> GetRequirementWaybillName()
+		{
+			var search = new RequirementWaybill();
+			yield return new DialogResult(search);
 		}
 
 		public IResult PrintStockRackingMaps()
@@ -237,7 +256,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
 		{
-			 var docSettings = doc.Settings;
+			var docSettings = doc.Settings;
 			if (docSettings != null)
 			{
 				yield return new DialogResult(new SimpleSettings(docSettings));
