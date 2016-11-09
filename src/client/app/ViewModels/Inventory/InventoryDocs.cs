@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
@@ -10,19 +11,25 @@ using NHibernate.Linq;
 using NHibernate;
 using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class InventoryDocs : BaseScreen2
 	{
+		private ReactiveCollection<InventoryDoc> items;
+
 		public InventoryDocs()
 		{
+			Items = new ReactiveCollection<InventoryDoc>();
 			IsAll = new NotifyValue<bool>(true);
-			Begin.Value = DateTime.Today.AddDays(-7);
+			Begin.Value = DateTime.Today.AddDays(-30);
 			End.Value = DateTime.Today;
 			CurrentItem.Subscribe(x => {
-				CanEdit.Value = x != null;
-				CanDelete.Value = x != null;
+				CanOpen.Value = x != null;
+				CanDelete.Value = x?.Status == DocStatus.NotPosted;
+				CanPost.Value = x?.Status == DocStatus.NotPosted;
+				CanUnPost.Value = x?.Status == DocStatus.Posted;
 			});
 			DisplayName = "Излишки";
 			TrackDb(typeof(InventoryDoc));
@@ -30,13 +37,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
-		public NotifyValue<List<InventoryDoc>> Items { get; set; }
+		[Export]
+		public ReactiveCollection<InventoryDoc> Items
+		{
+			get { return items; }
+			set
+			{
+				items = value;
+				NotifyOfPropertyChange(nameof(Items));
+			}
+		}
 		public NotifyValue<InventoryDoc> CurrentItem { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
-		public NotifyValue<bool> CanEdit { get; set; }
+		public NotifyValue<bool> CanOpen { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> IsAll { get; set; }
-		public NotifyValue<bool> IsOpened { get; set; }
-		public NotifyValue<bool> IsClosed { get; set; }
+		public NotifyValue<bool> IsNotPosted { get; set; }
+		public NotifyValue<bool> IsPosted { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -44,26 +62,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			DbReloadToken
 				.Merge(Begin.Select(x => (object)x))
 				.Merge(End.Select(x => (object)x))
-				.Merge(IsOpened.Changed())
-				.Merge(IsClosed.Changed())
-				.SelectMany(_ => RxQuery(LoadItems))
-				.Subscribe(Items);
+				.Merge(IsNotPosted.Changed())
+				.Merge(IsPosted.Changed())
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
-		public List<InventoryDoc> LoadItems(IStatelessSession session)
+		public override void Update()
 		{
-			var query = session.Query<InventoryDoc>()
+			var query = Session.Query<InventoryDoc>()
 				.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
 
-			if (IsOpened)
-				query = query.Where(x => x.Status == DocStatus.Opened);
-			else if (IsClosed)
-				query = query.Where(x => x.Status == DocStatus.Closed);
+			if (IsNotPosted)
+				query = query.Where(x => x.Status == DocStatus.NotPosted);
+			else if (IsPosted)
+				query = query.Where(x => x.Status == DocStatus.Posted);
 
 			var items = query.Fetch(x => x.Address)
 				.OrderByDescending(x => x.Date)
 				.ToList();
-			return items;
+
+			Items = new ReactiveCollection<InventoryDoc>(items) {
+					ChangeTrackingEnabled = true
+			};
 		}
 
 		public void Create()
@@ -71,24 +91,44 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new EditInventoryDoc(new InventoryDoc(Address)));
 		}
 
-		public void Edit()
+		public void Open()
 		{
-			if (!CanEdit)
+			if (!CanOpen)
 				return;
 			Shell.Navigate(new EditInventoryDoc(CurrentItem.Value.Id));
 		}
 
 		public async Task Delete()
 		{
+			if (!CanDelete)
+				return;
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
 			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}
 
+		public void Post()
+		{
+			if (!Confirm("Провести выбранный документ?"))
+				return;
+			Session.Load<InventoryDoc>(CurrentItem.Value.Id).Post();
+			CurrentItem.Refresh();
+			Update();
+		}
+
+		public void UnPost()
+		{
+			if (!Confirm("Распровести выбранный документ?"))
+				return;
+			Session.Load<InventoryDoc>(CurrentItem.Value.Id).UnPost();
+			CurrentItem.Refresh();
+			Update();
+		}
+
 		public void EnterItem()
 		{
-			Edit();
+			Open();
 		}
 
 		public IResult ExportExcel()
@@ -96,12 +136,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var columns = new[] {"Номер",
 				"Дата",
 				"Адрес",
-				"Сумма закупки",
-				"Сумма закупки с НДС",
 				"Сумма розничная",
 				"Число позиций",
 				"Время закрытия",
 				"Статус",
+				"Комментарий",
 			};
 
 			var book = new HSSFWorkbook();
@@ -110,16 +149,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			ExcelExporter.WriteRow(sheet, columns, row++);
 
-			var rows = Items.Value.Select((o, i) => new object[] {
+			var rows = Items.Select((o, i) => new object[] {
 				o.Id,
 				o.Date,
 				o.Address.Name,
-				o.SupplySumWithoutNds,
-				o.SupplySum,
 				o.RetailSum,
 				o.LinesCount,
 				o.CloseDate,
 				o.StatusName,
+				o.Comment,
 			});
 
 			ExcelExporter.WriteRows(sheet, rows, row);

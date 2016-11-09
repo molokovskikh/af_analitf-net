@@ -5,15 +5,16 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 using Common.Tools;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
 	public enum DisplacementDocStatus
 	{
 		[Description("Резерв")]
-		Opened,
+		NotPosted,
 		[Description("Передано")]
-		Closed,
+		Posted,
 		[Description("Получено")]
 		End
 	}
@@ -30,7 +31,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Address = address;
 			Date = DateTime.Now;
-			Status = DisplacementDocStatus.Opened;
+			Status = DisplacementDocStatus.NotPosted;
 			UpdateStat();
 		}
 
@@ -51,6 +52,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 				}
 			}
 		}
+
+		[Ignore]
+		[Style(Description = "Непроведенный документ")]
+		public virtual bool IsNotPosted => Status == DisplacementDocStatus.NotPosted;
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
@@ -88,22 +93,22 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(DstAddress) };
 
 		[Style(Description = "\"Непроведен\"")]
-		public virtual bool IsNotConducted => Status == DisplacementDocStatus.Opened;
+		public virtual bool IsNotConducted => Status == DisplacementDocStatus.NotPosted;
 
-		public virtual void Close(ISession session)
+		public virtual void Post(ISession session)
 		{
 			CloseDate = DateTime.Now;
-			Status = DisplacementDocStatus.Closed;
+			Status = DisplacementDocStatus.Posted;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.DisplacementTo(line.Quantity));
 				session.Save(line.DstStock.DisplacementFrom(line.Quantity));
 			}
 		}
 
-		public virtual void ReOpen(ISession session)
+		public virtual void UnPost(ISession session)
 		{
 			CloseDate = null;
-			Status = DisplacementDocStatus.Opened;
+			Status = DisplacementDocStatus.NotPosted;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.CancelDisplacementTo(line.Quantity));
 				session.Save(line.DstStock.CancelDisplacementFrom(line.Quantity));
@@ -120,7 +125,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		// для теста
 		public virtual void ReEnd(ISession session)
 		{
-			Status = DisplacementDocStatus.Closed;
+			Status = DisplacementDocStatus.Posted;
 			foreach (var line in Lines)
 				line.DstStock.CancelIncoming(line.Quantity);
 		}

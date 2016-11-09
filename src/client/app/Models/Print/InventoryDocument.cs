@@ -16,28 +16,26 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			var headers = new[] {
 				new PrintColumn("№ п/п", 50),
-				new PrintColumn("Товар", 160),
+				new PrintColumn("Товар", 210),
 				new PrintColumn("Производитель", 160),
-				new PrintColumn("Номер накладной", 50),
-				new PrintColumn("Дата накладной", 50),
 				new PrintColumn("Серия", 50),
+				new PrintColumn("Срок годности", 50),
 				new PrintColumn("Штрихкод", 50),
 				new PrintColumn("Кол-во", 50),
-				new PrintColumn("Цена закупки с НДС", 50),
-				new PrintColumn("Сумма закупки с НДС", 50),
+				new PrintColumn("Цена розничная с НДС", 50),
+				new PrintColumn("Сумма розничная с НДС", 50),
 			};
 
 			var rows = _items.Select((o, i) => new object[] {
 				o.Id,
 				o.Product,
 				o.Producer,
-				o.WaybillNumber,
-				o.DocumentDate,
 				o.SerialNumber,
+				o.Period,
 				o.Barcode,
 				o.Quantity,
-				o.SupplierCost,
-				o.SupplierSum,
+				o.RetailCost,
+				o.RetailSum,
 			});
 
 			var table = BuildTable(rows, headers, null);

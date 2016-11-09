@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы закроем документ то получим - Папаверен 2шт, 0шт в резерве
-			doc.Close(session);
+			doc.Post(session);
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
-			doc.ReOpen(session);
+			doc.UnPost(session);
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);

@@ -44,15 +44,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 		public InventoryDoc Doc { get; set; }
-		public NotifyValue<bool> IsDocOpen { get; set; }
 		public ReactiveCollection<InventoryDocLine> Lines { get; set; }
 		public NotifyValue<InventoryDocLine> CurrentLine { get; set; }
-		public NotifyValue<bool> CanAddLine { get; set; }
-		public NotifyValue<bool> CanDeleteLine { get; set; }
+		public NotifyValue<bool> CanAdd { get; set; }
+		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanEditLine { get; set; }
-		public NotifyValue<bool> CanSave { get; set; }
-		public NotifyValue<bool> CanCloseDoc { get; set; }
-		public NotifyValue<bool> CanReOpenDoc { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -62,25 +60,29 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Doc.Address = Address;
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			Save();
+			base.OnDeactivate(close);
+		}
+
 		private void InitDoc(InventoryDoc doc)
 		{
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
 			var editOrDelete = docStatus
-				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.Opened);
+				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
 			editOrDelete.Subscribe(CanEditLine);
-			editOrDelete.Subscribe(CanDeleteLine);
-			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.Opened);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanSave);
-			docStatus.Select(x => x.Value == DocStatus.Closed).Subscribe(CanReOpenDoc);
+			editOrDelete.Subscribe(CanDelete);
+			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
+			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
+			docStatus.Select(x => x.Value == DocStatus.Posted).Subscribe(CanUnPost);
 		}
 
-		public IEnumerable<IResult> AddLine()
+		public IEnumerable<IResult> Add()
 		{
 			var search = new StockSearch();
-			yield return new DialogResult(search);
+			yield return new DialogResult(search, resizable: true);
 			var edit = new EditStock(search.CurrentItem)
 			{
 				EditMode = EditStock.Mode.EditQuantity
@@ -92,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc.UpdateStat();
 		}
 
-		public void DeleteLine()
+		public void Delete()
 		{
 			// с поставки наружу
 			Session.Save(CurrentLine.Value.Stock.CancelInventoryDoc(CurrentLine.Value.Quantity));
@@ -122,19 +124,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return EditLine();
 		}
 
-		public void CloseDoc()
+		public void Post()
 		{
-			Doc.Close();
+			Doc.Post();
 			Save();
 		}
 
-		public void ReOpenDoc()
+		public void UnPost()
 		{
-			Doc.ReOpen();
+			Doc.UnPost();
 			Save();
 		}
 
-		public void Save()
+		private void Save()
 		{
 			Session.Save(Doc);
 			Session.Flush();
@@ -149,13 +151,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						"№ п/п",
 						"Товар",
 						"Производитель",
-						"Номер накладной",
-						"Дата накладной",
 						"Серия",
+						"Срок годности",
 						"Штрихкод",
 						"Кол-во",
-						"Цена закупки с НДС",
-						"Сумма закупки с НДС",
+						"Цена розничная с НДС",
+						"Сумма розничная с НДС",
 					};
 
 			var book = new HSSFWorkbook();
@@ -168,13 +169,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						o.Id,
 						o.Product,
 						o.Producer,
-						o.WaybillNumber,
-						o.DocumentDate,
 						o.SerialNumber,
+						o.Period,
 						o.Barcode,
 						o.Quantity,
-						o.SupplierCost,
-						o.SupplierSum,
+						o.RetailCost,
+						o.RetailSum,
 					});
 
 			ExcelExporter.WriteRows(sheet, rows, row);
@@ -201,7 +201,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			return new DialogResult(new PrintPreviewViewModel
 			{
-				DisplayName = "Ценники",
+				DisplayName = "Ярлыки",
 				Document = new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build()
 			}, fullScreen: true);
 		}

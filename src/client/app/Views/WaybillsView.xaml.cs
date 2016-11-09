@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Views
 
 		public void ApplyStyles()
 		{
-            StyleHelper.ApplyStyles(typeof(Waybill), Waybills, Application.Current.Resources, Legend);
-        }
+        StyleHelper.ApplyStyles(typeof(Waybill), Waybills, Application.Current.Resources, Legend);
     }
+	}
 }

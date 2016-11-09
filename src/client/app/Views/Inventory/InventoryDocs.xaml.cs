@@ -11,17 +11,25 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
 	/// <summary>
-	/// Interaction logic for Inventory.xaml
+	/// Interaction logic for InventoryDocs.xaml
 	/// </summary>
 	public partial class InventoryDocs : UserControl
 	{
 		public InventoryDocs()
 		{
 			InitializeComponent();
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(InventoryDoc), Items, Application.Current.Resources, Legend);
 		}
 	}
 }

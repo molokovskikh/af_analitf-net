@@ -374,7 +374,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Stock(ISession session)
 		{
-			Status = DocStatus.Closed;
+			Status = DocStatus.Posted;
 			var stockActions = Create();
 			foreach (var action in stockActions) {
 				session.Save(action.DstStock);

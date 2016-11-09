@@ -7,9 +7,19 @@
              xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
              xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+						 xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
-						behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+             d:DesignHeight="300" d:DesignWidth="1000"
+						 behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Create" />
+		<KeyBinding Gesture="Enter" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Open" />
+		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
+		<!--<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Post" />
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel" CommandParameter="UnPost" />-->
+	</UserControl.InputBindings>
+
 	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
 	</i:Interaction.Behaviors>
@@ -17,13 +27,13 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<ToolBar Grid.Row="0">
-			<Button Name="Create">Создать</Button>
-			<Button Name="Edit">Редактировать</Button>
-			<Button Name="Delete">Удалить</Button>
-			<Separator />
+		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
+			<Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать (Ctrl+N)">Создать</Button>
+			<Button Name="Open" Style="{StaticResource FilterElement}" ToolTip="Редактировать (Enter)">Открыть</Button>
+			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
 					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
@@ -32,7 +42,7 @@
 					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
 				</StackPanel>
 			</GroupBox>
-		</ToolBar>
+		</WrapPanel>
 
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
@@ -48,5 +58,6 @@
 				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
       </DataGrid.Columns>
 		</controls:DataGrid2>
+		<StackPanel Grid.Row="2" Name="Legend" />
 	</Grid>
 </UserControl>

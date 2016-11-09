@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.SupplyQuantity, 5);
 			Assert.AreEqual(line.Quantity, 3);
 
-			doc.Close();
+			doc.Post();
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 8);
@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 5 шт, 3 шт в поставке
-			doc.ReOpen();
+			doc.UnPost();
 			session.Save(doc);
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 5);

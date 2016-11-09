@@ -23,9 +23,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SelectedItems = new List<DisplacementDoc>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
+				/*
 				CanDelete.Value = x?.Status == DisplacementDocStatus.Opened;
 				CanReOpenDoc.Value = x?.Status == DisplacementDocStatus.End;
 				CanEndDoc.Value = x?.Status == DisplacementDocStatus.Opened;
+				*/
+				CanDelete.Value = x?.Status == DisplacementDocStatus.NotPosted;
 			});
 			DisplayName = "Внутреннее перемещение";
 			TrackDb(typeof(DisplacementDoc));
@@ -66,10 +69,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Session.DeleteEach<DisplacementDoc>();
 			var displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.Closed;
+			displacementDoc.Status = DisplacementDocStatus.NotPosted;
 			Session.Save(displacementDoc);
 			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.Opened;
+			displacementDoc.Status = DisplacementDocStatus.Posted;
 			Session.Save(displacementDoc);
 			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
 			displacementDoc.Status = DisplacementDocStatus.End;
@@ -79,9 +82,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			query = query.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
 			if (IsOpened)
-				query = query.Where(x => x.Status == DisplacementDocStatus.Opened);
+				query = query.Where(x => x.Status == DisplacementDocStatus.NotPosted);
 			else if (IsClosed)
-				query = query.Where(x => x.Status == DisplacementDocStatus.Closed);
+				query = query.Where(x => x.Status == DisplacementDocStatus.Posted);
 			else if (IsEnd)
 				query = query.Where(x => x.Status == DisplacementDocStatus.End);
 
@@ -159,9 +162,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Value.End(Session);
 		}
 
-		public void ReOpenDoc()
+		public void Post()
 		{
-			CurrentItem.Value.ReOpen(Session);
+			CurrentItem.Value.Post(Session);
+		}
+
+		public void UnPost()
+		{
+			CurrentItem.Value.UnPost(Session);
 		}
 	}
 }

@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public IResult Open(ProducerPromotion ProducerPromotion)
 		{
-			return new DialogResult(new DocModel<ProducerPromotion>(ProducerPromotion.Id), fixedSize: true);
+			return new DialogResult(new DocModel<ProducerPromotion>(ProducerPromotion.Id), resizable: true);
 		}
 
 	}

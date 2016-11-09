@@ -33,10 +33,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 			Keyboard.AddPreviewKeyDownHandler(this, (sender, args) => {
 				IEnumerable<IResult> results = null;
 				if (args.Key == Key.Insert) {
-					results = Model.AddLine();
+					results = Model.Add();
 					args.Handled = true;
 				} else if (args.Key == Key.Delete) {
-					Model.DeleteLine();
+					Model.Delete();
 					args.Handled = true;
 				}
 				if (results != null) {

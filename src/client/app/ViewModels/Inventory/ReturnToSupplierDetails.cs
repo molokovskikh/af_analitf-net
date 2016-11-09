@@ -42,17 +42,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public ReturnToSupplier Doc { get; set; }
 
-		public NotifyValue<bool> IsDocOpen { get; set; }
 		public ReactiveCollection<ReturnToSupplierLine> Lines { get; set; }
 		public NotifyValue<ReturnToSupplierLine> CurrentLine { get; set; }
 		public Supplier[] Suppliers { get; set; }
 
-		public NotifyValue<bool> CanAddLine { get; set; }
-		public NotifyValue<bool> CanDeleteLine { get; set; }
+		public NotifyValue<bool> CanAdd { get; set; }
+		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanEditLine { get; set; }
-		public NotifyValue<bool> CanSave { get; set; }
-		public NotifyValue<bool> CanCloseDoc { get; set; }
-		public NotifyValue<bool> CanReOpenDoc { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -62,22 +60,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Doc.Address = Address;
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			Save();
+			base.OnDeactivate(close);
+		}
+
 		private void InitDoc(ReturnToSupplier doc)
 		{
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
 			var editOrDelete = docStatus
-				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.Opened);
+				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
 			editOrDelete.Subscribe(CanEditLine);
-			editOrDelete.Subscribe(CanDeleteLine);
-			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.Opened);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(IsDocOpen);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanCloseDoc);
-			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanSave);
-			docStatus.Select(x => x.Value == DocStatus.Closed).Subscribe(CanReOpenDoc);
+			editOrDelete.Subscribe(CanDelete);
+			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
+			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
+			docStatus.Select(x => x.Value == DocStatus.Posted).Subscribe(CanUnPost);
 		}
 
-		public IEnumerable<IResult> AddLine()
+		public IEnumerable<IResult> Add()
 		{
 			var search = new StockSearch();
 			yield return new DialogResult(search);
@@ -92,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Doc.UpdateStat();
 		}
 
-		public void DeleteLine()
+		public void Delete()
 		{
 			CurrentLine.Value.Stock.Release(CurrentLine.Value.Quantity);
 			Lines.Remove(CurrentLine.Value);
@@ -120,19 +122,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return EditLine();
 		}
 
-		public void CloseDoc()
+		public void Post()
 		{
-			Doc.Close(Session);
+			Doc.Post(Session);
 			Save();
 		}
 
-		public void ReOpenDoc()
+		public void UnPost()
 		{
-			Doc.ReOpen(Session);
+			Doc.UnPost(Session);
 			Save();
 		}
 
-		public void Save()
+		private void Save()
 		{
 			if (!IsValide(Doc))
 				return;

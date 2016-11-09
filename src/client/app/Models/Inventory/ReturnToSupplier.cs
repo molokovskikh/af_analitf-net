@@ -4,6 +4,7 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 using Common.Tools;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -19,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Address = address;
 			Date = DateTime.Now;
-			Status = DocStatus.Opened;
+			Status = DocStatus.NotPosted;
 			UpdateStat();
 		}
 
@@ -40,6 +41,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 				}
 			}
 		}
+
+		[Ignore]
+		[Style(Description = "Непроведенный документ")]
+		public virtual bool IsNotPosted => Status == DocStatus.NotPosted;
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
@@ -77,18 +82,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(Supplier) };
 
-		public virtual void Close(ISession session)
+		public virtual void Post(ISession session)
 		{
 			CloseDate = DateTime.Now;
-			Status = DocStatus.Closed;
+			Status = DocStatus.Posted;
 			foreach (var line in Lines)
 				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
 		}
 
-		public virtual void ReOpen(ISession session)
+		public virtual void UnPost(ISession session)
 		{
 			CloseDate = null;
-			Status = DocStatus.Opened;
+			Status = DocStatus.NotPosted;
 			foreach (var line in Lines)
 				session.Save(line.Stock.CancelReturnToSupplier(line.Quantity));
 		}
