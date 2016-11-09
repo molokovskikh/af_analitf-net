@@ -84,28 +84,29 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
-			if (!IsValide(Doc))
-				yield break;
+			while (true) {
+				if (!IsValide(Doc))
+					yield break;
 
-			var search = new StockSearch();
-			yield return new DialogResult(search);
-			var edit = new EditStock(search.CurrentItem)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
+				var search = new StockSearch();
+				yield return new DialogResult(search, false, true);
+				var edit = new EditStock(search.CurrentItem) {
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
 
-			var srcStock = Session.Load<Stock>(edit.Stock.Id);
-			var dstStock = srcStock.Copy();
-			dstStock.Address = Doc.DstAddress;
-			dstStock.Quantity = dstStock.ReservedQuantity = dstStock.SupplyQuantity = 0;
-			Session.Save(dstStock);
+				var srcStock = Session.Load<Stock>(edit.Stock.Id);
+				var dstStock = srcStock.Copy();
+				dstStock.Address = Doc.DstAddress;
+				dstStock.Quantity = dstStock.ReservedQuantity = dstStock.SupplyQuantity = 0;
+				Session.Save(dstStock);
 
-			var line = new DisplacementLine(srcStock, dstStock, edit.Stock.Quantity);
-			Lines.Add(line);
-			Doc.Lines.Add(line);
-			Doc.UpdateStat();
-			Save();
+				var line = new DisplacementLine(srcStock, dstStock, edit.Stock.Quantity);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
+				Save();
+			}
 		}
 
 		public void Delete()

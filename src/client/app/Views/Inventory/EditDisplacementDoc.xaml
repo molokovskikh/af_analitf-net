@@ -28,7 +28,6 @@
 
     <WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
       <Button Name="Add" Style="{StaticResource FilterElement}" ToolTip="Добавить (Ctrl+N)">Добавить</Button>
-      <Button Name="EditLine" Style="{StaticResource FilterElement}" ToolTip="Редактировать">Редактировать</Button>
       <Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
       <Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
       <Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
@@ -60,7 +59,7 @@
       <Label Grid.Row="0" Grid.Column="0" FontWeight="Bold">Номер документа</Label>
       <Label Grid.Row="0" Grid.Column="1" Name="Doc_Id" />
       <Label Grid.Row="0" Grid.Column="2" FontWeight="Bold">Дата документа</Label>
-      <DatePicker Grid.Row="0" Grid.Column="3"  IsEnabled="{Binding CanPost.Value}" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="Doc_Date" />
+      <DatePicker Grid.Row="0" Grid.Column="3"  VerticalAlignment="Center" VerticalContentAlignment="Center" Name="Doc_Date" />
       <Label Grid.Row="0" Grid.Column="4" FontWeight="Bold">Отправитель</Label>
       <ComboBox Grid.Row="0" Grid.Column="5" IsEnabled="{Binding CanPost.Value}" Style="{StaticResource Select}" Width="100" ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" SelectedItem="{Binding Doc.Address}" />
       <Label Grid.Row="0" Grid.Column="6" FontWeight="Bold">Получатель</Label>
