@@ -85,12 +85,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield break;
 
 			var search = new StockSearch();
-			yield return new DialogResult(search);
+			yield return new WindowResult(search);
 			var edit = new EditStock(search.CurrentItem)
 			{
 				EditMode = EditStock.Mode.EditQuantity
 			};
-			yield return new DialogResult(edit);
+			yield return new WindowResult(edit);
 
 			var srcStock = Session.Load<Stock>(edit.Stock.Id);
 			var dstStock = srcStock.Copy();

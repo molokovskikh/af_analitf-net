@@ -52,17 +52,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 
-			Session.DeleteEach<DisplacementDoc>();
-			var displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.Closed;
-			Session.Save(displacementDoc);
-			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.Opened;
-			Session.Save(displacementDoc);
-			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
-			displacementDoc.Status = DisplacementDocStatus.End;
-			Session.Save(displacementDoc);
-
 			DbReloadToken
 				.Merge(IsOpened.Changed())
 				.Merge(IsClosed.Changed())
@@ -75,6 +64,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public List<DisplacementDoc> LoadItems(IStatelessSession session)
 		{
+			Session.DeleteEach<DisplacementDoc>();
+			var displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
+			displacementDoc.Status = DisplacementDocStatus.Closed;
+			Session.Save(displacementDoc);
+			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
+			displacementDoc.Status = DisplacementDocStatus.Opened;
+			Session.Save(displacementDoc);
+			displacementDoc = new DisplacementDoc(Session.Query<Address>().First());
+			displacementDoc.Status = DisplacementDocStatus.End;
+			Session.Save(displacementDoc);
+
 			var query = session.Query<DisplacementDoc>();
 
 			query = query.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
