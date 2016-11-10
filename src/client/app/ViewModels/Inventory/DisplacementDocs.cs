@@ -149,11 +149,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return ExcelExporter.Export(book);
 		}
 
-		public void EndDoc()
-		{
-			CurrentItem.Value.End(Session);
-		}
-
 		public void Post()
 		{
 			if (!Confirm("Провести выбранный документ?"))

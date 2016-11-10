@@ -7,7 +7,7 @@ using AnalitF.Net.Client.ViewModels.Inventory;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
-	class RequirementNegotiationProtocol : BaseScreen2, ICancelable
+	public class RequirementNegotiationProtocol : BaseScreen2, ICancelable
 	{
 		public bool WasCancelled { get; private set; }
 		public string Fio { get; set; }
