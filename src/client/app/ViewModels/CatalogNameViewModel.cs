@@ -91,7 +91,6 @@ namespace AnalitF.Net.Client.ViewModels
 					});
 				})
 				.Switch()
-				.Do(_ => Console.WriteLine(_))
 				.Subscribe(Catalogs, CloseCancellation.Token);
 			ExcelExporter.ActiveProperty.Value = "CatalogNames";
 		}
