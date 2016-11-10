@@ -88,6 +88,7 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
 			Func<WaybillLine, FrameworkElement> map = Normal;
+			var borderThickness = 0.5d;
 
 			if (settings.PriceTag.Type == PriceTagType.Small)
 				map = Small;
@@ -95,10 +96,12 @@ namespace AnalitF.Net.Client.Models.Print
 				map = Big;
 			else if (settings.PriceTag.Type == PriceTagType.BigCost2)
 				map = Big2;
-			else if (settings.PriceTag.Type == PriceTagType.Custom)
+			else if (settings.PriceTag.Type == PriceTagType.Custom) {
 				map = x => priceTag.ToElement(x);
+				borderThickness = priceTag.BorderThickness;
+			}
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), borderThickness), borderThickness);
 		}
 
 		private string FormatCost(WaybillLine line)
