@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public ReturnToSupplierDetails(uint id)
 			: this()
 		{
-			DisplayName = "Редактирование возврата поставщику";
+			DisplayName = "Редактирование возврата поставщику " + id;
 			InitDoc(Session.Load<ReturnToSupplier>(id));
 			Lines.AddRange(Doc.Lines);
 		}
@@ -81,8 +81,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
-			var search = new StockSearch();
-			yield return new DialogResult(search);
+			while (true) {
+				var search = new StockSearch();
+			yield return new DialogResult(search, false, true);
 			var edit = new EditStock(search.CurrentItem)
 			{
 				EditMode = EditStock.Mode.EditQuantity
@@ -92,6 +93,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Add(line);
 			Doc.Lines.Add(line);
 			Doc.UpdateStat();
+			}
 		}
 
 		public void Delete()
