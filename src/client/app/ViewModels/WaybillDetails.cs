@@ -31,9 +31,6 @@ namespace AnalitF.Net.Client.ViewModels
 		[Display(Name = "Сумма НДС")]
 		public decimal UserTaxSum { get; set; }
 
-		//[Display(Name = "Сумма без НДС")]
-		//public decimal UserSumExcludeTax => UserSum - UserTaxSum;
-
 		public EditSumSettings(Waybill waybill)
 		{
 			UserSum = waybill.DisplayedSum;
