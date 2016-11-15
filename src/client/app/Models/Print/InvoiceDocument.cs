@@ -184,9 +184,9 @@ namespace AnalitF.Net.Client.Models.Print
 			var result = new TableRow();
 			result.FontWeight = FontWeights.Bold;
 			result.Cells.Add(Cell("Всего к оплате", 5));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.AmountExcludeTax).FormatCost()));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.NdsAmount).FormatCost(), 3));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.Amount).FormatCost()));
+			result.Cells.Add(Cell((waybill.DisplayedSum - waybill.DisplayedTaxSum).ToString("0.00")));
+			result.Cells.Add(Cell(waybill.DisplayedTaxSum.ToString("0.00"), 3));
+			result.Cells.Add(Cell(waybill.DisplayedSum.ToString("0.00")));
 			dataTable.RowGroups[0].Rows.Add(result);
 			doc.Blocks.Add(dataTable);
 

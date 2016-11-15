@@ -917,7 +917,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 #else
 			requestId = Convert.ToUInt32(File.ReadAllText(Path.Combine(Config.TmpDir, "id")));
 #endif
-
+			var ggg = Directory.GetFiles(Config.UpdateTmpDir).Select(Path.GetFileName);
 			var data = GetDbData(Directory.GetFiles(Config.UpdateTmpDir).Select(Path.GetFileName), Config.UpdateTmpDir);
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 

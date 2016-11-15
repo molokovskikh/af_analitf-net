@@ -391,7 +391,7 @@ select u.Id,
 	?supportHours as SupportHours,
 	?lastSync as LastSync,
 	rcs.SaveOrders,
-	case 
+	case
 		when uup.MessageShowCount > 0 then uup.Message
 	end Message,
 	exists(
@@ -1849,6 +1849,8 @@ select d.RowId as Id,
 	i.ShipperInfo as ShipperNameAndAddress,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
+	if(i.IsSupplierAmount, i.NDSAmount, null) as SupplierTaxSum,
+	if(i.IsSupplierAmount, i.Amount, null) as SupplierSum,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
 	rf.IsRetailCostFixed
 from Logs.Document_logs d
@@ -1877,6 +1879,8 @@ select d.RowId as Id,
 	null as ShipperNameAndAddress,
 	null as InvoiceId,
 	null as InvoiceDate,
+	null as SupplierTaxSum,
+	null as SupplierSum,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
 	0 as IsRetailCostFixed
 from Logs.Document_logs d

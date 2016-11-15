@@ -53,12 +53,16 @@
 				<Grid.RowDefinitions>
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
 				</Grid.RowDefinitions>
 				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
 					Печать ценников
 				</Button>
 				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
 					Печать реестра
+				</Button>
+				<Button Grid.Column="0" Grid.Row="2" Name="EditSum" Style="{StaticResource FilterElement}">
+					Коррекция сумм
 				</Button>
 				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">
 					Печать накладной
