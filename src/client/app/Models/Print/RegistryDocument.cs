@@ -179,9 +179,9 @@ namespace AnalitF.Net.Client.Models.Print
 				Padding = new Thickness(0),
 				Margin = new Thickness(0)
 			});
-			var sum = lines.Sum(l => l.Amount);
-			block = Block("Сумма поставки: " + (sum != null ? RusCurrency.Str((double)sum) : ""));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(sum != null ? sum.Value.ToString("0.00") : ""))) {
+			var sum = waybill.DisplayedSum;
+			block = Block("Сумма поставки: " + (sum != 0 ? RusCurrency.Str((double)sum) : ""));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(sum != 0 ? sum.ToString("0.00") : ""))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),

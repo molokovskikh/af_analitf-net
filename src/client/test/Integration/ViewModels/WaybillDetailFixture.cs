@@ -163,6 +163,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Edit_sum()
+		{
+			var result = (DialogResult)model.EditSum().First();
+			var simpleSettings = (SimpleSettings)result.Model;
+			Assert.IsNotNull(simpleSettings.Target);
+			Assert.IsInstanceOf<EditSumSettings>(simpleSettings.Target);
+		}
+
+		[Test]
 		public void Print_registry()
 		{
 			var results = model.PrintRegistry().GetEnumerator();

@@ -19,9 +19,25 @@ using NHibernate.Linq;
 using NPOI.SS.UserModel;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
+using System.ComponentModel.DataAnnotations;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class EditSumSettings
+	{
+		[Display(Name = "Сумма с НДС")]
+		public decimal UserSum { get; set; }
+
+		[Display(Name = "Сумма НДС")]
+		public decimal UserTaxSum { get; set; }
+
+		public EditSumSettings(Waybill waybill)
+		{
+			UserSum = waybill.DisplayedSum;
+			UserTaxSum = waybill.DisplayedTaxSum;
+		}
+	}
+
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
@@ -189,6 +205,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//в случае редактирование пользовательской накладной в коллекции будет NamedObject
 			return Lines.Value.OfType<WaybillLine>().Where(l => l.Print).ToList();
+		}
+
+		public IEnumerable<IResult> EditSum()
+		{
+			var settings = new EditSumSettings(Waybill);
+			yield return new DialogResult(new SimpleSettings(settings));
+			if (settings.UserSum <= 0 || settings.UserTaxSum <= 0) {
+				MessageBox.Show(
+						"Суммы должны быть больше нуля",
+						"АналитФАРМАЦИЯ: Внимание",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				yield break;
+			}
+			Waybill.UserSum = settings.UserSum;
+			Waybill.UserTaxSum = settings.UserTaxSum;
+			Session.Save(Waybill);
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)

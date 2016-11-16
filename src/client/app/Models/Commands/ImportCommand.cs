@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				{"Waybills", new [] {
 					//вычисления розничной цены
 					"Sum", "RetailSum", "TaxSum", "UserSupplierName", "IsCreatedByUser", "IsRejectChanged", "IsNew", "Error",
-					"IsMigrated", "Rounding"
+					"IsMigrated", "Rounding", "UserSum", "UserTaxSum"
 				}},
 				{"Orders", new [] {
 					//локальные поля

@@ -88,6 +88,20 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal TaxSum { get; set; }
 
+		// суммы, установленные поставщиком
+		public virtual decimal? SupplierSum { get; set; }
+		public virtual decimal? SupplierTaxSum { get; set; }
+
+		// суммы, установленные пользователем
+		public virtual decimal? UserSum { get; set; }
+		public virtual decimal? UserTaxSum { get; set; }
+
+		// суммы, отражаемые в документах, установленные либо поставщиком, либо клиентом, либо рассчитанные построчно
+		[Ignore]
+		public virtual decimal DisplayedSum => SupplierSum ?? UserSum ?? Sum;
+		[Ignore]
+		public virtual decimal DisplayedTaxSum => SupplierTaxSum ?? UserTaxSum ?? TaxSum;
+
 		public virtual string InvoiceId { get; set; }
 		public virtual DateTime? InvoiceDate { get; set; }
 		public virtual Contractor Seller { get; set; }
