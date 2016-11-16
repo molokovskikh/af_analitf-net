@@ -19,16 +19,19 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class PriceTagConstructor : BaseScreen
 	{
-		public PriceTagConstructor()
+		private TagType tagType;
+
+		public PriceTagConstructor(TagType tagType)
 		{
+			this.tagType = tagType;
 			InitFields();
-			DisplayName = "Редактор ценника";
+			DisplayName = tagType == TagType.PriceTag ? "Конструктор ценника" : "Конструктор стеллажной карты";
 			Alignments = new[] {
 				new KeyValuePair<string, TextAlignment>("По левому краю", TextAlignment.Left),
 				new KeyValuePair<string, TextAlignment>("По центру", TextAlignment.Center),
 				new KeyValuePair<string, TextAlignment>("По правому краю", TextAlignment.Right),
 			};
-			Fields = PriceTagItem.Items();
+			Fields = PriceTagItem.Items(tagType);
 
 			Items = new ObservableCollection<PriceTagItem>();
 			Items.CollectionChanged += (sender, args) => {
@@ -50,7 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			base.OnInitialize();
 
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection)).Subscribe(Tag);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, tagType)).Subscribe(Tag);
 		}
 
 		public string Text
@@ -289,7 +292,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			if (Tag.Value == null)
 				return;
-			PreviewContent.Value = PriceTag.Preview(Tag.Value.Width, Tag.Value.Height, Items);
+			PreviewContent.Value = PriceTag.Preview(Tag.Value.Width, Tag.Value.Height, Tag.Value.BorderThickness, Items);
 		}
 
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -300,13 +303,24 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public void Save()
 		{
 			Query(s => {
-				if (Tag.Value.Id == 0)
+				// Tag.Value.Id = 0 не только у впервые вставляемого тега, но и при сбросе настроек на дефолтные
+				var exist = s.Query<PriceTag>().Where(x => x.TagType == Tag.Value.TagType).FirstOrDefault();
+				uint priceTagId = 0;
+				if (exist == null) {
 					s.Connection.Insert(Tag.Value);
-				else
-					s.Connection.Update(Tag.Value);
-				var dbItems = s.Query<PriceTagItem>().ToArray();
+					priceTagId = Tag.Value.Id;
+				}
+				else {
+					priceTagId = exist.Id;
+					exist.Width = Tag.Value.Width;
+					exist.Height = Tag.Value.Height;
+					exist.BorderThickness = Tag.Value.BorderThickness;
+					s.Connection.Update(exist);
+				}
+				var dbItems = s.Query<PriceTagItem>().Where(x => x.PriceTagId == priceTagId).ToArray();
 				for(var i = 0; i < Items.Count; i++) {
 					var item = Items[i];
+					item.PriceTagId = priceTagId;
 					item.Position = i;
 					if (item.Id == 0) {
 						s.Connection.Insert(item);
@@ -327,7 +341,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void Reset()
 		{
-			Tag.Value = PriceTag.Default();
+			Tag.Value = PriceTag.Default(tagType);
 		}
 
 		public void Delete()

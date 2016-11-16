@@ -42,6 +42,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private uint id;
 		private PriceTag priceTag;
+		private PriceTag rackingMap;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -159,8 +160,10 @@ namespace AnalitF.Net.Client.ViewModels
 				}))
 				.Switch()
 				.ToValue(CloseCancellation);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag))
 				.Subscribe(x => priceTag = x);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap))
+				.Subscribe(x => rackingMap = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)
 			{
@@ -173,7 +176,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
-				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
+				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value, rackingMap).Build()
 			}, fullScreen: true);
 		}
 

@@ -239,7 +239,8 @@ limit 300";
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
-		public NotifyValue<FrameworkElement> Preview { get; set; }
+		public NotifyValue<FrameworkElement> PriceTagPreview { get; set; }
+		public NotifyValue<FrameworkElement> RackingMapPreview { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -248,12 +249,19 @@ limit 300";
 			MarkupAddress.Value = Address;
 			CurrentAddress = Address;
 			LoadPriceTagPreview();
+			LoadRackingMapPreview();
 		}
 
 		private void LoadPriceTagPreview()
 		{
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
-				.Subscribe(x => Preview.Value = x.Preview());
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag))
+				.Subscribe(x => PriceTagPreview.Value = x.Preview());
+		}
+
+		private void LoadRackingMapPreview()
+		{
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap))
+				.Subscribe(x => RackingMapPreview.Value = x.Preview());
 		}
 
 		private static string Mask(string password1)
@@ -434,8 +442,14 @@ limit 300";
 
 		public IEnumerable<IResult> ShowPriceTagConstructor()
 		{
-			yield return new DialogResult(new PriceTagConstructor(), fullScreen: true);
+			yield return new DialogResult(new PriceTagConstructor(TagType.PriceTag), fullScreen: true);
 			LoadPriceTagPreview();
+		}
+
+		public IEnumerable<IResult> ShowRackingMapConstructor()
+		{
+			yield return new DialogResult(new PriceTagConstructor(TagType.RackingMap), fullScreen: true);
+			LoadRackingMapPreview();
 		}
 
 		protected override void Broadcast()
