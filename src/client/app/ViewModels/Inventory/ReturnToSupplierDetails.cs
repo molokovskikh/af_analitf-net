@@ -188,7 +188,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray()));
+			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnLabel()
@@ -203,12 +203,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintReturnWaybill()
 		{
-			return Preview("Возврат товарная накладная", new ReturnWaybill(Doc, Session.Query<WaybillSettings>().First()));
+			return Preview("Возврат товарная накладная", new ReturnWaybill(Doc,
+				Session.Query<WaybillSettings>().First(),
+				Session.Query<User>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
 		{
-			return Preview("Возврат акт о расхождении",
+			return Preview("Акт о расхождении",
 				new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
 

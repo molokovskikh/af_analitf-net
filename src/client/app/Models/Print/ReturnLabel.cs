@@ -44,7 +44,19 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
+
 			var body = new Grid()
+				.Cell(0, 0, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 24,
+						Text = "ВОЗВРАТ",
+						TextAlignment = TextAlignment.Center
+					}
+				})
+				.Cell(1, 0, new Grid()
 				.Cell(0, 0, new Label
 				{
 					Content = new TextBlock
@@ -59,7 +71,7 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 10,
+						FontSize = 16,
 						Text = returnToSupplier.SupplierName + "\n" + returnToSupplier.AddressName,
 					}
 				})
@@ -77,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 10,
+						FontSize = 16,
 						Text = waybillSettings==null ? "" : waybillSettings.FullName
 					}
 				})
@@ -95,11 +107,17 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 10,
+						FontSize = 16,
 						Text = returnToSupplier.Comment,
 					}
-				});
-			doc.Blocks.Add(new BlockUIContainer(body));
+				}));
+			var border = new Border
+			{
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(1, 1, 1, 1),
+				Child = body,
+			};
+			doc.Blocks.Add(new BlockUIContainer(border));
 		}
 	}
 }
