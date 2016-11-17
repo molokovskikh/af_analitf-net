@@ -56,7 +56,7 @@
 				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
-			</DataGrid.Columns>
+      </DataGrid.Columns>
 		</controls:DataGrid2>
 		<StackPanel Grid.Row="2" Name="Legend" />
 	</Grid>

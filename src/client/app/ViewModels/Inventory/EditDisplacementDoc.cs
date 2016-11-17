@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public EditDisplacementDoc(uint id)
 			: this()
 		{
-			DisplayName = "Редактирование внутреннего перемещения";
+			DisplayName = "Редактирование внутреннего перемещения " + Session.Load<DisplacementDoc>(id).Id;
 			InitDoc(Session.Load<DisplacementDoc>(id));
 			Lines.AddRange(Doc.Lines);
 		}
@@ -84,27 +84,29 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
-			if (!IsValide(Doc))
-				yield break;
+			while (true) {
+				if (!IsValide(Doc))
+					yield break;
 
-			var search = new StockSearch();
-			yield return new DialogResult(search);
-			var edit = new EditStock(search.CurrentItem)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
+				var search = new StockSearch();
+				yield return new DialogResult(search, false, true);
+				var edit = new EditStock(search.CurrentItem) {
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
 
-			var srcStock = Session.Load<Stock>(edit.Stock.Id);
-			var dstStock = srcStock.Copy();
-			dstStock.Address = Doc.DstAddress;
-			dstStock.Quantity = dstStock.ReservedQuantity = dstStock.SupplyQuantity = 0;
-			Session.Save(dstStock);
+				var srcStock = Session.Load<Stock>(edit.Stock.Id);
+				var dstStock = srcStock.Copy();
+				dstStock.Address = Doc.DstAddress;
+				dstStock.Quantity = dstStock.ReservedQuantity = dstStock.SupplyQuantity = 0;
+				Session.Save(dstStock);
 
-			var line = new DisplacementLine(srcStock, dstStock, edit.Stock.Quantity);
-			Lines.Add(line);
-			Doc.Lines.Add(line);
-			Doc.UpdateStat();
+				var line = new DisplacementLine(srcStock, dstStock, edit.Stock.Quantity);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
+				Save();
+			}
 		}
 
 		public void Delete()
@@ -113,6 +115,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Save();
 		}
 
 		public IEnumerable<IResult> EditLine()
@@ -127,6 +130,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			};
 			yield return new DialogResult(edit);
 			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity);
+			Save();
 			Doc.UpdateStat();
 		}
 
@@ -206,6 +210,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return Preview("Внутренее перемещение", new DisplacementDocument(Lines.ToArray()));
 		}
 
+		public IEnumerable<IResult> PrintDisplacementDocumentWaybill()
+		{
+			return Preview("Внутренее перемещение", new DisplacementDocumentWaybill(Doc, Lines, Session.Query<WaybillSettings>().First()));
+		}
+
 		public IResult PrintStockPriceTags()
 		{
 			return new DialogResult(new PrintPreviewViewModel
@@ -217,7 +226,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintDisplacementWaybill()
 		{
-			return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines));
+			var req = new RequirementWaybill();
+			yield return new DialogResult(req);
+			if (req.requirementWaybillName == null)
+				yield break;
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Требование-накладная",
+				new DisplacementWDocument(Doc, Lines, Session.Query<WaybillSettings>().First(), req.requirementWaybillName))), fullScreen: true);
+		}
+
+		public IEnumerable<IResult> PrintPriceNegotiationProtocol()
+		{
+			var req = new RequirementNegotiationProtocol();
+			yield return new DialogResult(req);
+			if (req.Fio == null)
+				yield break;
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Протокол согласования цен ЖНВЛП",
+				new PriceNegotiationProtocol(Doc, Lines, req.Fio))), fullScreen: true);
 		}
 
 		public IResult PrintStockRackingMaps()
@@ -233,7 +257,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
 		{
-			 var docSettings = doc.Settings;
+			var docSettings = doc.Settings;
 			if (docSettings != null)
 			{
 				yield return new DialogResult(new SimpleSettings(docSettings));

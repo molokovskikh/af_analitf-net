@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using Caliburn.Micro;
+using Common.NHibernate;
 using NHibernate;
 using NPOI.HSSF.UserModel;
 
@@ -17,11 +18,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public DisplacementDocs()
 		{
-			Begin.Value = DateTime.Today.AddDays(-7);
+			Begin.Value = DateTime.Today.AddDays(-30);
 			End.Value = DateTime.Today;
 			SelectedItems = new List<DisplacementDoc>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
+				CanPost.Value = x?.Status == DisplacementDocStatus.NotPosted;
+				CanUnPost.Value = x?.Status == DisplacementDocStatus.Posted;
 				CanDelete.Value = x?.Status == DisplacementDocStatus.NotPosted;
 			});
 			DisplayName = "Внутреннее перемещение";
@@ -35,6 +38,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<DisplacementDoc> CurrentItem { get; set; }
 		public List<DisplacementDoc> SelectedItems { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
+		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanEdit { get; set; }
 
 		public NotifyValue<bool> IsAll { get; set; }
@@ -42,9 +47,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> IsClosed { get; set; }
 		public NotifyValue<bool> IsEnd { get; set; }
 
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
 			DbReloadToken
 				.Merge(IsOpened.Changed())
 				.Merge(IsClosed.Changed())
@@ -79,6 +86,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new EditDisplacementDoc(new DisplacementDoc(Address)));
 		}
 
+		public void Open()
+		{
+			Edit();
+		}
+
 		public void Edit()
 		{
 			if (!CanEdit)
@@ -93,6 +105,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			CurrentItem.Value.BeforeDelete();
 			await Env.Query(s => s.Delete(CurrentItem.Value));
+			Items.Value.Remove(CurrentItem.Value);
 			Update();
 		}
 
@@ -134,6 +147,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ExcelExporter.WriteRows(sheet, rows, row);
 
 			return ExcelExporter.Export(book);
+		}
+
+		public void Post()
+		{
+			if (!Confirm("Провести выбранный документ?"))
+				return;
+			CurrentItem.Value.Post(Session);
+			Update();
+		}
+
+		public void UnPost()
+		{
+			if (!Confirm("Распровести выбранный документ?"))
+				return;
+			CurrentItem.Value.UnPost(Session);
+			Update();
 		}
 	}
 }
