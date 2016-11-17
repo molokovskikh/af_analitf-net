@@ -14,12 +14,14 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class ReturnWaybill : BaseDocument
 	{
-		private ReturnToSupplier returnToSupplier;
-		private WaybillSettings waybillSettings;
-		public ReturnWaybill(ReturnToSupplier _returnToSupplier, WaybillSettings _waybillSettings)
+		private ReturnToSupplier _returnToSupplier;
+		private WaybillSettings _waybillSettings;
+		private User _user;
+		public ReturnWaybill(ReturnToSupplier returnToSupplier, WaybillSettings waybillSettings, User user)
 		{
-			returnToSupplier = _returnToSupplier;
-			waybillSettings = _waybillSettings;
+			_returnToSupplier = returnToSupplier;
+			_waybillSettings = waybillSettings;
+			_user = user;
 			doc.PagePadding = new Thickness(29);
 			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
 
@@ -64,31 +66,31 @@ namespace AnalitF.Net.Client.Models.Print
 					.Cell(0, 0, BlockInner(new List<Grid>
 					{
 						Text("Грузоотправитель", 120),
-						TextWithLineSign($"{returnToSupplier.SupplierName}, {returnToSupplier.AddressName}; ИНН/КПП /; Р/С ; К/С ; БИК ",
+						TextWithLineSign($"{_returnToSupplier.SupplierName}, {_returnToSupplier.AddressName}; ИНН/КПП /; Р/С ; К/С ; БИК ",
 						"организация, адрес, номер телефона, банковские реквизиты"),
 					}))
 					.Cell(1, 0, BlockInner(new List<Grid>
 					{
 						Text("Грузополучатель", 120),
-						TextWithLineSign($"{waybillSettings.FullName}, {waybillSettings.Address}; ИНН/КПП /; Р/С ; К/С ; БИК ",
+						TextWithLineSign($"{_waybillSettings.FullName}, {_waybillSettings.Address}; ИНН/КПП /; Р/С ; К/С ; БИК ",
 						"организация, адрес, номер телефона, банковские реквизиты"),
 					}))
 					.Cell(2, 0, BlockInner(new List<Grid>
 					{
 						Text("Поставщик", 120),
-						TextWithLineSign($"{returnToSupplier.SupplierName}, {returnToSupplier.AddressName}; ИНН/КПП /; Р/С ; К/С ; БИК ",
+						TextWithLineSign($"{_returnToSupplier.SupplierName}, {_returnToSupplier.AddressName}; ИНН/КПП /; Р/С ; К/С ; БИК ",
 						"организация, адрес, номер телефона, банковские реквизиты"),
 					}))
 					.Cell(3, 0, BlockInner(new List<Grid>
 					{
 						Text("Плательщик", 120),
-						TextWithLineSign($"{waybillSettings.FullName}, {waybillSettings.Address}; ИНН/КПП /; Р/С ; К/С ; БИК ",
+						TextWithLineSign($"{_waybillSettings.FullName}, {_waybillSettings.Address}; ИНН/КПП /; Р/С ; К/С ; БИК ",
 						"организация, адрес, номер телефона, банковские реквизиты"),
 					}))
 					.Cell(4, 0, BlockInner(new List<Grid>
 					{
 						Text("Основание", 120),
-						TextWithLineSign("брак при премке ", "договор, заказ-наряд"),
+						TextWithLineSign(_returnToSupplier.Comment, "договор, заказ-наряд"),
 					})))
 				.Cell(0, 1, RightHeaderTable())
 				.Cell(1, 0, CaptionTable());
@@ -98,12 +100,12 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("№п/п", 20),
 				new PrintColumn("Наименование, характеристика, сорт, артикул товара, поставщик", 150),
 				new PrintColumn("Код", 30),
-				new PrintColumn("Наим-ие", 20),
-				new PrintColumn("Код по ОКЕИ", 20),
-				new PrintColumn("Вид упаковки", 20),
-				new PrintColumn("в одном месте", 20),
-				new PrintColumn("мест, шт.", 20),
-				new PrintColumn("масса, брутто", 20),
+				new PrintColumn("Наим-ие", 30),
+				new PrintColumn("Код по ОКЕИ", 30),
+				new PrintColumn("Вид упаковки", 30),
+				new PrintColumn("в одном месте", 30),
+				new PrintColumn("мест, шт.", 30),
+				new PrintColumn("масса, брутто", 30),
 				new PrintColumn("Кол-во (масса, нетто)", 40),
 				new PrintColumn("Цена,руб.коп.", 40),
 				new PrintColumn("Цена,с НДС", 40),
@@ -118,7 +120,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new ColumnGroup("Товар", 1, 2),
 				new ColumnGroup("Ед.Изм.", 3, 4),
 				new ColumnGroup("Кол-во", 6, 7),
-				new ColumnGroup("НДС", 12, 13),
+				new ColumnGroup("НДС", 13, 14),
 			});
 			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
 			var tableHeader = new TableRow();
@@ -131,7 +133,7 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 
 			dataTable.RowGroups[0].Rows.Add(tableHeader);
-			var rows = returnToSupplier.Lines.Select((o, i) => new object[]
+			var rows = _returnToSupplier.Lines.Select((o, i) => new object[]
 			{
 				i+1,
 				o.Product + o.Producer + "Прдок" + o.Stock.WaybillId + "от " + o.Stock.DocumentDate.ToShortDateString(),
@@ -157,26 +159,26 @@ namespace AnalitF.Net.Client.Models.Print
 			result.FontWeight = FontWeights.Bold;
 			result.FontSize = 8;
 			result.Cells.Add(Cell("Всего по накладной", 9));
-			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Quantity)));
+			result.Cells.Add(Cell(_returnToSupplier.Lines.Sum(l => l.Quantity)));
 			result.Cells.Add(Cell("X"));
 			result.Cells.Add(Cell("X"));
-			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.SupplierSumWithoutNds)));
+			result.Cells.Add(Cell(_returnToSupplier.Lines.Sum(l => l.SupplierSumWithoutNds)));
 			result.Cells.Add(Cell("X"));
-			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.NdsAmount)));
-			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.SupplierSum)));
+			result.Cells.Add(Cell(_returnToSupplier.Lines.Sum(l => l.Stock.NdsAmount)));
+			result.Cells.Add(Cell(_returnToSupplier.Lines.Sum(l => l.SupplierSum)));
 			dataTable.RowGroups[0].Rows.Add(result);
 			doc.Blocks.Add(dataTable);
-
+			var pageCount = ((IDocumentPaginatorSource)doc).DocumentPaginator.PageCount;
 			Block(new List<Grid>
 			{
 				Text("Товарная накладная имеет приложение на"),
-				TextWithLine("", 300),
+				TextWithLine(Convert.ToString(pageCount-1), 300),
 				Text("листах")
 			});
 			Block(new List<Grid>
 			{
 				Text("и содержит"),
-				TextWithLineSign("","прописью", 445),
+				TextWithLineSign(TextUtil.NumToString(_returnToSupplier.Lines.Count),"прописью", 445),
 				Text("порядковых номеров записей")
 			});
 			Block(new List<Grid>
@@ -212,7 +214,7 @@ namespace AnalitF.Net.Client.Models.Print
 				.Cell(0, 0, BlockInner(new List<Grid>
 				{
 					Text("Всего отпущено на сумму"),
-					TextWithLineSign("","прописью"),
+					TextWithLineSign(TextUtil.NumToPaymentString(Convert.ToDouble(_returnToSupplier.Lines.Sum(l => l.SupplierSum))),"прописью"),
 				}))
 				.Cell(1, 0, BlockInner(new List<Grid>
 				{
@@ -233,10 +235,10 @@ namespace AnalitF.Net.Client.Models.Print
 				}))
 				.Cell(4, 0, BlockInner(new List<Grid>
 				{
-					Text("Отпуск груза"),
-					TextWithLineSign("директор","должность"),
+					Text("Отпуск груза произвел"),
+					TextWithLineSign("","должность"),
 					TextWithLineSign("","подпись"),
-					TextWithLineSign("","расшифровка подписи"),
+					TextWithLineSign(_user.FullName,"расшифровка подписи"),
 				}))
 				.Cell(5, 0, BlockInner(new List<Grid>
 				{
@@ -293,7 +295,7 @@ namespace AnalitF.Net.Client.Models.Print
 				.Cell(1, 1, LabelWithoutBorder("Форма по ОКУД"))
 				.Cell(1, 2, LabelWithBorder("330202"))
 				.Cell(2, 1, LabelWithoutBorder("по ОКПО"))
-				.Cell(2, 2, LabelWithBorder(returnToSupplier.SupplierName))
+				.Cell(2, 2, LabelWithBorder(_waybillSettings.Name))
 				.Cell(3, 1, LabelWithoutBorder(""))
 				.Cell(3, 2, LabelWithBorder(""))
 				.Cell(4, 1, LabelWithoutBorder("Вид деятельности по ОКДП"))
@@ -301,7 +303,7 @@ namespace AnalitF.Net.Client.Models.Print
 				.Cell(5, 1, LabelWithoutBorder("по ОКПО"))
 				.Cell(5, 2, LabelWithBorder(""))
 				.Cell(6, 1, LabelWithoutBorder("по ОКПО"))
-				.Cell(6, 2, LabelWithBorder(returnToSupplier.SupplierName))
+				.Cell(6, 2, LabelWithBorder(_waybillSettings.Name))
 				.Cell(7, 1, LabelWithoutBorder("по ОКПО"))
 				.Cell(7, 2, LabelWithBorder(""))
 				.Cell(8, 1, LabelWithBorderLeft("номер"))

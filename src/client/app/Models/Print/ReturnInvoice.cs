@@ -111,6 +111,7 @@ namespace AnalitF.Net.Client.Models.Print
 				var rows = taxGroup.OrderBy(l => l.Product).Select(l => new object[] {
 					l.Product,
 					l.ProductId,
+					"упак",
 					l.Stock.Unit,
 					l.Quantity,
 					l.SupplierCostWithoutNds.FormatCost(),
@@ -144,7 +145,7 @@ namespace AnalitF.Net.Client.Models.Print
 			tax18Block.FontWeight = FontWeights.Bold;
 
 			doc.Blocks.Add(new BlockUIContainer(new Grid()
-				.Cell(0, 0, SingBlock("Руководитель организации\r\nили иное уполномоченное лицо"))
+				.Cell(0, 0, SingBlock("Руководитель организации\r\nили иное уполномоченное лицо", waybillSettings.Director))
 				.Cell(1, 0, SingBlock("Индивидуальный предприниматель"))
 				.RowSpan(0, 1, 2, new Label
 				{
@@ -154,7 +155,7 @@ namespace AnalitF.Net.Client.Models.Print
 					VerticalAlignment = VerticalAlignment.Center,
 					HorizontalAlignment = HorizontalAlignment.Center,
 				})
-				.Cell(0, 2, SingBlock("Главный бухгалтер\r\nили иное уполномоченное лицо"))
+				.Cell(0, 2, SingBlock("Главный бухгалтер\r\nили иное уполномоченное лицо", waybillSettings.Accountant))
 				.Cell(1, 2, new Grid()
 					.Cell(0, 0, new Label
 					{
@@ -179,7 +180,7 @@ namespace AnalitF.Net.Client.Models.Print
 				));
 		}
 
-		private static Grid SingBlock(string name)
+		private static Grid SingBlock(string name, string text="")
 		{
 			var grid = new Grid();
 			grid.RowDefinitions.Add(new RowDefinition());
@@ -220,6 +221,7 @@ namespace AnalitF.Net.Client.Models.Print
 				BorderBrush = Brushes.Black,
 				BorderThickness = new Thickness(0, 0, 0, 1),
 				SnapsToDevicePixels = true,
+				Content = text,
 				Margin = new Thickness(5, 0, 5, 0),
 			});
 			grid.Cell(1, 2, new Label {
