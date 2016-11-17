@@ -229,6 +229,22 @@ namespace AnalitF.Net.Client.Models.Commands
 						}
 					}
 
+					// #56897 конструктор ценников
+					if (table.Name.Match("PriceTagItems")) {
+						var tag = Session.Query<PriceTag>().FirstOrDefault(x => x.TagType == TagType.PriceTag);
+						var orphanItems = Session.Query<PriceTagItem>().Count(x => x.PriceTagId == 0);
+						// первый запуск после изменения схемы
+						if (tag != null && orphanItems > 0) {
+							var notOrphanItems = Session.Query<PriceTagItem>().Count(x => x.PriceTagId == tag.Id);
+							if (notOrphanItems == 0) {
+								tag.BorderThickness = 0.5; // толщина линии была прописана в коде
+								alters.Add($"update PriceTagItems set PriceTagId = {tag.Id} where PriceTagId = 0;"); // привязали
+							}
+						}
+						// удалили теги без элементов
+						alters.Add("delete t from PriceTags t left join PriceTagItems i on i.PriceTagId = t.Id where i.PriceTagId is null;");
+					}
+
 					// #51646 Проблемы обновления АF.NET
 					if (table.Name.Match("WaybillLines") && tableMeta.GetIndexMetadata("SerialProductIdProducerId") == null)
 						alters.Add("alter table WaybillLines add index SerialProductIdProducerId (SerialNumber, ProductId, ProducerId);");
