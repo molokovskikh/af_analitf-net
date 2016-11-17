@@ -12,20 +12,18 @@ using log4net;
 
 namespace AnalitF.Net.Client.Helpers
 {
-		public class ComboBoxSelectedItemConverter : IValueConverter
+	public class ComboBoxSelectedItemConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-			{
-				return ((IEnumerable<ValueDescription>)parameter).FirstOrDefault(d => Equals(d.Value, value));
-			}
-
-			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-			{
-				return ((ValueDescription)value).Value;
-			}
+			return ((IEnumerable<ValueDescription>)parameter).FirstOrDefault(d => Equals(d.Value, value));
 		}
 
-
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return ((ValueDescription)value).Value;
+		}
+	}
 
 	public class GroupNameConverter : IValueConverter
 	{

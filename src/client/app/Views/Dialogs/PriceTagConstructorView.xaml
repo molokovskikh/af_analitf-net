@@ -64,8 +64,11 @@
 				<TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
 					Visibility="{Binding IsTextVisible, Converter={StaticResource BoolToCollapsed}}" />
 
-				<TextBlock>На отдельной строке</TextBlock>
-				<CheckBox IsChecked="{Binding IsNewLine}" />
+				<TextBlock>Ширина (см)</TextBlock>
+				<TextBox Text="{Binding Width, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableConverter}}" />
+
+				<TextBlock>Высота (см)</TextBlock>
+				<TextBox Text="{Binding Height, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableConverter}}" />
 
 				<TextBlock>Выравнивание</TextBlock>
 				<ComboBox IsEditable="False"
