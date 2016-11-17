@@ -101,8 +101,12 @@ namespace AnalitF.Net.Client.Test.Unit
 
 			waybill.Calculate(settings, new List<uint>());
 			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
-
 			Assert.IsNotNull(doc);
+
+			var priceTag = PriceTag.Default(TagType.RackingMap);
+			settings.RackingMap.Size = RackingMapSize.Custom;
+			var doc2 = new RackingMapDocument(waybill, waybill.Lines, settings, priceTag).Build();
+			Assert.IsNotNull(doc2);
 		}
 
 		[Test]

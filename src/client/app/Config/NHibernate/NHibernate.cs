@@ -106,6 +106,8 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			Index<Offer>(o => o.Id.RegionId);
 			Index<SentOrder>(o => o.SentOn);
 			Index<SentOrder>(o => o.ServerId);
+			Index<DeletedOrder>(o => o.DeletedOn);
+			Index<DeletedOrder>(o => o.ServerId);
 			Index<MinCost>(r => r.Diff);
 			Index<Catalog>(r => r.Name);
 			Index<Drug>(r => r.EAN);
@@ -260,6 +262,13 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					cm => cm.Name("LeaderRegionId")));
 			});
 			mapper.Class<SentOrder>(m => {
+				m.Bag(o => o.Lines, c => {
+					c.Key(k => k.Column("OrderId"));
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+					c.Inverse(true);
+				});
+			});
+			mapper.Class<DeletedOrder>(m => {
 				m.Bag(o => o.Lines, c => {
 					c.Key(k => k.Column("OrderId"));
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);

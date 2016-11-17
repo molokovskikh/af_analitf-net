@@ -31,7 +31,7 @@ namespace AnalitF.Net.Service.Config.Environments
 				if (!Path.IsPathRooted(value))
 					value = Path.Combine(BasePath, value);
 
-				FileHelper.CreateDirectoryRecursive(value);
+				Directory.CreateDirectory(value);
 				property.SetValue(config, value, null);
 			}
 

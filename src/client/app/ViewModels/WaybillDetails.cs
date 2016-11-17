@@ -22,27 +22,22 @@ using NPOI.SS.UserModel;
 using ReactiveUI;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
+using System.ComponentModel.DataAnnotations;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class ConfirmQuantity : Screen, ICancelable
+	public class EditSumSettings
 	{
-		public ConfirmQuantity(WaybillLine line)
-		{
-			DisplayName = "Подтвердите количество";
-			Line = line;
-			Quantity = (int)(line.Stock?.Quantity).GetValueOrDefault();
-			WasCancelled = true;
-		}
+		[Display(Name = "Сумма с НДС")]
+		public decimal UserSum { get; set; }
 
-		public WaybillLine Line { get; }
-		public int Quantity { get; set; }
-		public bool WasCancelled { get; set; }
+		[Display(Name = "Сумма НДС")]
+		public decimal UserTaxSum { get; set; }
 
-		public void OK()
+		public EditSumSettings(Waybill waybill)
 		{
-			WasCancelled = false;
-			TryClose();
+			UserSum = waybill.DisplayedSum;
+			UserTaxSum = waybill.DisplayedTaxSum;
 		}
 	}
 
@@ -50,6 +45,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private uint id;
 		private PriceTag priceTag;
+		private PriceTag rackingMap;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -129,7 +125,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Reject> Reject { get; set; }
 		public NotifyValue<bool> CanStock { get; set; }
 		public NotifyValue<bool> CanToEditable { get; set; }
-		
+
 		private void Calculate()
 		{
 			//в случае если мы восстановили значение из сессии
@@ -184,8 +180,10 @@ namespace AnalitF.Net.Client.ViewModels
 				}))
 				.Switch()
 				.ToValue(CloseCancellation);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag))
 				.Subscribe(x => priceTag = x);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap))
+				.Subscribe(x => rackingMap = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)
 			{
@@ -198,7 +196,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
-				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
+				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value, rackingMap).Build()
 			}, fullScreen: true);
 		}
 
@@ -240,6 +238,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//в случае редактирование пользовательской накладной в коллекции будет NamedObject
 			return Lines.Value.OfType<WaybillLine>().Where(l => l.Print).ToList();
+		}
+
+		public IEnumerable<IResult> EditSum()
+		{
+			var settings = new EditSumSettings(Waybill);
+			yield return new DialogResult(new SimpleSettings(settings));
+			if (settings.UserSum <= 0 || settings.UserTaxSum <= 0) {
+				MessageBox.Show(
+						"Суммы должны быть больше нуля",
+						"АналитФАРМАЦИЯ: Внимание",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				yield break;
+			}
+			Waybill.UserSum = settings.UserSum;
+			Waybill.UserTaxSum = settings.UserTaxSum;
+			Session.Save(Waybill);
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)

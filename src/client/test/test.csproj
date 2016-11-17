@@ -155,6 +155,7 @@
     <Compile Include="Integration\ViewModels\CheckDetailsView.cs" />
     <Compile Include="Integration\ViewModels\ChecksView.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
+    <Compile Include="Fixtures\CreateMessageUpdateInfo.cs" />
     <Compile Include="Fixtures\CreateNews.cs" />
     <Compile Include="Fixtures\CreateProducerPromotion.cs" />
     <Compile Include="Fixtures\CreateOrder.cs" />
@@ -383,4 +384,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+	<ItemGroup>
+		<ShareFiles Include="..\..\..\lib\libmysqld\**\*.*"/>
+	</ItemGroup>
+
+	<Target Name="BeforeBuild">
+		<Copy SkipUnchangedFiles="True"
+			SourceFiles="@(ShareFiles)"
+			DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
+		/>
+	</Target>
 </Project>

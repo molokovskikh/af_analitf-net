@@ -12,6 +12,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI;
 using System.Windows;
+using Caliburn.Micro;
 using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
@@ -108,13 +109,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			orders.CurrentOrder = orders.Orders.First(o => o.Id == order.Id);
 			orders.EnterOrder();
 
-			var lines = (OrderDetailsViewModel)shell.ActiveItem;
-			Assert.AreEqual(2, lines.Lines.Value.Count);
-			lines.OnlyWarning.Value = true;
-			Assert.AreEqual(1, lines.Lines.Value.Count);
-			lines.CurrentLine.Value = lines.Lines.Value.First();
-			lines.Delete();
-			Assert.AreEqual(0, lines.Lines.Value.Count);
+			var model = (OrderDetailsViewModel)shell.ActiveItem;
+			Assert.AreEqual(2, model.Lines.Value.Count);
+
+			model.FilterItems.Where(x => x.Item.Item1 != "OnlyWarning").Each(x => x.IsSelected = false);
+			scheduler.AdvanceByMs(10000);
+			Assert.AreEqual(1, model.Lines.Value.Count);
+			model.CurrentLine.Value = model.Lines.Value.First();
+
+			model.Delete();
+			Assert.AreEqual(0, model.Lines.Value.Count);
 			Assert.IsInstanceOf<OrderDetailsViewModel>(shell.ActiveItem);
 		}
 

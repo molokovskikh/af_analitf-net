@@ -32,6 +32,12 @@ namespace AnalitF.Net.Client.Views
 						PriceTagConfig.Visibility = x.Value == PriceTagType.Custom ? Visibility.Collapsed : Visibility.Visible;
 						PriceTagConstructor.Visibility = x.Value == PriceTagType.Custom ? Visibility.Visible : Visibility.Collapsed;
 					});
+
+				model.ObservableForProperty(x => x.Settings.Value.RackingMap.Size, skipInitial: false)
+					.Subscribe(x => {
+						RackingMapConfig.Visibility = x.Value == RackingMapSize.Custom ? Visibility.Collapsed : Visibility.Visible;
+						RackingMapConstructor.Visibility = x.Value == RackingMapSize.Custom ? Visibility.Visible : Visibility.Collapsed;
+					});
 			};
 
 			Settings_PriceTag_Type.SelectionChanged += (sender, e) =>
@@ -39,7 +45,18 @@ namespace AnalitF.Net.Client.Views
 				if ((PriceTagType)((ValueDescription)(sender as ComboBox).SelectedItem).Value == PriceTagType.Custom)
 				{
 					(sender as ComboBox).ToolTip = @"Конструктор для редактирования ценников, с учетом нужных размеров и необходимых опций. Для создания нового ценника нажмите Редактировать.";
-					return; ;
+					return;
+				}
+
+				(sender as ComboBox).ToolTip = null;
+			};
+
+			Settings_RackingMap_Size.SelectionChanged += (sender, e) =>
+			{
+				if ((RackingMapSize)((ValueDescription)(sender as ComboBox).SelectedItem).Value == RackingMapSize.Custom)
+				{
+					(sender as ComboBox).ToolTip = @"Конструктор для редактирования стеллажных карт, с учетом нужных размеров и необходимых опций. Для создания нового стеллажной карты нажмите Редактировать.";
+					return;
 				}
 
 				(sender as ComboBox).ToolTip = null;

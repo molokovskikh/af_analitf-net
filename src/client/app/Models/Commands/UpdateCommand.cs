@@ -99,6 +99,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			Log.InfoFormat("Обновление завершено успешно");
+			var user = Session.Query<User>().FirstOrDefault();
+			var message = user?.Message;
+			if (message != null
+				&& String.IsNullOrEmpty(SyncData))
+				Results.Add(new MessageResult(message));
 			return result;
 		}
 
@@ -904,7 +909,6 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 #else
 			requestId = Convert.ToUInt32(File.ReadAllText(Path.Combine(Config.TmpDir, "id")));
 #endif
-
 			var data = ImportCommand.GetDbData(Config.UpdateTmpDir);
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
@@ -1000,12 +1004,24 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));
 			ProcessAttachments(resultDirs);
 
+			Log.Info("Очистка корзины");
+			EmptyTrash();
+
 			if (Clean)
 				FileHelper.DeleteDir(Config.UpdateTmpDir);
 
 			if (request != null)
 				WaitAndLog(Client.PutAsync("Main", request, Formatter), "Отправка лога импорта заявок");
 			Log.Info("Импорт завершен");
+		}
+
+
+		public void EmptyTrash(int days = 7)
+		{
+			var begin = DateTime.Today.AddDays(-days);
+			Session.CreateSQLQuery("delete from deletedorders where DeletedOn < :begin")
+				.SetParameter("begin", begin)
+				.ExecuteUpdate();
 		}
 
 		private bool CalculateAwaited()

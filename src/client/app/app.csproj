@@ -338,6 +338,8 @@
     <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />
     <Compile Include="Models\Print\DisplacementWDocument.cs" />
     <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\DeletedOrder.cs" />
+    <Compile Include="Models\DeletedOrderLine.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
     <Compile Include="Models\ProducerPromotion.cs" />
@@ -539,9 +541,6 @@
     </Compile>
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ConfirmQuantity.xaml.cs">
-      <DependentUpon>ConfirmQuantity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Debug.xaml.cs">
       <DependentUpon>Debug.xaml</DependentUpon>
@@ -830,10 +829,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CatalogView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ConfirmQuantity.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1278,8 +1273,10 @@
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
+  <ItemGroup>
+    <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
+  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>
