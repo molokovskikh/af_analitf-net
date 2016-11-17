@@ -27,6 +27,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Diadok;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Inventory;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -717,6 +718,46 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowJournal()
 		{
 			NavigateRoot(new Journal());
+		}
+
+		public void CheckDefectSeries()
+		{
+			NavigateRoot(new CheckDefectSeries());
+		}
+
+		public void ReceivingOrders()
+		{
+			NavigateRoot(new WaybillsViewModel());
+		}
+
+		public void Checks()
+		{
+			NavigateRoot(new Checks());
+		}
+
+		public void InventoryDocs()
+		{
+			NavigateRoot(new InventoryDocs());
+		}
+
+		public void WriteoffDocs()
+		{
+			NavigateRoot(new WriteoffDocs());
+		}
+
+		public void ReturnToSuppliers()
+		{
+			NavigateRoot(new ReturnToSuppliers());
+		}
+
+		public void ReassessmentDocs()
+		{
+			NavigateRoot(new ReassessmentDocs());
+		}
+
+		public void DisplacementDocs()
+		{
+			NavigateRoot(new DisplacementDocs());
 		}
 
 		public bool CanMicroUpdate => Settings.Value.LastUpdate != null;
