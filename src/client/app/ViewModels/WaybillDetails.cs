@@ -222,9 +222,12 @@ namespace AnalitF.Net.Client.ViewModels
 						MessageBoxImage.Error);
 				yield break;
 			}
+
 			Waybill.UserSum = settings.UserSum;
 			Waybill.UserTaxSum = settings.UserTaxSum;
-			Session.Save(Waybill);
+			Session.Update(Waybill);
+			Session.Flush();
+			Env.Bus.SendMessage("Changed", "db");
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
