@@ -279,6 +279,40 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			}
 		}
 
+		public double? Width
+		{
+			get
+			{
+				return SelectedItem.Value?.Width;
+			}
+			set
+			{
+				if (SelectedItem.Value != null) {
+					SelectedItem.Value.Width = value;
+					SelectedItem.Value.IsAutoWidth = value == null;
+					Preview();
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public double? Height
+		{
+			get
+			{
+				return SelectedItem.Value?.Height;
+			}
+			set
+			{
+				if (SelectedItem.Value != null) {
+					SelectedItem.Value.Height = value;
+					SelectedItem.Value.IsAutoHeight = value == null;
+					Preview();
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		public string Name => SelectedItem.Value?.Name;
 
 		public NotifyValue<PriceTag> Tag { get; set; }
