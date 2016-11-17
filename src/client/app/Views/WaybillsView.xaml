@@ -101,11 +101,11 @@
                 <c:DataGridTextColumnEx x:Name="clmnSupplierName" Width="64*" Header="Поставщик"
 					Binding="{Binding SupplierName}" />
                 <c:DataGridTextColumnEx x:Name="clmnSum" Width="64*" Header="Сумма опт"
-					Binding="{Binding Sum}"
-					TextAlignment="Right" />
+					Binding="{Binding Sum}" TextAlignment="Right" />
                 <c:DataGridTextColumnEx x:Name="clmnRetailSum" Width="64*" Header="Сумма розница"
-					Binding="{Binding RetailSum}"
-					TextAlignment="Right" />
+					Binding="{Binding RetailSum}" TextAlignment="Right" />
+                <c:DataGridTextColumnEx x:Name="clmnDisplayedSum" Width="64*" Header="Сумма по документу"
+					Binding="{Binding DisplayedSum}" TextAlignment="Right" />
             </DataGrid.Columns>
         </c:DataGrid2>
 
@@ -124,6 +124,8 @@
                                         Binding="{Binding TotalSum}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnRetailSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
                                         Binding="{Binding TotalRetailSum}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnDisplayedSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
+                                        Binding="{Binding TotalDisplayedSum}"/>
             </DataGrid.Columns>
         </c:DataGrid2>
         <StackPanel Grid.Row="3" Name="Legend" />
