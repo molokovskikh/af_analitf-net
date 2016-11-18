@@ -10,7 +10,7 @@
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
 			<Button Name="Reset" ToolTip="Вернуть исходные настройки">Вернуть исходные</Button>
-			<Button Name="Clear" ToolTip="Удалить все на Схеме ценника">Очистить</Button>
+			<Button Name="Clear" ToolTip="Удалить все элементы">Очистить</Button>
 			<Button Name="Delete" ToolTip="Удалить выделенный элемент">Удалить</Button>
 			<Button Name="Preview">Обновить</Button>
 			<Button Name="Save">Сохранить</Button>
@@ -29,7 +29,7 @@
 				</Grid.RowDefinitions>
 				<Label Grid.Row="0" FontWeight="Bold" FontSize="16" Content="Доступные элементы" />
 				<ListBox Grid.Row="1" Name="Items" ItemsSource="{Binding Fields}" DisplayMemberPath="Name"
-								 ToolTip="Для добавления -выделенный элемент перетащите мышкой на поле Схема ценника"/>
+								 ToolTip="Для добавления перетащите мышкой выделенный элемент на поле Схема"/>
 			</Grid>
 
 			<Grid Grid.Column="1">
@@ -39,7 +39,7 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition />
 				</Grid.RowDefinitions>
-				<Label HorizontalContentAlignment="Center" Grid.Row="0" FontWeight="Bold" FontSize="16" Content="Схема ярлыка" />
+				<Label HorizontalContentAlignment="Center" Grid.Row="0" FontWeight="Bold" FontSize="16" Content="Схема" />
 				<Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Background="LightGray">
 					<dialogs:CanvasPanel Selected="{Binding Selected.Value}" Items="{Binding Items}" x:Name="Canvas" Margin="3, 5, 3, 5" />
 				</Border>
@@ -48,7 +48,7 @@
 			</Grid>
 
 			<StackPanel Grid.Column="2" Margin="3, 5, 3, 5" FocusManager.IsFocusScope="True">
-				<TextBlock FontWeight="Bold" FontSize="16" Text="Размер ярлыка" Margin="0, 5, 0, 5"/>
+				<TextBlock FontWeight="Bold" FontSize="16" Text="Ярлык" Margin="0, 5, 0, 5"/>
 
 				<Label>Ширина (см)</Label>
 				<TextBox Name="Tag_Width" />
