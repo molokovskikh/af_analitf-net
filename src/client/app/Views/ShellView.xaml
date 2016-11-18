@@ -181,8 +181,15 @@
 				<Image Source="/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
+      <xctk:SplitButton x:Name="PrintStock" ToolTip="Печать склад" Background="Transparent">
+        <Image Source="/assets/images/Printer 2_32.ico"
+						Style="{StaticResource ButtonImage}" />
+        <xctk:SplitButton.DropDownContent>
+          <ItemsControl ItemsSource ="{Binding Path=PrintStockMenuItems}"/>
+        </xctk:SplitButton.DropDownContent>
+      </xctk:SplitButton>
 
-			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
+      <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге (F8)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Folder Green_32.ico"

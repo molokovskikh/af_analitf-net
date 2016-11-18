@@ -14,6 +14,7 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.NHibernate;
@@ -21,9 +22,14 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Stocks : BaseScreen2
+	public class Stocks : BaseScreen2, IPrintableStock
 	{
 		private string Name;
+
+		public bool CanPrintStock
+		{
+			get { return true; }
+		}
 
 		public Stocks()
 		{
@@ -41,6 +47,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
 			TrackDb(typeof(Stock));
+
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			MenuItem item = new MenuItem();
+			item.Header = "Товарные запасы";
+			item.Click += (sender, args) => PrintStock();
+			PrintStockMenuItems.Add(item);
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -82,6 +95,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				}))
 				.Subscribe(Items, CloseCancellation.Token);
 		}
+
+
 
 		protected override void OnDeactivate(bool close)
 		{
@@ -243,5 +258,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Shell.Navigate(new DisplacementDocs());
 		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			throw new NotImplementedException();
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+
 	}
 }
