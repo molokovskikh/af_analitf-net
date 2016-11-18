@@ -45,14 +45,9 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			session.CreateSQLQuery("delete from PriceTagItems;").ExecuteUpdate();
 			session.CreateSQLQuery("delete from PriceTags;").ExecuteUpdate();
 			session.CreateSQLQuery("insert into PriceTags () values ();").ExecuteUpdate();
-			session.CreateSQLQuery("insert into PriceTags () values ();").ExecuteUpdate(); // будет удалено
-			session.CreateSQLQuery("insert into PriceTagItems () values ();").ExecuteUpdate(); // будет привязано к первому
-
 			check.UpgradeSchema();
-			var tag = session.Query<PriceTag>().Single();
-			var tagItem = session.Query<PriceTagItem>().Single();
-			Assert.AreEqual(tag.Id, tagItem.PriceTagId);
-			Assert.AreEqual(tag.BorderThickness, 0.5);
+			var tag = session.Query<PriceTag>().SingleOrDefault();
+			Assert.IsNull(tag);
 		}
 
 		[Test]
