@@ -45,9 +45,11 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			session.CreateSQLQuery("delete from PriceTagItems;").ExecuteUpdate();
 			session.CreateSQLQuery("delete from PriceTags;").ExecuteUpdate();
 			session.CreateSQLQuery("insert into PriceTags () values ();").ExecuteUpdate();
+			session.CreateSQLQuery("insert into PriceTags () values ();").ExecuteUpdate(); // должен быть удалён
+			session.CreateSQLQuery("insert into PriceTagItems () values ();").ExecuteUpdate(); // должен быть привязан
 			check.UpgradeSchema();
-			var tag = session.Query<PriceTag>().SingleOrDefault();
-			Assert.IsNull(tag);
+			var tag = session.Query<PriceTag>().Single();
+			Assert.AreEqual(tag.Items.Count, 1);
 		}
 
 		[Test]

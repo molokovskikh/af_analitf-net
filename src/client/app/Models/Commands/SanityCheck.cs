@@ -229,9 +229,11 @@ namespace AnalitF.Net.Client.Models.Commands
 						}
 					}
 
-					// #56897 удалили теги без элементов
-					if (table.Name.Match("PriceTags"))
+					// #56897 привязали элементы, чтоб сохранить настройки конструктора, удалили теги без элементов
+					if (table.Name.Match("PriceTags")) {
+						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where PriceTagId = 0;");
 						alters.Add("delete t from PriceTags t left join PriceTagItems i on i.PriceTagId = t.Id where i.PriceTagId is null;");
+					}
 
 					// #51646 Проблемы обновления АF.NET
 					if (table.Name.Match("WaybillLines") && tableMeta.GetIndexMetadata("SerialProductIdProducerId") == null)
