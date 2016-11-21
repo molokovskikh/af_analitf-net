@@ -28,6 +28,7 @@ using NHibernate;
 using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
+using NHibernate.Util;
 using SmartOrderFactory.Domain;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
@@ -391,6 +392,9 @@ select u.Id,
 	?supportHours as SupportHours,
 	?lastSync as LastSync,
 	rcs.SaveOrders,
+	case
+		when uup.MessageShowCount > 0 then uup.Message
+	end Message,
 	exists(
 		select *
 		from Customers.UserAddresses ua
@@ -402,6 +406,7 @@ select u.Id,
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
+	join Usersettings.Userupdateinfo uup on uup.UserID = u.Id
 where u.Id = ?userId";
 			Export(Result, sql, "Users", truncate: true, parameters: new {
 				userId = user.Id,
@@ -1773,6 +1778,9 @@ group by ol.RowId";
 					"LoadedDocuments",
 					new[] { "Id", "Type", "SupplierId", "OriginFilename", "IsDocDelivered" },
 					new object[0][]);
+				if (job.UpdateType.Match("Waybills"))
+					job.ErrorDescription = "Новых документов нет";
+
 				return;
 			}
 
@@ -1842,6 +1850,8 @@ select d.RowId as Id,
 	i.ShipperInfo as ShipperNameAndAddress,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
+	if(i.IsSupplierAmount, i.NDSAmount, null) as SupplierTaxSum,
+	if(i.IsSupplierAmount, i.Amount, null) as SupplierSum,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
 	rf.IsRetailCostFixed
 from Logs.Document_logs d
@@ -1870,6 +1880,8 @@ select d.RowId as Id,
 	null as ShipperNameAndAddress,
 	null as InvoiceId,
 	null as InvoiceDate,
+	null as SupplierTaxSum,
+	null as SupplierSum,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
 	0 as IsRetailCostFixed
 from Logs.Document_logs d
@@ -2320,6 +2332,22 @@ where l.UserId = :userId;")
 			session.CreateSQLQuery(@"
 delete from Logs.PendingOrderLogs
 where UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+				var messageShowCountList = session.CreateSQLQuery(@"
+select MessageShowCount from usersettings.userupdateinfo where UserID = :userId")
+				.SetParameter("userId", userId).List();
+
+			var messageShowCount = Convert.ToByte(messageShowCountList.First());
+			if (messageShowCount > 0)
+				messageShowCount--;
+
+			session.CreateSQLQuery(@"
+update usersettings.userupdateinfo
+set MessageShowCount = :MessageShowCount
+where UserId = :userId;")
+				.SetParameter("MessageShowCount", messageShowCount)
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 		}

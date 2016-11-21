@@ -8,7 +8,8 @@ namespace AnalitF.Net.Client.Models
 	{
 		[Description("Стандартный размер")] Normal,
 		[Description("Большой размер")] Big,
-		[Description("Стеллажная карта №2")] Normal2
+		[Description("Стеллажная карта №2")] Normal2,
+		[Description("Конструктор")] Custom,
 	}
 
 	public class RackingMapSettings : BaseNotify

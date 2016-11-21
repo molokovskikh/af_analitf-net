@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.Models
 			OfferId = offer.Id;
 			Count = count;
 			OptimalFactor = offer.ResultCost - offer.LeaderCost;
+			Junk = offer.Junk;
 		}
 
 		public virtual uint Id { get; set; }
@@ -130,6 +131,9 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged();
 			}
 		}
+
+		[Style(Description = "Позиция по мин.ценам")]
+		public virtual bool IsMinCost => OptimalFactor <= 0 && !Junk;
 
 		//заглушка что бы работало смешение цветов от IsSendError
 		[Style("Sum")]

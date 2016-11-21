@@ -42,9 +42,9 @@
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
 					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
-					<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+					<DatePicker Name="Begin"/>
 					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
-					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
+					<DatePicker Name="End"/>
 				</StackPanel>
 			</GroupBox>
 			<c:PopupSelector VerticalAlignment="Center" x:Name="Suppliers"

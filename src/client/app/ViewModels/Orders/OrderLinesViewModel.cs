@@ -15,19 +15,14 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
+using Common.Tools.Calendar;
 using NHibernate.Linq;
 using ReactiveUI;
 using System.ComponentModel;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
-	public enum LinesFilter
-	{
-		[Description("Все")] All,
-		[Description("Позиции присутствуют в замороженных заказах")] InFrozenOrders
-	}
-
-	//todo при удалении строки в предложениях должна удаляться строка и в заказах
+//todo при удалении строки в предложениях должна удаляться строка и в заказах
 	[DataContract]
 	public class OrderLinesViewModel : BaseOfferViewModel, IPrintable
 	{
@@ -39,9 +34,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
 			IsCurrentSelected = new NotifyValue<bool>(true);
-			Begin = new NotifyValue<DateTime>(DateTime.Today);
+			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			AddressSelector = new AddressSelector(this);
+
+			FilterItems = new List<Selectable<Tuple<string, string>>>();
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("InFrozenOrders", "Позиции присутствуют в замороженных заказах")));
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsMinCost", "Позиции по мин.ценам")));
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsNotMinCost", "Позиции не по мин.ценам")));
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("OnlyWarning", "Только позиции с корректировкой")));
 
 			CanDelete = CurrentLine.CombineLatest(IsCurrentSelected, (l, s) => l != null && s).ToValue();
 			BeginEnabled = IsSentSelected.ToValue();
@@ -103,6 +104,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Persist(IsExpanded, "IsExpanded");
 		}
 
+		public List<Selectable<Tuple<string, string>>> FilterItems { get; set; }
+
+		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 		public NotifyValue<bool> IsExpanded { get; set; }
 		public NotifyValue<bool> IsCurrentSelected { get; set ;}
 		public NotifyValue<bool> IsSentSelected { get; set; }
@@ -121,9 +125,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public List<Selectable<Price>> Prices { get; set; }
 
-		public NotifyValue<bool> OnlyWarningVisible { get; set; }
-		public NotifyValue<bool> OnlyWarning { get; set; }
-
 		public NotifyValue<OrderLine> CurrentLine { get; set; }
 
 		[Export]
@@ -141,8 +142,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public NotifyValue<bool> CanDelete { get; set; }
 
 		public MatchedWaybills MatchedWaybills { get; set; }
-
-		public NotifyValue<LinesFilter> LinesFilter { get; set; }
 
 		public bool CanPrint
 		{
@@ -203,16 +202,16 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.Init();
 			AddressSelector.FilterChanged
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
-				.Merge(OnlyWarning.Select(v => (object)v))
-				.Merge(LinesFilter.Changed())
 				.Merge(DbReloadToken)
 				.Merge(OrdersReloadToken)
+				.Merge(FilterItems.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Where(_ => IsCurrentSelected && Session != null)
-				.Select(_ => {
-					var lines = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
-						.Where(x => Prices.Where(y => y.IsSelected).Select(y => y.Item.Id).Contains(x.Price.Id))
-						.SelectMany(o => o.Lines)
-						.Where(x => OnlyWarning ? x.SendResult != LineResultStatus.OK : true)
+				.Select(_ =>
+				{
+					var orders = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
+						.Where(x => Prices.Where(y => y.IsSelected).Select(y => y.Item.Id).Contains(x.Price.Id)).ToList();
+
+					var lines = orders.SelectMany(o => o.Lines)
 						.OrderBy(l => l.Id)
 						.ToObservableCollection();
 					lines.Each(l => {
@@ -222,16 +221,25 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					});
 
 					// #48323 Присутствует в замороженных заказах
-					var productInFrozenOrders = Session.Query<Order>()
-						.Where(x => x.Frozen)
-						.SelectMany(x => x.Lines)
-						.Select(x => x.ProductId)
-						.ToList();
+					var productInFrozenOrders = orders.Where(x => x.Frozen).SelectMany(x => x.Lines)
+						.Select(x => x.ProductId).Distinct().ToList();
 					lines.Where(x => productInFrozenOrders.Contains(x.ProductId))
 						.Each(x => x.InFrozenOrders = true);
-					if (LinesFilter.Value == Orders.LinesFilter.InFrozenOrders)
-						lines = lines.Where(x => x.InFrozenOrders).ToObservableCollection();
 
+					var selected = FilterItems.Where(p => p.IsSelected).Select(p => p.Item.Item1).ToArray();
+					if (selected.Count() != FilterItems.Count())
+					{
+						var ids = new List<uint>();
+						if (selected.Contains("InFrozenOrders"))
+							ids.AddRange(lines.Where(x => x.InFrozenOrders).Select(x => x.Id));
+						if (selected.Contains("IsMinCost"))
+							ids.AddRange(lines.Where(x => x.IsMinCost).Select(x => x.Id));
+						if (selected.Contains("IsNotMinCost"))
+							ids.AddRange(lines.Where(x => !x.IsMinCost).Select(x => x.Id));
+						if (selected.Contains("OnlyWarning"))
+							ids.AddRange(lines.Where(x => x.SendResult != LineResultStatus.OK).Select(x => x.Id));
+						return lines.Where(x => ids.Contains(x.Id)).ToObservableCollection();
+					}
 					return lines;
 				})
 				.Subscribe(Lines, CloseCancellation.Token);
@@ -346,7 +354,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OfferCommitted();
 			//мы могли создать новую строку или удалить существующую
 			//нужно обновить список строк
-			OnlyWarning.Refresh();
+			DbReloadToken.Refresh();
 		}
 
 		public PrintResult Print()

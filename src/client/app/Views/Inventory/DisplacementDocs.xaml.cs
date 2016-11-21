@@ -22,14 +22,30 @@ namespace AnalitF.Net.Client.Views.Inventory
 	/// </summary>
 	public partial class DisplacementDocs : UserControl
 	{
+		public ViewModels.Inventory.DisplacementDocs Model => DataContext as ViewModels.Inventory.DisplacementDocs;
+
 		public DisplacementDocs()
 		{
 			InitializeComponent();
 			ApplyStyles();
 
+			Loaded += (sender, args) => {
+				Items.Focus();
+			};
+
 			Items.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
+
+			Keyboard.AddPreviewKeyDownHandler(this, (sender, args) => {
+				if (args.Key == Key.Insert) {
+					Model.Create();
+					args.Handled = true;
+				} else if (args.Key == Key.Delete) {
+					var task = Model.Delete();
+					args.Handled = true;
+				}
+			});
 		}
 
 		public void ApplyStyles()

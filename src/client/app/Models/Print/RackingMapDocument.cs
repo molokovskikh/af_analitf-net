@@ -39,20 +39,26 @@ namespace AnalitF.Net.Client.Models.Print
 		private Waybill waybill;
 		private IList<WaybillLine> lines;
 		private IDictionary<string, object> properties;
+		private PriceTag priceTag;
 
-		public RackingMapDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings)
+		public RackingMapDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, PriceTag priceTag = null)
 		{
 			this.settings = settings;
 			this.waybill = waybill;
 			this.waybillSettings = waybill.WaybillSettings;
 			this.lines = lines;
+			this.priceTag = priceTag;
 		}
 
 		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.RackingMap);
+			Func<WaybillLine, FrameworkElement> map = Map;
+			var borderThickness = 2.5d;
+
 			if (settings.RackingMap.Size == RackingMapSize.Normal2) {
-				return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, Map2, 1);
+				map = Map2;
+				borderThickness = 1d;
 			}
 			else if (settings.RackingMap.Size == RackingMapSize.Big) {
 				bigHeight = new GridLength(63);
@@ -60,7 +66,7 @@ namespace AnalitF.Net.Client.Models.Print
 				labelColumnWidth = new GridLength(143);
 				valueColumnWidth = new GridLength(147);
 			}
-			else {
+			else if (settings.RackingMap.Size == RackingMapSize.Normal) {
 				bigHeight = new GridLength(45);
 				defaultHeight = new GridLength(15);
 				labelColumnWidth = new GridLength(101);
@@ -71,8 +77,23 @@ namespace AnalitF.Net.Client.Models.Print
 					}
 				});
 			}
+			else if (settings.RackingMap.Size == RackingMapSize.Custom) {
+				borderThickness = priceTag.BorderThickness;
+				map = x => Border(priceTag.ToElement(x), borderThickness);
+			}
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, Map, 2.5);
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, map, borderThickness);
+		}
+
+		private static Border Border(FrameworkElement element, double borderThickness)
+		{
+			var border = new Border
+			{
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 0, borderThickness, borderThickness),
+				Child = element,
+			};
+			return border;
 		}
 
 		private Grid Map(WaybillLine line)

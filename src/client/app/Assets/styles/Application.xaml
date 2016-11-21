@@ -229,6 +229,12 @@
 		<Setter Property="FontWeight" Value="Bold" />
 	</Style>
 
+	<Style TargetType="DatePicker">
+		<Setter Property="Margin" Value="0, 2, 4, 0" />
+		<Setter Property="VerticalAlignment" Value="Center" />
+		<Setter Property="Width" Value="150" />
+	</Style>
+
 	<Style TargetType="StackPanel" x:Key="FilterPanel">
 		<Setter Property="Orientation" Value="Horizontal" />
 		<Setter Property="Margin" Value="4" />

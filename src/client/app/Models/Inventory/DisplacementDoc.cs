@@ -70,6 +70,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual IList<DisplacementLine> Lines { get; set; }
 
+		public virtual string Comment { get; set; }
+
 		public virtual string this[string columnName]
 		{
 			get
@@ -89,6 +91,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Error { get; protected set; }
 
 		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(DstAddress) };
+
+		[Style(Description = "\"Непроведен\"")]
+		public virtual bool IsNotConducted => Status == DisplacementDocStatus.NotPosted;
 
 		public virtual void Post(ISession session)
 		{

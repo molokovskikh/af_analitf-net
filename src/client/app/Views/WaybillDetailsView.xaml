@@ -54,6 +54,7 @@
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
 				</Grid.RowDefinitions>
 				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
 					Печать ценников
@@ -63,6 +64,9 @@
 				</Button>
 				<Button Grid.Column="0" Grid.Row="2" Name="Stock" Style="{StaticResource FilterElement}">
 					Оприходовать
+				</Button>
+				<Button Grid.Column="0" Grid.Row="3" Name="EditSum" Style="{StaticResource FilterElement}">
+					Коррекция сумм
 				</Button>
 				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">
 					Печать накладной

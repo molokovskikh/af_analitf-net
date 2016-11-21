@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public ReturnToSuppliers()
 		{
-			Begin.Value = DateTime.Today.AddDays(-7);
+			Begin.Value = DateTime.Today.AddDays(-30);
 			End.Value = DateTime.Today;
 			SelectedItems = new List<ReturnToSupplier>();
 			CurrentItem.Subscribe(x => {
@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new ReturnToSupplierDetails(new ReturnToSupplier(Address)));
 		}
 
-		public void Edit()
+		public void Open()
 		{
 			if (!CanEdit)
 				return;
@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void EnterItem()
 		{
-			Edit();
+			Open();
 		}
 
 		public IResult ExportExcel()

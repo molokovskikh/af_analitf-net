@@ -26,7 +26,7 @@
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
 			<StackPanel Orientation="Vertical" Margin="0,0,5,0" Width="200" VerticalAlignment="Center">
-				<ComboBox Style="{StaticResource Select}" x:Name="LinesFilter" />
+				<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="FilterItems" ButtonContent="Фильтр" Member="Item.Item2"/>
 			</StackPanel>
 			<GroupBox Header="Источник" Margin="0, 0, 4, 0">
 				<StackPanel Orientation="Vertical">
@@ -44,9 +44,6 @@
 			</GroupBox>
 			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Prices" ButtonContent="Прайс-листы" />
 			<ContentControl x:Name="AddressSelector" />
-			<CheckBox Style="{StaticResource FilterElement}" x:Name="OnlyWarning">
-				Только позиции с корректировкой
-			</CheckBox>
 		</StackPanel>
 
 		<Grid Grid.Row="1" Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"

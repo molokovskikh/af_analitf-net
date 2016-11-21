@@ -12,20 +12,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AnalitF.Net.Client.Views
+namespace AnalitF.Net.Client.Views.Dialogs
 {
 	/// <summary>
-	/// Interaction logic for ConfirmQuantity.xaml
+	/// Interaction logic for RequirementWaybill.xaml
 	/// </summary>
-	public partial class ConfirmQuantity : UserControl
+	public partial class RequirementWaybill : UserControl
 	{
-		public ConfirmQuantity()
+		public RequirementWaybill()
 		{
 			InitializeComponent();
-			Loaded += (sender, args) => {
-				Quantity.Focus();
-				Quantity.SelectAll();
-			};
 		}
 	}
 }

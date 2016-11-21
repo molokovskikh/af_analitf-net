@@ -14,45 +14,49 @@
 		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
 		<KeyBinding Gesture="F3" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ExportExcel" />
 	</UserControl.InputBindings>
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto" />
-			<RowDefinition />
-			<RowDefinition Height="Auto" />
-		</Grid.RowDefinitions>
-		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
-			<Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать (Ctrl+N)">Создать</Button>
-			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
-			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
-			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
-				<StackPanel Orientation="Horizontal">
-					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
-					<DatePicker Name="Begin" VerticalAlignment="Center" />
-					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
-					<DatePicker Name="End" VerticalAlignment="Center" />
-				</StackPanel>
-			</GroupBox>
-			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
-				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>
-					<RadioButton GroupName="Source" Name="IsOpened" Margin="5">Резерв</RadioButton>
-					<RadioButton GroupName="Source" Name="IsClosed" Margin="5">Передано</RadioButton>
-					<RadioButton GroupName="Source" Name="IsEnd" Margin="5">Получено</RadioButton>
-				</StackPanel>
-			</GroupBox>
-		</WrapPanel>
-		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
-			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Док. ИД" Binding="{Binding Id}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Отправитель" Binding="{Binding AddressName}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Получатель" Binding="{Binding DstAddressName}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplierSum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding PosCount}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
-			</DataGrid.Columns>
-		</controls:DataGrid2>
-		<StackPanel Grid.Row="2" Name="Legend" />
-	</Grid>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
+      <Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать (Ctrl+N)">Создать</Button>
+      <Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
+      <Button Name="Open" Style="{StaticResource FilterElement}">Открыть</Button>
+      <Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
+      <Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
+      <GroupBox Header="За период" Style="{StaticResource FilterElement}">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+          <DatePicker Name="Begin" VerticalAlignment="Center" />
+          <Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+          <DatePicker Name="End" VerticalAlignment="Center" />
+        </StackPanel>
+      </GroupBox>
+      <GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>
+          <RadioButton GroupName="Source" Name="IsOpened" Margin="5">Резерв</RadioButton>
+          <RadioButton GroupName="Source" Name="IsClosed" Margin="5">Передано</RadioButton>
+          <RadioButton GroupName="Source" Name="IsEnd" Margin="5">Получено</RadioButton>
+        </StackPanel>
+      </GroupBox>
+    </WrapPanel>
+    <controls:DataGrid2 Grid.Row="1" x:Name="Items">
+      <DataGrid.Columns>
+        <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Отправитель" Binding="{Binding AddressName}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Получатель" Binding="{Binding DstAddressName}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding SupplierSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Кол-во позиций" Binding="{Binding PosCount}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" />
+      </DataGrid.Columns>
+    </controls:DataGrid2>
+    <StackPanel Grid.Row="2" Name="Legend" />
+  </Grid>
 </UserControl>

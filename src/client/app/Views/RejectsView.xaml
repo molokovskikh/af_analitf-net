@@ -27,9 +27,9 @@
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<Label>Вывести за период с</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="Begin" />
+			<DatePicker Name="Begin"/>
 			<Label>по</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="End" />
+			<DatePicker Name="End"/>
 			<CheckBox Name="ShowCauseReason"
 				Style="{StaticResource FilterElement}">
 				Выводить причину забраковки

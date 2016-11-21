@@ -14,10 +14,17 @@ using Dapper.Contrib.Extensions;
 
 namespace AnalitF.Net.Client.Models
 {
+	public enum TagType
+	{
+		PriceTag,
+		RackingMap
+	}
+
 	public class PriceTag : INotifyPropertyChanged
 	{
 		private double _width;
 		private double _height;
+		private double _borderThickness;
 
 		public PriceTag()
 		{
@@ -50,15 +57,29 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual TagType TagType { get; set; }
+
+		public virtual double BorderThickness
+		{
+			get { return _borderThickness; }
+			set
+			{
+				if (_borderThickness == value)
+					return;
+				_borderThickness = value;
+				OnPropertyChanged();
+			}
+		}
+
 		[Write(false)]
 		public virtual IList<PriceTagItem> Items { get; set; }
 
-		public static Border Preview(double width, double height, IList<PriceTagItem> items)
+		public static Border Preview(double width, double height, double borderThickness, IList<PriceTagItem> items)
 		{
 			return new Border {
 				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0.5),
-				Child = PriceTagItem.ToElement(width, height, items, PriceTagItem.DemoData),
+				BorderThickness = new Thickness(borderThickness),
+				Child = PriceTagItem.ToElement(width, height, items, DemoData),
 				HorizontalAlignment = HorizontalAlignment.Center,
 				VerticalAlignment = VerticalAlignment.Center
 			};
@@ -66,31 +87,34 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Border Preview()
 		{
-			return Preview(Height, Width, Items);
+			return Preview(Width, Height, BorderThickness, Items);
 		}
 
-		public static PriceTag LoadOrDefault(IDbConnection connection)
+		public static PriceTag LoadOrDefault(IDbConnection connection, TagType tagType)
 		{
-				var tag = connection.Query<PriceTag>("select * from PriceTags").FirstOrDefault();
+			var tag = connection.Query<PriceTag>($"select * from PriceTags where TagType = {(int)tagType}").FirstOrDefault();
 			if (tag != null)
-				tag.Items = connection.Query<PriceTagItem>("select * from PriceTagItems order by Position").ToArray();
+				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
 			else
-				tag = Default();
+				tag = Default(tagType);
 			return tag;
 		}
 
-		public static PriceTag Default()
+		public static PriceTag Default(TagType tagType)
 		{
-			return new PriceTag {
+			var tag = new PriceTag {
+				TagType = tagType,
 				Height = 5,
 				Width = 5,
+				BorderThickness = 0.5d,
 				Items = {
 					new PriceTagItem("Наименование клиента") {
 						BorderThickness = 1,
 						BottomBorder = true,
 						TextAlignment = TextAlignment.Center,
 						LeftMargin = 2,
-						RightMargin = 2
+						RightMargin = 2,
+						Position = 1,
 					},
 					new PriceTagItem("Наименование") {
 						Underline = true,
@@ -99,10 +123,12 @@ namespace AnalitF.Net.Client.Models
 						Wrap = true,
 						LeftMargin = 2,
 						RightMargin = 2,
+						Position = 2,
 					},
 					new PriceTagItem("<Произвольный текст>") {
 						Text = "Цена",
 						LeftMargin = 2,
+						Position = 3,
 					},
 					new PriceTagItem("Цена") {
 						IsNewLine = false,
@@ -110,57 +136,68 @@ namespace AnalitF.Net.Client.Models
 						FontSize = 20,
 						TextAlignment = TextAlignment.Right,
 						RightMargin = 2,
+						Position = 4,
 					},
 					new PriceTagItem("<Произвольный текст>") {
 						Text = "Произв.",
 						LeftMargin = 2,
+						Position = 5,
 					},
 					new PriceTagItem("Страна") {
 						IsNewLine = false,
 						TextAlignment = TextAlignment.Right,
-						RightMargin = 2
+						RightMargin = 2,
+						Position = 6,
 					},
 					new PriceTagItem("Производитель") {
 						LeftMargin = 2,
 						RightMargin = 2,
+						Position = 7,
 					},
 					new PriceTagItem("<Произвольный текст>") {
 						Text = "Срок годности",
 						LeftMargin = 2,
+						Position = 8,
 					},
 					new PriceTagItem("Срок годности") {
 						IsNewLine = false,
 						TextAlignment = TextAlignment.Right,
 						RightMargin = 2,
+						Position = 9,
 					},
 					new PriceTagItem("<Произвольный текст>") {
 						Text = "Серия товара",
 						LeftMargin = 2,
-						FontSize = 10
+						FontSize = 10,
+						Position = 10,
 					},
 					new PriceTagItem("Серия товара") {
 						IsNewLine = false,
 						TextAlignment = TextAlignment.Right,
 						RightMargin = 2,
-						FontSize = 10
+						FontSize = 10,
+						Position = 11,
 					},
 					new PriceTagItem("<Произвольный текст>") {
 						Text = "№ накладной",
 						LeftMargin = 2,
-						FontSize = 10
+						FontSize = 10,
+						Position = 16,
 					},
 					new PriceTagItem("Номер накладной") {
 						IsNewLine = false,
 						TextAlignment = TextAlignment.Right,
 						RightMargin = 2,
-						FontSize = 10
+						FontSize = 10,
+						Position = 17,
 					},
 					new PriceTagItem("<Произвольный текст>") {
 						Text = "Подпись",
 						LeftMargin = 2,
 						BorderThickness = 1,
 						TopBorder = true,
-						FontSize = 10
+						FontSize = 10,
+						Position = 18,
 					},
 					new PriceTagItem("Дата накладной") {
 						IsNewLine = false,
@@ -168,10 +205,43 @@ namespace AnalitF.Net.Client.Models
 						RightMargin = 2,
 						FontSize = 10,
 						BorderThickness = 1,
-						TopBorder = true
+						TopBorder = true,
+						Position = 19,
 					},
 				}
 			};
+			if (tagType == TagType.RackingMap) {
+				tag.Height = 6;
+				tag.Items.Add(new PriceTagItem("<Произвольный текст>") {
+					Text = "Количество",
+					LeftMargin = 2,
+					FontSize = 10,
+					Position = 12,
+				});
+				tag.Items.Add(new PriceTagItem("Количество") {
+					IsNewLine = false,
+					TextAlignment = TextAlignment.Right,
+					RightMargin = 2,
+					FontSize = 10,
+					Position = 13,
+				});
+				tag.Items.Add(new PriceTagItem("<Произвольный текст>") {
+					Text = "Номер сертификата",
+					LeftMargin = 2,
+					FontSize = 10,
+					Position = 14,
+				});
+				tag.Items.Add(new PriceTagItem("Номер сертификата")
+				{
+					IsNewLine = false,
+					TextAlignment = TextAlignment.Right,
+					RightMargin = 2,
+					FontSize = 10,
+					Position = 15,
+				});
+				tag.Items = tag.Items.OrderBy(x => x.Position).ToList();
+			}
+			return tag;
 		}
 
 		public virtual FrameworkElement ToElement(WaybillLine line)
@@ -185,10 +255,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
-	}
 
-	public class PriceTagItem : INotifyPropertyChanged
-	{
 		public static Dictionary<string, string> DemoData = new Dictionary<string, string> {
 			{"Цена", "221,03"},
 			{"Наименование клиента", "Здоровая Аптека"},
@@ -200,8 +267,13 @@ namespace AnalitF.Net.Client.Models
 			{"Поставщик", "Катрен"},
 			{"Серия товара", "21012"},
 			{"Дата накладной", DateTime.Today.ToShortDateString() },
+			{"Количество", "100" },
+			{"Номер сертификата", "RU.АЯ46.В60125" },
 		};
+	}
 
+	public class PriceTagItem : INotifyPropertyChanged
+	{
 		private bool _isNewLine;
 
 		public PriceTagItem()
@@ -257,10 +329,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool TopBorder { get; set; }
 		public virtual bool RightBorder { get; set; }
 		public virtual bool BottomBorder { get; set; }
+		public virtual uint PriceTagId { get; set; }
 
-		public static PriceTagItem[] Items()
+		public static PriceTagItem[] Items(TagType tagType)
 		{
-			return new [] {
+			var items = new List<PriceTagItem> {
 				new PriceTagItem("<Произвольный текст>"),
 				new PriceTagItem("Цена"),
 				new PriceTagItem("Наименование клиента"),
@@ -273,6 +346,11 @@ namespace AnalitF.Net.Client.Models
 				new PriceTagItem("Серия товара"),
 				new PriceTagItem("Дата накладной")
 			};
+			if (tagType == TagType.RackingMap) {
+				items.Add(new PriceTagItem("Количество"));
+				items.Add(new PriceTagItem("Номер сертификата"));
+			}
+			return items.ToArray();
 		}
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;
@@ -342,6 +420,8 @@ namespace AnalitF.Net.Client.Models
 				{"Поставщик", line.Waybill.SupplierName},
 				{"Серия товара", line.SerialNumber},
 				{"Дата накладной", line.Waybill.DocumentDate.ToShortDateString() },
+				{"Количество", line.Quantity.ToString() },
+				{"Номер сертификата", line.Certificates },
 			};
 		}
 	}

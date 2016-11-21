@@ -19,6 +19,7 @@ using NHibernate;
 using ReactiveUI;
 using NHibernate.Linq;
 using NPOI.HSSF.Record.Chart;
+using AnalitF.Net.Client.Controls;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -27,15 +28,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		private uint orderId;
 		private Type type;
 		private Editor editor;
+		private List<uint> frozenProducts;
 
-		public OrderDetailsViewModel(IOrder order)
+		public OrderDetailsViewModel(IOrder order, List<uint> fProducts = null)
 		{
 			InitFields();
 			orderId = order.Id;
 			type = NHibernateUtil.GetClass(order);
 			DisplayName = "Архивный заказ";
-
-			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning, LinesFilter);
+			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter);
 			MatchedWaybills = new MatchedWaybills(this,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder));
@@ -44,13 +45,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 				ExcelExporter.Properties = new string[0];
 			ExcelExporter.ActiveProperty.Refresh();
+			frozenProducts = fProducts ?? new List<uint>();
+
+			FilterItems = new List<Selectable<Tuple<string, string>>>();
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("InFrozenOrders", "Позиции присутствуют в замороженных заказах")));
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsMinCost", "Позиции по мин.ценам")));
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsNotMinCost", "Позиции не по мин.ценам")));
+			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("OnlyWarning", "Только позиции с корректировкой")));
 		}
 
+		public List<Selectable<Tuple<string, string>>> FilterItems { get; set; }
+
+		// все строки заказа
 		public IList<IOrderLine> Source { get; set; }
 
 		public bool IsCurrentOrder => type == typeof(Order);
 
-		public NotifyValue<bool> OnlyWarning { get; set; }
 		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -59,6 +69,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public NotifyValue<IOrder> Order { get; set; }
 
+		// фильтрованные строки заказа на UI
 		[Export]
 		public NotifyValue<IList<IOrderLine>> Lines { get; set; }
 
@@ -73,8 +84,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public bool CanShowPrice => Order.Value.SafePrice != null && IsCurrentOrder;
 
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
-
-		public NotifyValue<LinesFilter> LinesFilter { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -96,6 +105,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(x => RxQuery(s => BaseOfferViewModel.LoadOrderHistory(s, Cache, Settings.Value, x, Address)))
 				.Switch()
 				.Subscribe(HistoryOrders, CloseCancellation.Token);
+
+			FilterItems.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+			.Select(_ => Filter())
+			.Subscribe(Lines, CloseCancellation.Token);
 		}
 
 		protected override void OnViewAttached(object view, object context)
@@ -106,15 +119,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		private IList<IOrderLine> Filter()
 		{
-			if (OnlyWarning || LinesFilter.Value == Orders.LinesFilter.InFrozenOrders) {
-				var query = Source.OfType<OrderLine>();
-				if (OnlyWarning)
-					query = query.Where(x => x.SendResult != LineResultStatus.OK);
-				if (LinesFilter.Value == Orders.LinesFilter.InFrozenOrders)
-					query = query.Where(x => x.InFrozenOrders);
-				return query.OrderBy(l => l.ProducerSynonym).LinkTo(Source);
+			var selected = FilterItems.Where(p => p.IsSelected).Select(p => p.Item.Item1).ToArray();
+			if (selected.Count() != FilterItems.Count())
+			{
+				var ids = new List<uint>();
+				var lines = Source.OfType<OrderLine>();
+				if (selected.Contains("InFrozenOrders"))
+					ids.AddRange(lines.Where(x => x.InFrozenOrders).Select(x => x.Id));
+				if (selected.Contains("IsMinCost"))
+					ids.AddRange(lines.Where(x => x.IsMinCost).Select(x => x.Id));
+				if (selected.Contains("IsNotMinCost"))
+					ids.AddRange(lines.Where(x => !x.IsMinCost).Select(x => x.Id));
+				if (selected.Contains("OnlyWarning"))
+					ids.AddRange(lines.Where(x => x.SendResult != LineResultStatus.OK).Select(x => x.Id));
+				return lines.Where(x => ids.Contains(x.Id)).OrderBy(l => l.ProducerSynonym).LinkTo(Source);
 			}
-
 			return Source;
 		}
 
@@ -141,18 +160,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 			{
 				Order.Value.Lines.Each(l => l.Configure(User));
-
-				Env.RxQuery(s => s.Query<Order>()
-					.Where(x => x.Frozen)
-					.SelectMany(x => x.Lines)
-					.Select(x => x.ProductId)
-					.ToList())
-					.Subscribe(x => {
-						Order.Value.Lines
-							.Cast<OrderLine>()
-							.Where(y => x.Contains(y.ProductId))
-							.Each(y => y.InFrozenOrders = true);
-					});
+				Order.Value.Lines
+					.Cast<OrderLine>()
+					.Where(x => frozenProducts.Contains(x.ProductId))
+					.Each(x => x.InFrozenOrders = true);
 			}
 
 			if (CurrentLine.Value != null)

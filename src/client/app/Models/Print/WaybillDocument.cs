@@ -148,7 +148,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Margin = new Thickness(0)
 			});
 
-			var sum = lines.Sum(l => l.Amount);
+			var sum = waybill.DisplayedSum;
 			block = Block("Сумма поставки: " + RusCurrency.Str((double)sum));
 			block.Inlines.Add(new Figure(new Paragraph(new Run(sum.ToString()))) {
 				FontWeight = FontWeights.Bold,

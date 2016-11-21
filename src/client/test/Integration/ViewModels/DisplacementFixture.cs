@@ -45,8 +45,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var dstAddress = new Address("Тестовый адрес");
 			session.Save(dstAddress);
 
-			doc = new DisplacementDoc
-			{
+			doc = new DisplacementDoc {
 				Date = DateTime.Now,
 				Address = address,
 				DstAddress = dstAddress
@@ -78,6 +77,31 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var preview = Next<DialogResult>(results);
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
+
+		[Test]
+		public void Print_DisplacementDocumentWaybill()
+		{
+			var results = modelDetails.PrintDisplacementDocumentWaybill().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Print_DisplacementWaybill()
+		{
+			var results = modelDetails.PrintDisplacementWaybill().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<RequirementWaybill>(preview.Model);
+		}
+
+		[Test]
+		public void Print_PriceNegotiationProtocol()
+		{
+			var results = modelDetails.PrintPriceNegotiationProtocol().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<RequirementNegotiationProtocol>(preview.Model);
+		}
+
 
 		[Test]
 		public void Doc_Flow()

@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public ReturnToSupplierDetails(uint id)
 			: this()
 		{
-			DisplayName = "Редактирование возврата поставщику";
+			DisplayName = "Редактирование возврата поставщику " + id;
 			InitDoc(Session.Load<ReturnToSupplier>(id));
 			Lines.AddRange(Doc.Lines);
 		}
@@ -81,8 +81,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
-			var search = new StockSearch();
-			yield return new DialogResult(search);
+			while (true) {
+				var search = new StockSearch();
+			yield return new DialogResult(search, false, true);
 			var edit = new EditStock(search.CurrentItem)
 			{
 				EditMode = EditStock.Mode.EditQuantity
@@ -92,6 +93,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Add(line);
 			Doc.Lines.Add(line);
 			Doc.UpdateStat();
+			}
 		}
 
 		public void Delete()
@@ -186,7 +188,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray()));
+			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnLabel()
@@ -201,12 +203,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintReturnWaybill()
 		{
-			return Preview("Возврат товарная накладная", new ReturnWaybill(Doc, Session.Query<WaybillSettings>().First()));
+			return Preview("Возврат товарная накладная", new ReturnWaybill(Doc,
+				Session.Query<WaybillSettings>().First(),
+				Session.Query<User>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
 		{
-			return Preview("Возврат акт о расхождении",
+			return Preview("Акт о расхождении",
 				new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
