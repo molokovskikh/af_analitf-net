@@ -28,11 +28,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		private string Name;
 
-		public bool CanPrintStock
-		{
-			get { return true; }
-		}
-
 		public Stocks()
 		{
 			DisplayName = "Товарные запасы";
@@ -306,6 +301,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
+		}
 
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
@@ -13,15 +14,17 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class ReturnToSupplierDetails : BaseScreen2
+	public class ReturnToSupplierDetails : BaseScreen2, IPrintableStock
 	{
 		private ReturnToSupplierDetails()
 		{
 			Lines = new ReactiveCollection<ReturnToSupplierLine>();
 			Session.FlushMode = FlushMode.Never;
+			SetMenuItems();
 		}
 
 		public ReturnToSupplierDetails(ReturnToSupplier doc)
@@ -188,29 +191,34 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
+			LastOperation = "Возврат товара";
 			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnLabel()
 		{
+			LastOperation = "Возврат ярлык";
 			return Preview("Возврат ярлык", new ReturnLabel(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnInvoice()
 		{
+			LastOperation = "Возврат счет-фактура";
 			return Preview("Возврат счет-фактура", new ReturnInvoice(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnWaybill()
 		{
-			return Preview("Возврат товарная накладная", new ReturnWaybill(Doc,
+			LastOperation = "Возврат товарная накладная";
+			return Preview("Возврат товарная накладная ТОРГ-12", new ReturnWaybill(Doc,
 				Session.Query<WaybillSettings>().First(),
 				Session.Query<User>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
 		{
-			return Preview("Акт о расхождении",
+			LastOperation = "Акт о расхождении";
+			return Preview("Акт о расхождении ТОРГ-2",
 				new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
@@ -222,6 +230,56 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		private void SetMenuItems()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Возврат товара";
+			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Возврат ярлык";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnLabel().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Возврат счет-фактура";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnInvoice().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Возврат товарная накладная ТОРГ-12";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnWaybill().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Акт о расхождении ТОРГ-2";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnDivergenceAct().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Возврат товара")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Возврат ярлык")
+				 Coroutine.BeginExecute(PrintReturnLabel().GetEnumerator());
+			if(LastOperation == "Возврат счет-фактура")
+				Coroutine.BeginExecute(PrintReturnInvoice().GetEnumerator());
+			if(LastOperation == "Возврат товарная накладная")
+				Coroutine.BeginExecute(PrintReturnWaybill().GetEnumerator());
+			if(LastOperation == "Акт о расхождении")
+				Coroutine.BeginExecute(PrintReturnDivergenceAct().GetEnumerator());
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

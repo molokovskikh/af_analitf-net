@@ -238,6 +238,22 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 
+			CanPrintStock = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintableStock
+					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.CanPrintStock, skipInitial: false)
+					: Observable.Return(new ObservedChange<IPrintableStock, bool>()))
+				.Switch()
+				.Select(e => e.Value)
+				.ToValue(CancelDisposable);
+
+			PrintStockMenuItems = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintableStock
+					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.PrintStockMenuItems, skipInitial: false)
+					: Observable.Return(new ObservedChange<IPrintableStock, ObservableCollection<MenuItem>>()))
+				.Switch()
+				.Select(e => e.Value)
+				.ToValue(CancelDisposable);
+
 			//if (Env.Factory != null) {
 			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
 			//	CloseDisposable.Add(Disposable.Create(() => {
@@ -246,8 +262,6 @@ namespace AnalitF.Net.Client.ViewModels
 			//	}));
 			//}
 		}
-
-		//public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 
 		public Config.Config Config { get; set; }
 
@@ -548,7 +562,8 @@ namespace AnalitF.Net.Client.ViewModels
 			((IPrintableStock) ActiveItem).PrintStock();
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems => ((IPrintableStock) ActiveItem).PrintStockMenuItems;
+		public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems { get; set;}
+		//public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems => ((IPrintableStock) ActiveItem).PrintStockMenuItems;
 
 		public NotifyValue<bool> CanPrintPreview { get; set; }
 

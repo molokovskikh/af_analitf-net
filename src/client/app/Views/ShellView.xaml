@@ -205,7 +205,7 @@
         <Image Source="/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
         <xctk:SplitButton.DropDownContent>
-          <ItemsControl ItemsSource ="{Binding Path=PrintStockMenuItems}"/>
+          <ItemsControl ItemsSource ="{Binding Path=PrintStockMenuItems.Value}"/>
         </xctk:SplitButton.DropDownContent>
       </xctk:SplitButton>
 
