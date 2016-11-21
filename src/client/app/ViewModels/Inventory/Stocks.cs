@@ -14,10 +14,12 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.NHibernate;
+using Diadoc.Api.Proto.Documents;
 using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -48,12 +50,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				CurrentItem);
 			TrackDb(typeof(Stock));
 
+			SetMenuItems();
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			MenuItem item = new MenuItem();
-			item.Header = "Товарные запасы";
-			item.Click += (sender, args) => PrintStock();
-			PrintStockMenuItems.Add(item);
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -173,6 +171,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStock()
 		{
+			LastOperation = "Товарные запасы";
 			return Preview("Товарные запасы", new StockDocument(Items.Value.ToArray()));
 		}
 
@@ -188,6 +187,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult PrintStockPriceTags()
 		{
+			LastOperation = "Ценники";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
@@ -198,7 +198,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IResult PrintStockRackingMaps()
 		{
 			var receivingOrders = Session.Query<Waybill>().ToList();
-
+			LastOperation = "Постеллажная карта";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Постеллажная карта",
@@ -208,6 +208,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStockLimitMonth()
 		{
+			LastOperation = "Товары со сроком годности менее 1 месяца";
 			var title = "Товары со сроком годности менее 1 месяца";
 			var stocks = Items.Value.Where(s => s.Exp < DateTime.Today.AddMonths(1)).ToArray();
 			return Preview(title, new StockLimitMonthDocument(stocks, title, Name));
@@ -215,6 +216,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStockLimit()
 		{
+			LastOperation = "Товары со сроком годности";
 			var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
 			yield return new DialogResult(new SelectStockPeriod(stocks, Name));
 		}
@@ -259,12 +261,51 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new DisplacementDocs());
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		private void SetMenuItems()
 		{
-			throw new NotImplementedException();
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Ценники";
+			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Товарные запасы";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStock().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Товары со сроком годности";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStockLimit().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Товары со сроком годности менее 1 месяца";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Постеллажная карта";
+			item.Click += (sender, args) => PrintStockRackingMaps().Execute(null);
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
+				Coroutine.BeginExecute(PrintStock().GetEnumerator());
+			if(LastOperation == "Ценники")
+				PrintStockPriceTags().Execute(null);
+			if(LastOperation == "Товары со сроком годности")
+				Coroutine.BeginExecute(PrintStockLimit().GetEnumerator());
+			if(LastOperation == "Товары со сроком годности менее 1 месяца")
+				Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
+			if(LastOperation == "Постеллажная карта")
+				PrintStockRackingMaps().Execute(null);
 		}
 
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
 
 	}
 }

@@ -60,7 +60,8 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		bool CanPrintStock { get; }
 		ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
-		PrintResult PrintStock();
+		void PrintStock();
+		string LastOperation { get; set; }
 	}
 
 #if DEBUG
@@ -539,12 +540,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<bool> CanPrintStock { get; set; }
 
-		public IResult PrintStock()
+		public void PrintStock()
 		{
 			if (!CanPrintStock.Value)
-				return null;
-
-			return ((IPrintable)ActiveItem).Print();
+				return;
+			((IPrintableStock) ActiveItem).PrintStock();
 		}
 
 		public ObservableCollection<MenuItem> PrintStockMenuItems => ((IPrintableStock) ActiveItem).PrintStockMenuItems;
