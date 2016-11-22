@@ -623,7 +623,7 @@ namespace AnalitF.Net.Client.Helpers
 				where style != null
 				select ConnectEdit(new Label {
 					Style = style,
-					Tag = "generated",
+					Tag = "generated" + grid.Name,
 					Name = a.GetName(p) + "LegendItem",
 				});
 
@@ -662,7 +662,7 @@ namespace AnalitF.Net.Client.Helpers
 			else {
 				//если пользовательские стили изменились нужно перестроить легенду
 				var panel = legend.Children.OfType<LegendPanel>().First();
-				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated", c.Tag))
+				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated" + grid.Name, c.Tag))
 					.ToArray()
 					.Each(c => panel.Children.Remove(c));
 				panel.Children.AddRange(labels);
