@@ -12,6 +12,115 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
+	public class DreamReportSettings
+	{
+		public DateTime Begin { get; set; }
+		public DateTime End { get; set; }
+
+		public uint[] AddressIds { get; set; }
+		public string AddressNames { get; set; }
+
+		public uint[] ProductIds { get; set; }
+		public string ProductNames { get; set; }
+
+		public uint[] SupplierIds { get; set; }
+		public string SupplierNames { get; set; }
+
+		public uint[] ProducerIds { get; set; }
+		public string ProducerNames { get; set; }
+
+		public bool FilterByWriteTime { get; set; }
+
+		public DreamReportSettings(DateTime begin, DateTime end, bool filterByWriteTime)
+		{
+			Begin = begin;
+			End = end;
+			FilterByWriteTime = filterByWriteTime;
+			AddressIds = ProductIds = SupplierIds = ProducerIds = new uint[] { };
+			AddressNames = ProductNames = SupplierNames = ProducerNames = "все";
+		}
+	}
+
+	public class DreamReport : DbCommand<string>
+	{
+		private DreamReportSettings _settings;
+
+		public DreamReport(DreamReportSettings settings)
+		{
+			_settings = settings;
+		}
+
+		public override void Execute()
+		{
+			var settings = Session.Query<Settings>().First();
+			var dir = settings.InitAndMap("Reports");
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Движение товара по накладным-{_settings.Begin:d}-{_settings.End:d}.csv"));
+
+			var field = "WriteTime";
+			if (_settings.FilterByWriteTime)
+				field = "DocumentDate";
+			var sql = $@"
+select CONCAT_WS(' ', l.Product, l.SerialNumber, d.InnR, l.Certificates) as Name,
+w.WriteTime, w.ProviderDocumentId, w.UserSupplierName, l.Quantity, l.SupplierCost, l.RetailCost
+from WaybillLines l
+join Waybills w on w.Id = l.WaybillId
+left 	join Drugs d on d.EAN = l.EAN13
+where w.{field} > ?
+	and w.{field} < ?
+";
+			if (_settings.AddressIds.Any())
+				sql += $" and w.AddressId in ({_settings.AddressIds.Implode()})";
+			if (_settings.ProductIds.Any())
+				sql += $" and l.ProductId in ({_settings.ProductIds.Implode()})";
+			if (_settings.SupplierIds.Any())
+				sql += $" and w.SupplierId in ({_settings.SupplierIds.Implode()})";
+			if (_settings.ProducerIds.Any())
+				sql += $" and l.ProducerId in ({_settings.ProducerIds.Implode()})";
+			sql += " order by Name asc, w.WriteTime asc;";
+
+			using (var stream = File.Create(Result))
+			using (var writer = new StreamWriter(stream, Encoding.GetEncoding(1251)))
+			{
+				writer.WriteLine($"Движение товаров за период {_settings.Begin.ToShortDateString()} — {_settings.End.ToShortDateString()}");
+				writer.WriteLine($"По адресам: {_settings.AddressNames}");
+				writer.WriteLine($"По товарам: {_settings.ProductNames}");
+				writer.WriteLine($"По поставщикам: {_settings.SupplierNames}");
+				writer.WriteLine($"По производителям: {_settings.ProducerNames}");
+				writer.WriteLine();
+				var _name = "";
+
+				writer.WriteLine("Дата поступления;Номер накладной;Поставщик;Приход;Сумма опт;Сумма розница");
+				foreach (var row in StatelessSession.Connection.Query(sql, new { begin = _settings.Begin, end = _settings.End.AddDays(1) })) {
+					// пишем название товара только раз
+					var name = (string)row.Name;
+					if (name != _name) {
+						writer.WriteLine($"Товар: {name}");
+						_name = name;
+					}
+
+					var quantity = Convert.ToDecimal(row.Quantity);
+					var supplierCost = Convert.ToDecimal(row.SupplierCost);
+					var retailCost = Convert.ToDecimal(row.RetailCost);
+					var supplierSum = (supplierCost * quantity) ?? 0;
+					var retailSum = (retailCost * quantity) ?? 0;
+
+					writer.Write(row.WriteTime);
+					writer.Write(";");
+					writer.Write((string)row.ProviderDocumentId);
+					writer.Write(";");
+					writer.Write((string)row.UserSupplierName);
+					writer.Write(";");
+					writer.Write(quantity.ToString("0.00", CultureInfo.InvariantCulture));
+					writer.Write(";");
+					writer.Write(supplierSum.ToString("0.00", CultureInfo.InvariantCulture));
+					writer.Write(";");
+					writer.Write(retailSum.ToString("0.00", CultureInfo.InvariantCulture));
+					writer.WriteLine();
+				}
+			}
+		}
+	}
+
 	public class VitallyImportantReport : DbCommand<string>
 	{
 		public DateTime Begin;

@@ -274,6 +274,16 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 		}
 
+		public IEnumerable<IResult> DreamReport()
+		{
+			var settings = new DreamReportSettings(Begin.Value, End.Value, IsFilterByWriteTime.Value);
+			yield return new DialogResult(new CreateDreamReport(settings));
+
+			var commnand = new DreamReport(settings);
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
+			yield return new OpenResult(commnand.Result);
+		}
+
 		public IEnumerable<IResult> VitallyImportantReport()
 		{
 			var commnand = new VitallyImportantReport {
