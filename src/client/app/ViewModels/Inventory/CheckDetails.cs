@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -12,7 +15,7 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class CheckDetails : BaseScreen2
+	public class CheckDetails : BaseScreen2, IPrintableStock
 	{
 		private uint id;
 
@@ -20,6 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			DisplayName = "Чек";
 			Lines = new NotifyValue<IList<CheckLine>>(new List<CheckLine>());
+			SetMenuItems();
 		}
 
 		public CheckDetails(uint id)
@@ -49,6 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintCheckDetails()
 		{
+			LastOperation = "Чеки";
 			return Preview("Чеки", new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
 		}
 
@@ -95,6 +100,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ExcelExporter.WriteRows(sheet, rows, row);
 
 			return ExcelExporter.Export(book);
+		}
+
+		private void SetMenuItems()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Чеки";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintCheckDetails().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
+				Coroutine.BeginExecute(PrintCheckDetails().GetEnumerator());
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

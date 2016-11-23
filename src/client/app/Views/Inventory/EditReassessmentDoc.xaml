@@ -32,11 +32,8 @@
 			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
 			<Button Name="Reassessment" Style="{StaticResource FilterElement}" ToolTip="">Переоценка</Button>
 			<Button Name="Search" Style="{StaticResource FilterElement}" ToolTip="">Анализ остатков</Button>
-			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
-			<Button Name="Print" Style="{StaticResource FilterElement}" ToolTip="Печать документов (Ctrl+P)">Печать документов</Button>
-			<Button Name="PrintAct" Style="{StaticResource FilterElement}" ToolTip="">Акт переоценки</Button>
-			<Button Name="PrintStockPriceTags" Style="{StaticResource FilterElement}" ToolTip="Печать ярлыков (Ctrl+L)">Печать ярлыков</Button>
-		</WrapPanel>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
+    </WrapPanel>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
 			<Grid.RowDefinitions>

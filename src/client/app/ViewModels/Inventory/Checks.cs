@@ -15,10 +15,12 @@ using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
 using System.ComponentModel;
 using System.Reactive;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Checks : BaseScreen2
+	public class Checks : BaseScreen2, IPrintableStock
 	{
 		public Checks()
 		{
@@ -30,6 +32,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			AddressSelector = new AddressSelector(this);
 			DisplayName = "Чеки";
 			TrackDb(typeof(Check));
+			SetMenuItems();
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -78,12 +81,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintChecks()
 		{
+			LastOperation = "Чеки";
 			return Preview("Чеки", new CheckDocument(Items.Value.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintReturnAct()
 		{
-			return Preview("Чеки", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
+			LastOperation = "Акт возврата";
+			return Preview("Акт возврата", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -130,6 +135,35 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ExcelExporter.WriteRows(sheet, rows, row);
 
 			return ExcelExporter.Export(book);
+		}
+
+		private void SetMenuItems()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Чеки";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintChecks().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Акт возврата";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnAct().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
+				Coroutine.BeginExecute(PrintChecks().GetEnumerator());
+			if(LastOperation == "Акт возврата")
+				Coroutine.BeginExecute(PrintReturnAct().GetEnumerator());
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

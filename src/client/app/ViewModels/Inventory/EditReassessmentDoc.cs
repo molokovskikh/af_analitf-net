@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,10 +16,11 @@ using NHibernate.Linq;
 using ReactiveUI;
 using AnalitF.Net.Client.Models.Print;
 using NPOI.HSSF.UserModel;
+using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditReassessmentDoc : BaseScreen2
+	public class EditReassessmentDoc : BaseScreen2, IPrintableStock
 	{
 		private string Name;
 
@@ -27,6 +29,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines = new ReactiveCollection<ReassessmentLine>();
 			Session.FlushMode = FlushMode.Never;
 			Name = User?.FullName ?? "";
+			SetMenuItems();
 		}
 
 		public EditReassessmentDoc(ReassessmentDoc doc)
@@ -238,16 +241,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
+			LastOperation = "Переоценка";
 			return Preview("Переоценка", new ReassessmentDocument(Lines.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintAct()
 		{
+			LastOperation = "Акт переоценки";
 			return Preview("Акт переоценки", new ReassessmentActDocument(Lines.ToArray()));
 		}
 
 		public IResult PrintStockPriceTags()
 		{
+			LastOperation = "Ценники";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
@@ -263,6 +269,42 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		private void SetMenuItems()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Переоценка";
+			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Акт переоценки";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintAct().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Ценники";
+			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Переоценка")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Акт переоценки")
+				Coroutine.BeginExecute(PrintAct().GetEnumerator());
+			if(LastOperation == "Ценники")
+				PrintStockPriceTags().Execute(null);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

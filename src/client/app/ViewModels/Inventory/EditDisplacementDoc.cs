@@ -13,10 +13,12 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
+using System.Collections.ObjectModel;
+using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditDisplacementDoc : BaseScreen2
+	public class EditDisplacementDoc : BaseScreen2, IPrintableStock
 	{
 		private string Name;
 
@@ -25,6 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Name = User?.FullName ?? "";
 			Lines = new ReactiveCollection<DisplacementLine>();
 			Session.FlushMode = FlushMode.Never;
+			SetMenuItems();
 		}
 
 		public EditDisplacementDoc(DisplacementDoc doc)
@@ -207,16 +210,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			return Preview("Внутренее перемещение", new DisplacementDocument(Lines.ToArray()));
+			LastOperation = "Печать документов";
+			return Preview("Печать документов", new DisplacementDocument(Lines.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintDisplacementDocumentWaybill()
 		{
-			return Preview("Внутренее перемещение", new DisplacementDocumentWaybill(Doc, Lines, Session.Query<WaybillSettings>().First()));
+			LastOperation = "Внутреннее-перемещение";
+			return Preview("Внутреннее-перемещение", new DisplacementDocumentWaybill(Doc, Lines, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IResult PrintStockPriceTags()
 		{
+			LastOperation = "Печать ярлыков";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
@@ -226,6 +232,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintDisplacementWaybill()
 		{
+			LastOperation ="Требование-накладная";
 			var req = new RequirementWaybill();
 			yield return new DialogResult(req);
 			if (req.requirementWaybillName == null)
@@ -236,6 +243,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintPriceNegotiationProtocol()
 		{
+			LastOperation = "Протокол согласования цен ЖНВЛП";
 			var req = new RequirementNegotiationProtocol();
 			yield return new DialogResult(req);
 			if (req.Fio == null)
@@ -247,7 +255,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IResult PrintStockRackingMaps()
 		{
 			var receivingOrders = Session.Query<Waybill>().ToList();
-
+			LastOperation = "Постеллажная карта";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Постеллажная карта",
@@ -263,6 +271,63 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		private void SetMenuItems()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Печать документов";
+			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Ценники";
+			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Постеллажная карта";
+			item.Click += (sender, args) => PrintStockRackingMaps().Execute(null);
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Требование-накладная";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintDisplacementWaybill().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Внутреннее-перемещение";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintDisplacementDocumentWaybill().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Протокол согласования цен ЖНВЛП";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintPriceNegotiationProtocol().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Печать документов")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Печать ярлыков")
+				PrintStockPriceTags().Execute(null);
+			if(LastOperation == "Постеллажная карта")
+				PrintStockRackingMaps().Execute(null);
+			if(LastOperation == "Требование-накладная")
+				Coroutine.BeginExecute(PrintDisplacementWaybill().GetEnumerator());
+			if(LastOperation == "Внутреннее-перемещение")
+				Coroutine.BeginExecute(PrintDisplacementDocumentWaybill().GetEnumerator());
+			if(LastOperation == "Протокол согласования цен ЖНВЛП")
+				Coroutine.BeginExecute(PrintPriceNegotiationProtocol().GetEnumerator());
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

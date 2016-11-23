@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -16,12 +18,13 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditWriteoffDoc : BaseScreen2
+	public class EditWriteoffDoc : BaseScreen2, IPrintableStock
 	{
 		private EditWriteoffDoc()
 		{
 			Lines = new ReactiveCollection<WriteoffLine>();
 			Session.FlushMode = FlushMode.Never;
+			SetMenuItems();
 		}
 
 		public EditWriteoffDoc(WriteoffDoc doc)
@@ -174,11 +177,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
+			LastOperation = "Списание";
 			return Preview("Списание", new WriteoffDocument(Lines.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintAct()
 		{
+			LastOperation = "Акт списания";
 			return Preview("Акт списания", new WriteoffActDocument(Lines.ToArray()));
 		}
 
@@ -190,6 +195,35 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		private void SetMenuItems()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			var item = new MenuItem();
+			item.Header = "Списание";
+			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem();
+			item.Header = "Акт списания";
+			item.Click += (sender, args) => Coroutine.BeginExecute(PrintAct().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+		}
+
+		void IPrintableStock.PrintStock()
+		{
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Списание")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Акт списания")
+				Coroutine.BeginExecute(PrintAct().GetEnumerator());
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

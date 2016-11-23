@@ -70,7 +70,6 @@
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="7" Name="Header_Agent" />
     </Grid>
     <WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="1">
-      <Button Name="PrintCheckDetails" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать</Button>
       <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Экспорт</Button>
     </WrapPanel>
     <controls:DataGrid2 Grid.Row="2" x:Name="Lines">
