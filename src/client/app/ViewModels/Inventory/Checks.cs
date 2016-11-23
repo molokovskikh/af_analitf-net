@@ -151,12 +151,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			PrintStockMenuItems.Add(item);
 		}
 
-		void IPrintableStock.PrintStock()
+		PrintResult IPrintableStock.PrintStock()
 		{
 			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
 				Coroutine.BeginExecute(PrintChecks().GetEnumerator());
 			if(LastOperation == "Акт возврата")
 				Coroutine.BeginExecute(PrintReturnAct().GetEnumerator());
+			return null;
 		}
 
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
