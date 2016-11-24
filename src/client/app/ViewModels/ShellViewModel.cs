@@ -60,9 +60,12 @@ namespace AnalitF.Net.Client.ViewModels
 	public interface IPrintableStock
 	{
 		bool CanPrintStock { get; }
+		bool IsView { get; set; }
 		ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
-		void PrintStock();
+		PrintResult PrintStock();
 		string LastOperation { get; set; }
+		string PrinterName { get; set; }
+		IEnumerable<IResult> ReportSetting();
 	}
 
 #if DEBUG
@@ -248,7 +251,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			PrintStockMenuItems = this.ObservableForProperty(m => m.ActiveItem)
 				.Select(e => e.Value is IPrintableStock
-					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.PrintStockMenuItems, skipInitial: false)
+					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.PrintStockMenuItems, skipInitial: false, beforeChange: true)
 					: Observable.Return(new ObservedChange<IPrintableStock, ObservableCollection<MenuItem>>()))
 				.Switch()
 				.Select(e => e.Value)
@@ -555,15 +558,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<bool> CanPrintStock { get; set; }
 
-		public void PrintStock()
+		public IResult PrintStock()
 		{
 			if (!CanPrintStock.Value)
-				return;
-			((IPrintableStock) ActiveItem).PrintStock();
+				return null;
+			return ((IPrintableStock) ActiveItem).PrintStock();
 		}
 
 		public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems { get; set;}
-		//public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems => ((IPrintableStock) ActiveItem).PrintStockMenuItems;
 
 		public NotifyValue<bool> CanPrintPreview { get; set; }
 

@@ -21,11 +21,14 @@ namespace AnalitF.Net.Client.Models.Results
 
 		private Lazy<Tuple<FlowDocument, BaseDocument>>[] buffered;
 
-		public PrintResult(string name, IEnumerable<BaseDocument> docs)
+		public string PrinterName { get; set; }
+
+		public PrintResult(string name, IEnumerable<BaseDocument> docs, string printerName = "")
 		{
 			this.docs = docs
 				.Select(b => new Lazy<Tuple<FlowDocument, BaseDocument>>(() => Tuple.Create(b.Build(), b)));
 			this.name = name;
+			PrinterName = printerName;
 		}
 
 		public PrintResult(string name, params BaseDocument[] baseDocs)
@@ -49,9 +52,14 @@ namespace AnalitF.Net.Client.Models.Results
 		public void Execute(ActionExecutionContext context)
 		{
 			var dialog = new PrintDialog();
-			dialog.UserPageRangeEnabled = true;
+			if (string.IsNullOrEmpty(PrinterName)) {
+				dialog.UserPageRangeEnabled = true;
 			if (dialog.ShowDialog() != true)
 				return;
+			} else {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+			}
+			
 
 			foreach (var doc in Docs) {
 				var flowDocument = doc.Value.Item1;

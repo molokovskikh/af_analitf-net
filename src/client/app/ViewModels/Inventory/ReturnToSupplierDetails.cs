@@ -15,6 +15,10 @@ using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
 using System.Collections.ObjectModel;
+using System.Printing;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -24,7 +28,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Lines = new ReactiveCollection<ReturnToSupplierLine>();
 			Session.FlushMode = FlushMode.Never;
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			SetMenuItems();
+			IsView = true;
 		}
 
 		public ReturnToSupplierDetails(ReturnToSupplier doc)
@@ -210,9 +217,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> PrintReturnWaybill()
 		{
 			LastOperation = "Возврат товарная накладная";
-			return Preview("Возврат товарная накладная ТОРГ-12", new ReturnWaybill(Doc,
-				Session.Query<WaybillSettings>().First(),
-				Session.Query<User>().First()));
+			return Preview("Возврат товарная накладная ТОРГ-12",
+				new ReturnWaybill(Doc, Session.Query<WaybillSettings>().First(), Session.Query<User>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
@@ -234,35 +240,98 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void SetMenuItems()
 		{
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			var item = new MenuItem();
-			item.Header = "Возврат товара";
+			PrintStockMenuItems.Clear();
+			var item = new MenuItem {Header = "Возврат товара"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Возврат ярлык";
+			item = new MenuItem {Header = "Возврат ярлык"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnLabel().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Возврат счет-фактура";
+			item = new MenuItem {Header = "Возврат счет-фактура"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnInvoice().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Возврат товарная накладная ТОРГ-12";
+			item = new MenuItem {Header = "Возврат товарная накладная ТОРГ-12"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnWaybill().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Акт о расхождении ТОРГ-2";
+			item = new MenuItem {Header = "Акт о расхождении ТОРГ-2"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnDivergenceAct().GetEnumerator());
 			PrintStockMenuItems.Add(item);
+
+			foreach (var it in PrintStockMenuItems) {
+				it.IsCheckable = false;
+			}
 		}
 
-		void IPrintableStock.PrintStock()
+		public bool IsView { get; set; }
+
+		public IEnumerable<IResult> ReportSetting()
 		{
+			var req = new ReportSetting();
+			yield return new DialogResult(req);
+			PrinterName = req.PrinterName;
+			if (req.IsView) {
+				IsView = true;
+				SetMenuItems();
+			}
+
+			if (req.IsPrint) {
+				IsView = false;
+				DisablePreview();
+			}
+
+		}
+
+		public void DisablePreview()
+		{
+			foreach (var item in PrintStockMenuItems) {
+				if (item.Header != "Настройки") {
+					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
+					item.IsCheckable = true;
+				}
+			}
+		}
+
+		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
+		{
+			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
+				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
+			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
+
+			if (eventHandlersStore == null)
+				return;
+
+			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
+				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
+				eventHandlersStore, new object[] {routedEvent});
+
+			foreach (var routedEventHandler in routedEventHandlers)
+				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == "Возврат товара")
+						docs.Add(new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
+					if ((string)item.Header == "Возврат ярлык")
+						docs.Add(new ReturnLabel(Doc, Session.Query<WaybillSettings>().First()));
+					if ((string) item.Header == "Возврат счет-фактура")
+						docs.Add(new ReturnInvoice(Doc, Session.Query<WaybillSettings>().First()));
+					if ((string) item.Header == "Возврат товарная накладная")
+						docs.Add(new ReturnWaybill(Doc, Session.Query<WaybillSettings>().First(), Session.Query<User>().First()));
+					if ((string)item.Header == "Акт о расхождении")
+						docs.Add(new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
 			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Возврат товара")
 				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Возврат ярлык")
@@ -273,10 +342,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Coroutine.BeginExecute(PrintReturnWaybill().GetEnumerator());
 			if(LastOperation == "Акт о расхождении")
 				Coroutine.BeginExecute(PrintReturnDivergenceAct().GetEnumerator());
+			return null;
 		}
 
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+
 		public bool CanPrintStock
 		{
 			get { return true; }

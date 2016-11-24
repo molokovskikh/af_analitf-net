@@ -17,6 +17,8 @@ using System.ComponentModel;
 using System.Reactive;
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
+using System.Reflection;
+using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -32,7 +34,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			AddressSelector = new AddressSelector(this);
 			DisplayName = "Чеки";
 			TrackDb(typeof(Check));
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			SetMenuItems();
+			IsView = true;
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -139,7 +144,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void SetMenuItems()
 		{
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintStockMenuItems.Clear();
 			var item = new MenuItem();
 			item.Header = "Чеки";
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintChecks().GetEnumerator());
@@ -149,10 +154,29 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			item.Header = "Акт возврата";
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnAct().GetEnumerator());
 			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Настройки"};
+			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			foreach (var it in PrintStockMenuItems) {
+				it.IsCheckable = false;
+			}
 		}
 
 		PrintResult IPrintableStock.PrintStock()
 		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == "Чеки")
+						docs.Add(new CheckDocument(Items.Value.ToArray()));
+					if ((string) item.Header == "Акт возврата")
+						docs.Add(new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
 			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
 				Coroutine.BeginExecute(PrintChecks().GetEnumerator());
 			if(LastOperation == "Акт возврата")
@@ -160,8 +184,55 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
+		public IEnumerable<IResult> ReportSetting()
+		{
+			var req = new ReportSetting();
+			yield return new DialogResult(req);
+			PrinterName = req.PrinterName;
+			if (req.IsView) {
+				IsView = true;
+				SetMenuItems();
+			}
+
+			if (req.IsPrint) {
+				IsView = false;
+				DisablePreview();
+			}
+		}
+
+		public void DisablePreview()
+		{
+			foreach (var item in PrintStockMenuItems) {
+				if (item.Header != "Настройки") {
+					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
+					item.IsCheckable = true;
+				}
+			}
+		}
+
+		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
+		{
+			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
+				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
+			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
+
+			if (eventHandlersStore == null)
+				return;
+
+			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
+				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
+				eventHandlersStore, new object[] {routedEvent});
+
+			foreach (var routedEventHandler in routedEventHandlers)
+				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
+		}
+
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
 		public bool CanPrintStock
 		{
 			get { return true; }

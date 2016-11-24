@@ -14,8 +14,12 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using System.ComponentModel;
+using System.Printing;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.NHibernate;
@@ -45,8 +49,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				CurrentItem);
 			TrackDb(typeof(Stock));
 
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			SetMenuItems();
-
+			IsView = true;
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -258,36 +263,106 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void SetMenuItems()
 		{
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			var item = new MenuItem();
-			item.Header = "Ценники";
+			PrintStockMenuItems.Clear();
+			var item = new MenuItem {Header = "Ценники"};
 			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Товарные запасы";
+			item = new MenuItem {Header = "Товарные запасы"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStock().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Товары со сроком годности";
+			item = new MenuItem {Header = "Товары со сроком годности"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStockLimit().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Товары со сроком годности менее 1 месяца";
+			item = new MenuItem {Header = "Товары со сроком годности менее 1 месяца"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Постеллажная карта";
+			item = new MenuItem {Header = "Постеллажная карта"};
 			item.Click += (sender, args) => PrintStockRackingMaps().Execute(null);
 			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Настройки"};
+			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
+			PrintStockMenuItems.Add(item);
+
+			foreach (var it in PrintStockMenuItems) {
+				it.IsCheckable = false;
+			}
 		}
 
-		void IPrintableStock.PrintStock()
+		public IEnumerable<IResult> ReportSetting()
 		{
-			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
+			var req = new ReportSetting();
+			yield return new DialogResult(req);
+			PrinterName = req.PrinterName;
+			if (req.IsView) {
+				IsView = true;
+				SetMenuItems();
+			}
+
+			if (req.IsPrint) {
+				IsView = false;
+				DisablePreview();
+			}
+		}
+
+		public void DisablePreview()
+		{
+			foreach (var item in PrintStockMenuItems) {
+				if (item.Header != "Настройки") {
+					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
+					item.IsCheckable = true;
+				}
+			}
+		}
+
+		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
+		{
+			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
+				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
+			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
+
+			if (eventHandlersStore == null)
+				return;
+
+			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
+				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
+				eventHandlersStore, new object[] {routedEvent});
+
+			foreach (var routedEventHandler in routedEventHandlers)
+				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == "Товарные запасы")
+						docs.Add(new StockDocument(Items.Value.ToArray()));
+					if ((string)item.Header == "Ценники")
+						PrintFixedDoc(new StockPriceTagDocument(Items.Value.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator);
+					if ((string)item.Header == "Товары со сроком годности") {
+						var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
+						var per = new DialogResult(new SelectStockPeriod(stocks, Name));
+						per.Execute(null);
+					}
+					if ((string)item.Header == "Товары со сроком годности менее 1 месяца")
+						docs.Add(new StockLimitMonthDocument(Items.Value.Where(s => s.Exp < DateTime.Today.AddMonths(1)).ToArray(),
+							"Товары со сроком годности менее 1 месяца", Name));
+					if ((string)item.Header == "Постеллажная карта") {
+						var receivingOrders = Session.Query<Waybill>().ToList();
+						PrintFixedDoc(new StockRackingMapDocument(receivingOrders, Items.Value.ToList()).Build().DocumentPaginator);
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(string.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
 				Coroutine.BeginExecute(PrintStock().GetEnumerator());
 			if(LastOperation == "Ценники")
 				PrintStockPriceTags().Execute(null);
@@ -297,10 +372,23 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
 			if(LastOperation == "Постеллажная карта")
 				PrintStockRackingMaps().Execute(null);
+			return null;
 		}
 
+		private void PrintFixedDoc(DocumentPaginator doc)
+		{
+			var dialog = new PrintDialog();
+				if(!string.IsNullOrEmpty(PrinterName))
+					dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+			if (string.IsNullOrEmpty(PrinterName))
+							dialog.ShowDialog();
+			dialog.PrintDocument(doc, "Ценники");
+		}
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
 		public bool CanPrintStock
 		{
 			get { return true; }
