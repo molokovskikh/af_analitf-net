@@ -112,9 +112,7 @@
 				<c:DataGrid2 x:Name="DeletedOrders" CanUserDeleteRows="True"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}" VerticalAlignment="Top">
 					<DataGrid.Columns>
-						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
-							Visibility="Collapsed" />
-						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding ServerId}" />
+						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}" />
 						<c:DataGridTextColumnEx Width="66*" Header="Удалено" Binding="{Binding DeletedOn}" />
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}" />
 						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding PriceName}" />

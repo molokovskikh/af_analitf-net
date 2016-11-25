@@ -25,6 +25,7 @@ using NHibernate.Linq;
 using NHibernate.Proxy;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
+using Common.NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -176,6 +177,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (IsDeletedSelected) {
 				Env.RxQuery(s => {
 					var result = s.Query<DeletedOrder>()
+					.Fetch(o => o.Price)
+					.Fetch(o => o.Address)
 					.OrderByDescending(o => o.DeletedOn)
 					.ToList();
 					if (CurrentDeletedOrder != null)
@@ -419,6 +422,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				order.Address.Orders.Remove(order);
 			}
 			Orders.Remove(order);
+			Session.Flush();
 		}
 
 		public bool FreezeVisible => IsCurrentSelected;
