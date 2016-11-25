@@ -33,7 +33,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.FlushMode = FlushMode.Never;
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			SetMenuItems();
 			IsView = true;
 		}
 
@@ -217,19 +216,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			LastOperation = "Печать документов";
 			return Preview("Печать документов", new DisplacementDocument(Lines.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintDisplacementDocumentWaybill()
 		{
-			LastOperation = "Внутреннее-перемещение";
 			return Preview("Внутреннее-перемещение", new DisplacementDocumentWaybill(Doc, Lines, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IResult PrintStockPriceTags()
 		{
-			LastOperation = "Печать ярлыков";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
@@ -239,7 +235,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintDisplacementWaybill()
 		{
-			LastOperation ="Требование-накладная";
 			var req = new RequirementWaybill();
 			yield return new DialogResult(req);
 			if (req.requirementWaybillName == null)
@@ -250,7 +245,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintPriceNegotiationProtocol()
 		{
-			LastOperation = "Протокол согласования цен ЖНВЛП";
 			var req = new RequirementNegotiationProtocol();
 			yield return new DialogResult(req);
 			if (req.Fio == null)
@@ -262,7 +256,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IResult PrintStockRackingMaps()
 		{
 			var receivingOrders = Session.Query<Waybill>().ToList();
-			LastOperation = "Постеллажная карта";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Постеллажная карта",
@@ -280,46 +273,25 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
-		private void SetMenuItems()
+		public void SetMenuItems()
 		{
-			PrintStockMenuItems.Clear();
-			var item = new MenuItem();
-			item.Header = "Печать документов";
-			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			var item = new MenuItem {Header = "Печать документов"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Ценники";
-			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
+			item = new MenuItem {Header = "Ценники"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Постеллажная карта";
-			item.Click += (sender, args) => PrintStockRackingMaps().Execute(null);
+			item = new MenuItem {Header = "Постеллажная карта"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Требование-накладная";
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintDisplacementWaybill().GetEnumerator());
+			item = new MenuItem {Header = "Требование-накладная"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Внутреннее-перемещение";
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintDisplacementDocumentWaybill().GetEnumerator());
+			item = new MenuItem {Header = "Внутреннее-перемещение"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Протокол согласования цен ЖНВЛП";
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintPriceNegotiationProtocol().GetEnumerator());
+			item = new MenuItem {Header = "Протокол согласования цен ЖНВЛП"};
 			PrintStockMenuItems.Add(item);
-
-			item = new MenuItem {Header = "Настройки"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
-			PrintStockMenuItems.Add(item);
-
-			foreach (var it in PrintStockMenuItems) {
-				it.IsCheckable = false;
-			}
 		}
 
 		PrintResult IPrintableStock.PrintStock()
@@ -330,10 +302,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					if ((string) item.Header == "Печать документов")
 						docs.Add(new DisplacementDocument(Lines.ToArray()));
 					if ((string) item.Header == "Печать ярлыков")
-						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator);
+						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator,
+							"Печать ярлыков");
 					if ((string) item.Header == "Постеллажная карта") {
 						var receivingOrders = Session.Query<Waybill>().ToList();
-						PrintFixedDoc(new StockRackingMapDocument(receivingOrders, Lines.Select(x => x.SrcStock).ToList()).Build().DocumentPaginator);
+						PrintFixedDoc(
+							new StockRackingMapDocument(receivingOrders, Lines.Select(x => x.SrcStock).ToList()).Build().DocumentPaginator,
+							"Постеллажная карта");
 					}
 					if ((string) item.Header == "Требование-накладная") {
 						var req = new RequirementWaybill();
@@ -356,7 +331,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
 
-
 			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Печать документов")
 				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Печать ярлыков")
@@ -372,60 +346,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		public IEnumerable<IResult> ReportSetting()
-		{
-			var req = new ReportSetting();
-			yield return new DialogResult(req);
-			PrinterName = req.PrinterName;
-			if (req.IsView) {
-				IsView = true;
-				SetMenuItems();
-			}
 
-			if (req.IsPrint) {
-				IsView = false;
-				DisablePreview();
-			}
-		}
-
-		public void DisablePreview()
-		{
-			foreach (var item in PrintStockMenuItems) {
-				if (item.Header != "Настройки") {
-					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
-					item.IsCheckable = true;
-				}
-			}
-		}
-
-		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
-		{
-			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
-				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
-			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
-
-			if (eventHandlersStore == null)
-				return;
-
-			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
-				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
-				eventHandlersStore, new object[] {routedEvent});
-
-			foreach (var routedEventHandler in routedEventHandlers)
-				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
-		}
-
-		private void PrintFixedDoc(DocumentPaginator doc)
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
 		{
 			var dialog = new PrintDialog();
-				if(!string.IsNullOrEmpty(PrinterName))
-					dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
-			if (string.IsNullOrEmpty(PrinterName))
-							dialog.ShowDialog();
-			dialog.PrintDocument(doc, "Ценники");
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
 		}
-
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }

@@ -33,7 +33,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Name = User?.FullName ?? "";
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			SetMenuItems();
 			IsView = true;
 		}
 
@@ -194,7 +193,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			LastOperation = "Излишки";
 			return Preview("Излишки", new InventoryDocument(Lines.ToArray()));
 		}
 
@@ -210,7 +208,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult PrintStockPriceTags()
 		{
-			LastOperation = "Ярлыки";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ярлыки",
@@ -220,35 +217,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintInventoryAct()
 		{
-			LastOperation = "Акт об излишках";
 			return Preview("Акт об излишках", new InventoryActDocument(Lines.ToArray()));
 		}
 
-		private void SetMenuItems()
+		public void SetMenuItems()
 		{
 			PrintStockMenuItems.Clear();
-			var item = new MenuItem();
-			item.Header = "Излишки";
-			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			var item = new MenuItem {Header = "Излишки"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Ярлыки";
-			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
+			item = new MenuItem {Header = "Ярлыки"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Акт об излишках";
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintInventoryAct().GetEnumerator());
+			item = new MenuItem {Header = "Акт об излишках"};
 			PrintStockMenuItems.Add(item);
-
-			item = new MenuItem {Header = "Настройки"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
-			PrintStockMenuItems.Add(item);
-
-			foreach (var it in PrintStockMenuItems) {
-				it.IsCheckable = false;
-			}
 		}
 
 		PrintResult IPrintableStock.PrintStock()
@@ -261,7 +243,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					if ((string) item.Header == "Акт об излишках")
 						docs.Add(new InventoryActDocument(Lines.ToArray()));
 					if ((string) item.Header == "Ярлыки")
-						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator);
+						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ярлыки");
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
@@ -275,60 +257,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		public IEnumerable<IResult> ReportSetting()
-		{
-			var req = new ReportSetting();
-			yield return new DialogResult(req);
-			PrinterName = req.PrinterName;
-			if (req.IsView) {
-				IsView = true;
-				SetMenuItems();
-			}
-
-			if (req.IsPrint) {
-				IsView = false;
-				DisablePreview();
-			}
-		}
-
-		public void DisablePreview()
-		{
-			foreach (var item in PrintStockMenuItems) {
-				if (item.Header != "Настройки") {
-					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
-					item.IsCheckable = true;
-				}
-			}
-		}
-
-		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
-		{
-			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
-				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
-			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
-
-			if (eventHandlersStore == null)
-				return;
-
-			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
-				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
-				eventHandlersStore, new object[] {routedEvent});
-
-			foreach (var routedEventHandler in routedEventHandlers)
-				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
-		}
-
-		private void PrintFixedDoc(DocumentPaginator doc)
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
 		{
 			var dialog = new PrintDialog();
-				if(!string.IsNullOrEmpty(PrinterName))
-					dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
-			if (string.IsNullOrEmpty(PrinterName))
-							dialog.ShowDialog();
-			dialog.PrintDocument(doc, "Ценники");
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
 		}
-
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }

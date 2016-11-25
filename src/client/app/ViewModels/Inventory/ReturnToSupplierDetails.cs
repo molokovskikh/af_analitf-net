@@ -30,7 +30,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.FlushMode = FlushMode.Never;
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			SetMenuItems();
 			IsView = true;
 		}
 
@@ -198,32 +197,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			LastOperation = "Возврат товара";
 			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnLabel()
 		{
-			LastOperation = "Возврат ярлык";
 			return Preview("Возврат ярлык", new ReturnLabel(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnInvoice()
 		{
-			LastOperation = "Возврат счет-фактура";
 			return Preview("Возврат счет-фактура", new ReturnInvoice(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnWaybill()
 		{
-			LastOperation = "Возврат товарная накладная";
 			return Preview("Возврат товарная накладная ТОРГ-12",
 				new ReturnWaybill(Doc, Session.Query<WaybillSettings>().First(), Session.Query<User>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
 		{
-			LastOperation = "Акт о расхождении";
 			return Preview("Акт о расхождении ТОРГ-2",
 				new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
@@ -238,80 +232,25 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
-		private void SetMenuItems()
+		public void SetMenuItems()
 		{
-			PrintStockMenuItems.Clear();
 			var item = new MenuItem {Header = "Возврат товара"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Возврат ярлык"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnLabel().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Возврат счет-фактура"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnInvoice().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Возврат товарная накладная ТОРГ-12"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnWaybill().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Акт о расхождении ТОРГ-2"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintReturnDivergenceAct().GetEnumerator());
 			PrintStockMenuItems.Add(item);
-
-			foreach (var it in PrintStockMenuItems) {
-				it.IsCheckable = false;
-			}
 		}
 
-		public bool IsView { get; set; }
 
-		public IEnumerable<IResult> ReportSetting()
-		{
-			var req = new ReportSetting();
-			yield return new DialogResult(req);
-			PrinterName = req.PrinterName;
-			if (req.IsView) {
-				IsView = true;
-				SetMenuItems();
-			}
-
-			if (req.IsPrint) {
-				IsView = false;
-				DisablePreview();
-			}
-
-		}
-
-		public void DisablePreview()
-		{
-			foreach (var item in PrintStockMenuItems) {
-				if (item.Header != "Настройки") {
-					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
-					item.IsCheckable = true;
-				}
-			}
-		}
-
-		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
-		{
-			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
-				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
-			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
-
-			if (eventHandlersStore == null)
-				return;
-
-			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
-				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
-				eventHandlersStore, new object[] {routedEvent});
-
-			foreach (var routedEventHandler in routedEventHandlers)
-				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
-		}
 
 		PrintResult IPrintableStock.PrintStock()
 		{
@@ -348,6 +287,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
 
 		public bool CanPrintStock
 		{

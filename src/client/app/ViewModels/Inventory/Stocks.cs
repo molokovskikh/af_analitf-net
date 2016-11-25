@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.NHibernate;
@@ -50,7 +51,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			TrackDb(typeof(Stock));
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			SetMenuItems();
 			IsView = true;
 		}
 
@@ -171,7 +171,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStock()
 		{
-			LastOperation = "Товарные запасы";
 			return Preview("Товарные запасы", new StockDocument(Items.Value.ToArray()));
 		}
 
@@ -187,7 +186,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult PrintStockPriceTags()
 		{
-			LastOperation = "Ценники";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
@@ -198,7 +196,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IResult PrintStockRackingMaps()
 		{
 			var receivingOrders = Session.Query<Waybill>().ToList();
-			LastOperation = "Постеллажная карта";
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Постеллажная карта",
@@ -208,7 +205,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStockLimitMonth()
 		{
-			LastOperation = "Товары со сроком годности менее 1 месяца";
 			var title = "Товары со сроком годности менее 1 месяца";
 			var stocks = Items.Value.Where(s => s.Exp < DateTime.Today.AddMonths(1)).ToArray();
 			return Preview(title, new StockLimitMonthDocument(stocks, title, Name));
@@ -216,7 +212,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStockLimit()
 		{
-			LastOperation = "Товары со сроком годности";
 			var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
 			yield return new DialogResult(new SelectStockPeriod(stocks, Name));
 		}
@@ -261,80 +256,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new DisplacementDocs());
 		}
 
-		private void SetMenuItems()
+		public void SetMenuItems()
 		{
-			PrintStockMenuItems.Clear();
 			var item = new MenuItem {Header = "Ценники"};
-			item.Click += (sender, args) => PrintStockPriceTags().Execute(null);
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товарные запасы"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStock().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStockLimit().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности менее 1 месяца"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
 			PrintStockMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Постеллажная карта"};
-			item.Click += (sender, args) => PrintStockRackingMaps().Execute(null);
 			PrintStockMenuItems.Add(item);
-
-			item = new MenuItem {Header = "Настройки"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
-			PrintStockMenuItems.Add(item);
-
-			foreach (var it in PrintStockMenuItems) {
-				it.IsCheckable = false;
-			}
-		}
-
-		public IEnumerable<IResult> ReportSetting()
-		{
-			var req = new ReportSetting();
-			yield return new DialogResult(req);
-			PrinterName = req.PrinterName;
-			if (req.IsView) {
-				IsView = true;
-				SetMenuItems();
-			}
-
-			if (req.IsPrint) {
-				IsView = false;
-				DisablePreview();
-			}
-		}
-
-		public void DisablePreview()
-		{
-			foreach (var item in PrintStockMenuItems) {
-				if (item.Header != "Настройки") {
-					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
-					item.IsCheckable = true;
-				}
-			}
-		}
-
-		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
-		{
-			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
-				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
-			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
-
-			if (eventHandlersStore == null)
-				return;
-
-			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
-				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
-				eventHandlersStore, new object[] {routedEvent});
-
-			foreach (var routedEventHandler in routedEventHandlers)
-				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
 		}
 
 		PrintResult IPrintableStock.PrintStock()
@@ -345,7 +282,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					if ((string)item.Header == "Товарные запасы")
 						docs.Add(new StockDocument(Items.Value.ToArray()));
 					if ((string)item.Header == "Ценники")
-						PrintFixedDoc(new StockPriceTagDocument(Items.Value.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator);
+						PrintFixedDoc(new StockPriceTagDocument(Items.Value.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ценники");
 					if ((string)item.Header == "Товары со сроком годности") {
 						var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
 						var per = new DialogResult(new SelectStockPeriod(stocks, Name));
@@ -356,7 +293,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 							"Товары со сроком годности менее 1 месяца", Name));
 					if ((string)item.Header == "Постеллажная карта") {
 						var receivingOrders = Session.Query<Waybill>().ToList();
-						PrintFixedDoc(new StockRackingMapDocument(receivingOrders, Items.Value.ToList()).Build().DocumentPaginator);
+						PrintFixedDoc(new StockRackingMapDocument(receivingOrders, Items.Value.ToList()).Build().DocumentPaginator, "Постеллажная карта");
 					}
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
@@ -375,14 +312,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		private void PrintFixedDoc(DocumentPaginator doc)
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
 		{
 			var dialog = new PrintDialog();
-				if(!string.IsNullOrEmpty(PrinterName))
-					dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
-			if (string.IsNullOrEmpty(PrinterName))
-							dialog.ShowDialog();
-			dialog.PrintDocument(doc, "Ценники");
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
 		}
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
 		public string LastOperation { get; set; }

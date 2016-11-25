@@ -28,7 +28,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.FlushMode = FlushMode.Never;
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
-			SetMenuItems();
 			IsView = true;
 		}
 
@@ -182,13 +181,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			LastOperation = "Списание";
 			return Preview("Списание", new WriteoffDocument(Lines.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintAct()
 		{
-			LastOperation = "Акт списания";
 			return Preview("Акт списания", new WriteoffActDocument(Lines.ToArray()));
 		}
 
@@ -202,26 +199,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
-		private void SetMenuItems()
+		public void SetMenuItems()
 		{
-			PrintStockMenuItems.Clear();
-			var item = new MenuItem();
-			item.Header = "Списание";
-			item.Click += (sender, args) => Coroutine.BeginExecute(Print().GetEnumerator());
+			var item = new MenuItem {Header = "Списание"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem();
-			item.Header = "Акт списания";
-			item.Click += (sender, args) => Coroutine.BeginExecute(PrintAct().GetEnumerator());
+			item = new MenuItem {Header = "Акт списания"};
 			PrintStockMenuItems.Add(item);
-
-			item = new MenuItem {Header = "Настройки"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
-			PrintStockMenuItems.Add(item);
-
-			foreach (var it in PrintStockMenuItems) {
-				it.IsCheckable = false;
-			}
 		}
 
 		PrintResult IPrintableStock.PrintStock()
@@ -242,50 +226,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if(LastOperation == "Акт списания")
 				Coroutine.BeginExecute(PrintAct().GetEnumerator());
 			return null;
-		}
-
-		public IEnumerable<IResult> ReportSetting()
-		{
-			var req = new ReportSetting();
-			yield return new DialogResult(req);
-			PrinterName = req.PrinterName;
-			if (req.IsView) {
-				IsView = true;
-				SetMenuItems();
-			}
-
-			if (req.IsPrint) {
-				IsView = false;
-				DisablePreview();
-			}
-		}
-
-		public void DisablePreview()
-		{
-			foreach (var item in PrintStockMenuItems) {
-				if (item.Header != "Настройки") {
-					RemoveRoutedEventHandlers(item, MenuItem.ClickEvent);
-					item.IsCheckable = true;
-				}
-			}
-		}
-
-		public static void RemoveRoutedEventHandlers(UIElement element, RoutedEvent routedEvent)
-		{
-			var eventHandlersStoreProperty = typeof (UIElement).GetProperty(
-				"EventHandlersStore", BindingFlags.Instance | BindingFlags.NonPublic);
-			object eventHandlersStore = eventHandlersStoreProperty.GetValue(element, null);
-
-			if (eventHandlersStore == null)
-				return;
-
-			var getRoutedEventHandlers = eventHandlersStore.GetType().GetMethod(
-				"GetRoutedEventHandlers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			var routedEventHandlers = (RoutedEventHandlerInfo[]) getRoutedEventHandlers.Invoke(
-				eventHandlersStore, new object[] {routedEvent});
-
-			foreach (var routedEventHandler in routedEventHandlers)
-				element.RemoveHandler(routedEvent, routedEventHandler.Handler);
 		}
 
 		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
