@@ -276,7 +276,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> DreamReport()
 		{
-			var settings = new DreamReportSettings(Begin.Value, End.Value, IsFilterByWriteTime.Value);
+			// выбор товаров
+			var catalogList = new List<Catalog>();
+			yield return new DialogResult(new CatalogViewModel(catalogList), fullScreen: true);
+
+			// выбор остальных параметров
+			var settings = new DreamReportSettings() {
+				Begin = Begin.Value,
+				End = End.Value,
+				FilterByWriteTime = IsFilterByWriteTime.Value,
+				CatalogIds = catalogList.Select(x => x.Id).ToArray(),
+				CatalogNames = catalogList.Select(x => x.FullName).ToList().Implode()
+			};
 			yield return new DialogResult(new CreateDreamReport(settings));
 
 			var commnand = new DreamReport(settings);

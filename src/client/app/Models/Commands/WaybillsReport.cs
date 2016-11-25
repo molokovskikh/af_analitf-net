@@ -20,8 +20,8 @@ namespace AnalitF.Net.Client.Models.Commands
 		public uint[] AddressIds { get; set; }
 		public string AddressNames { get; set; }
 
-		public uint[] ProductIds { get; set; }
-		public string ProductNames { get; set; }
+		public uint[] CatalogIds { get; set; }
+		public string CatalogNames { get; set; }
 
 		public uint[] SupplierIds { get; set; }
 		public string SupplierNames { get; set; }
@@ -31,13 +31,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public bool FilterByWriteTime { get; set; }
 
-		public DreamReportSettings(DateTime begin, DateTime end, bool filterByWriteTime)
+		public DreamReportSettings()
 		{
-			Begin = begin;
-			End = end;
-			FilterByWriteTime = filterByWriteTime;
-			AddressIds = ProductIds = SupplierIds = ProducerIds = new uint[] { };
-			AddressNames = ProductNames = SupplierNames = ProducerNames = "все";
+			AddressIds = CatalogIds = SupplierIds = ProducerIds = new uint[] { };
+			AddressNames = CatalogNames = SupplierNames = ProducerNames = "все";
 		}
 	}
 
@@ -61,29 +58,33 @@ namespace AnalitF.Net.Client.Models.Commands
 				field = "DocumentDate";
 			var sql = $@"
 select CONCAT_WS(' ', l.Product, l.SerialNumber, d.InnR, l.Certificates) as Name,
-w.WriteTime, w.ProviderDocumentId, w.UserSupplierName, l.Quantity, l.SupplierCost, l.RetailCost
+w.WriteTime, w.ProviderDocumentId, w.UserSupplierName, 
+SUM(l.Quantity) as Quantity, SUM(l.SupplierCost*l.Quantity) as SupplierSum, SUM(l.RetailCost*l.Quantity) as RetailSum
 from WaybillLines l
 join Waybills w on w.Id = l.WaybillId
-left 	join Drugs d on d.EAN = l.EAN13
-where w.{field} > ?
+left join Drugs d on d.EAN = l.EAN13
+where DocType = 1 
+	and Status = 1 
+	and w.{field} > ?
 	and w.{field} < ?
 ";
 			if (_settings.AddressIds.Any())
 				sql += $" and w.AddressId in ({_settings.AddressIds.Implode()})";
-			if (_settings.ProductIds.Any())
-				sql += $" and l.ProductId in ({_settings.ProductIds.Implode()})";
+			if (_settings.CatalogIds.Any())
+				sql += $" and l.CatalogId in ({_settings.CatalogIds.Implode()})";
 			if (_settings.SupplierIds.Any())
 				sql += $" and w.SupplierId in ({_settings.SupplierIds.Implode()})";
 			if (_settings.ProducerIds.Any())
 				sql += $" and l.ProducerId in ({_settings.ProducerIds.Implode()})";
-			sql += " order by Name asc, w.WriteTime asc;";
+			sql += @" group by Name, w.WriteTime, w.ProviderDocumentId, w.UserSupplierName 
+								order by Name asc, w.WriteTime asc;";
 
 			using (var stream = File.Create(Result))
 			using (var writer = new StreamWriter(stream, Encoding.GetEncoding(1251)))
 			{
 				writer.WriteLine($"Движение товаров за период {_settings.Begin.ToShortDateString()} — {_settings.End.ToShortDateString()}");
 				writer.WriteLine($"По адресам: {_settings.AddressNames}");
-				writer.WriteLine($"По товарам: {_settings.ProductNames}");
+				writer.WriteLine($"По товарам: {_settings.CatalogNames}");
 				writer.WriteLine($"По поставщикам: {_settings.SupplierNames}");
 				writer.WriteLine($"По производителям: {_settings.ProducerNames}");
 				writer.WriteLine();
@@ -99,10 +100,8 @@ where w.{field} > ?
 					}
 
 					var quantity = Convert.ToDecimal(row.Quantity);
-					var supplierCost = Convert.ToDecimal(row.SupplierCost);
-					var retailCost = Convert.ToDecimal(row.RetailCost);
-					var supplierSum = (supplierCost * quantity) ?? 0;
-					var retailSum = (retailCost * quantity) ?? 0;
+					var supplierSum = Convert.ToDecimal(row.SupplierSum);
+					var retailSum = Convert.ToDecimal(row.RetailSum);
 
 					writer.Write(row.WriteTime);
 					writer.Write(";");
