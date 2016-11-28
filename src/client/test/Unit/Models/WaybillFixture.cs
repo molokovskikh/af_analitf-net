@@ -450,6 +450,43 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		}
 
 		[Test]
+		public void Select_markup_by_supplierCostWithNds_1()
+		{
+			settings.Rounding = Rounding.None;
+			settings.Markups.RemoveEach(x => x.Type == MarkupType.Over);
+			settings.Markups.Add(new MarkupConfig(address, 0, 550, 10, MarkupType.Over));
+			settings.Markups.Add(new MarkupConfig(address, 550, 1000000, 9, MarkupType.Over));
+			var line = new WaybillLine(waybill)
+			{
+				SupplierCostWithoutNds = 536.17m,
+				SupplierCost = 589.79m,
+				Quantity = 1
+			};
+			WaybillLine calculatedLine = Calculate(line);
+			Assert.AreEqual(9, calculatedLine.RetailMarkup);
+			Assert.AreEqual(642.87, calculatedLine.RetailCost);
+		}
+
+		[Test]
+		public void Select_markup_by_supplierCostWithNds_2()
+		{
+			settings.Rounding = Rounding.None;
+			settings.Markups.RemoveEach(x => x.Type == MarkupType.Nds18);
+			settings.Markups.Add(new MarkupConfig(address, 0, 550, 10, MarkupType.Nds18));
+			settings.Markups.Add(new MarkupConfig(address, 550, 1000000, 9, MarkupType.Nds18));
+			var line = new WaybillLine(waybill)
+			{
+				Nds = 18,
+				SupplierCostWithoutNds = 536.17m,
+				SupplierCost = 632.68m,
+				Quantity = 1
+			};
+			WaybillLine calculatedLine = Calculate(line);
+			Assert.AreEqual(9, calculatedLine.RetailMarkup);
+			Assert.AreEqual(689.62, calculatedLine.RetailCost);
+		}
+
+		[Test]
 		public void Calculate_with_zero_producer_cost()
 		{
 			var markup = settings.Markups.First(x => x.Type == MarkupType.Nds18);
