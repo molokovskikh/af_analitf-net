@@ -395,6 +395,7 @@
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
+    <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -504,6 +505,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
       <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\RegistryDocSettings.xaml.cs">
+      <DependentUpon>RegistryDocSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
@@ -731,6 +735,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PriceTagConstructorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RegistryDocSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1010,14 +1018,10 @@
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-	<ItemGroup>
-		<ShareFiles Include="..\..\..\lib\libmysqld\**\*.*"/>
-	</ItemGroup>
-
-	<Target Name="BeforeBuild">
-		<Copy SkipUnchangedFiles="True"
-			SourceFiles="@(ShareFiles)"
-			DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
-		/>
-	</Target>
+  <ItemGroup>
+    <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
+  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>
