@@ -467,5 +467,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var restoreId = model.Orders[0].DisplayId;
 			Assert.AreNotEqual(restoreId, sentOrderId);
 		}
+
+		[Test]
+		public void Unfreeze_order_check_display_id()
+		{
+			var orderFreeze = PrepareCurrent();
+			Assert.That(model.CanFreeze, Is.True);
+			model.Freeze();
+			Assert.That(model.CanUnfreeze);
+			var order = MakeOrder(null);
+			var displayId = order.DisplayId;
+			TaskResult(model.Unfreeze());
+			Assert.That(model.Orders.Select(o => o.Id).ToArray(), Is.Not.Contains(orderFreeze.Id));
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			var displayAfter = model.Orders.First().DisplayId;
+			Assert.AreEqual(displayId, displayAfter);
+		}
 	}
 }
