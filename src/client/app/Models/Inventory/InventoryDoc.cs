@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Проведен")] Posted
 	}
 
-	public class InventoryDoc : BaseNotify
+	public class InventoryDoc : BaseNotify, IEditableObject
 	{
 		private DocStatus _status;
 
@@ -95,9 +95,21 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplySumWithoutNds = Lines.Sum(x => x.SupplierSumWithoutNds);
 			SupplySum = Lines.Sum(x => x.Quantity*x.SupplierCost);
 		}
+
+		public virtual void BeginEdit()
+		{
+		}
+
+		public virtual void EndEdit()
+		{
+		}
+
+		public virtual void CancelEdit()
+		{
+		}
 	}
 
-	public class InventoryDocLine : BaseStock
+	public class InventoryDocLine : BaseStock, IEditableObject
 	{
 		public InventoryDocLine()
 		{
@@ -126,13 +138,24 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock Stock { get; set; }
 
-		public virtual void UpdateQuantity(decimal quantity, ISession session)
+		public virtual void UpdateQuantity(decimal oldQuantity, ISession session)
 		{
 			// с поставки наружу
-			session.Save(Stock.CancelInventoryDoc(Quantity));
+			session.Save(Stock.CancelInventoryDoc(oldQuantity));
 			// снаружи в поставку
-			session.Save(Stock.InventoryDoc(quantity));
-			Quantity = quantity;
+			session.Save(Stock.InventoryDoc(Quantity));
+		}
+
+		public virtual void BeginEdit()
+		{
+		}
+
+		public virtual void EndEdit()
+		{
+		}
+
+		public virtual void CancelEdit()
+		{
 		}
 	}
 }
