@@ -48,7 +48,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<InventoryDocLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanAdd { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
-		public NotifyValue<bool> CanEditLine { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
 
@@ -72,7 +71,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
 			var editOrDelete = docStatus
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
-			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDelete);
 			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
 			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
@@ -81,17 +79,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
-			var search = new StockSearch();
-			yield return new DialogResult(search, resizable: true);
-			var edit = new EditStock(search.CurrentItem)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
-			var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
-			Lines.Add(line);
-			Doc.Lines.Add(line);
-			Doc.UpdateStat();
+			while (true) {
+				var search = new StockSearch();
+				yield return new DialogResult(search, resizable: true);
+				var edit = new EditStock(search.CurrentItem)
+				{
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
+				var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
+				Save();
+			}
 		}
 
 		public void Delete()
@@ -101,27 +102,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Save();
 		}
 
-		public IEnumerable<IResult> EditLine()
+		public void UpdateQuantity(InventoryDocLine line, decimal oldQuantity)
 		{
-			if (!CanEditLine)
-				yield break;
-			var stock = Env.Query(s => s.Get<Stock>(CurrentLine.Value.Stock.Id)).Result;
-			stock.Quantity = CurrentLine.Value.Quantity;
-			var edit = new EditStock(stock)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
-			// вернули старое кол-во, приняли новое
-			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity, Session);
+			if (Session == null)
+				return;
+			line.UpdateQuantity(oldQuantity, Session);
 			Doc.UpdateStat();
-		}
-
-		public IEnumerable<IResult> EnterLine()
-		{
-			return EditLine();
+			Save();
 		}
 
 		public void Post()
@@ -138,7 +128,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void Save()
 		{
-			Session.Save(Doc);
+			if (Doc.Id == 0)
+				Session.Save(Doc);
+			else
+				Session.Update(Doc);
 			Session.Flush();
 			Bus.SendMessage(nameof(InventoryDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
