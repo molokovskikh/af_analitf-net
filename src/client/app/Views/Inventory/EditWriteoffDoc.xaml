@@ -35,10 +35,8 @@
 			<Button Name="EditLine" Style="{StaticResource FilterElement}" ToolTip="Редактировать">Редактировать</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
-			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
-			<Button Name="Print" Style="{StaticResource FilterElement}" ToolTip="Печать документов (Ctrl+P)">Печать документов</Button>
-			<Button Name="PrintAct" Style="{StaticResource FilterElement}" ToolTip="Акт списания">Акт списания</Button>
-		</WrapPanel>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
+    </WrapPanel>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
 			<Grid.RowDefinitions>

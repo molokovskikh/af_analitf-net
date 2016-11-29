@@ -51,30 +51,30 @@
 			<TextBlock Text="{Binding Name}" />
 		</DataTemplate>
 
-		<Style x:Key="RootTabs" TargetType="TabControl">
-			<Setter Property="Background" Value="White" />
-			<Setter Property="ItemTemplate">
-				<Setter.Value>
-					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
-							<Button Focusable="False" cal:Message.Attach="CloseScreen($this)" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
-								<Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
+    <Style x:Key="RootTabs" TargetType="TabControl">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="ItemTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
+              <Button Focusable="False" cal:Message.Attach="CloseScreen($this)" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
+                <Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
 									StrokeThickness="1" StrokeEndLineCap="Round" StrokeStartLineCap="Round" />
-							</Button>
-						</StackPanel>
-					</DataTemplate>
-				</Setter.Value>
-			</Setter>
-			<Setter Property="ContentTemplate">
-				<Setter.Value>
-					<DataTemplate>
-						<ContentControl cal:View.Model="{TemplateBinding DataContext}" />
-					</DataTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-	</Window.Resources>
+              </Button>
+            </StackPanel>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="ContentTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <ContentControl cal:View.Model="{TemplateBinding DataContext}" />
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
 
 	<Grid Name="RootGrid">
 		<Grid.RowDefinitions>
@@ -201,8 +201,15 @@
 				<Image Source="/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
+      <xctk:SplitButton x:Name="PrintStock" ToolTip="Печать склад" Background="Transparent">
+        <Image Source="/assets/images/Printer 2_32.ico"
+						Style="{StaticResource ButtonImage}" />
+        <xctk:SplitButton.DropDownContent>
+          <ItemsControl ItemsSource ="{Binding Path=PrintStockMenuItems.Value}"/>
+        </xctk:SplitButton.DropDownContent>
+      </xctk:SplitButton>
 
-			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
+      <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге (F8)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Folder Green_32.ico"

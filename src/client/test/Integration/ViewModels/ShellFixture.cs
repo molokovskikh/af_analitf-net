@@ -475,6 +475,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(order.Send);
 		}
 
+		[Test]
+		public void Activate_stock_view()
+		{
+			shell.ShowInventory();
+			Assert.AreEqual(6, shell.PrintStockMenuItems.Value.Count);
+			shell.Checks();
+			Assert.AreEqual(3, shell.PrintStockMenuItems.Value.Count);
+		}
+
 		private void Collect(IEnumerable<IResult> results)
 		{
 			dialogs.AddRange(results.OfType<DialogResult>().Select(d => d.Model));

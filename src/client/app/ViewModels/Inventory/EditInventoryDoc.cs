@@ -13,10 +13,16 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
+using System.Collections.ObjectModel;
+using System.Printing;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditInventoryDoc : BaseScreen2
+	public class EditInventoryDoc : BaseScreen2, IPrintableStock
 	{
 		private string Name;
 
@@ -25,6 +31,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines = new ReactiveCollection<InventoryDocLine>();
 			Session.FlushMode = FlushMode.Never;
 			Name = User?.FullName ?? "";
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public EditInventoryDoc(InventoryDoc doc)
@@ -202,6 +211,63 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> PrintInventoryAct()
 		{
 			return Preview("Акт об излишках", new InventoryActDocument(Lines.ToArray()));
+		}
+
+		public void SetMenuItems()
+		{
+			PrintStockMenuItems.Clear();
+			var item = new MenuItem {Header = "Излишки"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Ярлыки"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Акт об излишках"};
+			PrintStockMenuItems.Add(item);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == "Излишки")
+						docs.Add(new InventoryDocument(Lines.ToArray()));
+					if ((string) item.Header == "Акт об излишках")
+						docs.Add(new InventoryActDocument(Lines.ToArray()));
+					if ((string) item.Header == "Ярлыки")
+						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ярлыки");
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Излишки")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Ярлыки")
+				PrintStockPriceTags().Execute(null);
+			if(LastOperation == "Акт об излишках")
+				Coroutine.BeginExecute(PrintInventoryAct().GetEnumerator());
+			return null;
+		}
+
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
+		{
+			var dialog = new PrintDialog();
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
+		}
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

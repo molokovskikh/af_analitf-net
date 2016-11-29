@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reflection;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -13,15 +16,19 @@ using NHibernate;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 using ReactiveUI;
+using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditWriteoffDoc : BaseScreen2
+	public class EditWriteoffDoc : BaseScreen2, IPrintableStock
 	{
 		private EditWriteoffDoc()
 		{
 			Lines = new ReactiveCollection<WriteoffLine>();
 			Session.FlushMode = FlushMode.Never;
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public EditWriteoffDoc(WriteoffDoc doc)
@@ -190,6 +197,45 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem {Header = "Списание"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Акт списания"};
+			PrintStockMenuItems.Add(item);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == "Списание")
+						docs.Add(new WriteoffDocument(Lines.ToArray()));
+					if ((string)item.Header == "Акт списания")
+						docs.Add(new WriteoffActDocument(Lines.ToArray()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Списание")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Акт списания")
+				Coroutine.BeginExecute(PrintAct().GetEnumerator());
+			return null;
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

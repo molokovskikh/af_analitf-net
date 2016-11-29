@@ -41,12 +41,6 @@
 			<controls:PopupSelector VerticalAlignment="Center" x:Name="StatusFilter"
 				ButtonContent="Статус"
 				Member="Name" />
-			<Button Name="PrintStockRackingMaps" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Постеллажная карта</Button>
-			<Button Name="PrintStock" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товарные запасы</Button>
-			<Button Name="PrintStockLimit" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности</Button>
-			<Button Name="PrintStockLimitMonth" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности менее 1 месяца</Button>
-			<Button Name="PrintStockPriceTags" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Ценники</Button>
-			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Список в Excel</Button>
 		</WrapPanel>
 		<controls:DataGrid2 x:Name="Items" Grid.Row="2">
 			<DataGrid.Columns>
