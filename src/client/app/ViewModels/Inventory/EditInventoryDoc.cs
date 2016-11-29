@@ -13,10 +13,16 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
+using System.Collections.ObjectModel;
+using System.Printing;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditInventoryDoc : BaseScreen2
+	public class EditInventoryDoc : BaseScreen2, IPrintableStock
 	{
 		private string Name;
 
@@ -25,6 +31,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines = new ReactiveCollection<InventoryDocLine>();
 			Session.FlushMode = FlushMode.Never;
 			Name = User?.FullName ?? "";
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public EditInventoryDoc(InventoryDoc doc)
@@ -48,7 +57,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<InventoryDocLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanAdd { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
-		public NotifyValue<bool> CanEditLine { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
 
@@ -72,7 +80,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
 			var editOrDelete = docStatus
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
-			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDelete);
 			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
 			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
@@ -81,17 +88,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
-			var search = new StockSearch();
-			yield return new DialogResult(search, resizable: true);
-			var edit = new EditStock(search.CurrentItem)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
-			var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
-			Lines.Add(line);
-			Doc.Lines.Add(line);
-			Doc.UpdateStat();
+			while (true) {
+				var search = new StockSearch();
+				yield return new DialogResult(search, resizable: true);
+				var edit = new EditStock(search.CurrentItem)
+				{
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
+				var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
+				Save();
+			}
 		}
 
 		public void Delete()
@@ -101,27 +111,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Save();
 		}
 
-		public IEnumerable<IResult> EditLine()
+		public void UpdateQuantity(InventoryDocLine line, decimal oldQuantity)
 		{
-			if (!CanEditLine)
-				yield break;
-			var stock = Env.Query(s => s.Get<Stock>(CurrentLine.Value.Stock.Id)).Result;
-			stock.Quantity = CurrentLine.Value.Quantity;
-			var edit = new EditStock(stock)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
-			// вернули старое кол-во, приняли новое
-			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity, Session);
+			if (Session == null)
+				return;
+			line.UpdateQuantity(oldQuantity, Session);
 			Doc.UpdateStat();
-		}
-
-		public IEnumerable<IResult> EnterLine()
-		{
-			return EditLine();
+			Save();
 		}
 
 		public void Post()
@@ -138,7 +137,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void Save()
 		{
-			Session.Save(Doc);
+			if (Doc.Id == 0)
+				Session.Save(Doc);
+			else
+				Session.Update(Doc);
 			Session.Flush();
 			Bus.SendMessage(nameof(InventoryDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
@@ -209,6 +211,63 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> PrintInventoryAct()
 		{
 			return Preview("Акт об излишках", new InventoryActDocument(Lines.ToArray()));
+		}
+
+		public void SetMenuItems()
+		{
+			PrintStockMenuItems.Clear();
+			var item = new MenuItem {Header = "Излишки"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Ярлыки"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Акт об излишках"};
+			PrintStockMenuItems.Add(item);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == "Излишки")
+						docs.Add(new InventoryDocument(Lines.ToArray()));
+					if ((string) item.Header == "Акт об излишках")
+						docs.Add(new InventoryActDocument(Lines.ToArray()));
+					if ((string) item.Header == "Ярлыки")
+						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ярлыки");
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Излишки")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Ярлыки")
+				PrintStockPriceTags().Execute(null);
+			if(LastOperation == "Акт об излишках")
+				Coroutine.BeginExecute(PrintInventoryAct().GetEnumerator());
+			return null;
+		}
+
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
+		{
+			var dialog = new PrintDialog();
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
+		}
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

@@ -67,7 +67,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 	    WaybillsTotal.First().TotalSum = Waybills.Value.Sum(s => s.Sum);
 	    WaybillsTotal.First().TotalRetailSum = Waybills.Value.Sum(s => s.RetailSum);
-    }
+			WaybillsTotal.First().TotalDisplayedSum = Waybills.Value.Sum(s => s.DisplayedSum);
+		}
 
 		public NotifyValue<IList<Selectable<Supplier>>> Suppliers { get; set; }
 
@@ -107,6 +108,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(AddressSelector.FilterChanged)
 				.Merge(TypeFilter.Changed())
 				.Merge(Suppliers.Where(x => x != null).Cast<object>())
+				.Merge(Bus.Listen<Waybill>())
 				.Throttle(TimeSpan.FromMilliseconds(50), Scheduler)
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}

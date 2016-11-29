@@ -68,7 +68,6 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				var items = Items.Where(s => Convert.ToDateTime(s.Period) >= Start && Convert.ToDateTime(s.Period) <= End).ToArray();
 				return Preview(title, new StockLimitMonthDocument(items, title, _name));
 			}
-
 			return Preview(title, new StockLimitMonthDocument(Items.ToArray(), title, _name));
 		}
 	}

@@ -14,14 +14,22 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using System.ComponentModel;
+using System.Printing;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.NHibernate;
+using Diadoc.Api.Proto.Documents;
 using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Stocks : BaseScreen2
+	public class Stocks : BaseScreen2, IPrintableStock
 	{
 		private string Name;
 
@@ -41,6 +49,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
 			TrackDb(typeof(Stock));
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -82,6 +93,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				}))
 				.Subscribe(Items, CloseCancellation.Token);
 		}
+
+
 
 		protected override void OnDeactivate(bool close)
 		{
@@ -183,7 +196,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IResult PrintStockRackingMaps()
 		{
 			var receivingOrders = Session.Query<Waybill>().ToList();
-
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Постеллажная карта",
@@ -243,5 +255,82 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Shell.Navigate(new DisplacementDocs());
 		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem {Header = "Ценники"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Товарные запасы"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Товары со сроком годности"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Товары со сроком годности менее 1 месяца"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Постеллажная карта"};
+			PrintStockMenuItems.Add(item);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == "Товарные запасы")
+						docs.Add(new StockDocument(Items.Value.ToArray()));
+					if ((string)item.Header == "Ценники")
+						PrintFixedDoc(new StockPriceTagDocument(Items.Value.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ценники");
+					if ((string)item.Header == "Товары со сроком годности") {
+						var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
+						var per = new DialogResult(new SelectStockPeriod(stocks, Name));
+						per.Execute(null);
+					}
+					if ((string)item.Header == "Товары со сроком годности менее 1 месяца")
+						docs.Add(new StockLimitMonthDocument(Items.Value.Where(s => s.Exp < DateTime.Today.AddMonths(1)).ToArray(),
+							"Товары со сроком годности менее 1 месяца", Name));
+					if ((string)item.Header == "Постеллажная карта") {
+						var receivingOrders = Session.Query<Waybill>().ToList();
+						PrintFixedDoc(new StockRackingMapDocument(receivingOrders, Items.Value.ToList()).Build().DocumentPaginator, "Постеллажная карта");
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(string.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
+				Coroutine.BeginExecute(PrintStock().GetEnumerator());
+			if(LastOperation == "Ценники")
+				PrintStockPriceTags().Execute(null);
+			if(LastOperation == "Товары со сроком годности")
+				Coroutine.BeginExecute(PrintStockLimit().GetEnumerator());
+			if(LastOperation == "Товары со сроком годности менее 1 месяца")
+				Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
+			if(LastOperation == "Постеллажная карта")
+				PrintStockRackingMaps().Execute(null);
+			return null;
+		}
+
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
+		{
+			var dialog = new PrintDialog();
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
+		}
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
+		}
+
 	}
 }

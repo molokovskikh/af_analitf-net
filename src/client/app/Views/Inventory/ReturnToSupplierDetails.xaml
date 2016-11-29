@@ -30,12 +30,7 @@
       <Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
 			<Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
-			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
-			<Button Name="Print" Style="{StaticResource FilterElement}" ToolTip="Печать документов (Ctrl+P)">Печать документов</Button>
-			<Button Name="PrintReturnLabel" Style="{StaticResource FilterElement}" ToolTip="">Возврат ярлык</Button>
-			<Button Name="PrintReturnInvoice" Style="{StaticResource FilterElement}" ToolTip="">Возврат счет-фактура</Button>
-			<Button Name="PrintReturnWaybill" Style="{StaticResource FilterElement}" ToolTip="">Возврат накладная ТОРГ-12</Button>
-			<Button Name="PrintReturnDivergenceAct" Style="{StaticResource FilterElement}" ToolTip="">Акт о расхождении ТОРГ-2</Button>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
     </WrapPanel>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">

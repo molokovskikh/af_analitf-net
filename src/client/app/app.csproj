@@ -429,6 +429,7 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
@@ -524,6 +525,9 @@
     <Compile Include="ViewModels\WaybillsViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\ReportSetting.xaml.cs">
+      <DependentUpon>ReportSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\RequirementNegotiationProtocol.xaml.cs">
       <DependentUpon>RequirementNegotiationProtocol.xaml</DependentUpon>
@@ -893,6 +897,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ReportSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

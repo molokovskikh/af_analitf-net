@@ -42,6 +42,19 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		}
 
 		[Test]
+		public void Update_scheam_fix_error_PriceTag()
+		{
+			session.CreateSQLQuery("delete from PriceTagItems;").ExecuteUpdate();
+			session.CreateSQLQuery("delete from PriceTags;").ExecuteUpdate();
+			session.CreateSQLQuery("insert into PriceTags () values ();").ExecuteUpdate();
+			session.CreateSQLQuery("insert into PriceTags () values ();").ExecuteUpdate(); // должен быть удалён
+			session.CreateSQLQuery("insert into PriceTagItems () values ();").ExecuteUpdate(); // должен быть привязан
+			check.UpgradeSchema();
+			var tag = session.Query<PriceTag>().Single();
+			Assert.AreEqual(tag.Items.Count, 1);
+		}
+
+		[Test]
 		public void Update_column_types()
 		{
 			session.CreateSQLQuery("alter table Settings change column ProxyPort ProxyPort int NOT NULL DEFAULT '0';")

@@ -15,10 +15,14 @@ using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
 using System.ComponentModel;
 using System.Reactive;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
+using System.Reflection;
+using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Checks : BaseScreen2
+	public class Checks : BaseScreen2, IPrintableStock
 	{
 		public Checks()
 		{
@@ -30,6 +34,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			AddressSelector = new AddressSelector(this);
 			DisplayName = "Чеки";
 			TrackDb(typeof(Check));
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -83,7 +90,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintReturnAct()
 		{
-			return Preview("Чеки", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
+			return Preview("Акт возврата", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -130,6 +137,46 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ExcelExporter.WriteRows(sheet, rows, row);
 
 			return ExcelExporter.Export(book);
+		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem {Header = "Чеки"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Акт возврата"};
+			PrintStockMenuItems.Add(item);
+
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == "Чеки")
+						docs.Add(new CheckDocument(Items.Value.ToArray()));
+					if ((string) item.Header == "Акт возврата")
+						docs.Add(new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
+				Coroutine.BeginExecute(PrintChecks().GetEnumerator());
+			if(LastOperation == "Акт возврата")
+				Coroutine.BeginExecute(PrintReturnAct().GetEnumerator());
+			return null;
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

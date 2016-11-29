@@ -16,9 +16,8 @@
 		</Grid.RowDefinitions>
 		<WrapPanel Style="{StaticResource FilterWrapPanel}" >
 			<Button Name="EnterItems" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Проверить позицию</Button>
-			<Button Name="DisplayItem" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Просмотр</Button>
-			<Button Name="PrintDefectStock" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать</Button>
-			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Excel</Button>
+      <Button Name="DisplayItem" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Просмотр</Button>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Excel</Button>
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>

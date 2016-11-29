@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,10 +16,15 @@ using NHibernate.Linq;
 using ReactiveUI;
 using AnalitF.Net.Client.Models.Print;
 using NPOI.HSSF.UserModel;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Printing;
+using System.Reflection;
+using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditReassessmentDoc : BaseScreen2
+	public class EditReassessmentDoc : BaseScreen2, IPrintableStock
 	{
 		private string Name;
 
@@ -27,6 +33,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines = new ReactiveCollection<ReassessmentLine>();
 			Session.FlushMode = FlushMode.Never;
 			Name = User?.FullName ?? "";
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public EditReassessmentDoc(ReassessmentDoc doc)
@@ -263,6 +272,62 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem {Header = "Переоценка"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Акт переоценки"};
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem {Header = "Ценники"};
+			PrintStockMenuItems.Add(item);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == "Переоценка")
+						docs.Add(new ReassessmentDocument(Lines.ToArray()));
+					if ((string) item.Header == "Акт переоценки")
+						docs.Add(new ReassessmentActDocument(Lines.ToArray()));
+					if ((string) item.Header == "Ценники")
+						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ценники");
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Переоценка")
+				Coroutine.BeginExecute(Print().GetEnumerator());
+			if(LastOperation == "Акт переоценки")
+				Coroutine.BeginExecute(PrintAct().GetEnumerator());
+			if(LastOperation == "Ценники")
+				PrintStockPriceTags().Execute(null);
+			return null;
+		}
+
+		private void PrintFixedDoc(DocumentPaginator doc, string name)
+		{
+			var dialog = new PrintDialog();
+			if (!string.IsNullOrEmpty(PrinterName)) {
+				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
+				dialog.PrintDocument(doc, name);
+			}
+			else if (dialog.ShowDialog() == true)
+				dialog.PrintDocument(doc, name);
+		}
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }

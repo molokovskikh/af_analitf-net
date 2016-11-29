@@ -14,6 +14,9 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
 using NHibernate.Mapping;
 using MySql.Data.MySqlClient;
 using Common.MySql;
@@ -21,7 +24,7 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class CheckDefectSeries : BaseScreen2
+	public class CheckDefectSeries : BaseScreen2, IPrintableStock
 	{
 		public NotifyValue<List<Stock>> Items { get; set; }
 		public NotifyValue<Stock> CurrentItem { get; set; }
@@ -39,6 +42,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			IsAll = new NotifyValue<bool>(true);
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3));
 			End = new NotifyValue<DateTime>(DateTime.Today);
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		protected override void OnInitialize()
@@ -170,6 +176,38 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			.ToList();
 
 			return result;
+		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem {Header = "Товарные запасы"};
+			PrintStockMenuItems.Add(item);
+		}
+
+		PrintResult IPrintableStock.PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == "Чеки")
+						docs.Add(new DefectStockDocument(Items.Value.ToArray()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
+				Coroutine.BeginExecute(PrintDefectStock().GetEnumerator());
+			return null;
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 	}
 }
