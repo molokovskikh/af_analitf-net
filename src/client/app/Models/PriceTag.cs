@@ -330,6 +330,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool RightBorder { get; set; }
 		public virtual bool BottomBorder { get; set; }
 		public virtual uint PriceTagId { get; set; }
+		public virtual bool IsAutoWidth { get; set; }
+		public virtual double? Width { get; set; }
+		public virtual bool IsAutoHeight { get; set; }
+		public virtual double? Height { get; set; }
 
 		public static PriceTagItem[] Items(TagType tagType)
 		{
@@ -375,6 +379,8 @@ namespace AnalitF.Net.Client.Models
 					FontStyle = src.Italic ? FontStyles.Italic : FontStyles.Normal,
 					TextDecorations = src.Underline ? TextDecorations.Underline : null,
 					Margin = new Thickness(src.LeftMargin, src.TopMargin, src.RightMargin, src.BottomMargin),
+					Height = src.IsAutoHeight ? double.NaN : CmToPx(src.Height ?? double.NaN),
+					Width = src.IsAutoWidth ? double.NaN : CmToPx(src.Width ?? double.NaN),
 				};
 				var dst = new Border {
 					BorderThickness = new Thickness(src.LeftBorder ? src.BorderThickness : 0,
