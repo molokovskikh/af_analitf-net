@@ -9,10 +9,14 @@ using Common.Tools.Calendar;
 using Dapper;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
+using System.Collections.Generic;
+using NHibernate.Util;
+using NPOI.HSSF.Util;
+using NPOI.SS.UserModel;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
-	public class DreamReportSettings
+	public class GoodsMovementReportSettings
 	{
 		public DateTime Begin { get; set; }
 		public DateTime End { get; set; }
@@ -31,18 +35,29 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public bool FilterByWriteTime { get; set; }
 
-		public DreamReportSettings()
+		public GoodsMovementReportSettings()
 		{
 			AddressIds = CatalogIds = SupplierIds = ProducerIds = new uint[] { };
 			AddressNames = CatalogNames = SupplierNames = ProducerNames = "все";
 		}
 	}
 
-	public class DreamReport : DbCommand<string>
+	public class GoodsMovementReport : DbCommand<string>
 	{
-		private DreamReportSettings _settings;
+		private GoodsMovementReportSettings _settings;
 
-		public DreamReport(DreamReportSettings settings)
+		public class GoodsMovementRow
+		{
+			public string Name { get; set; }
+			public DateTime WriteTime { get; set; }
+			public string ProviderDocumentId { get; set; }
+			public string UserSupplierName { get; set; }
+			public decimal Quantity { get; set; }
+			public decimal SupplierSum { get; set; }
+			public decimal RetailSum { get; set; }
+		}
+
+		public GoodsMovementReport(GoodsMovementReportSettings settings)
 		{
 			_settings = settings;
 		}
@@ -51,20 +66,20 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			var settings = Session.Query<Settings>().First();
 			var dir = settings.InitAndMap("Reports");
-			Result = Path.Combine(dir, FileHelper.StringToFileName($"Движение товара по накладным-{_settings.Begin:d}-{_settings.End:d}.csv"));
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Движение товара по накладным-{_settings.Begin:d}-{_settings.End:d}.xls"));
 
 			var field = "WriteTime";
 			if (_settings.FilterByWriteTime)
 				field = "DocumentDate";
 			var sql = $@"
 select CONCAT_WS(' ', l.Product, l.SerialNumber, d.InnR, l.Certificates) as Name,
-w.WriteTime, w.ProviderDocumentId, w.UserSupplierName, 
+w.WriteTime, w.ProviderDocumentId, w.UserSupplierName,
 SUM(l.Quantity) as Quantity, SUM(l.SupplierCost*l.Quantity) as SupplierSum, SUM(l.RetailCost*l.Quantity) as RetailSum
 from WaybillLines l
 join Waybills w on w.Id = l.WaybillId
 left join Drugs d on d.EAN = l.EAN13
-where DocType = 1 
-	and Status = 1 
+where DocType = 1
+	and Status = 1
 	and w.{field} > ?
 	and w.{field} < ?
 ";
@@ -76,47 +91,107 @@ where DocType = 1
 				sql += $" and w.SupplierId in ({_settings.SupplierIds.Implode()})";
 			if (_settings.ProducerIds.Any())
 				sql += $" and l.ProducerId in ({_settings.ProducerIds.Implode()})";
-			sql += @" group by Name, w.WriteTime, w.ProviderDocumentId, w.UserSupplierName 
+			sql += @" group by Name, w.WriteTime, w.ProviderDocumentId, w.UserSupplierName
 								order by Name asc, w.WriteTime asc;";
 
-			using (var stream = File.Create(Result))
-			using (var writer = new StreamWriter(stream, Encoding.GetEncoding(1251)))
+			var book = new HSSFWorkbook();
+
+			var headerStyle = book.CreateCellStyle();
+			headerStyle.Alignment = HorizontalAlignment.Center;
+
+			var groupStyle = book.CreateCellStyle();
+			groupStyle.FillForegroundColor = IndexedColors.Grey25Percent.Index;
+			groupStyle.FillPattern = FillPattern.SolidForeground;
+			groupStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+
+			var boldFont = book.CreateFont();
+			boldFont.Boldweight = (short)FontBoldWeight.Bold;
+			var totalStyle = book.CreateCellStyle();
+			totalStyle.Alignment = HorizontalAlignment.Right;
+			totalStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+			totalStyle.SetFont(boldFont);
+
+			var numericStyle = book.CreateCellStyle();
+			numericStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+
+			var sheet = book.CreateSheet("Движение товара по накладным");
+			var rowIndex = 0;
+
+			var headers = new[]
 			{
-				writer.WriteLine($"Движение товаров за период {_settings.Begin.ToShortDateString()} — {_settings.End.ToShortDateString()}");
-				writer.WriteLine($"По адресам: {_settings.AddressNames}");
-				writer.WriteLine($"По товарам: {_settings.CatalogNames}");
-				writer.WriteLine($"По поставщикам: {_settings.SupplierNames}");
-				writer.WriteLine($"По производителям: {_settings.ProducerNames}");
-				writer.WriteLine();
-				var _name = "";
+				$"Движение товаров за период {_settings.Begin.ToShortDateString()} — {_settings.End.ToShortDateString()}",
+				"По фирме: все",
+				$"По отделу: {_settings.AddressNames}",
+				$"По товару: {_settings.CatalogNames}",
+				$"По поставщику: {_settings.SupplierNames}",
+				$"По производителю: {_settings.ProducerNames}",
+				"",
+			};
+			foreach (var header in headers)
+				ExcelExporter.WriteRow(sheet, new object[] { header }, rowIndex++);
 
-				writer.WriteLine("Дата поступления;Номер накладной;Поставщик;Приход;Сумма опт;Сумма розница");
-				foreach (var row in StatelessSession.Connection.Query(sql, new { begin = _settings.Begin, end = _settings.End.AddDays(1) })) {
-					// пишем название товара только раз
-					var name = (string)row.Name;
-					if (name != _name) {
-						writer.WriteLine($"Товар: {name}");
-						_name = name;
-					}
+			var columns = new object[] {
+				"Товар / Документ движения / Серия / МНН / Номер сертификата",
+				"",
+				"Получатель / Поставщик",
+				"Приход, шт.",
+				"Сумма опт, руб.",
+				"Сумма розница, руб."
+			};
+			ExcelExporter.WriteRow(sheet, columns, rowIndex).Cells.ForEach(x => x.CellStyle = headerStyle);
+			MergeCells(sheet, rowIndex++);
 
-					var quantity = Convert.ToDecimal(row.Quantity);
-					var supplierSum = Convert.ToDecimal(row.SupplierSum);
-					var retailSum = Convert.ToDecimal(row.RetailSum);
+			var items = StatelessSession.Connection.Query<GoodsMovementRow>(sql, new { begin = _settings.Begin, end = _settings.End.AddDays(1) });
+			var groups = items.GroupBy(x => x.Name)
+				.Select(x => new object[]{ x.Key,
+					"",
+					"",
+					x.Sum(y => y.Quantity),
+					x.Sum(y => y.SupplierSum),
+					x.Sum(y => y.RetailSum)
+				}).ToList();
 
-					writer.Write(row.WriteTime);
-					writer.Write(";");
-					writer.Write((string)row.ProviderDocumentId);
-					writer.Write(";");
-					writer.Write((string)row.UserSupplierName);
-					writer.Write(";");
-					writer.Write(quantity.ToString("0.00", CultureInfo.InvariantCulture));
-					writer.Write(";");
-					writer.Write(supplierSum.ToString("0.00", CultureInfo.InvariantCulture));
-					writer.Write(";");
-					writer.Write(retailSum.ToString("0.00", CultureInfo.InvariantCulture));
-					writer.WriteLine();
-				}
+			foreach (var group in groups) {
+				ExcelExporter.WriteRow(sheet, group, rowIndex).Cells.ForEach(x => x.CellStyle = groupStyle);
+				MergeCells(sheet, rowIndex++);
+				var rows = items.Where(x => x.Name == (string)group[0]).Select((o, i) => new object[] {
+					o.WriteTime.ToString("dd.MM.yyyy HH:mm"),
+					$"Приходная накладная {o.ProviderDocumentId}",
+					o.UserSupplierName,
+					o.Quantity,
+					o.SupplierSum,
+					o.RetailSum,
+				});
+				foreach (var row in rows)
+					ExcelExporter.WriteRow(sheet, row, rowIndex++).Cells.ForEach(x => x.CellStyle = numericStyle);
 			}
+
+			if (items.Any()) {
+				WriteStatRow(sheet, rowIndex, items, "ВСЕГО").Cells.ForEach(x => x.CellStyle = totalStyle);
+				MergeCells(sheet, rowIndex++);
+			}
+
+			for (int columnIndex = 0; columnIndex < columns.Length; columnIndex++)
+				sheet.AutoSizeColumn(columnIndex, true);
+
+			using (var stream = File.Create(Result))
+				book.Write(stream);
+		}
+
+		private static void MergeCells(ISheet sheet, int rowIndex)
+		{
+			var cra = new NPOI.SS.Util.CellRangeAddress(rowIndex, rowIndex, 0, 1);
+			sheet.AddMergedRegion(cra);
+		}
+
+		private static IRow WriteStatRow(ISheet sheet, int rowIndex, IEnumerable<GoodsMovementRow> items, string label)
+		{
+			var row = sheet.CreateRow(rowIndex);
+			ExcelExporter.SetCellValue(row, 0, label);
+			ExcelExporter.SetCellValue(row, 3, items.Sum(x => x.Quantity));
+			ExcelExporter.SetCellValue(row, 4, items.Sum(x => x.SupplierSum));
+			ExcelExporter.SetCellValue(row, 5, items.Sum(x => x.RetailSum));
+			return row;
 		}
 	}
 

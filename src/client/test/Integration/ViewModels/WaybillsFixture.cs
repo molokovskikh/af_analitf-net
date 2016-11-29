@@ -153,7 +153,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Dream_report()
+		public void Goods_movement_report()
 		{
 			var fixture = Fixture<LocalWaybill>();
 			var w = session.Load<Waybill>(fixture.Waybill.Id);
@@ -162,19 +162,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			FileHelper.InitDir(settings.MapPath("Reports"));
 			model.CurrentWaybill.Value = model.Waybills.Value.First(x => x.Id == fixture.Waybill.Id);
-			var result = model.DreamReport().GetEnumerator();
+			var result = model.GoodsMovementReport().GetEnumerator();
 			result.MoveNext();
 			var dialog = (CatalogViewModel)((DialogResult)result.Current).Model;
 			result.MoveNext();
-			var dialog2 = (CreateDreamReport)((DialogResult)result.Current).Model;
+			var dialog2 = (CreateGoodsMovementReport)((DialogResult)result.Current).Model;
 			var task = Next<TaskResult>(result);
 			task.Task.Start();
 			task.Task.Wait();
 			var open = Next<OpenResult>(result);
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
 			Assert.That(open.Filename, Does.Contain("Движение товара по накладным"));
-			var text = File.ReadAllText(open.Filename);
-			Assert.That(text.Length, Is.GreaterThan(1));
 		}
 
 		[Test]

@@ -12,9 +12,9 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
-	public class CreateDreamReport : BaseScreen, ICancelable
+	public class CreateGoodsMovementReport : BaseScreen, ICancelable
 	{
-		public CreateDreamReport(DreamReportSettings settings)
+		public CreateGoodsMovementReport(GoodsMovementReportSettings settings)
 		{
 			InitFields();
 			DrSettings = settings;
@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		}
 
 		public bool WasCancelled { get; private set; }
-		public DreamReportSettings DrSettings { get; set; }
+		public GoodsMovementReportSettings DrSettings { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 		public NotifyValue<IList<Selectable<Address>>> Addresses2 { get; set; }

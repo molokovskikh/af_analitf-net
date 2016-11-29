@@ -442,7 +442,7 @@
     <Compile Include="ViewModels\Diadok\Sign.cs" />
     <Compile Include="ViewModels\Dialogs\EditDefectSeries.cs" />
     <Compile Include="ViewModels\Dialogs\EditStock.cs" />
-    <Compile Include="ViewModels\Dialogs\CreateDreamReport.cs" />
+    <Compile Include="ViewModels\Dialogs\CreateGoodsMovementReport.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
     <Compile Include="ViewModels\Dialogs\ScannerConfig.cs" />
@@ -570,8 +570,8 @@
       <DependentUpon>Sign.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\CanvasPanel.cs" />
-    <Compile Include="Views\Dialogs\CreateDreamReport.xaml.cs">
-      <DependentUpon>CreateDreamReport.xaml</DependentUpon>
+    <Compile Include="Views\Dialogs\CreateGoodsMovementReport.xaml.cs">
+      <DependentUpon>CreateGoodsMovementReport.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\CreateWaybill.xaml.cs">
       <DependentUpon>CreateWaybill.xaml</DependentUpon>
@@ -868,7 +868,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\CreateDreamReport.xaml">
+    <Page Include="Views\Dialogs\CreateGoodsMovementReport.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

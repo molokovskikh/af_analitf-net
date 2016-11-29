@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace AnalitF.Net.Client.Views.Dialogs
 {
 	/// <summary>
-	/// Interaction logic for CreateDreamReport.xaml
+	/// Interaction logic for CreateGoodsMovementReport.xaml
 	/// </summary>
-	public partial class CreateDreamReport : UserControl
+	public partial class CreateGoodsMovementReport : UserControl
 	{
-		public CreateDreamReport()
+		public CreateGoodsMovementReport()
 		{
 			InitializeComponent();
 		}

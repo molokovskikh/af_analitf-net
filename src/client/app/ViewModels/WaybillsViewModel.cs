@@ -276,23 +276,23 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 		}
 
-		public IEnumerable<IResult> DreamReport()
+		public IEnumerable<IResult> GoodsMovementReport()
 		{
 			// выбор товаров
 			var catalogList = new List<Catalog>();
 			yield return new DialogResult(new CatalogViewModel(catalogList), fullScreen: true);
 
 			// выбор остальных параметров
-			var settings = new DreamReportSettings() {
+			var settings = new GoodsMovementReportSettings() {
 				Begin = Begin.Value,
 				End = End.Value,
 				FilterByWriteTime = IsFilterByWriteTime.Value,
 				CatalogIds = catalogList.Select(x => x.Id).ToArray(),
 				CatalogNames = catalogList.Select(x => x.FullName).ToList().Implode()
 			};
-			yield return new DialogResult(new CreateDreamReport(settings));
+			yield return new DialogResult(new CreateGoodsMovementReport(settings));
 
-			var commnand = new DreamReport(settings);
+			var commnand = new GoodsMovementReport(settings);
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
 		}
