@@ -19,6 +19,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			Waybill = new Waybill(address, session.Query<Supplier>().First());
 			Waybill.Lines = Enumerable.Range(0, 10).Select(i => new WaybillLine(Waybill)).ToList();
+			Waybill.ProviderDocumentId = "н2";
 			var line = Waybill.Lines[0];
 			line.Quantity = 10;
 			line.Nds = 10;

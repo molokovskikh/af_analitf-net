@@ -11,6 +11,8 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
 using System.Reactive.Disposables;
+using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -148,6 +150,29 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var vendorId = text.Split(new [] { Environment.NewLine }, StringSplitOptions.None)[1].Split(';')[10];
 			//в тестовых данных VendorId == Id
 			Assert.AreEqual(vendorId, fixture.Waybill.Supplier.Id.ToString());
+		}
+
+		[Test]
+		public void Goods_movement_report()
+		{
+			var fixture = Fixture<LocalWaybill>();
+			var w = session.Load<Waybill>(fixture.Waybill.Id);
+			w.Status = DocStatus.Posted;
+			session.Update(w);
+			session.Flush();
+			FileHelper.InitDir(settings.MapPath("Reports"));
+			model.CurrentWaybill.Value = model.Waybills.Value.First(x => x.Id == fixture.Waybill.Id);
+			var result = model.GoodsMovementReport().GetEnumerator();
+			result.MoveNext();
+			var dialog = (CatalogViewModel)((DialogResult)result.Current).Model;
+			result.MoveNext();
+			var dialog2 = (CreateGoodsMovementReport)((DialogResult)result.Current).Model;
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Does.Contain("Движение товара по накладным"));
 		}
 
 		[Test]
