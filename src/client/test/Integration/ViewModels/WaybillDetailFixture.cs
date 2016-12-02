@@ -164,6 +164,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Consumption_report()
 		{
+			var stock = new Stock(waybill, waybill.Lines[10]);
+			session.Save(stock);
+
+			var check = new Check();
+			check.Status = Status.Closed;
+			session.Save(check);
+
+			var checkLine = new CheckLine(stock, 1, CheckType.SaleBuyer);
+			checkLine.CheckId = check.Id;
+			session.Save(checkLine);
+			session.Flush();
+
 			var result = model.ConsumptionReport().GetEnumerator();
 			var task = Next<TaskResult>(result);
 			task.Task.Start();

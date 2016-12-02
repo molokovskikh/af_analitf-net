@@ -202,7 +202,8 @@ where DocType = 1
 		{
 			public string Name { get; set; }
 			public decimal Quantity { get; set; }
-			public string DocumentId { get; set; }
+			public string DocType { get; set; }
+			public uint DocumentId { get; set; }
 			public DateTime Date { get; set; }
 			public decimal Quantity2 { get; set; }
 		}
@@ -277,41 +278,41 @@ where DocType = 1
 drop temporary table if exists consumption_report;
 create temporary table consumption_report engine=memory
 select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
-CONCAT('Списание №', d.Id) as DocumentId, d.Date, l.Quantity as Quantity2
+'Списание' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
 from writeofflines l
 join writeoffdocs d on d.Id = l.WriteoffDocId
 join waybilllines wl on wl.Id = l.WaybillLineId
 where d.`Status` = 1 and wl.WaybillId = ?
 union all
 select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
-CONCAT('Возврат поставщику №', d.Id) as DocumentId, d.Date, l.Quantity as Quantity2
+'Возврат поставщику' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
 from returntosupplierlines l
 join returntosuppliers d on d.Id = l.ReturnToSupplierId
 join waybilllines wl on wl.Id = l.WaybillLineId
 where d.`Status` = 1 and wl.WaybillId = ?
 union all
 select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
-CONCAT('Внутреннее перемещение №', d.Id) as DocumentId, d.Date, l.Quantity as Quantity2
+'Внутреннее перемещение' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
 from displacementlines l
 join displacementdocs d on d.Id = l.DisplacementDocId
 join waybilllines wl on wl.Id = l.WaybillLineId
-where d.`Status` = 1 and wl.WaybillId = ?
+where (d.`Status` = 1 or d.`Status` = 2) and wl.WaybillId = ?
 union all
 select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
-CONCAT('Чек №', d.Id) as DocumentId, d.Date, l.Quantity as Quantity2
+'Чек' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
 from checklines l
 join checks d on d.Id = l.CheckId
 join waybilllines wl on wl.Id = l.WaybillLineId
-where d.`Status` = 1 and d.CheckType = 0 and wl.WaybillId = ?
+where d.`Status` = 0 and d.CheckType = 0 and wl.WaybillId = ?
 ;";
 
 			StatelessSession.Connection.Execute(sql, new { a = _waybill.Id, b = _waybill.Id, c = _waybill.Id, d = _waybill.Id });
 
 			sql = $@"
 select CONCAT(Product, '\n', Producer) as Name, SUM(Quantity) as Quantity,
-DocumentId, Date, SUM(Quantity2) as Quantity2
+DocType, DocumentId, Date, SUM(Quantity2) as Quantity2
 from consumption_report
-group by Product, Producer, SerialNumber, DocumentId, Date
+group by Product, Producer, SerialNumber, DocType, DocumentId, Date
 order by Name asc, Date desc
 ;";
 			var items = StatelessSession.Connection.Query<ConsumptionDocumentRow>(sql);
@@ -327,7 +328,7 @@ order by Name asc, Date desc
 			var rows = items.Select(x => new object[]{
 							x.Name,
 							x.Quantity,
-							x.DocumentId,
+							$"{x.DocType} №{x.DocumentId}",
 							x.Date.ToString("dd.MM.yyyy"),
 							x.Quantity2
 						}).ToList();
