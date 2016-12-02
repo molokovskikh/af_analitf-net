@@ -252,5 +252,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf(typeof (OpenResult), result);
 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
+
+		[Test]
+		public void Mark_as_read()
+		{
+			var id = model.Waybill.Id;
+			model.Waybill.IsNew = true;
+			model.Session.Flush();
+			Assert.IsTrue(model.Waybill.IsNew);
+			Close(model);
+			model = Open(new WaybillDetails(id));
+			Assert.IsTrue(!model.Waybill.IsNew);
+		}
 	}
 }
