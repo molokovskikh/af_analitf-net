@@ -14,6 +14,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
+using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -158,6 +159,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
 			var preview = Next<DialogResult>(results);
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Consumption_report()
+		{
+			var result = model.ConsumptionReport().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Does.Contain("Расход по документу"));
 		}
 
 		[Test]
