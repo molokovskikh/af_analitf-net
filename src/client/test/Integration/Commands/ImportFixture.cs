@@ -17,20 +17,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Import_future_data()
 		{
-			var waybill = CollectionExtention.FirstOrDefault(session.Query<Waybill>(), null);
-			if (waybill == null)
-			{
-				Fixture(new LocalWaybill());
-				waybill = session.Query<Waybill>().First();
-			}
-			if (!waybill.IsNew)
-			{
-				waybill.IsNew = true;
-				session.Flush();
-			}
-			var waybillId = waybill.Id;
-			Assert.IsTrue(waybill.IsNew);
-
 			restore = true;
 			var data = new List<Tuple<string, string[]>> {
 				Tuple.Create(TempFile("Users.txt", "5\ttest\t"), new[] { "Id", "NonExistsColumn" })
@@ -39,9 +25,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				Strict = false
 			});
 			cmd.Execute();
-
-			waybill = session.Query<Waybill>().First(r => r.Id == waybillId);
-			Assert.IsTrue(waybill.IsNew);
 		}
 	}
 }
