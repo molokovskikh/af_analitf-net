@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var doc = new RegistryDocument(waybill, waybillLines);
 			var flowDoc = doc.Build();
 
-			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().First()
+			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().Skip(1).First()
 					.RowGroups.Select(x => x.Rows).ToList()
 					.First().Select(x => x.Cells).ToList();
 
