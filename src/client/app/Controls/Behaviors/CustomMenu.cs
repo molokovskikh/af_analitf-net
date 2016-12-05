@@ -58,7 +58,8 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			context.Session.Flush();
 
 			grid.Items.Refresh();
-			context.Shell.NewDocsCount.Value = context.Session.Query<Waybill>().Count(r => r.IsNew);
+			var session = context.Session.SessionFactory.OpenStatelessSession();
+			context.Shell.NewDocsCount.Value = session.Query<Waybill>().Count(r => r.IsNew);
 		}
 	}
 }
