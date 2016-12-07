@@ -149,6 +149,7 @@
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Integration\ViewModels\FrontendFixture.cs" />
+    <Compile Include="Integration\ViewModels\UnpackingDocsFixture.cs" />
     <Compile Include="Integration\ViewModels\InventoryDocsFixture.cs" />
     <Compile Include="Integration\ViewModels\DisplacementFixture.cs" />
     <Compile Include="Integration\ViewModels\ReturnToSupplierViewFixture.cs" />
@@ -384,14 +385,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-	<ItemGroup>
-		<ShareFiles Include="..\..\..\lib\libmysqld\**\*.*"/>
-	</ItemGroup>
-
-	<Target Name="BeforeBuild">
-		<Copy SkipUnchangedFiles="True"
-			SourceFiles="@(ShareFiles)"
-			DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
-		/>
-	</Target>
+  <ItemGroup>
+    <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
+  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

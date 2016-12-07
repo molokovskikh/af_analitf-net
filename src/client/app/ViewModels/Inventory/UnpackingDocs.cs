@@ -1,43 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
-using NHibernate;
-using Caliburn.Micro;
-using NPOI.HSSF.UserModel;
 using ReactiveUI;
-using AnalitF.Net.Client.Models.Print;
-using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.ViewModels.Dialogs;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class InventoryDocs : BaseScreen2
+	public class UnpackingDocs : BaseScreen2
 	{
-		private ReactiveCollection<InventoryDoc> items;
+		private ReactiveCollection<UnpackingDoc> items;
 		private string Name;
 
-		public InventoryDocs()
+		public UnpackingDocs()
 		{
-			Items = new ReactiveCollection<InventoryDoc>();
+			Items = new ReactiveCollection<UnpackingDoc>();
 			IsAll = new NotifyValue<bool>(true);
 			Begin.Value = DateTime.Today.AddDays(-30);
 			End.Value = DateTime.Today;
 			CurrentItem.Subscribe(x => {
 				CanOpen.Value = x != null;
-				CanPrint.Value = x != null;
-				CanPrintStockPriceTags.Value = x != null;
 				CanDelete.Value = x?.Status == DocStatus.NotPosted;
 				CanPost.Value = x?.Status == DocStatus.NotPosted;
 				CanUnPost.Value = x?.Status == DocStatus.Posted;
 			});
-			DisplayName = "Излишки";
+			DisplayName = "Распаковка";
 			TrackDb(typeof(InventoryDoc));
 			Name = User?.FullName ?? "";
 		}
@@ -45,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 		[Export]
-		public ReactiveCollection<InventoryDoc> Items
+		public ReactiveCollection<UnpackingDoc> Items
 		{
 			get { return items; }
 			set
@@ -54,13 +44,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				NotifyOfPropertyChange(nameof(Items));
 			}
 		}
-		public NotifyValue<InventoryDoc> CurrentItem { get; set; }
+		public NotifyValue<UnpackingDoc> CurrentItem { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanOpen { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
-		public NotifyValue<bool> CanPrint { get; set; }
-		public NotifyValue<bool> CanPrintStockPriceTags { get; set; }
 		public NotifyValue<bool> IsAll { get; set; }
 		public NotifyValue<bool> IsNotPosted { get; set; }
 		public NotifyValue<bool> IsPosted { get; set; }
@@ -78,8 +66,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public override void Update()
 		{
+			// сделать через RxQuery
 			Session.Clear();
-			var query = Session.Query<InventoryDoc>()
+			var query = Session.Query<UnpackingDoc>()
 				.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
 
 			if (IsNotPosted)
@@ -91,7 +80,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.OrderByDescending(x => x.Date)
 				.ToList();
 
-			Items = new ReactiveCollection<InventoryDoc>(items)
+			Items = new ReactiveCollection<UnpackingDoc>(items)
 			{
 				ChangeTrackingEnabled = true
 			};
@@ -99,14 +88,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Create()
 		{
-			Shell.Navigate(new EditInventoryDoc(new InventoryDoc(Address)));
+			Shell.Navigate(new EditUnpackingDoc(new UnpackingDoc(Address)));
 		}
 
 		public void Open()
 		{
 			if (!CanOpen)
 				return;
-			Shell.Navigate(new EditInventoryDoc(CurrentItem.Value.Id));
+			Shell.Navigate(new EditUnpackingDoc(CurrentItem.Value.Id));
 		}
 
 		public async Task Delete()
@@ -115,7 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
-			CurrentItem.Value.BeforeDelete(Session);
+			CurrentItem.Value.BeforeDelete();
 			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}
@@ -124,7 +113,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			Session.Load<InventoryDoc>(CurrentItem.Value.Id).Post();
+			Session.Load<UnpackingDoc>(CurrentItem.Value.Id).Post();
 			CurrentItem.Refresh();
 			Update();
 		}
@@ -133,7 +122,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			Session.Load<InventoryDoc>(CurrentItem.Value.Id).UnPost();
+			Session.Load<UnpackingDoc>(CurrentItem.Value.Id).UnPost();
 			CurrentItem.Refresh();
 			Update();
 		}
@@ -141,63 +130,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void EnterItem()
 		{
 			Open();
-		}
-
-		public IResult ExportExcel()
-		{
-			var columns = new[] {"Номер",
-				"Дата",
-				"Адрес",
-				"Сумма розничная",
-				"Число позиций",
-				"Время закрытия",
-				"Статус",
-				"Комментарий",
-			};
-
-			var book = new HSSFWorkbook();
-			var sheet = book.CreateSheet("Экспорт");
-			var row = 0;
-
-			ExcelExporter.WriteRow(sheet, columns, row++);
-
-			var rows = Items.Select((o, i) => new object[] {
-				o.Id,
-				o.Date,
-				o.Address.Name,
-				o.RetailSum,
-				o.LinesCount,
-				o.CloseDate,
-				o.StatusName,
-				o.Comment,
-			});
-
-			ExcelExporter.WriteRows(sheet, rows, row);
-			return ExcelExporter.Export(book);
-		}
-
-		public IEnumerable<IResult> Print()
-		{
-			return Preview("Излишки", new InventoryDocument(CurrentItem.Value.Lines.ToArray()));
-		}
-
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
-		public IResult PrintStockPriceTags()
-		{
-			return new DialogResult(new PrintPreviewViewModel
-			{
-				DisplayName = "Ярлыки",
-				Document = new StockPriceTagDocument(CurrentItem.Value.Lines.Cast<BaseStock>().ToList(), Name).Build()
-			}, fullScreen: true);
 		}
 	}
 }

@@ -30,6 +30,7 @@
 				<MenuItem Header="Списание" Name="WriteoffDocs" />
 				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
 				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
+				<MenuItem Header="Распаковка" Name="UnpackingDocs" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
