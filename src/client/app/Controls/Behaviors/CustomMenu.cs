@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
+using System.Windows.Threading;
 
 namespace AnalitF.Net.Client.Controls.Behaviors
 {
@@ -38,7 +39,13 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		private void MarkAsReadOrUnread(DataGrid grid, bool read)
 		{
+			Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => UpdateWaybills(grid, !read)));
+		}
+
+		private void UpdateWaybills(DataGrid grid, bool newState)
+		{
 			var context = grid.DataContext as BaseScreen;
+			var statelessSession = context.Session.SessionFactory.OpenStatelessSession();
 			var waybills = new List<Waybill>();
 			foreach (var wb in grid.SelectedItems)
 			{
@@ -52,10 +59,10 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 			foreach (var waybill in waybills)
 			{
-				waybill.IsNew = !read;
-				context.Session.SaveOrUpdate(waybill);
+				waybill.IsNew = newState;
+				statelessSession.Update(waybill);
 			}
-			context.Session.Flush();
+			statelessSession.Close();
 
 			grid.Items.Refresh();
 			context.Env.RxQuery(x => x.Query<Waybill>().Count(r => r.IsNew)).Subscribe(context.Shell.NewDocsCount);
