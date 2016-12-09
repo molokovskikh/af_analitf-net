@@ -151,9 +151,11 @@ namespace AnalitF.Net.Client.Models.Commands
 				markups
 					.Where(c => c.MaxMarkup < c.Markup)
 					.Each(c => c.MaxMarkup = c.Markup);
-				foreach (var markup in markups) {
-					if (markup.End == 10000) {
-						markup.End = 1000000;
+				var groups = markups.GroupBy(x => new { x.Address, x.Type });
+				foreach (var group in groups) {
+					var last = group.OrderBy(x => x.End).Last();
+					if (last.End == 10000) {
+						last.End = 1000000;
 					}
 				}
 				transaction.Commit();
