@@ -448,6 +448,7 @@
     <Compile Include="ViewModels\Dialogs\ScannerConfig.cs" />
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
+    <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
@@ -599,6 +600,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
       <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\RegistryDocSettings.xaml.cs">
+      <DependentUpon>RegistryDocSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
@@ -921,6 +925,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PriceTagConstructorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RegistryDocSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

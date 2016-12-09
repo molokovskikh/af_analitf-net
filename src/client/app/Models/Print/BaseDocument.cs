@@ -22,6 +22,8 @@ namespace AnalitF.Net.Client.Models.Print
 		public int ColSpan;
 		public string Name;
 		public int Width;
+		public Style HeaderStyle;
+		public Style CellStyle;
 	}
 
 	public class DocumentTemplate
@@ -277,11 +279,11 @@ namespace AnalitF.Net.Client.Models.Print
 			tableRowGroup.Rows.Add(row);
 
 			for (var i = 0; i < data.Length; i++) {
-				row.Cells.Add(Cell(data[i]));
+				row.Cells.Add(Cell(data[i], style: headers[i].CellStyle));
 			}
 		}
 
-		protected TableCell Cell(object value, int colspan = 0)
+		protected TableCell Cell(object value, int colspan = 0, Style style = null)
 		{
 			var text = "";
 			if (value != null)
@@ -291,7 +293,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var cell = new TableCell(new Paragraph(new Run(text)) {
 				KeepTogether = true,
 			});
-			cell.Style = CellStyle;
+			cell.Style = style ?? CellStyle;
 			if (colspan > 0)
 				cell.ColumnSpan = colspan;
 			if (Util.IsNumeric(value)) {
@@ -332,7 +334,7 @@ namespace AnalitF.Net.Client.Models.Print
 				lastgroup = group;
 				var name = lastgroup != null ? lastgroup.Name : column.Name;
 				var tableCell = new TableCell(new Paragraph(new Run(name))) {
-					Style = TableHeaderStyle,
+					Style = column.HeaderStyle ?? TableHeaderStyle,
 				};
 				if (group != null) {
 					tableCell.ColumnSpan = group.Last - group.First + 1;

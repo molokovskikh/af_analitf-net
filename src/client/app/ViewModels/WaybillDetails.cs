@@ -211,7 +211,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> PrintRegistry()
 		{
 			var doc = new RegistryDocument(Waybill, PrintableLines());
-			return Preview("Реестр", doc);
+			var docSettings = doc.Settings;
+			yield return new DialogResult(new RegistryDocSettings((RegistryDocumentSettings)docSettings));
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Реестр", doc)), fullScreen: true);
 		}
 
 		public IEnumerable<IResult> PrintWaybill()

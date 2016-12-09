@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var doc = new RegistryDocument(waybill, waybillLines);
 			var flowDoc = doc.Build();
 
-			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().First()
+			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().Skip(1).First()
 					.RowGroups.Select(x => x.Rows).ToList()
 					.First().Select(x => x.Cells).ToList();
 
@@ -198,8 +198,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var results = model.PrintRegistry().GetEnumerator();
 			var dialog = Next<DialogResult>(results);
-			var settings = (SimpleSettings) dialog.Model;
-			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var settings = (RegistryDocSettings) dialog.Model;
+			Assert.IsNotNull(settings);
 			var preview = Next<DialogResult>(results);
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
@@ -241,12 +241,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Persis_registry_config()
+		public void Persist_registry_config()
 		{
 			var results = model.PrintRegistry().GetEnumerator();
 			Assert.IsTrue(results.MoveNext());
-			var target = (RegistryDocumentSettings) ((SimpleSettings) ((DialogResult) results.Current).Model).Target;
+			var target = (RegistryDocSettings) ((DialogResult) results.Current).Model;
 			target.CommitteeMember1 = "Член комитета №1";
+			target.OK();
 			Assert.IsTrue(results.MoveNext());
 			Assert.IsNotNull(results.Current);
 			Close(model);
@@ -254,7 +255,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model = Open(new WaybillDetails(waybill.Id));
 			results = model.PrintRegistry().GetEnumerator();
 			Assert.IsTrue(results.MoveNext());
-			target = (RegistryDocumentSettings) ((SimpleSettings) ((DialogResult) results.Current).Model).Target;
+			target = (RegistryDocSettings) ((DialogResult) results.Current).Model;
 			Assert.AreEqual("Член комитета №1", target.CommitteeMember1);
 		}
 
