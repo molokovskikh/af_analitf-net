@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var rowGroup = table.RowGroups[0];
 			var index = 0;
 			foreach (var row in rows) {
-				BuildRow(rowGroup, row);
+				BuildRow(rowGroup, headers, row);
 
 				var line = Lines[index];
 				if (!String.IsNullOrEmpty(line.Comment)) {

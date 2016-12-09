@@ -269,17 +269,17 @@ namespace AnalitF.Net.Client.Models.Print
 			var tableRowGroup = table.RowGroups[0];
 
 			foreach (var data in rows) {
-				BuildRow(tableRowGroup, data);
+				BuildRow(tableRowGroup, headers, data);
 			}
 		}
 
-		protected void BuildRow(TableRowGroup tableRowGroup, object[] data)
+		protected void BuildRow(TableRowGroup tableRowGroup, PrintColumn[] headers, object[] data)
 		{
 			var row = new TableRow();
 			tableRowGroup.Rows.Add(row);
 
 			for (var i = 0; i < data.Length; i++) {
-				row.Cells.Add(Cell(data[i], style: headers[i].CellStyle));
+				row.Cells.Add(Cell(data[i], style: headers?[i].CellStyle));
 			}
 		}
 
