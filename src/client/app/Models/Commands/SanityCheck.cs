@@ -154,7 +154,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var groups = markups.GroupBy(x => new { x.Address, x.Type });
 				foreach (var group in groups) {
 					var last = group.OrderBy(x => x.End).Last();
-					if (last.End == 10000) {
+					if (last.End < 1000000) {
 						last.End = 1000000;
 					}
 				}
