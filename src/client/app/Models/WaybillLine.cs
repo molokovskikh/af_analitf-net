@@ -165,8 +165,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? RetailMarkupInRubles
 		{
 				get {
-						if(RetailCost != null && SupplierCost != null)
-						return RetailCost - SupplierCost;
+						if(RetailCost.HasValue && SupplierCost.HasValue)
+							return RetailCost - SupplierCost;
 						return null;
 				}
 		}
@@ -193,7 +193,7 @@ namespace AnalitF.Net.Client.Models
 			get
 			{
 				if (RetailCost.HasValue && Nds.HasValue)
-					return RetailCost.Value*100/(100 + Nds.Value);
+					return Math.Round(RetailCost.Value*100/(100 + Nds.Value), 2);
 				return null;
 			}
 		}

@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			this.waybill = waybill;
 			this.settings = waybill.WaybillSettings;
-			this.lines = lines;
+			this.lines = lines.Where(x => x.ActualVitallyImportant).ToList();
 			docSettings = waybill.GetWaybillProtocolDocSettings();
 			Settings = docSettings;
 
@@ -70,6 +70,12 @@ namespace AnalitF.Net.Client.Models.Print
 					new Setter(Control.FontSizeProperty, 10d),
 				}
 			};
+			CellStyle = new Style(typeof(TableCell), CellStyle)
+			{
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+				}
+			};
 		}
 
 		protected override void BuildDoc()
@@ -83,8 +89,7 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 
 			var h1 = Header($"ПРОТОКОЛ\nсогласования цен поставки лекарственных препаратов,\nвключенных в перечень жизненно необходимых и важнейших лекарственных препаратов\nпо документу {docSettings.ProviderDocumentId} от {docSettings.DocumentDate:d}");
-			var h2 = Header($"({waybill.ProviderDocumentId} от {waybill.DocumentDate:d})");
-			h1.TextAlignment = h2.TextAlignment = TextAlignment.Center;
+			h1.TextAlignment = TextAlignment.Center;
 			((Run)h1.Inlines.FirstInline).FontWeight = FontWeights.Bold;
 
 			var sh1 = new BlockUIContainer(StrokeBlock(waybill.SupplierName, "поставщик"));
@@ -93,22 +98,22 @@ namespace AnalitF.Net.Client.Models.Print
 			doc.Blocks.Add(sh2);
 
 			var columns = new[] {
-				new PrintColumn("Торговое наименование, лекарственная форма, дозировка, количество в потребительской упаковке", 270),
+				new PrintColumn("Торговое наименование, лекарственная форма, дозировка, количество в потребительской упаковке", 170),
 				new PrintColumn("Серия", 60),
-				new PrintColumn("Производитель", 110),
+				new PrintColumn("Производитель", 102),
 				new PrintColumn("Зарегистрированная предельная отпускная цена, установленная производителем (рублей)", 60),
 				new PrintColumn("Фактическая отпускная цена, установленная производителем, без НДС (рублей)", 60),
 				new PrintColumn("проц.", 33),
 				new PrintColumn("руб.", 33),
 				new PrintColumn("Фактическая отпускная цена, установленная организацией оптовой торговли, без НДС (рублей)", 60),
-				new PrintColumn("проц.", 33),
-				new PrintColumn("руб.", 33),
+				new PrintColumn("проц.", 60),
+				new PrintColumn("руб.", 60),
 				new PrintColumn("Фактическая отпускная цена, установленная организацией оптовой торговли, без НДС (рублей)", 60),
 				new PrintColumn("проц.", 33),
 				new PrintColumn("руб.", 33),
 
-				new PrintColumn("проц.", 33),
-				new PrintColumn("руб.", 33),
+				new PrintColumn("проц.", 60),
+				new PrintColumn("руб.", 60),
 				new PrintColumn("Фактическая отпускная цена, установленная организацией розничной торговли, без НДС (рублей)", 60),
 			};
 			var columnGrops = new[] {
@@ -121,19 +126,19 @@ namespace AnalitF.Net.Client.Models.Print
 				l.Product,
 				l.SerialNumber,
 				l.Producer,
-				l.RegistryCost,
-				l.ProducerCost,
+				l.RegistryCost.HasValue ? l.RegistryCost.Value.ToString("0.00") : "",
+				l.ProducerCost.HasValue ? l.ProducerCost.Value.ToString("0.00") : "",
 				"",
 				"",
 				"",
-				l.SupplierPriceMarkup.HasValue ? l.SupplierPriceMarkup.Value.ToString("0.00") : "",
-				l.SupplierPriceMarkup.HasValue && l.SupplierCostWithoutNds.HasValue ? (l.SupplierPriceMarkup.Value * l.SupplierCostWithoutNds.Value / 100).ToString("0.00") : "",
-				l.SupplierCostWithoutNds,
+				GetSupplierPriceMarkup(l),
+				GetSupplierPriceMarkupInRubles(l),
+				l.SupplierCostWithoutNds.HasValue ? l.SupplierCostWithoutNds.Value.ToString("0.00") : "",
 				"",
 				"",
 				l.RetailMarkup.HasValue ? l.RetailMarkup.Value.ToString("0.00") : "",
-				l.RetailMarkupInRubles.HasValue ? l.RetailMarkupInRubles.Value.ToString("0.00") : "",
-				l.RetailCostWithoutNds.HasValue ? l.RetailCostWithoutNds.Value.ToString("0.00") : "",
+				GetRetailMarkupInRubles(l),
+				GetRetailCost(l),
 			});
 
 			var table = BuildTableHeader(columns, columnGrops);
@@ -148,6 +153,46 @@ namespace AnalitF.Net.Client.Models.Print
 			BuildRows(rows, columns, table);
 			doc.Blocks.Add(table);
 			doc.Blocks.Add(new BlockUIContainer(Caption()));
+		}
+
+		private string GetSupplierPriceMarkupInRubles(WaybillLine line)
+		{
+			if (!line.ProducerCost.HasValue || !line.SupplierCostWithoutNds.HasValue)
+				return "";
+			var result = line.SupplierCostWithoutNds - line.ProducerCost;
+			// при реализации ниже уровня приобретения ставится прочерк
+			if (result < 0)
+				return "–";
+			return result.Value.ToString("0.00");
+		}
+
+		private string GetSupplierPriceMarkup(WaybillLine line)
+		{
+			if (!line.SupplierPriceMarkup.HasValue)
+				return "";
+			// при реализации ниже уровня приобретения ставится прочерк
+			if (line.SupplierPriceMarkup.Value < 0)
+				return "–";
+			return line.SupplierPriceMarkup.Value.ToString("0.00");
+		}
+
+		private string GetRetailCost(WaybillLine line)
+		{
+			// неплательщик НДС указывает фактическую отпускную цену
+			if (waybill.WaybillSettings.Taxation == Taxation.Envd && line.RetailCost.HasValue)
+				return line.RetailCost.Value.ToString("0.00");
+			if (waybill.WaybillSettings.Taxation == Taxation.Nds && line.RetailCostWithoutNds.HasValue)
+				return line.RetailCostWithoutNds.Value.ToString("0.00");
+			return "";
+		}
+
+		private string GetRetailMarkupInRubles(WaybillLine line)
+		{
+			if (waybill.WaybillSettings.Taxation == Taxation.Envd && line.RetailCost.HasValue && line.SupplierCost.HasValue)
+				return (line.RetailCost - line.SupplierCost).Value.ToString("0.00");
+			if (waybill.WaybillSettings.Taxation == Taxation.Nds && line.RetailCostWithoutNds.HasValue && line.SupplierCostWithoutNds.HasValue)
+				return (line.RetailCostWithoutNds - line.SupplierCostWithoutNds).Value.ToString("0.00");
+			return "";
 		}
 
 		private Grid Caption()
