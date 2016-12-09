@@ -425,6 +425,8 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string CheckPrinter { get; set; }
+
 		public virtual IWebProxy GetProxy()
 		{
 			if (!UseProxy)

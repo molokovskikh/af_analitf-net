@@ -204,17 +204,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield break;
 			}
 			var message = "Возврат по чеку";
+			decimal charge = 0;
+			decimal payment = 0;
 			if (checkType == CheckType.SaleBuyer)
 			{
 				var checkout = new Checkout(Sum.Value.Value);
 				yield return new DialogResult(checkout);
 				Change.Value = checkout.Change.Value;
+				charge = checkout.Change.Value.GetValueOrDefault();
+				payment = checkout.Amount.Value.GetValueOrDefault();
 				message = "Оплата наличными";
 			}
 
+			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
+				var check = new Check(Address, Lines, checkType);
+				check.Payment = payment;
+				check.Charge = charge;
 				using (var trx = s.BeginTransaction()) {
-					var check = new Check(Address, Lines, checkType);
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
 					s.InsertEach(Lines);
@@ -222,6 +229,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					s.UpdateEach(Lines.Select(x => x.Stock).Distinct());
 					trx.Commit();
 				}
+
+				if (!String.IsNullOrEmpty(Settings.Value.CheckPrinter))
+					check.Print(Settings.Value.CheckPrinter, waybillSettings);
 			}).Wait();
 			Bus.SendMessage(nameof(Stock), "db");
 			Bus.SendMessage(nameof(Check), "db");
