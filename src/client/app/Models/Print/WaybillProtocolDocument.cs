@@ -286,7 +286,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override FrameworkContentElement GetFooter(int page, int pageCount)
 		{
-			return new Paragraph(new Run($"страница {page + 1} из {pageCount}")) {
+			return new Paragraph(new Run($"страница {page + 1} из {pageCount}, время печати {DateTime.Now.ToString("dd.MM.yyyy HH:mm")}")) {
 				FontFamily = new FontFamily("Arial"),
 				FontSize = 8
 			};
