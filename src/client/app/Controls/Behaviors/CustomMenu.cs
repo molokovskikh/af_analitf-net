@@ -9,6 +9,9 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
 using System.Windows.Threading;
+using System.Threading;
+using System.Threading.Tasks;
+using NHibernate;
 
 namespace AnalitF.Net.Client.Controls.Behaviors
 {
@@ -25,28 +28,21 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			menuItem.Click += (sender, args) =>
 			{
 				args.Handled = true;
-				MarkAsReadOrUnread(AssociatedObject, false);
+				MarkAsReadOrUnread(AssociatedObject, false).LogResult();
 			};
 			AssociatedObject.ContextMenu.Items.Insert(0, menuItem);
 			menuItem = new MenuItem() {Header = "Пометить как прочтённые"};
 			menuItem.Click += (sender, args) =>
 			{
 				args.Handled = true;
-				MarkAsReadOrUnread(AssociatedObject, true);
+				MarkAsReadOrUnread(AssociatedObject, true).LogResult();
 			};
 			AssociatedObject.ContextMenu.Items.Insert(0, menuItem);
 		}
 
-		private void MarkAsReadOrUnread(DataGrid grid, bool read)
+		private async Task MarkAsReadOrUnread(DataGrid grid, bool read)
 		{
-			Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => UpdateWaybills(grid, !read)));
-		}
-
-		private void UpdateWaybills(DataGrid grid, bool newState)
-		{
-			var context = grid.DataContext as BaseScreen;
-			var statelessSession = context.Session.SessionFactory.OpenStatelessSession();
-			var waybills = new List<Waybill>();
+			IList<Waybill> waybills = new List<Waybill>();
 			foreach (var wb in grid.SelectedItems)
 			{
 				waybills.Add(wb as Waybill);
@@ -57,14 +53,22 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			}
 			if (waybills.Count == 0) return;
 
+			var context = grid.DataContext as BaseScreen;
+			await context.Env.Query(s => UpdateWaybills(context, waybills, !read, s));
+
+			grid.Items.Refresh();
+		}
+
+		private void UpdateWaybills(BaseScreen context, IList<Waybill> waybills, bool newState, IStatelessSession session)
+		{
 			foreach (var waybill in waybills)
 			{
 				waybill.IsNew = newState;
-				statelessSession.Update(waybill);
+				session.CreateSQLQuery("update waybills set IsNew = :isNew where Id = :id")
+					.SetParameter("isNew", newState ? 1 : 0)
+					.SetParameter("id", waybill.Id)
+					.ExecuteUpdate();
 			}
-			statelessSession.Close();
-
-			grid.Items.Refresh();
 			context.Env.RxQuery(x => x.Query<Waybill>().Count(r => r.IsNew)).Subscribe(context.Shell.NewDocsCount);
 		}
 	}
