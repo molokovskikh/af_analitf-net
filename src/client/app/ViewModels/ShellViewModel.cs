@@ -808,7 +808,12 @@ namespace AnalitF.Net.Client.ViewModels
 				yield return new DialogResult(orderWarning);
 			}
 
-			var results = Sync(new SendOrders(CurrentAddress, force));
+			var cmd = new SendOrders(CurrentAddress, force);
+			var settings = ViewSettings.GetValueOrDefault(typeof(OrderDetailsViewModel).FullName + ".Line");
+			var sort = settings?.FirstOrDefault(x => x.SortDirection != null);
+			if (sort != null)
+				cmd.SortComparer = new PropertyComparer<SentOrderLine>(sort.SortDirection.Value == ListSortDirection.Ascending ? SortDirection.Asc : SortDirection.Desc, sort.Name);
+			var results = Sync(cmd);
 			foreach (var result in results)
 				yield return result;
 			//говорим форме что изменились данные

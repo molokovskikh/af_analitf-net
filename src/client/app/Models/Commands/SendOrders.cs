@@ -25,8 +25,8 @@ namespace AnalitF.Net.Client.Models.Commands
 	public class SendOrders : RemoteCommand
 	{
 		private Address address;
-
 		public bool Force;
+		public IComparer<SentOrderLine> SortComparer;
 
 		public SendOrders(Address address, bool force = false)
 		{
@@ -113,7 +113,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			if (sentOrders.Length > 0) {
 				if (settings.PrintOrdersAfterSend) {
-					Results.Add(new PrintResult("Отправленные заказы", sentOrders.Select(o => new OrderDocument(o))));
+					Results.Add(new PrintResult("Отправленные заказы", sentOrders.Select(o => {
+						var lines = o.Lines.ToList();
+						if (SortComparer != null)
+							lines.Sort(SortComparer);
+						return new OrderDocument(o, lines.ToArray());
+					})));
 				}
 				if (user.SaveOrders) {
 					try {
