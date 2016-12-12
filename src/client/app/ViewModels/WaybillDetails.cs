@@ -308,7 +308,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
-                l.RetailMarkupInRubles,
+        l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum

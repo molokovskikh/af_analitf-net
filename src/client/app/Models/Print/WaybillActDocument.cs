@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		public WaybillActDocumentSettings Setup(Waybill waybill)
 		{
-			ProviderDocumentId = waybill.ProviderDocumentId;
+			DocId = waybill.Id.ToString();
 			DocumentDate = waybill.DocumentDate;
 			Person1Position = "Фармацевт";
 			Person2Position = "Зав. аптекой";
@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Models.Print
 		}
 
 		[Display(Name = "Акт №", Order = 0), Ignore]
-		public string ProviderDocumentId { get; set; }
+		public string DocId { get; set; }
 
 		[Display(Name = "Дата", Order = 1), Ignore]
 		public DateTime DocumentDate { get; set; }
@@ -89,12 +89,19 @@ namespace AnalitF.Net.Client.Models.Print
 					new Setter(Control.FontSizeProperty, 10d),
 				}
 			};
+			CellStyle = new Style(typeof(TableCell), CellStyle) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+				}
+			};
 		}
 
 		protected override void BuildDoc()
 		{
-			var h1 = Header($"Акт прихода товара по документу {docSettings.ProviderDocumentId} от {docSettings.DocumentDate:d}");
-			var h2 = Header($"по счет-фактуре {waybill.ProviderDocumentId} от {waybill.DocumentDate:d}\nпоставщик: {waybill.SupplierName}");
+			var h1 = Header($"{settings.FullName}\nАкт прихода товара №{docSettings.DocId} от {docSettings.DocumentDate:d}");
+			var h2 = Header($@"по накладной {waybill.ProviderDocumentId} от {waybill.DocumentDate:d}
+поставщик: {waybill.SupplierName}
+получатель: {settings.FullName}");
 			h1.TextAlignment = h2.TextAlignment = TextAlignment.Center;
 			((Run)h1.Inlines.FirstInline).FontWeight  = FontWeights.Bold;
 
@@ -102,19 +109,19 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("№ пп", 28),
 				new PrintColumn("Наименование", 356),
 				new PrintColumn("Кол-во", 34),
-				new PrintColumn("Серия\nСрок", 63),
-				new PrintColumn("ЖВЛ", 16),
+				new PrintColumn("Серия\nСрок", 81),
+				new PrintColumn("ЖНВЛП", 16),
 				new PrintColumn("Заводской штрихкод", 75),
-				new PrintColumn("НДС", 16),
-				new PrintColumn("Цена", 59),
-				new PrintColumn("Сумма", 59),
-				new PrintColumn("Цена", 59),
-				new PrintColumn("Сумма", 59),
+				new PrintColumn("НДС", 34),
+				new PrintColumn("Цена", 50),
+				new PrintColumn("Сумма", 50),
+				new PrintColumn("Цена", 50),
+				new PrintColumn("Сумма", 50),
 				new PrintColumn("Сертификат", 180),
 			};
 			var columnGrops = new[] {
 				new ColumnGroup("Оптовое звено", 7, 8),
-				new ColumnGroup("Розничное", 9, 10)
+				new ColumnGroup("Розничное звено", 9, 10)
 			};
 			var rows = lines.Select((l, i) => new object[] {
 				++i,
@@ -130,9 +137,13 @@ namespace AnalitF.Net.Client.Models.Print
 				l.RetailSum,
 				$"{l.Certificates}",
 			});
-			var table = BuildTable(rows, columns, columnGrops);
+
 			var retailSum = lines.Sum(l => l.RetailSum);
 			var sum = lines.Sum(l => l.Amount);
+			var table = BuildTable(rows, columns, columnGrops);
+
+			foreach (var row in table.RowGroups[0].Rows.Skip(2))
+				row.Cells[0].TextAlignment = row.Cells[2].TextAlignment = row.Cells[4].TextAlignment = row.Cells[6].TextAlignment = TextAlignment.Center;
 
 			table.RowGroups[0].Rows.Add(new TableRow
 			{
@@ -167,70 +178,78 @@ namespace AnalitF.Net.Client.Models.Print
 				}
 			});
 
-			TwoColumns();
+			var grid = new Grid().Cell(0, 0, new Label {
+				FontSize = 12,
+				Content = "По ценам закупочным:",
+			}).Cell(0, 1, new Label {
+				FontSize = 12,
+				HorizontalAlignment = HorizontalAlignment.Right,
+				Content = sum?.ToString("0.00"),
+			}).Cell(0, 2, new Label {
+				FontSize = 12,
+				Content = RusCurrency.Str((double)sum),
+			}).Cell(1, 0, new Label {
+				FontSize = 12,
+				Content = "По ценам розничным:",
+			}).Cell(1, 1, new Label {
+				FontSize = 12,
+				HorizontalAlignment = HorizontalAlignment.Right,
+				Content = retailSum?.ToString("0.00"),
+			}).Cell(1, 2, new Label {
+				FontSize = 12,
+				Content = RusCurrency.Str((double)retailSum),
+			}).Cell(2, 0, new Label {
+				FontSize = 12,
+				Content = "Сумма розничной наценки:",
+			}).Cell(2, 1, new Label {
+				FontSize = 12,
+				HorizontalAlignment = HorizontalAlignment.Right,
+				Content = (retailSum - sum)?.ToString("0.00"),
+			}).Cell(2, 2, new Label {
+				FontSize = 12,
+				Content = RusCurrency.Str((double)(retailSum - sum)),
+			});
+			doc.Blocks.Add(new BlockUIContainer(grid));
 
-			var table2 = new Table() {
-				FontSize = 10d,
-				RowGroups = { new TableRowGroup() {
-					Rows = {
-						new TableRow() {
-							Cells = {
-								new TableCell(new Paragraph(new Run("По ценам закупочным:"))),
-								new TableCell(new Paragraph(new Run(RusCurrency.Str((double)sum)))),
-							}
-						},
-						new TableRow() {
-							Cells = {
-								new TableCell(new Paragraph(new Run("По ценам розничным:"))),
-								new TableCell(new Paragraph(new Run(RusCurrency.Str((double)retailSum)))),
-							}
-						},
-						new TableRow() {
-							Cells = {
-								new TableCell(new Paragraph(new Run("Сумма розничной наценки:"))),
-								new TableCell(new Paragraph(new Run(RusCurrency.Str((double)(retailSum - sum))))),
-							}
-						},
-					}
-				}}
-			};
-			Stash(table2);
+			var captionGrid = new Grid();
+			captionGrid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
+			captionGrid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
 
-			var table3 = new Table()
-			{
-				FontSize = 10d,
-				RowGroups = { new TableRowGroup() {
-					Rows = {
-						new TableRow() {
-							Cells = {
-								new TableCell(new Paragraph(new Run("Принял"))),
-								new TableCell(new Paragraph(new Run($"{docSettings.Person1Position} {docSettings.Person1Name}"))),
-								new TableCell(new Paragraph(new Run("__________________"))),
-							}
-						},
-						new TableRow() {
-							Cells = {
-								new TableCell(new Paragraph(new Run("Товар получен полностью"))),
-								new TableCell(new Paragraph(new Run($"{docSettings.Person2Position} {docSettings.Person2Name}"))),
-								new TableCell(new Paragraph(new Run("__________________"))),
-							}
-						},
-						new TableRow() {
-							Cells = {
-								new TableCell(new Paragraph(new Run("Кол-во и цены проверены"))),
-								new TableCell(new Paragraph(new Run($"{docSettings.Person3Position} {docSettings.Person3Name}"))),
-								new TableCell(new Paragraph(new Run("__________________"))),
-							}
-						},
-					}
-				}}
-			};
-			Stash(table3);
-		}
+			var caption = new Grid().Cell(0, 0, new Label {
+				FontSize = 12,
+				Content = "Принял",
+			}).Cell(0, 1, new Label {
+				FontSize = 12,
+				Content = $"{docSettings.Person1Position} {docSettings.Person1Name}",
+			}).Cell(0, 2, new Label {
+				FontSize = 12,
+				Content = "______________________________",
+			}).Cell(1, 0, new Label {
+				FontSize = 12,
+				Content = "Товар получен полностью",
+			}).Cell(1, 1, new Label {
+				FontSize = 12,
+				Content = $"{docSettings.Person2Position} {docSettings.Person2Name}",
+			}).Cell(1, 2, new Label {
+				FontSize = 12,
+				Content = "______________________________",
+			}).Cell(2, 0, new Label {
+				FontSize = 12,
+				Content = "Кол-во и цены проверены",
+			}).Cell(2, 1, new Label {
+				FontSize = 12,
+				Content = $"{docSettings.Person3Position} {docSettings.Person3Name}",
+			}).Cell(2, 2, new Label {
+				FontSize = 12,
+				Content = "______________________________",
+			});
 
-		private void TwoColumns()
-		{
-			template = new DocumentTemplate();
+			captionGrid.Cell(0, 1, caption).HorizontalAlignment = HorizontalAlignment.Right;
+			doc.Blocks.Add(new BlockUIContainer(captionGrid));
 		}
 
 		public override FrameworkContentElement GetHeader(int page, int pageCount)
@@ -240,7 +259,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override FrameworkContentElement GetFooter(int page, int pageCount)
 		{
-			return new Paragraph(new Run($"страница {page + 1} из {pageCount}")) {
+			return new Paragraph(new Run($"страница {page + 1} из {pageCount}, время печати {DateTime.Now.ToString("dd.MM.yyyy HH:mm")}")) {
 				FontFamily = new FontFamily("Arial"),
 				FontSize = 8
 			};
