@@ -10,9 +10,8 @@ using Dapper;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 using System.Collections.Generic;
-using NHibernate.Util;
-using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -180,7 +179,7 @@ where DocType = 1
 
 		private static void MergeCells(ISheet sheet, int rowIndex)
 		{
-			var cra = new NPOI.SS.Util.CellRangeAddress(rowIndex, rowIndex, 0, 1);
+			var cra = new CellRangeAddress(rowIndex, rowIndex, 0, 1);
 			sheet.AddMergedRegion(cra);
 		}
 
@@ -192,6 +191,163 @@ where DocType = 1
 			ExcelExporter.SetCellValue(row, 4, items.Sum(x => x.SupplierSum));
 			ExcelExporter.SetCellValue(row, 5, items.Sum(x => x.RetailSum));
 			return row;
+		}
+	}
+
+	public class ConsumptionReport : DbCommand<string>
+	{
+		private Waybill _waybill;
+
+		public class ConsumptionDocumentRow
+		{
+			public string Name { get; set; }
+			public decimal Quantity { get; set; }
+			public string DocType { get; set; }
+			public uint DocumentId { get; set; }
+			public DateTime Date { get; set; }
+			public decimal Quantity2 { get; set; }
+		}
+
+		public ConsumptionReport(Waybill waybill)
+		{
+			_waybill = waybill;
+		}
+
+		public override void Execute()
+		{
+			var settings = Session.Query<Settings>().First();
+			var dir = settings.InitAndMap("Reports");
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Расход по документу {_waybill.ProviderDocumentId}.xls"));
+
+			var book = new HSSFWorkbook();
+
+			var titleFont = book.CreateFont();
+			titleFont.Boldweight = (short)FontBoldWeight.Bold;
+			titleFont.FontHeightInPoints = 12;
+			var titleStyle = book.CreateCellStyle();
+			titleStyle.Alignment = HorizontalAlignment.Center;
+			titleStyle.VerticalAlignment = VerticalAlignment.Center;
+			titleStyle.SetFont(titleFont);
+
+			var headerFont = book.CreateFont();
+			headerFont.Boldweight = (short)FontBoldWeight.Bold;
+			var headerStyle = book.CreateCellStyle();
+			headerStyle.Alignment = HorizontalAlignment.Center;
+			headerStyle.VerticalAlignment = VerticalAlignment.Center;
+			headerStyle.WrapText = true;
+			headerStyle.SetFont(headerFont);
+
+			var numericStyle = book.CreateCellStyle();
+			numericStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+
+			var wrapStyle = book.CreateCellStyle();
+			wrapStyle.WrapText = true;
+
+			var sheet = book.CreateSheet($"Расход по документу {_waybill.ProviderDocumentId}");
+			var rowIndex = 0;
+
+			var titles = new[]
+			{
+				$"Расход по документу {_waybill.ProviderDocumentId}",
+				"",
+			};
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 4));
+			foreach (var header in titles)
+				ExcelExporter.WriteRow(sheet, new object[] { header }, rowIndex++).Cells.ForEach(x => x.CellStyle = titleStyle);
+
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex + 1, 0, 0));
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex + 1, 1, 1));
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
+			var columns = new object[] {
+				"Наименование\nПроизводитель",
+				"Кол-во",
+				"Расход"
+			};
+			ExcelExporter.WriteRow(sheet, columns, rowIndex++).Cells.ForEach(x => x.CellStyle = headerStyle);
+
+			var columns2 = new object[] {
+				null,
+				null,
+				"Документ",
+				"Дата",
+				"Кол-во"
+			};
+			ExcelExporter.WriteRow(sheet, columns2, rowIndex++).Cells.ForEach(x => x.CellStyle = headerStyle);
+
+			var sql = $@"
+drop temporary table if exists consumption_report;
+create temporary table consumption_report engine=memory
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Списание' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from writeofflines l
+join writeoffdocs d on d.Id = l.WriteoffDocId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where d.`Status` = 1 and wl.WaybillId = ?
+union all
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Возврат поставщику' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from returntosupplierlines l
+join returntosuppliers d on d.Id = l.ReturnToSupplierId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where d.`Status` = 1 and wl.WaybillId = ?
+union all
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Внутреннее перемещение' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from displacementlines l
+join displacementdocs d on d.Id = l.DisplacementDocId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where (d.`Status` = 1 or d.`Status` = 2) and wl.WaybillId = ?
+union all
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Чек' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from checklines l
+join checks d on d.Id = l.CheckId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where d.`Status` = 0 and d.CheckType = 0 and wl.WaybillId = ?
+;";
+
+			StatelessSession.Connection.Execute(sql, new { a = _waybill.Id, b = _waybill.Id, c = _waybill.Id, d = _waybill.Id });
+
+			sql = $@"
+select CONCAT(Product, '\n', Producer) as Name, SUM(Quantity) as Quantity,
+DocType, DocumentId, Date, SUM(Quantity2) as Quantity2
+from consumption_report
+group by Product, Producer, SerialNumber, DocType, DocumentId, Date
+order by Name asc, Date desc
+;";
+			var items = StatelessSession.Connection.Query<ConsumptionDocumentRow>(sql);
+			var prevName = "";
+			foreach (var item in items)
+			{
+				if (item.Name == prevName)
+					item.Name = "";
+				else
+					prevName = item.Name;
+			}
+
+			var rows = items.Select(x => new object[]{
+							x.Name,
+							x.Quantity,
+							$"{x.DocType} №{x.DocumentId}",
+							x.Date.ToString("dd.MM.yyyy"),
+							x.Quantity2
+						}).ToList();
+
+			foreach (var row in rows)
+			{
+				var cells = ExcelExporter.WriteRow(sheet, row, rowIndex++).Cells;
+				cells[0].CellStyle = wrapStyle;
+				cells[1].CellStyle = numericStyle;
+				cells[4].CellStyle = numericStyle;
+			}
+
+			for (int columnIndex = 0; columnIndex < columns2.Length; columnIndex++)
+				sheet.AutoSizeColumn(columnIndex, true);
+			// увеличил первую колонку относительно значения по автосайзу, т.к. при WrapText = true текст переносится не только по \n
+			sheet.SetColumnWidth(0, sheet.GetColumnWidth(0) * 2);
+
+			using (var stream = File.Create(Result))
+				book.Write(stream);
 		}
 	}
 

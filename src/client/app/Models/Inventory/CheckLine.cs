@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public CheckLine(Stock stock, uint quantity, CheckType checkType)
 		{
+			WaybillLineId = stock.WaybillLineId;
 			if (checkType == CheckType.SaleBuyer && stock.Quantity < quantity)
 				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Quantity}");
 			Stock = stock;
@@ -36,6 +37,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 		public virtual uint Id { get; set; }
+		public virtual uint? WaybillLineId { get; set; }
 		public virtual decimal Cost { get; set; }
 
 		public virtual decimal Quantity

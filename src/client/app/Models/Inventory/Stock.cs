@@ -67,6 +67,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public Stock(Waybill waybill, WaybillLine line)
 		{
 			WaybillId = waybill.Id;
+			WaybillLineId = line.Id;
 			Status = StockStatus.Available;
 			Address = waybill.Address;
 
@@ -107,6 +108,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual StockStatus Status { get; set; }
 
 		public virtual uint? WaybillId { get; set; }
+		public virtual uint? WaybillLineId { get; set; }
 
 		public virtual string AnalogCode { get; set; }
 		public virtual string ProducerBarcode { get; set; }
