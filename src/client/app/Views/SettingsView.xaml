@@ -612,58 +612,70 @@
 					</StackPanel>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Настройка печати ценников" Name="PriceTagSettings">
-				<StackPanel>
-					<ComboBox Style="{StaticResource Select}" x:Name="Settings_PriceTag_Type" />
-					<StackPanel Name="PriceTagConfig">
-						<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Удалять непечатаемые элементы
-						</CheckBox>
-						<Label>Печатаемые элементы ценника</Label>
-						<CheckBox x:Name="Settings_PriceTag_PrintFullName"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Наименование клиента
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintProduct"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Наименование
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintCountry"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Страна
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintProducer"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Производитель
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Срок годности
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Номер накладной
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Поставщик
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Серия товара
-						</CheckBox>
-						<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
-							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-							Дата накладной
-						</CheckBox>
+			<TabItem Header="Настройка печати ценников" Name="PriceTags" IsEnabled="{Binding HaveAddresses}">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+
+					<ComboBox Grid.Row="0" Grid.Column="0" Style="{StaticResource Select}" MinWidth="100"
+					          SelectedItem="{Binding MarkupAddress.Value}"
+					          ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+
+					<StackPanel Grid.Row="1" Grid.Column="0">
+						<ComboBox Style="{StaticResource Select}" x:Name="PriceTagSettings_Value_Type" />
+						<StackPanel x:Name="PriceTagConfig">
+							<CheckBox x:Name="PriceTagSettings_Value_PrintEmpty">Печать "пустых" ценников</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_HideNotPrinted"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Удалять непечатаемые элементы
+							</CheckBox>
+							<Label>Печатаемые элементы ценника</Label>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintFullName"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Наименование клиента
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintProduct"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Наименование
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintCountry"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Страна
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintProducer"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Производитель
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintPeriod"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Срок годности
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintProviderDocumentId"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Номер накладной
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintSupplier"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Поставщик
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintSerialNumber"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Серия товара
+							</CheckBox>
+							<CheckBox x:Name="PriceTagSettings_Value_PrintDocumentDate"
+							IsEnabled="{Binding PriceTagSettings.Value.IsConfigurable}">
+								Дата накладной
+							</CheckBox>
+						</StackPanel>
+						<StackPanel Name="PriceTagConstructor">
+							<Button Margin="0, 20, 0, 20" Name="ShowPriceTagConstructor">Редактировать</Button>
+							<ContentControl Content="{Binding PriceTagPreview.Value}" />
+						</StackPanel>
 					</StackPanel>
-					<StackPanel Name="PriceTagConstructor">
-						<Button Margin="0, 20, 0, 20" Name="ShowPriceTagConstructor">Редактировать</Button>
-						<ContentControl Content="{Binding PriceTagPreview.Value}" />
-					</StackPanel>
-				</StackPanel>
+				</Grid>
 			</TabItem>
 			<TabItem Header="Отладка" Name="DebugTab">
 				<StackPanel>

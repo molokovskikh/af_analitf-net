@@ -74,6 +74,7 @@ namespace AnalitF.Net.Client.Models.Print
 		private WaybillSettings waybillSettings;
 		private IList<WaybillLine> lines;
 		private PriceTag priceTag;
+		private PriceTagSettings priceTagSettings;
 
 		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, PriceTag priceTag)
 		{
@@ -82,21 +83,22 @@ namespace AnalitF.Net.Client.Models.Print
 			this.settings = settings;
 			this.lines = lines;
 			this.priceTag = priceTag;
+			this.priceTagSettings = settings.PriceTags.First(r => r.Address == waybill.Address);
 		}
-		 
+
 		public FixedDocument Build()
 		{
-			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
+			properties = ObjectExtentions.ToDictionary(priceTagSettings);
 			Func<WaybillLine, FrameworkElement> map = Normal;
 			var borderThickness = 0.5d;
 
-			if (settings.PriceTag.Type == PriceTagType.Small)
+			if (priceTagSettings.Type == PriceTagType.Small)
 				map = Small;
-			else if (settings.PriceTag.Type == PriceTagType.BigCost)
+			else if (priceTagSettings.Type == PriceTagType.BigCost)
 				map = Big;
-			else if (settings.PriceTag.Type == PriceTagType.BigCost2)
+			else if (priceTagSettings.Type == PriceTagType.BigCost2)
 				map = Big2;
-			else if (settings.PriceTag.Type == PriceTagType.Custom) {
+			else if (priceTagSettings.Type == PriceTagType.Custom) {
 				map = x => priceTag.ToElement(x);
 				borderThickness = priceTag.BorderThickness;
 			}
@@ -106,7 +108,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private string FormatCost(WaybillLine line)
 		{
-			if (settings.PriceTag.PrintEmpty)
+			if (priceTagSettings.PrintEmpty)
 				return "";
 
 			var format = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
@@ -445,7 +447,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Width = 162,
 				Margin = new Thickness(2)
 			};
-			if (!settings.PriceTag.HideNotPrinted || settings.PriceTag.PrintFullName) {
+			if (!priceTagSettings.HideNotPrinted || priceTagSettings.PrintFullName) {
 				var uri = new Uri(String.Format(@"pack://application:,,,/{0};component/assets/images/price-tag-log.png",
 					typeof(PriceTagDocument).Assembly.GetName().Name));
 				panel.Children.Add(new Border {
@@ -461,7 +463,7 @@ namespace AnalitF.Net.Client.Models.Print
 							},
 							new TextBlock {
 								Height = 20,
-								Text = settings.PriceTag.PrintFullName ? waybillSettings.FullName : "",
+								Text = priceTagSettings.PrintFullName ? waybillSettings.FullName : "",
 								FontSize = 8,
 								TextAlignment = TextAlignment.Center,
 								VerticalAlignment = VerticalAlignment.Center,
@@ -479,11 +481,11 @@ namespace AnalitF.Net.Client.Models.Print
 			GetValue(panel, "Серия товара", line.SerialNumber, "SerialNumber");
 			GetValue(panel, "№ накладной", line.Waybill.ProviderDocumentId, "ProviderDocumentId");
 
-			var haveValue = settings.PriceTag.PrintSupplier || settings.PriceTag.PrintDocumentDate;
-			if (haveValue || !settings.PriceTag.HideNotPrinted) {
+			var haveValue = priceTagSettings.PrintSupplier || priceTagSettings.PrintDocumentDate;
+			if (haveValue || !priceTagSettings.HideNotPrinted) {
 				var value = String.Format("{0:d}{1}",
-					settings.PriceTag.PrintDocumentDate ? (DateTime?)line.Waybill.DocumentDate : null,
-					settings.PriceTag.PrintSupplier ? line.Waybill.SupplierName : "");
+					priceTagSettings.PrintDocumentDate ? (DateTime?)line.Waybill.DocumentDate : null,
+					priceTagSettings.PrintSupplier ? line.Waybill.SupplierName : "");
 
 				var label = new Label {
 					FontSize = 8,
@@ -524,7 +526,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var print = (bool)properties.GetValueOrDefault(printKey, true);
 
 			if (!print) {
-				if (settings.PriceTag.HideNotPrinted)
+				if (priceTagSettings.HideNotPrinted)
 					return;
 
 				value = "";

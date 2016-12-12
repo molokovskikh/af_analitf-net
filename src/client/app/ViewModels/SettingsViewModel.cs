@@ -77,6 +77,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(Nds18Markups);
 			MarkupAddress.Select(x => MarkupByType(MarkupType.Special, x))
 				.Subscribe(SpecialMarkups);
+			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
+				.Subscribe(PriceTagSettings);
 
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
@@ -91,7 +93,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Products, CloseCancellation.Token);
-
 
 			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToObservableCollection())
 				.Subscribe(SpecialMarkupProducts);
@@ -235,10 +236,12 @@ limit 300";
 			{
 				address = value;
 				CurrentWaybillSettings.Value = waybillConfig.FirstOrDefault(c => c.BelongsToAddress == value);
+				PriceTagSettings.Value = Settings.Value.PriceTags.FirstOrDefault(r => r.Address == value);
 			}
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+		public NotifyValue<PriceTagSettings> PriceTagSettings { get; set; }
 		public NotifyValue<FrameworkElement> PriceTagPreview { get; set; }
 		public NotifyValue<FrameworkElement> RackingMapPreview { get; set; }
 
@@ -246,21 +249,21 @@ limit 300";
 		{
 			base.OnInitialize();
 
-			MarkupAddress.Value = Address;
-			CurrentAddress = Address;
+			MarkupAddress.Value = Address ?? Addresses.FirstOrDefault();
+			CurrentAddress = Address ?? Addresses.FirstOrDefault();
 			LoadPriceTagPreview();
 			LoadRackingMapPreview();
 		}
 
 		private void LoadPriceTagPreview()
 		{
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, MarkupAddress.Value))
 				.Subscribe(x => PriceTagPreview.Value = x.Preview());
 		}
 
 		private void LoadRackingMapPreview()
 		{
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, null))
 				.Subscribe(x => RackingMapPreview.Value = x.Preview());
 		}
 
@@ -442,13 +445,13 @@ limit 300";
 
 		public IEnumerable<IResult> ShowPriceTagConstructor()
 		{
-			yield return new DialogResult(new PriceTagConstructor(TagType.PriceTag), fullScreen: true);
+			yield return new DialogResult(new PriceTagConstructor(TagType.PriceTag, MarkupAddress.Value), fullScreen: true);
 			LoadPriceTagPreview();
 		}
 
 		public IEnumerable<IResult> ShowRackingMapConstructor()
 		{
-			yield return new DialogResult(new PriceTagConstructor(TagType.RackingMap), fullScreen: true);
+			yield return new DialogResult(new PriceTagConstructor(TagType.RackingMap, null), fullScreen: true);
 			LoadRackingMapPreview();
 		}
 
@@ -461,5 +464,5 @@ limit 300";
 		{
 			return CustomStyle.Edit(style);
 		}
-    }
+	}
 }

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using System.Runtime.Serialization;
+using System.Collections.Generic;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -28,16 +30,25 @@ namespace AnalitF.Net.Client.Models
 
 		public PriceTagSettings()
 		{
-			PrintProduct  = true;
-			PrintCountry  = true;
-			PrintProducer  = true;
-			PrintPeriod  = true;
-			PrintProviderDocumentId  = true;
-			PrintSupplier  = true;
-			PrintSerialNumber  = true;
-			PrintDocumentDate  = true;
+			PrintProduct = true;
+			PrintCountry = true;
+			PrintProducer = true;
+			PrintPeriod = true;
+			PrintProviderDocumentId = true;
+			PrintSupplier = true;
+			PrintSerialNumber = true;
+			PrintDocumentDate = true;
 			PrintFullName = true;
 		}
+
+		public PriceTagSettings(Address address) : this()
+		{
+			Address = address;
+		}
+
+		public virtual uint Id { get; set; }
+		public virtual Settings Settings { get; set; }
+		public virtual Address Address { get; set; }
 
 		public virtual PriceTagType Type
 		{
@@ -200,7 +211,24 @@ namespace AnalitF.Net.Client.Models
 
 		}
 
-		public bool IsConfigurable => Type == PriceTagType.Normal;
-		public bool IsConstructor => Type == PriceTagType.Custom;
+		public static IEnumerable<PriceTagSettings> Defaults(Address address)
+		{
+			return new[]
+			{
+				new PriceTagSettings(address)
+			};
+		}
+
+		[IgnoreDataMember]
+		public virtual bool IsConfigurable
+		{
+			get { return Type == PriceTagType.Normal; }
+		}
+
+		[IgnoreDataMember]
+		public virtual bool IsConstructor
+		{
+			get { return Type == PriceTagType.Custom; }
+		}
 	}
 }

@@ -116,6 +116,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						if (settings.Markups.Count(x => x.Address == address && x.Type == type) == 0)
 							MarkupConfig.Defaults(address).Where(x => x.Type == type).Each(settings.AddMarkup);
 					}
+					if (settings.PriceTags.Count(r => r.Address == address) == 0)
+						PriceTagSettings.Defaults(address).Each(settings.AddPriceTag);
 				}
 
 				var addressConfigs = session.Query<AddressConfig>().ToArray();
@@ -231,7 +233,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 					// #56897 привязали элементы, чтоб сохранить настройки конструктора, удалили теги без элементов
 					if (table.Name.Match("PriceTags")) {
-						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where PriceTagId = 0;");
+						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where PriceTagId is null;");
 						alters.Add("delete t from PriceTags t left join PriceTagItems i on i.PriceTagId = t.Id where i.PriceTagId is null;");
 					}
 

@@ -160,9 +160,9 @@ namespace AnalitF.Net.Client.ViewModels
 				}))
 				.Switch()
 				.ToValue(CloseCancellation);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, Address))
 				.Subscribe(x => priceTag = x);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, null))
 				.Subscribe(x => rackingMap = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)
