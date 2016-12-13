@@ -151,21 +151,21 @@ namespace AnalitF.Net.Client.Models.Inventory
 			doc.Blocks.Add(table);
 			doc.Blocks.Add(paragraph);
 			foreach (var line in Lines) {
-				paragraph.Inlines.Add(new Run($"{line.Product} {line.RetailCost} x {line.Quantity} = {line.Sum}"));
+				paragraph.Inlines.Add(new Run($"{line.Product} {line.RetailCost:C} x {line.Quantity} = {line.Sum:C}"));
 				paragraph.Inlines.Add(new LineBreak());
 			}
 			doc.Blocks.Add(new Paragraph() {
 				Inlines = {
-					new Run($"Итого = {Sum}") {
+					new Run($"Итого = {Sum:C}") {
 						FontSize = 20,
 						FontWeight = FontWeights.Bold,
 					},
 					new LineBreak(),
-					new Run($"Наличными = {Payment}") {
+					new Run($"Наличными = {Payment:C}") {
 						FontSize = 10,
 					},
 					new LineBreak(),
-					new Run($"Сдача = {Charge}") {
+					new Run($"Сдача = {Charge:C}") {
 						FontSize = 10
 					}
 				},
