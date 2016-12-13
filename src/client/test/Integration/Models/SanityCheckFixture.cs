@@ -73,7 +73,6 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		[Test]
 		public void Update_schema()
 		{
-			//var columns = typeof(PriceTagSettings).GetProperties().Select(p => "drop column " + p.Name).Implode();
 			try {
 				session.CreateSQLQuery("alter table pricetagsettings drop column PrintProduct").ExecuteUpdate();
 			}

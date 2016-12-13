@@ -10,8 +10,6 @@ using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
-using Dapper;
-using Dapper.Contrib.Extensions;
 using NHibernate.Linq;
 using NHibernate;
 using System.Windows.Threading;
