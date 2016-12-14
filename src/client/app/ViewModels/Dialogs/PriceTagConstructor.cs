@@ -11,9 +11,6 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
-using NHibernate;
-using System.Windows.Threading;
-using Common.NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
@@ -342,42 +339,74 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void Save()
 		{
-			var session = Session.SessionFactory.OpenStatelessSession();
-			var tag = Tag.Value;
-			var tx = session.BeginTransaction();
-
-			try
-			{
-				if (tag.Id == 0)
-					session.Insert(tag);
-				else
-					session.Update(tag);
-
-				foreach (var item in tag.Items)
-				{
-					item.PriceTag = tag;
-					if (item.Id == 0)
-						session.Insert(item);
-					else
-						session.Update(item);
+			Query(s => {
+				// Tag.Value.Id = 0 не только у впервые вставляемого тега, но и при сбросе настроек на дефолтные
+				var priceTag = s.Query<PriceTag>().SingleOrDefault(x => x.TagType == Tag.Value.TagType && x.Address == Tag.Value.Address);
+				if (priceTag == null) {
+					s.Insert(Tag.Value);
+					priceTag = Tag.Value;
 				}
-
-				var items = session.Query<PriceTagItem>().Where(r => r.PriceTag == tag);
-				session.DeleteEach(items.Where(r => !tag.Items.Contains(r)));
-
-				tx.Commit();
-			}
-			catch
-			{
-				tx.Rollback();
-				throw;
-			}
-			finally
-			{
-				session.Close();
-			}
-
+				else {
+					priceTag.Width = Tag.Value.Width;
+					priceTag.Height = Tag.Value.Height;
+					priceTag.BorderThickness = Tag.Value.BorderThickness;
+					s.Update(priceTag);
+				}
+				var dbItems = s.Query<PriceTagItem>().Where(x => x.PriceTag == priceTag).ToArray();
+				for (var i = 0; i < Items.Count; i++) {
+					var item = Items[i];
+					item.PriceTag = priceTag;
+					item.Position = i;
+					if (item.Id == 0) {
+						s.Insert(item);
+					}
+					else {
+						s.Update(item);
+					}
+				}
+				foreach (var item in dbItems.Where(x => Items.All(y => x.Id != y.Id)))
+					s.Delete(item);
+			}).Wait();
 			TryClose();
+
+
+
+			//var session = Session.SessionFactory.OpenStatelessSession();
+			//var tag = Tag.Value;
+			//var tx = session.BeginTransaction();
+
+			//try
+			//{
+			//	if (tag.Id == 0)
+			//		session.Insert(tag);
+			//	else
+			//		session.Update(tag);
+
+			//	foreach (var item in tag.Items)
+			//	{
+			//		item.PriceTag = tag;
+			//		if (item.Id == 0)
+			//			session.Insert(item);
+			//		else
+			//			session.Update(item);
+			//	}
+
+			//	var items = session.Query<PriceTagItem>().Where(r => r.PriceTag == tag);
+			//	session.DeleteEach(items.Where(r => !tag.Items.Contains(r)));
+
+			//	tx.Commit();
+			//}
+			//catch
+			//{
+			//	tx.Rollback();
+			//	throw;
+			//}
+			//finally
+			//{
+			//	session.Close();
+			//}
+
+			//TryClose();
 		}
 
 		public void Clear()
