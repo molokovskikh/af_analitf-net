@@ -43,7 +43,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			FileHelper.InitDir(settings.MapPath("Reports"));
 
-			model.Items.Value.Add(catalog);
+			model.Items.Add(catalog);
+			model.CurrentItem.Value = catalog;
 			var result = model.ExportExcel().GetEnumerator();
 			var task = Next<TaskResult>(result);
 			task.Task.Start();
