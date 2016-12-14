@@ -294,5 +294,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			yield return new DialogResult(new Help());
 		}
+
+		public IEnumerable<IResult> PossibleBarcodeScanned()
+		{
+			if (String.IsNullOrEmpty(Input.Value))
+				yield break;
+			var barcode = Input.Value;
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == barcode)).Result;
+			if (stock == null)
+				yield break;
+			if (Quantity.Value == null)
+				Quantity.Value = 1;
+			UpdateProduct(stock, "Штрих код");
+		}
 	}
 }

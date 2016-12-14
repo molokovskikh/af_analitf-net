@@ -287,6 +287,8 @@ where p.IsSynced = 1 or p.PriceId is null;";
 		[Conditional("DEBUG")]
 		private void CheckWarning(IDbCommand cmd)
 		{
+			if (!Strict)
+				return;
 			var warnings = new List<string>();
 			cmd.CommandText = "show warnings";
 			using (var reader = cmd.ExecuteReader()) {

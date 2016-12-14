@@ -199,6 +199,9 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange(nameof(CanShowAwaited));
 					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
 					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
+
+					NotifyOfPropertyChange(nameof(CanShowInventory));
+					NotifyOfPropertyChange(nameof(CanShowFrontend));
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -720,10 +723,14 @@ namespace AnalitF.Net.Client.ViewModels
 			return model.IsCredentialsChanged;
 		}
 
+		public bool CanShowInventory => Settings.Value.LastUpdate != null;
+
 		public void ShowInventory()
 		{
 			NavigateRoot(new Inventory.Stocks());
 		}
+
+		public bool CanShowFrontend => Settings.Value.LastUpdate != null;
 
 		public void ShowFrontend()
 		{
