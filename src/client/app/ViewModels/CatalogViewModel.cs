@@ -524,6 +524,13 @@ namespace AnalitF.Net.Client.ViewModels
 				TryClose();
 		}
 
+		public void CatalogSelector(Catalog currentCatalog)
+		{
+			_catalogList.Add(currentCatalog);
+			if (!Confirm("Наименование выбрано. Продолжить выбор?"))
+				TryClose();
+		}
+
 		public IEnumerable<IResult> ShowOrderHistory()
 		{
 			if (CurrentCatalog == null || Address == null)

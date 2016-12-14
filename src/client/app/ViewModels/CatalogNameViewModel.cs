@@ -297,10 +297,15 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentCatalog == null)
 				return null;
 
-			if (!CurrentCatalog.HaveOffers)
-				return new ShowPopupResult(() => ParentModel.ShowOrderHistory());
+			if (ParentModel.Mode == CatalogViewMode.Basic) {
+				if (!CurrentCatalog.HaveOffers)
+					return new ShowPopupResult(() => ParentModel.ShowOrderHistory());
 
-			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+				Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+			}
+			else if (ParentModel.Mode == CatalogViewMode.CatalogSelector)
+				ParentModel.CatalogSelector(CurrentCatalog);
+
 			return null;
 		}
 

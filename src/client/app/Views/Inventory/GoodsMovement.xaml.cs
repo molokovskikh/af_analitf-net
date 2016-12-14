@@ -12,14 +12,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AnalitF.Net.Client.Views.Dialogs
+namespace AnalitF.Net.Client.Views.Inventory
 {
 	/// <summary>
-	/// Interaction logic for CreateGoodsMovementReport.xaml
+	/// Interaction logic for GoodsMovement.xaml
 	/// </summary>
-	public partial class CreateGoodsMovementReport : UserControl
+	public partial class GoodsMovement : UserControl
 	{
-		public CreateGoodsMovementReport()
+		public GoodsMovement()
 		{
 			InitializeComponent();
 		}
