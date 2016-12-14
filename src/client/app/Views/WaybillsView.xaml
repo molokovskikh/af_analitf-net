@@ -77,10 +77,6 @@
 
 					<TextBlock Style="{StaticResource HeaderTextBlock}">Отчет по розничным надбавкам к ценам на ЖНВЛП за год</TextBlock>
 					<Button Name="WaybillMarkupReport" HorizontalAlignment="Left">Сформировать</Button>
-					<Separator />
-
-					<TextBlock Style="{StaticResource HeaderTextBlock}">Отчет Движение товара по накладным</TextBlock>
-					<Button Name="GoodsMovementReport" HorizontalAlignment="Left">Сформировать</Button>
 				</StackPanel>
 			</c:PopupButton>
 		</WrapPanel>
