@@ -109,6 +109,17 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual bool IsLoaded { get; set; }
 
+		/// <summary>
+		/// Заказ считатеся загруженым с момента импорта до заморозки
+		/// </summary>
+		[Style(Description = "\"Загружен\"")]
+		[Ignore]
+		public virtual bool IsImported
+		{
+			get { return ExportId != null ? true : false; }
+
+		}
+
 		public virtual int LinesCount
 		{
 			get { return linesCount; }
