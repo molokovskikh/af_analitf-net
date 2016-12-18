@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using Common.Tools;
+using AnalitF.Net.Client.Models.Print;
 
 namespace AnalitF.Net.Client.Models
 {

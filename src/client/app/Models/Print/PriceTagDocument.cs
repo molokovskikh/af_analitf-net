@@ -69,25 +69,21 @@ namespace AnalitF.Net.Client.Models.Print
 			}},
 		};
 
-		private Waybill waybill;
 		private Settings settings;
-		private WaybillSettings waybillSettings;
-		private IList<WaybillLine> lines;
+		private IList<TagPrintable> lines;
 		private PriceTag priceTag;
 
-		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, PriceTag priceTag)
+		public PriceTagDocument(IList<TagPrintable> lines, Settings settings, PriceTag priceTag)
 		{
-			this.waybill = waybill;
-			this.waybillSettings = waybill.WaybillSettings;
 			this.settings = settings;
 			this.lines = lines;
 			this.priceTag = priceTag;
 		}
-		 
+
 		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
-			Func<WaybillLine, FrameworkElement> map = Normal;
+			Func<TagPrintable, FrameworkElement> map = Normal;
 			var borderThickness = 0.5d;
 
 			if (settings.PriceTag.Type == PriceTagType.Small)
@@ -101,10 +97,10 @@ namespace AnalitF.Net.Client.Models.Print
 				borderThickness = priceTag.BorderThickness;
 			}
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), borderThickness), borderThickness);
+			return FixedDocumentHelper.BuildFixedDoc(lines, l => Border(map(l), borderThickness), borderThickness);
 		}
 
-		private string FormatCost(WaybillLine line)
+		private string FormatCost(TagPrintable line)
 		{
 			if (settings.PriceTag.PrintEmpty)
 				return "";
@@ -137,7 +133,7 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 		}
 
-		private FrameworkElement Small(WaybillLine line)
+		private FrameworkElement Small(TagPrintable line)
 		{
 			var canvas = new Canvas {
 				Height = 106,
@@ -236,7 +232,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var waybillDate = new TextBlock {
 				TextAlignment = TextAlignment.Right,
 				FontSize = 9,
-				Text = line.Waybill.DocumentDate.ToShortDateString(),
+				Text = line.DocumentDate.ToShortDateString(),
 				Width = 100,
 			};
 			waybillDate.SetValue(Canvas.LeftProperty, 46d);
@@ -248,14 +244,14 @@ namespace AnalitF.Net.Client.Models.Print
 			return canvas;
 		}
 
-		public FrameworkElement Big(WaybillLine line)
+		public FrameworkElement Big(TagPrintable line)
 		{
 			var canvas = new Canvas {
 				Width = 162,
 				Height = 106,
 			};
 			var nameAndAddressLabel = new TextBlock {
-				Text = waybillSettings.FullName,
+				Text = line.ClientName,
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
 				FontSize = 8,
@@ -327,7 +323,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return canvas;
 		}
 
-		public FrameworkElement Big2(WaybillLine line)
+		public FrameworkElement Big2(TagPrintable line)
 		{
 			var canvas = new Canvas {
 				Width = 162,
@@ -335,7 +331,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 
 			var nameAndAddressLabel = new TextBlock {
-				Text = waybillSettings.FullName,
+				Text = line.ClientName,
 				TextAlignment = TextAlignment.Center,
 				FontSize = 6,
 				Width = 162,
@@ -366,7 +362,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(serialNumberBorder);
 
 			var supplierNameLabel = new TextBlock {
-				Text = line.Waybill.SupplierName,
+				Text = line.SupplierName,
 				TextAlignment = TextAlignment.Center,
 				FontSize = 6,
 				Width = 81,
@@ -439,7 +435,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return canvas;
 		}
 
-		private FrameworkElement Normal(WaybillLine line)
+		private FrameworkElement Normal(TagPrintable line)
 		{
 			var panel = new StackPanel {
 				Width = 162,
@@ -461,7 +457,7 @@ namespace AnalitF.Net.Client.Models.Print
 							},
 							new TextBlock {
 								Height = 20,
-								Text = settings.PriceTag.PrintFullName ? waybillSettings.FullName : "",
+								Text = settings.PriceTag.PrintFullName ? line.ClientName : "",
 								FontSize = 8,
 								TextAlignment = TextAlignment.Center,
 								VerticalAlignment = VerticalAlignment.Center,
@@ -477,13 +473,13 @@ namespace AnalitF.Net.Client.Models.Print
 			GetValue(panel, "", line.Producer, "Producer");
 			GetValue(panel, "Срок годности", line.Period, "Period");
 			GetValue(panel, "Серия товара", line.SerialNumber, "SerialNumber");
-			GetValue(panel, "№ накладной", line.Waybill.ProviderDocumentId, "ProviderDocumentId");
+			GetValue(panel, "№ накладной", line.ProviderDocumentId, "ProviderDocumentId");
 
 			var haveValue = settings.PriceTag.PrintSupplier || settings.PriceTag.PrintDocumentDate;
 			if (haveValue || !settings.PriceTag.HideNotPrinted) {
 				var value = String.Format("{0:d}{1}",
-					settings.PriceTag.PrintDocumentDate ? (DateTime?)line.Waybill.DocumentDate : null,
-					settings.PriceTag.PrintSupplier ? line.Waybill.SupplierName : "");
+					settings.PriceTag.PrintDocumentDate ? (DateTime?)line.DocumentDate : null,
+					settings.PriceTag.PrintSupplier ? line.SupplierName : "");
 
 				var label = new Label {
 					FontSize = 8,

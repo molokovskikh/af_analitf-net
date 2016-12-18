@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -12,7 +13,7 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		private static Size pageSize = new Size(816.0, 1056.0);
 
-		public static FixedDocument BuildFixedDoc(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
+		public static FixedDocument BuildFixedDoc(IList<TagPrintable> lines, Func<TagPrintable, FrameworkElement> map, double borderThickness)
 		{
 			var document = new FixedDocument();
 			var left = lines.Count;
@@ -20,7 +21,7 @@ namespace AnalitF.Net.Client.Models.Print
 				var panel = new StackPanel();
 				var label = new Label {
 					Padding = new Thickness(0, 5, 0, 5),
-					Content = $"{waybill.ProviderDocumentId} {settings.FullName}",
+					Content = $"{lines[0].ProviderDocumentId} {lines[0].ClientName}",
 					FontFamily = new FontFamily("Arial"),
 				};
 				panel.Children.Add(label);
@@ -31,52 +32,6 @@ namespace AnalitF.Net.Client.Models.Print
 					Child = panel,
 				};
 				label.Measure(pageSize);
-				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
-					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
-				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
-				page.Child.Children.Add(border);
-				document.Pages.Add(page);
-			}
-			return document;
-		}
-
-		public static FixedDocument BuildFixedDoc(IList<BaseStock> lines, Func<BaseStock, FrameworkElement> map, double borderThickness)
-		{
-			var document = new FixedDocument();
-			var left = lines.Count;
-			while (left > 0)
-			{
-				var panel = new StackPanel();
-				var page = new PageContent();
-				page.Child = new FixedPage();
-				var border = new Border
-				{
-					Margin = new Thickness(25),
-					Child = panel,
-				};
-				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
-					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
-				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
-				page.Child.Children.Add(border);
-				document.Pages.Add(page);
-			}
-			return document;
-		}
-
-		public static FixedDocument BuildFixedDoc(IList<Stock> lines, Func<Stock, FrameworkElement> map, double borderThickness)
-		{
-			var document = new FixedDocument();
-			var left = lines.Count;
-			while (left > 0)
-			{
-				var panel = new StackPanel();
-				var page = new PageContent();
-				page.Child = new FixedPage();
-				var border = new Border
-				{
-					Margin = new Thickness(25),
-					Child = panel,
-				};
 				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
 					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
 				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));

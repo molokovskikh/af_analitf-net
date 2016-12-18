@@ -21,7 +21,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	public class InventoryDocs : BaseScreen2
 	{
 		private ReactiveCollection<InventoryDoc> items;
-		private string Name;
 
 		public InventoryDocs()
 		{
@@ -32,14 +31,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Subscribe(x => {
 				CanOpen.Value = x != null;
 				CanPrint.Value = x != null;
-				CanPrintStockPriceTags.Value = x != null;
+				CanTags.Value = x != null;
 				CanDelete.Value = x?.Status == DocStatus.NotPosted;
 				CanPost.Value = x?.Status == DocStatus.NotPosted;
 				CanUnPost.Value = x?.Status == DocStatus.Posted;
 			});
 			DisplayName = "Излишки";
 			TrackDb(typeof(InventoryDoc));
-			Name = User?.FullName ?? "";
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -60,7 +58,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanPrint { get; set; }
-		public NotifyValue<bool> CanPrintStockPriceTags { get; set; }
+		public NotifyValue<bool> CanTags { get; set; }
 		public NotifyValue<bool> IsAll { get; set; }
 		public NotifyValue<bool> IsNotPosted { get; set; }
 		public NotifyValue<bool> IsPosted { get; set; }
@@ -190,13 +188,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
-		public IResult PrintStockPriceTags()
+		public void Tags()
 		{
-			return new DialogResult(new PrintPreviewViewModel
-			{
-				DisplayName = "Ярлыки",
-				Document = new StockPriceTagDocument(CurrentItem.Value.Lines.Cast<BaseStock>().ToList(), Name).Build()
-			}, fullScreen: true);
+			var tags = CurrentItem.Value.Lines.Select(x => x.Stock.GeTagPrintable(User?.FullName)).ToList();
+			Shell.Navigate(new Tags(tags));
 		}
 	}
 }

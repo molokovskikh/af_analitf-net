@@ -104,22 +104,21 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var address = new Address("Тестовый");
 			var settings = new Settings(address);
-			var waybill = new Waybill(address, new Supplier());
-			var line = new WaybillLine(waybill) {
+			var lines = new List<TagPrintable>();
+			var line = new TagPrintable() {
 				Nds = 10,
-				SupplierCost = 251.20m,
-				SupplierCostWithoutNds = 228.36m,
+				RetailCost = 251.20m,
+				Product = "Диклофенак",
 				Quantity = 1
 			};
-			waybill.AddLine(line);
+			lines.Add(line);
 
-			waybill.Calculate(settings, new List<uint>());
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+			var doc = new PriceTagDocument(lines, settings, null).Build();
 			Assert.IsNotNull(doc);
 
 			var priceTag = PriceTag.Default(TagType.RackingMap);
 			settings.RackingMap.Size = RackingMapSize.Custom;
-			var doc2 = new RackingMapDocument(waybill, waybill.Lines, settings, priceTag).Build();
+			var doc2 = new RackingMapDocument(lines, settings, priceTag).Build();
 			Assert.IsNotNull(doc2);
 		}
 
@@ -129,19 +128,18 @@ namespace AnalitF.Net.Client.Test.Unit
 			var address = new Address("Тестовый");
 			var settings = new Settings(address);
 			settings.PriceTag.Type = PriceTagType.Normal;
-			var waybill = new Waybill(address, new Supplier());
+			var lines = new List<TagPrintable>();
 			for(var i = 0; i < 25; i++) {
-				var line = new WaybillLine(waybill) {
+				var line = new TagPrintable() {
 					Nds = 10,
-					SupplierCost = 251.20m,
-					SupplierCostWithoutNds = 228.36m,
+					RetailCost = 251.20m,
+					Product = "Диклофенак",
 					Quantity = 1
 				};
-				waybill.AddLine(line);
+				lines.Add(line);
 			}
 
-			waybill.Calculate(settings, new List<uint>());
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+			var doc = new PriceTagDocument(lines, settings, null).Build();
 
 			Assert.IsNotNull(doc);
 			Assert.AreEqual(2, doc.Pages.Count);

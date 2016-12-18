@@ -35,7 +35,7 @@
 			<Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
 			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
 			<Button Name="Print" Style="{StaticResource FilterElement}" ToolTip="Печать документов (Ctrl+P)">Печать документов</Button>
-			<Button Name="PrintStockPriceTags" Style="{StaticResource FilterElement}" ToolTip="Печать ярлыков (Ctrl+L)">Печать ярлыков</Button>
+			<Button Name="Tags" Style="{StaticResource FilterElement}" ToolTip="Печать ярлыков (Ctrl+L)">Печать ярлыков</Button>
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>

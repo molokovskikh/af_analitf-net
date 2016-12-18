@@ -212,6 +212,7 @@
     <Compile Include="Integration\ViewModels\CorrectionFixture.cs" />
     <Compile Include="Fixtures\Diadok\DiadokFixtureData.cs" />
     <Compile Include="Integration\ViewModels\GoodsMovementFixture.cs" />
+    <Compile Include="Integration\ViewModels\TagsFixture.cs" />
     <Compile Include="Integration\Views\Diadok\DiadokFixture.cs" />
     <Compile Include="Integration\ViewModels\FeedbackFixture.cs" />
     <Compile Include="Integration\ViewModels\JunkOfferFixture.cs" />
