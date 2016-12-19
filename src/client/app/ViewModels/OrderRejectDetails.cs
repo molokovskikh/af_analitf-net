@@ -41,8 +41,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 			ProductInfo = new ProductInfo(this, CurrentOffer);
 			Doc.Value = Session.Query<OrderReject>().First(r => r.DownloadId == id);
+			var waybill = Session.Query<Waybill>().First(r => r.Id == id);
+			if (waybill.IsNew)
+			{
+				waybill.IsNew = false;
+				if (Shell.NewDocsCount.Value > 0)
+					Shell.NewDocsCount.Value--;
+			}
 			if (Doc.Value.Supplier == null)
-				DisplaySupplierName = Session.Query<Waybill>().First(r => r.Id == id).UserSupplierName;
+				DisplaySupplierName = waybill.UserSupplierName;
 			else
 				DisplaySupplierName = Doc.Value.Supplier.FullName;
 

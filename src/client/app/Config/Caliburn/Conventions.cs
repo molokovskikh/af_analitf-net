@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
 					var dataGrid = (DataGrid)element;
 					if (dataGrid.Columns.Count > 1)
-						Interaction.GetBehaviors(element).Add(new Persistable());
+						Interaction.GetBehaviors(element).Add(new CustomMenu());
 
 					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
 					if (fallback != null) {
