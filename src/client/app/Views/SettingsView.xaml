@@ -713,14 +713,24 @@
 				</StackPanel>
 			</TabItem>
 
-			<TabItem Header="Причины списания">
+			<TabItem Header="Причины списания" Name="WriteoffReasonsTab">
 				<DataGrid Name="WriteoffReasons">
 					<DataGrid.Columns>
 						<DataGridTextColumn Width="*" Header="Причина" Binding="{Binding Name}" />
 					</DataGrid.Columns>
 				</DataGrid>
 			</TabItem>
+
+			<TabItem Header="Печать чеков" Name="ChecksTab">
+				<StackPanel>
+					<ComboBox Style="{StaticResource Select}"
+						ItemsSource="{Binding Printers}"
+						SelectedItem="{Binding Settings.Value.CheckPrinter}" />
+				</StackPanel>
+			</TabItem>
+
 		</TabControl>
+
 		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>
 			<Button x:Name="TryClose" MinWidth="100" IsCancel="True">Отменить</Button>

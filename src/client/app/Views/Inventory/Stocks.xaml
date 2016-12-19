@@ -35,6 +35,7 @@
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
 				<MenuItem Header="Чеки" Name="Checks" />
+				<MenuItem Header="Движение товара по накладным" Name="GoodsMovement" />
 			</MenuItem>
 		</Menu>
 		<WrapPanel Grid.Row="1" Style="{StaticResource FilterWrapPanel}" >

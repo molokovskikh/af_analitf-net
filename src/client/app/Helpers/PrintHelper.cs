@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Printing;
+using System.Text;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -47,7 +48,7 @@ namespace AnalitF.Net.Client.Helpers
 			TextRange text = new TextRange(doc.ContentStart, doc.ContentEnd);
 			text.Save(ms, DataFormats.Rtf);
 
-			var rtfString = System.Text.Encoding.Default.GetString(ms.ToArray());
+			var rtfString = Encoding.Default.GetString(ms.ToArray());
 
 			if (orientation == PageOrientation.Landscape)
 			{
@@ -77,7 +78,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 			else {
 				pageSize = page.Size;
-			}	
+			}
 			var renderBmp = new RenderTargetBitmap((int) pageSize.Width, (int) pageSize.Height, 96d, 96d, PixelFormats.Pbgra32);
 			renderBmp.Render(drawingVisual);
 			var dWidth = (int)pageSize.Width;
@@ -106,7 +107,7 @@ namespace AnalitF.Net.Client.Helpers
 			if (contentOnly) {
 				var rects = new List<Rect>();
 				foreach (var item in pagevisual.Children) {
-					var container = item as ContainerVisual; 
+					var container = item as ContainerVisual;
 					var offset = container.Transform;
 					var containerItem = container.Descendants<ContainerVisual>().ToArray()[1];
 					var rect = containerItem.DescendantBounds;
@@ -144,6 +145,17 @@ namespace AnalitF.Net.Client.Helpers
 			var resultBitmap = new RenderTargetBitmap((int)dWidth, (int)dHeight, 96d, 96d, PixelFormats.Pbgra32);
 			resultBitmap.Render(dv);
 			return resultBitmap;
+		}
+
+		public static PrintQueueCollection GetPrinters()
+		{
+			var server = new LocalPrintServer();
+			var printQueues =
+				server.GetPrintQueues(new[] {
+					EnumeratedPrintQueueTypes.Local,
+					EnumeratedPrintQueueTypes.Connections
+				});
+			return printQueues;
 		}
 	}
 }

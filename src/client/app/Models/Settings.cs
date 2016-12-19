@@ -139,6 +139,7 @@ namespace AnalitF.Net.Client.Models
 			Markups = new List<MarkupConfig>();
 			Waybills = new List<WaybillSettings>();
 			ModePKU = ModePKU.Warning;
+			RegistryDoc = new RegistryDocumentSettings();
 #if DEBUG
 			TabbedUI = true;
 #endif
@@ -262,10 +263,7 @@ namespace AnalitF.Net.Client.Models
 			set { _proxyPassword = value?.Trim(); }
 		}
 
-		public virtual bool IsValid
-		{
-			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }
-		}
+		public virtual bool IsValid => !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName);
 
 		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
 		public virtual WaybillActDocumentSettings WaybillActDoc { get; set; }
@@ -426,6 +424,8 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 		}
+
+		public virtual string CheckPrinter { get; set; }
 
 		public virtual IWebProxy GetProxy()
 		{

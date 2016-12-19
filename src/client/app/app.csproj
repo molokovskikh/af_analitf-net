@@ -433,6 +433,7 @@
     <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
     <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
     <Compile Include="ViewModels\Inventory\EditUnpackingDoc.cs" />
@@ -445,12 +446,12 @@
     <Compile Include="ViewModels\Diadok\Sign.cs" />
     <Compile Include="ViewModels\Dialogs\EditDefectSeries.cs" />
     <Compile Include="ViewModels\Dialogs\EditStock.cs" />
-    <Compile Include="ViewModels\Dialogs\CreateGoodsMovementReport.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
     <Compile Include="ViewModels\Dialogs\ScannerConfig.cs" />
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
+    <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
@@ -573,9 +574,6 @@
       <DependentUpon>Sign.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\CanvasPanel.cs" />
-    <Compile Include="Views\Dialogs\CreateGoodsMovementReport.xaml.cs">
-      <DependentUpon>CreateGoodsMovementReport.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\Dialogs\CreateWaybill.xaml.cs">
       <DependentUpon>CreateWaybill.xaml</DependentUpon>
     </Compile>
@@ -603,6 +601,9 @@
     <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
       <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\RegistryDocSettings.xaml.cs">
+      <DependentUpon>RegistryDocSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
     </Compile>
@@ -617,6 +618,9 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\GoodsMovement.xaml.cs">
+      <DependentUpon>GoodsMovement.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\EditDisplacementDoc.xaml.cs">
       <DependentUpon>EditDisplacementDoc.xaml</DependentUpon>
@@ -877,10 +881,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\CreateGoodsMovementReport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\Dialogs\CreateWaybill.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -933,6 +933,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\RegistryDocSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\SelfClose.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -952,6 +956,10 @@
     <Page Include="Views\Feedback.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\GoodsMovement.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\EditDisplacementDoc.xaml">
       <Generator>MSBuild:Compile</Generator>

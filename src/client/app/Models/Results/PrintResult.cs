@@ -64,12 +64,11 @@ namespace AnalitF.Net.Client.Models.Results
 			foreach (var doc in Docs) {
 				var flowDocument = doc.Value.Item1;
 				var paginator = GetPaginator(flowDocument, doc.Value.Item2, dialog.PageRangeSelection, dialog.PageRange);
-				var documentPaginator = GetPaginator(dialog, paginator);
-				dialog.PrintDocument(documentPaginator, name);
+				SetPageOrientation(dialog, paginator);
+				dialog.PrintDocument(paginator, name);
 			}
 
-			if (Completed != null)
-				Completed(this, new ResultCompletionEventArgs());
+			Completed?.Invoke(this, new ResultCompletionEventArgs());
 		}
 
 		public static PageOrientation GetPageOrientation(DocumentPaginator documentPaginator)
@@ -79,27 +78,21 @@ namespace AnalitF.Net.Client.Models.Results
 			return PageOrientation.Unknown;
 		}
 
-		public DocumentPaginator Paginator
-		{
-			get
-			{
-				return GetPaginator(PageRangeSelection.AllPages, new PageRange());
-			}
-		}
+		public DocumentPaginator Paginator => GetPaginator(PageRangeSelection.AllPages, new PageRange());
 
 		public DocumentPaginator GetPaginator(PrintDialog dialog)
 		{
-			var documentPaginator = GetPaginator(dialog.PageRangeSelection, dialog.PageRange);
-			return GetPaginator(dialog, documentPaginator);
+			var paginator = GetPaginator(dialog.PageRangeSelection, dialog.PageRange);
+			SetPageOrientation(dialog, paginator);
+			return paginator;
 		}
 
-		private DocumentPaginator GetPaginator(PrintDialog dialog, DocumentPaginator documentPaginator)
+		private void SetPageOrientation(PrintDialog dialog, DocumentPaginator documentPaginator)
 		{
 			var orientation = GetPageOrientation(documentPaginator);
 			if (orientation != PageOrientation.Unknown) {
 				dialog.PrintTicket.PageOrientation = orientation;
 			}
-			return documentPaginator;
 		}
 
 		public DocumentPaginator GetPaginator(PageRangeSelection selection, PageRange range)

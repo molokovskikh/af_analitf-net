@@ -94,12 +94,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Stock.Copy(stock, this);
 			Id = 0;
+			WaybillLineId = stock.WaybillLineId;
 			Stock = stock;
 			Quantity = quantity;
 			Stock.Reserve(Quantity);
 		}
 
 		public virtual uint Id { get; set; }
+
+		public virtual uint? WaybillLineId { get; set; }
 
 		public virtual DateTime? Exp { get; set; }
 

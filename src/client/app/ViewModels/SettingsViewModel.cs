@@ -105,10 +105,12 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 
 			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
+			Printers = PrintHelper.GetPrinters().Select(x => x.Name).ToArray();
 			if (Session != null)
 				WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
 		}
 
+		public string[] Printers { get; set; }
 		public PersistentList<WriteoffReason> WriteoffReasons { get; set; }
 		public bool HaveAddresses { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }

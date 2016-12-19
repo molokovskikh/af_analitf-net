@@ -23,6 +23,7 @@ using ReactiveUI;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
 using System.ComponentModel.DataAnnotations;
+using AnalitF.Net.Client.Models.Commands;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -211,7 +212,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> PrintRegistry()
 		{
 			var doc = new RegistryDocument(Waybill, PrintableLines());
-			return Preview("Реестр", doc);
+			var docSettings = doc.Settings;
+			yield return new DialogResult(new RegistryDocSettings((RegistryDocumentSettings)docSettings));
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Реестр", doc)), fullScreen: true);
 		}
 
 		public IEnumerable<IResult> PrintWaybill()
@@ -269,6 +272,13 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
+		public IEnumerable<IResult> ConsumptionReport()
+		{
+			var commnand = new ConsumptionReport(Waybill);
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
+			yield return new OpenResult(commnand.Result);
+		}
+
 		public IResult ExportWaybill()
 		{
 			var columns = new[] {
@@ -306,7 +316,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
-                l.RetailMarkupInRubles,
+        l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum

@@ -406,7 +406,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
-			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo(Util.HumanizeDaysAgo(settings.CountDayForWarnOrdered)));
+			Assert.That(model.OrderWarning.OrderWarning, Is.GreaterThanOrEqualTo(Util.HumanizeDaysAgo(settings.CountDayForWarnOrdered)));
 		}
 
 		[Test]

@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Printing;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 
@@ -69,6 +74,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Style(Description = "\"Аннулирован\"")]
 		public virtual bool Cancelled { get; set; }
 
+		/// <summary>
+		/// Получено, руб
+		/// </summary>
+		public virtual decimal Payment { get; set; }
+		/// <summary>
+		/// Сдача, руб
+		/// </summary>
+		public virtual decimal Charge { get; set; }
 		public virtual decimal Sum => RetailSum - DiscountSum;
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal DiscountSum { get; set; }
@@ -89,6 +102,81 @@ namespace AnalitF.Net.Client.Models.Inventory
 			RetailSum = Lines.Sum(l => l.RetailSum);
 			DiscountSum = Lines.Sum(l => l.DiscontSum);
 			SupplySum = Lines.Sum(x => x.Cost);
+		}
+
+		public virtual void Print(string printer, WaybillSettings settings)
+		{
+			var dialog = new PrintDialog();
+			dialog.PrintQueue = new PrintQueue(new PrintServer(), printer);
+
+			var doc = new FlowDocument();
+			doc.ColumnGap = 0;
+			doc.PagePadding = new Thickness(0, 0, 0, 0);
+			doc.ColumnWidth = double.PositiveInfinity;
+			doc.FontFamily = new FontFamily("Arial");
+			var width = dialog.PrintableAreaWidth;
+			doc.PageWidth = width;
+			doc.Blocks.Add(new Paragraph(new Run(settings.FullName) {
+				FontSize = 20,
+			}) {
+				TextAlignment = TextAlignment.Center
+			});
+			var table = new Table();
+			table.CellSpacing = 0;
+			var value = width / 2;
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(value, GridUnitType.Pixel)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(value, GridUnitType.Pixel)
+			});
+			var tableRowGroup = new TableRowGroup();
+			tableRowGroup.Rows.Add(new TableRow {
+				Cells = {
+					new TableCell(new Paragraph(new Run($"Чек №{Id}"))) {
+						FontSize = 8,
+					},
+					new TableCell(new Paragraph(new Run(Date.ToString()))) {
+						TextAlignment = TextAlignment.Right,
+						FontSize = 8
+					},
+				}
+			});
+			table.RowGroups.Add(tableRowGroup);
+			var paragraph = new Paragraph() {
+				FontSize = 10,
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 1, 0, 0)
+			};
+			doc.Blocks.Add(table);
+			doc.Blocks.Add(paragraph);
+			foreach (var line in Lines) {
+				paragraph.Inlines.Add(new Run($"{line.Product} {line.RetailCost:C} x {line.Quantity} = {line.Sum:C}"));
+				paragraph.Inlines.Add(new LineBreak());
+			}
+			doc.Blocks.Add(new Paragraph() {
+				Inlines = {
+					new Run($"Итого = {Sum:C}") {
+						FontSize = 20,
+						FontWeight = FontWeights.Bold,
+					},
+					new LineBreak(),
+					new Run($"Наличными = {Payment:C}") {
+						FontSize = 10,
+					},
+					new LineBreak(),
+					new Run($"Сдача = {Charge:C}") {
+						FontSize = 10
+					}
+				},
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 1, 0, 0)
+			});
+
+			doc.Blocks.Add(new Paragraph(new LineBreak()));
+			doc.Blocks.Add(new Paragraph(new LineBreak()));
+
+			dialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Чек");
 		}
 	}
 }

@@ -12,9 +12,14 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	[Description("Настройка печати реестра")]
 	public class RegistryDocumentSettings
 	{
+		public enum SignerType
+		{
+			[Description("Члены комиссии")] Commitee,
+			[Description("Товар принял")] Acceptor
+		}
+
 		public RegistryDocumentSettings Setup(Waybill waybill)
 		{
 			RegistryId = waybill.ProviderDocumentId;
@@ -22,20 +27,21 @@ namespace AnalitF.Net.Client.Models.Print
 			return this;
 		}
 
-		[Display(Name = "Реестр №", Order = 0), Ignore]
+		[Ignore]
 		public string RegistryId { get; set; }
 
-		[Display(Name = "Дата", Order = 1), Ignore]
+		[Ignore]
 		public DateTime Date { get; set; }
 
-		[Display(Name = "Члены комиссии", Order = 2)]
 		public string CommitteeMember1 { get; set; }
 
-		[Display(Order = 3)]
 		public string CommitteeMember2 { get; set; }
 
-		[Display(Order = 4)]
 		public string CommitteeMember3 { get; set; }
+
+		public string Acceptor { get; set; }
+
+		public SignerType Type { get; set; }
 	}
 
 	public class RegistryDocument : BaseDocument
@@ -84,38 +90,51 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var block = new Paragraph { Style = BlockStyle };
-			//Figure - игнорирует отступы
-			block.Inlines.Add(new Figure(new Paragraph(new Run(
+			var row1 = new TableRow();
+			var row2 = new TableRow();
+			var headerTable = new Table {
+				Columns = {
+					new TableColumn {
+						Width = new GridLength(300, GridUnitType.Pixel)
+					},
+					new TableColumn {
+						Width = new GridLength(300, GridUnitType.Pixel)
+					},
+					new TableColumn {
+						Width = new GridLength(400, GridUnitType.Pixel)
+					},
+				},
+				RowGroups = {
+					new TableRowGroup {
+						Rows = { row1, row2 }
+					}
+				}
+			};
+			row1.Cells.Add(new TableCell(new Paragraph(new Run(
 				"К положению о порядке формирования цен на лекарственные средства и изделия медицинского назначения\n"
 				+ "Цены реестра соответствуют\n"
-				+ "Гос. реестру 17 изд. 5 доп."))) {
-					Width = new FigureLength(208),
-					HorizontalAnchor = FigureHorizontalAnchor.PageLeft,
-					Padding = new Thickness(29, 0, 0, 0),
-					TextAlignment = TextAlignment.Left
+				+ "Гос. реестру 17 изд. 5 доп.")) {
+					FontSize = 8,
+					Style = BlockStyle,
+				}) {
+					RowSpan = 2
 				});
-			//WrapDirection = WrapDirection.None нужно что бы блок с "УТВЕРЖДАЮ"
-			//не пытался заполнить пустое пространство между этим блоком и предыдущим
-			block.Inlines.Add(new Figure(new Paragraph(new Run(settings.FullName))) {
-				HorizontalOffset = 713,
-				HorizontalAnchor = FigureHorizontalAnchor.PageLeft,
-				WrapDirection = WrapDirection.None,
-				Padding = new Thickness(0, 0, 29, 0)
-			});
-			doc.Blocks.Add(block);
+			row1.Cells.Add(new TableCell());
+			row1.Cells.Add(new TableCell(new Paragraph(new Run(settings.FullName)) {
+				TextAlignment = TextAlignment.Right,
+				FontSize = 14,
+				Style = BlockStyle,
+			}));
 
-			block = new Paragraph { Style = BlockStyle };
-			//WrapDirection = WrapDirection.None нужно что бы текст заголовка не пытался заполнить пустое пространство
-			//а располагался отдельно
-			block.Inlines.Add(new Figure(new Paragraph(new Run("УТВЕРЖДАЮ\n"
-				+ $"Зав.аптекой ______________{settings.Director}"))) {
-					HorizontalAnchor = FigureHorizontalAnchor.PageRight,
-					WrapDirection = WrapDirection.None,
-					Padding = new Thickness(0, 0, 29, 0)
-				});
-			doc.Blocks.Add(block);
+			row2.Cells.Add(new TableCell());
+			row2.Cells.Add(new TableCell(new Paragraph(new Run("УТВЕРЖДАЮ\n"
+				+ $"Зав.аптекой _____________________{settings.Director}")) {
+					TextAlignment = TextAlignment.Right,
+					FontSize = 8,
+					Style = BlockStyle,
+				}));
 
+			doc.Blocks.Add(headerTable);
 			var header = Header(String.Format("РЕЕСТР  №{0} от {1:d}\n"
 				+ "розничных цен на лекарственные средства и изделия медицинского назначения,\n"
 				+ "полученные от {4}-по счету (накладной) №{2} от {3:d}",
@@ -132,7 +151,18 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn(null, 30),
 				new PrintColumn("Серия товара", 84),
 				new PrintColumn("Срок годности", 60),
-				new PrintColumn("Наименование", 100),
+				new PrintColumn("Наименование", 100) {
+					HeaderStyle = new Style(typeof(TableCell), TableHeaderStyle) {
+						Setters = {
+							new Setter(TableCell.FontSizeProperty, 8d),
+						}
+					},
+					CellStyle = new Style(typeof(TableCell), CellStyle) {
+						Setters = {
+							new Setter(TableCell.FontSizeProperty, 8d),
+						}
+					}
+				},
 				new PrintColumn("Цена без НДС, руб", 50),
 				new PrintColumn("Цена с НДС, руб", 50),
 				new PrintColumn("Цена ГР, руб", 50),
@@ -156,23 +186,24 @@ namespace AnalitF.Net.Client.Models.Print
 				l.SerialNumber,
 				l.Period,
 				$"{l.Producer} {l.Country}",
-				l.ProducerCost != null ? l.ProducerCost.Value.ToString("0.00") : "",
-				l.ProducerCostWithTax != null ? l.ProducerCostWithTax.Value.ToString("0.00") : "",
-				l.RegistryCost != null ? l.RegistryCost.Value.ToString("0.00") : "",
+				l.ProducerCost?.ToString("0.00"),
+				l.ProducerCostWithTax?.ToString("0.00"),
+				l.RegistryCost?.ToString("0.00"),
 				l.SupplierPriceMarkup,
-				l.SupplierCostWithoutNds != null ? l.SupplierCostWithoutNds.Value.ToString("0.00") : "",
+				l.SupplierCostWithoutNds?.ToString("0.00"),
 				l.TaxPerUnit,
-				l.SupplierCost != null ? l.SupplierCost.Value.ToString("0.00") : "",
+				l.SupplierCost?.ToString("0.00"),
 				l.RetailMarkup,
-                l.RetailMarkupInRubles != null ? l.RetailMarkupInRubles.Value.ToString("0.00") : "",
-				l.RetailCost != null ? l.RetailCost.Value.ToString("0.00") : "",
+				l.RetailMarkupInRubles?.ToString("0.00"),
+				l.RetailCost?.ToString("0.00"),
 				l.Quantity,
-				l.RetailSum != null ? l.RetailSum.Value.ToString("0.00") : "",
+				l.RetailSum?.ToString("0.00"),
 			});
 			BuildTable(rows, columns, columnGrops);
 
 			var retailsSum = lines.Sum(l => l.RetailSum);
-			block = Block("Продажная сумма: " + (retailsSum != null ? RusCurrency.Str((double)retailsSum) : ""));
+			var block = Block("Продажная сумма: " + (retailsSum != null ? RusCurrency.Str((double)retailsSum) : ""));
+			block.FontSize = 14;
 			block.Inlines.Add(new Figure(new Paragraph(new Run(retailsSum != null ? retailsSum.Value.ToString("0.00") : ""))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
@@ -181,16 +212,24 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			var sum = waybill.DisplayedSum;
 			block = Block("Сумма поставки: " + (sum != 0 ? RusCurrency.Str((double)sum) : ""));
+			block.FontSize = 14;
 			block.Inlines.Add(new Figure(new Paragraph(new Run(sum != 0 ? sum.ToString("0.00") : ""))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),
 				Margin = new Thickness(0)
 			});
-			Block("Члены комиссии:\n"
-				+ $"_{docSettings.CommitteeMember1}____/             /\n"
-				+ $"_{docSettings.CommitteeMember2}____/             /\n"
-				+ $"_{docSettings.CommitteeMember3}____/             /");
+			if (docSettings.Type == RegistryDocumentSettings.SignerType.Acceptor) {
+				var signBlock = Block("Товар принял:\n"
+					+ $"_{docSettings.Acceptor}____/                                   /\n");
+				signBlock.FontSize = 8;
+			} else {
+				var signBlock = Block("Члены комиссии:\n"
+					+ $"_{docSettings.CommitteeMember1}____/                                   /\n"
+					+ $"_{docSettings.CommitteeMember2}____/                                   /\n"
+					+ $"_{docSettings.CommitteeMember3}____/                                   /");
+				signBlock.FontSize = 8;
+			}
 		}
 
 		public override FrameworkContentElement GetHeader(int page, int pageCount)
@@ -200,7 +239,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override FrameworkContentElement GetFooter(int page, int pageCount)
 		{
-			return new Paragraph(new Run($"страница {page + 1} из {pageCount}")) {
+			return new Paragraph(new Run($"страница {page + 1} из {pageCount}, время печати {DateTime.Now.ToString("dd.MM.yyyy HH:mm")}")) {
 				FontFamily = new FontFamily("Arial"),
 				FontSize = 8
 			};

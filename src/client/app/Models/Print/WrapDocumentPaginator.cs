@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Markup;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 
@@ -33,6 +35,16 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			this.document = document;
 			this.paginator = paginator;
+
+			//будь бдителен, это очистка кеша
+			//DocumentPaginator содержит внутри себя кеш страниц которые он сформировал
+			//но если мы сформируем два WrapDocumentPaginator то при попытке сформировать страницу будет ошибка
+			//System.ArgumentException : Указанный элемент Visual уже является дочерним по отношению к другому элементу Visual или корневому элементу CompositionTarget.
+			//эта ошибка вызвана тем что страница из кеша присваивается как дочерняя двум результирующим страницам
+			//что бы этого избежать при создании очищаем кеш
+			var size = paginator.PageSize;
+			paginator.PageSize = new Size(0, 0);
+			paginator.PageSize = size;
 
 			pageSize = new Size(paginator.PageSize.Width + Margins.Right + Margins.Left,
 				paginator.PageSize.Height + Margins.Top + Margins.Bottom);
@@ -83,6 +95,13 @@ namespace AnalitF.Net.Client.Models.Print
 				new Rect(new Point(), pageSize),
 				new Rect(new Point(Margins.Left, Margins.Top), ContentSize()));
 			return documentPage;
+		}
+
+		private Visual Clone(Visual visual)
+		{
+			var memory = new MemoryStream();
+			var s = XamlWriter.Save(visual);
+			return (Visual)XamlReader.Parse(s);
 		}
 
 		private Visual Header(int pageNumber)

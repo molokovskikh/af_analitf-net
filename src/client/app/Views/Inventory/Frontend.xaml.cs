@@ -53,7 +53,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 				} else if (args.Key == Key.F7) {
 					results = Model.SearchByCost();
 				} else if (args.Key == Key.Enter) {
-					results = Model.Close();
+					if (String.IsNullOrEmpty(Input.Text))
+						results = Model.Close();
+					else
+						results = Model.PossibleBarcodeScanned();
 				}
 				if (results != null) {
 					Coroutine.BeginExecute(results.GetEnumerator(), new ActionExecutionContext { View = this });

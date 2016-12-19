@@ -165,8 +165,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? RetailMarkupInRubles
 		{
 				get {
-						if(RetailCost != null && SupplierCost != null)
-						return RetailCost - SupplierCost;
+						if(RetailCost.HasValue && SupplierCost.HasValue)
+							return RetailCost - SupplierCost;
 						return null;
 				}
 		}
@@ -193,7 +193,7 @@ namespace AnalitF.Net.Client.Models
 			get
 			{
 				if (RetailCost.HasValue && Nds.HasValue)
-					return RetailCost.Value*100/(100 + Nds.Value);
+					return Math.Round(RetailCost.Value*100/(100 + Nds.Value), 2);
 				return null;
 			}
 		}
@@ -407,7 +407,9 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			var markupType = GetMarkupType();
-			var sourceCost = SupplierCostWithoutNds.GetValueOrDefault();
+			var sourceCost = markupType == MarkupType.Over || markupType == MarkupType.Nds18
+				? SupplierCost.GetValueOrDefault()
+				: SupplierCostWithoutNds.GetValueOrDefault();
 			if (markupType == MarkupType.VitallyImportant) {
 				sourceCost = ProducerCost.GetValueOrDefault();
 				if (RegistryCost.GetValueOrDefault() > 0 && (sourceCost == 0 || sourceCost > RegistryCost.GetValueOrDefault())) {
@@ -421,6 +423,11 @@ namespace AnalitF.Net.Client.Models
 			if (sourceCost == 0)
 				return;
 			if (!Waybill.IsAddressExists())
+				return;
+			if (!(SupplierCost != 0 && TaxFactor != 0 &&
+			    (markupType == MarkupType.VitallyImportant && ProducerCost != 0
+			     ||
+			     markupType != MarkupType.VitallyImportant && SupplierCostWithoutNds != 0)))
 				return;
 			var markup = MarkupConfig.Calculate(settings.Markups, markupType, sourceCost, Waybill.Address);
 			if (markup == null)

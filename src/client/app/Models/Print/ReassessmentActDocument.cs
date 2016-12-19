@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var table = (Table)doc.Blocks.Single(x => x.Name == "Table");
 			var tableRowGroup = table.RowGroups[1];
 			foreach (var data in rows)
-				BuildRow(tableRowGroup, data);
+				BuildRow(tableRowGroup, null, data);
 		}
 	}
 }

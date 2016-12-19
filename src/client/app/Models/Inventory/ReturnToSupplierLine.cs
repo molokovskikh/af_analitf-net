@@ -10,6 +10,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 	{
 		public virtual uint Id { get; set; }
 
+		public virtual uint? WaybillLineId { get; set; }
+
 		public virtual decimal Quantity { get; set; }
 
 		public virtual decimal SupplierSumWithoutNds => Quantity * SupplierCostWithoutNds.GetValueOrDefault();
@@ -29,6 +31,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Stock.Copy(stock, this);
 			Id = 0;
+			WaybillLineId = stock.WaybillLineId;
 			Stock = stock;
 			Quantity = quantity;
 			Stock.Reserve(Quantity);
