@@ -86,7 +86,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			decimal? RetailMarkupInRubles = Convert.ToDecimal(ValueCell);
 			Assert.AreEqual(4m, RetailMarkupInRubles);
 
-
 			tableCellCollection = listTableCellCollection[3];
 			ValueCell = new TextRange(tableCellCollection[14].ContentStart, tableCellCollection[14].ContentEnd).Text;
 			Assert.AreEqual(string.Empty, ValueCell);
