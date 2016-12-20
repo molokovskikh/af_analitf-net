@@ -13,7 +13,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	public class UnpackingDocs : BaseScreen2
 	{
 		private ReactiveCollection<UnpackingDoc> items;
-		private string Name;
 
 		public UnpackingDocs()
 		{
@@ -25,11 +24,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				CanOpen.Value = x != null;
 				CanDelete.Value = x?.Status == DocStatus.NotPosted;
 				CanPost.Value = x?.Status == DocStatus.NotPosted;
-				CanUnPost.Value = x?.Status == DocStatus.Posted;
+				CanUnPost.Value = x?.Status == DocStatus.Posted && !x.Lines.Any(y => y.Moved);
 			});
 			DisplayName = "Распаковка";
-			TrackDb(typeof(InventoryDoc));
-			Name = User?.FullName ?? "";
+			TrackDb(typeof(UnpackingDoc));
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -66,7 +64,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public override void Update()
 		{
-			// сделать через RxQuery
 			Session.Clear();
 			var query = Session.Query<UnpackingDoc>()
 				.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
@@ -86,11 +83,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			};
 		}
 
-		public void Create()
-		{
-			Shell.Navigate(new EditUnpackingDoc(new UnpackingDoc(Address)));
-		}
-
 		public void Open()
 		{
 			if (!CanOpen)
@@ -107,24 +99,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Value.BeforeDelete();
 			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
+			CurrentItem.Refresh();
 		}
 
 		public void Post()
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			Session.Load<UnpackingDoc>(CurrentItem.Value.Id).Post();
-			CurrentItem.Refresh();
+			CurrentItem.Value.Post();
+			Session.Flush();
 			Update();
+			CurrentItem.Refresh();
 		}
 
 		public void UnPost()
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			Session.Load<UnpackingDoc>(CurrentItem.Value.Id).UnPost();
-			CurrentItem.Refresh();
+			CurrentItem.Value.UnPost();
+			Session.Flush();
 			Update();
+			CurrentItem.Refresh();
 		}
 
 		public void EnterItem()

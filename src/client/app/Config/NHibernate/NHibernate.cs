@@ -246,7 +246,11 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			mapper.Class<UnpackingDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 			}));
-			mapper.Class<UnpackingDocLine>(m => m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All)));
+			mapper.Class<UnpackingDocLine>(m => {
+				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
+				m.ManyToOne(x => x.SrcStock, p => p.Cascade(Cascade.All));
+			});
+
 			mapper.Class<WriteoffDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 			}));

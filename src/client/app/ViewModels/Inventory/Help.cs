@@ -34,6 +34,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				new HelpItem("* (NUM)", "Перенести содержимое поля ввода в поле количество"),
 				new HelpItem("Alt + Delete", "Отменить чек"),
 				new HelpItem("Ctrl + Q", "Редактирование количества"),
+				new HelpItem("Ctrl + R", "Распаковка"),
 			};
 			DisplayName = "Справка";
 		}

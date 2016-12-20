@@ -51,6 +51,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			doc.Lines.Add(line);
 			session.Save(doc);
 			session.Flush();
+			// после создания распаковки - распакованная упаковка в резерве
 			Assert.AreEqual(stock.Quantity, 4);
 			Assert.AreEqual(stock.ReservedQuantity, 1);
 			Assert.AreEqual(line.SrcQuantity, 1);
@@ -61,7 +62,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(line.RetailCost, 1.26m);
 			Assert.AreEqual(dstStock.RetailCost, 1.26m);
 			Assert.AreEqual(line.Delta, -0.07m);
+			Assert.AreEqual(dstStock.Multiplicity, 10);
+			Assert.IsTrue(dstStock.Unpacked); // распакованный
+			Assert.IsFalse(stock.Unpacked); // нераспакованный
 
+			// проводка: склад -1 целая, +10 распакованная
 			doc.Post();
 			session.Save(doc);
 			session.Flush();
@@ -69,8 +74,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 			Assert.AreEqual(dstStock.Quantity, 10);
 			Assert.AreEqual(dstStock.ReservedQuantity, 0);
+			Assert.IsFalse(line.Moved); // не было движения
 
-			//Если мы снова откроем документ, то получим что было до закрытия
+			//Если снова откроем документ, то получим что было до закрытия
 			doc.UnPost();
 			session.Save(doc);
 			session.Flush();

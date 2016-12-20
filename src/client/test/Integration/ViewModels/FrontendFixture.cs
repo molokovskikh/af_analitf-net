@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
 
@@ -159,6 +160,32 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 8);
 			Assert.AreEqual(check.Sum, 3);
 			Assert.AreEqual(check.CheckType, CheckType.CheckReturn);
+		}
+
+		[Test]
+		public void Unpack()
+		{
+			//добавляем строку на 3 упаковки
+			var line = new CheckLine(stock, 3, CheckType.SaleBuyer);
+			model.Lines.Add(line);
+			model.CurrentLine.Value = line;
+			Assert.AreEqual(stock.Quantity, 2);
+
+			var result = model.Unpack().GetEnumerator();
+			var dialog = Next<DialogResult>(result);
+			var settings = (Frontend.UnpackSettings)((SimpleSettings)dialog.Model).Target;
+			settings.Quantity = 2;
+			settings.Multiplicity = 6;
+			result.MoveNext();
+
+			// было 5, одну распаковали
+			Assert.AreEqual(stock.Quantity, 4);
+			var dstStock = model.CurrentLine.Value.Stock;
+			// распаковали на 6 частей
+			Assert.AreEqual(dstStock.Multiplicity, 6);
+			// из них две в чеке
+			Assert.AreEqual(dstStock.Quantity, 6 - 2);
+			Assert.AreEqual(model.CurrentLine.Value.Quantity, 2);
 		}
 	}
 }

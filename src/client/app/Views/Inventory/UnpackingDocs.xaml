@@ -10,8 +10,6 @@
              d:DesignHeight="300" d:DesignWidth="1000">
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Create" />
-		<KeyBinding Gesture="Enter" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Open" />
 		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
 		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Post" />
 		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel" CommandParameter="UnPost" />
@@ -25,8 +23,6 @@
 		</Grid.RowDefinitions>
 
 		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
-			<Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать (Ctrl+N)">Создать</Button>
-			<Button Name="Open" Style="{StaticResource FilterElement}" ToolTip="Открыть (Enter)">Открыть</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
 			<Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
@@ -47,17 +43,17 @@
 			</GroupBox>
 		</WrapPanel>
 
-		<controls:DataGrid2 Grid.Row="1" x:Name="Items" IsReadOnly="False">
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" IsReadOnly="False" />
-				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Сумма списания с НДС" Binding="{Binding SrcRetailSum}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Сумма прихода с НДС" Binding="{Binding RetailSum}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Разность сумм" Binding="{Binding Delta}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" IsReadOnly="False"/>
+				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Сумма списания с НДС" Binding="{Binding SrcRetailSum}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Сумма прихода с НДС" Binding="{Binding RetailSum}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Разность сумм" Binding="{Binding Delta}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*"/>
+				<controls:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*"/>
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 		<StackPanel Grid.Row="2" Name="Legend" />

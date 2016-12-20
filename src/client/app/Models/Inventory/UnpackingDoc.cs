@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Date = DateTime.Now;
 			Address = address;
+			UpdateStat();
 		}
 
 		public virtual uint Id { get; set; }
@@ -43,6 +44,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual DateTime? CloseDate { get; set; }
 		public virtual decimal? SrcRetailSum { get; set; }
 		public virtual decimal? RetailSum { get; set; }
+		public virtual string Comment { get; set; }
 		public virtual decimal? Delta => RetailSum - SrcRetailSum;
 		public virtual int LinesCount { get; set; }
 
@@ -110,7 +112,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Stock.Copy(srcStock, this);
 			var dstStock = srcStock.Copy();
 			dstStock.Quantity = 0;
-			Quantity = dstStock.ReservedQuantity = multiplicity;
+			dstStock.Unpacked = true;
+			Quantity = dstStock.ReservedQuantity = dstStock.Multiplicity = multiplicity;
 			DstStock = dstStock;
 
 			Id = 0;
@@ -121,10 +124,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 			if (srcStock.RetailCost.HasValue)
 				RetailCost = dstStock.RetailCost = getPriceForUnit(srcStock.RetailCost.Value, multiplicity);
-			// надо ли это и правильно ли это?
+
 			if (srcStock.SupplierCost.HasValue)
 				dstStock.SupplierCost = getPriceForUnit(srcStock.SupplierCost.Value, multiplicity);
-			// куда девать разницу Delta?
 		}
 
 		public virtual uint Id { get; set; }
@@ -142,6 +144,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? SrcRetailSum => SrcRetailCost * SrcQuantity;
 
 		public virtual decimal? Delta => RetailSum - SrcRetailSum;
+
+		// признак движения распакованного товара
+		public virtual bool Moved => (DstStock.Quantity + DstStock.ReservedQuantity) != DstStock.Multiplicity;
 
 		public virtual Stock SrcStock { get; set; }
 		public virtual Stock DstStock { get; set; }
