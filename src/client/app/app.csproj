@@ -303,7 +303,6 @@
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
     <Compile Include="Models\Inventory\ReassessmentDoc.cs" />
     <Compile Include="Models\Inventory\ReceivingLine.cs" />
-    <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
     <Compile Include="Models\Inventory\StockAction.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
