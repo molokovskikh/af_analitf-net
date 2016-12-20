@@ -213,12 +213,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Inverse(true);
 				});
 			});
-			mapper.Class<ReceivingOrder>(m => {
-				m.Bag(o => o.Lines, c => {
-					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
-					c.Inverse(false);
-				});
-			});
 			mapper.Class<Waybill>(m => {
 				//при миграции могут если поставщик отсутствует nhibernate будет перезаписывать
 				m.ManyToOne(x => x.Address, x => x.Update(false));

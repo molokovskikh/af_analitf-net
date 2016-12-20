@@ -389,7 +389,22 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool Stock(ISession session)
 		{
 			Status = DocStatus.Posted;
-			var stockActions = Create();
+			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
+			var stockActions = new List<StockAction>();
+			foreach (var line in lines) {
+				line.Stock.Quantity -= line.Quantity.Value;
+				var stock = new Stock(this, line);
+				stockActions.Add(new StockAction {
+					ActionType = ActionType.Stock,
+					SourceStockId = line.StockId,
+					SourceStockVersion = line.StockVersion,
+					Quantity = line.Quantity.GetValueOrDefault(),
+					RetailCost = line.RetailCost,
+					RetailMarkup = line.RetailMarkup,
+					DstStock = stock,
+					SrcStock = line.Stock,
+				});
+			}
 			foreach (var action in stockActions) {
 				session.Save(action.DstStock);
 				session.Update(action.SrcStock);
@@ -397,28 +412,6 @@ namespace AnalitF.Net.Client.Models
 			}
 			session.SaveEach(stockActions);
 			return true;
-		}
-
-		public virtual List<StockAction> Create()
-		{
-			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
-			var stockActions = new List<StockAction>();
-			foreach (var line in lines) {
-				var receivingLine = new ReceivingLine(line);
-				line.Stock.Quantity -= line.Quantity.Value;
-				var stock = new Stock(this, line);
-				stockActions.Add(new StockAction {
-					ActionType = ActionType.Stock,
-					SourceStockId = line.StockId,
-					SourceStockVersion = line.StockVersion,
-					Quantity = receivingLine.Quantity,
-					RetailCost = receivingLine.RetailCost,
-					RetailMarkup = receivingLine.RetailMarkup,
-					DstStock = stock,
-					SrcStock = line.Stock,
-				});
-			}
-			return stockActions;
 		}
 	}
 }
