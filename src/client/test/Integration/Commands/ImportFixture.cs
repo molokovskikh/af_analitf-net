@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
+using Common.Tools;
+using NHibernate.Linq;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Integration.Commands

@@ -34,7 +34,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			InitFields();
 			orderId = order.Id;
 			type = NHibernateUtil.GetClass(order);
-			DisplayName = "Архивный заказ";
+			if (IsCurrentOrder)
+				DisplayName = "Текущий заказ";
+			else
+				DisplayName = "Архивный заказ";
 			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter);
 			MatchedWaybills = new MatchedWaybills(this,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),

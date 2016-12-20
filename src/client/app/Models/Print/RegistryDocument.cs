@@ -90,41 +90,51 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var block = new Paragraph { Style = BlockStyle };
-			//Figure - игнорирует отступы
-			block.Inlines.Add(new Figure(new Paragraph(new Run(
+			var row1 = new TableRow();
+			var row2 = new TableRow();
+			var headerTable = new Table {
+				Columns = {
+					new TableColumn {
+						Width = new GridLength(300, GridUnitType.Pixel)
+					},
+					new TableColumn {
+						Width = new GridLength(300, GridUnitType.Pixel)
+					},
+					new TableColumn {
+						Width = new GridLength(400, GridUnitType.Pixel)
+					},
+				},
+				RowGroups = {
+					new TableRowGroup {
+						Rows = { row1, row2 }
+					}
+				}
+			};
+			row1.Cells.Add(new TableCell(new Paragraph(new Run(
 				"К положению о порядке формирования цен на лекарственные средства и изделия медицинского назначения\n"
 				+ "Цены реестра соответствуют\n"
-				+ "Гос. реестру 17 изд. 5 доп."))) {
-					Width = new FigureLength(208),
-					HorizontalAnchor = FigureHorizontalAnchor.PageLeft,
-					Padding = new Thickness(29, 0, 0, 0),
-					TextAlignment = TextAlignment.Left,
+				+ "Гос. реестру 17 изд. 5 доп.")) {
 					FontSize = 8,
+					Style = BlockStyle,
+				}) {
+					RowSpan = 2
 				});
-			//WrapDirection = WrapDirection.None нужно что бы блок с "УТВЕРЖДАЮ"
-			//не пытался заполнить пустое пространство между этим блоком и предыдущим
-			block.Inlines.Add(new Figure(new Paragraph(new Run(settings.FullName))) {
-				HorizontalOffset = 713,
-				HorizontalAnchor = FigureHorizontalAnchor.PageLeft,
-				WrapDirection = WrapDirection.None,
-				Padding = new Thickness(0, 0, 29, 0),
+			row1.Cells.Add(new TableCell());
+			row1.Cells.Add(new TableCell(new Paragraph(new Run(settings.FullName)) {
+				TextAlignment = TextAlignment.Right,
 				FontSize = 14,
-			});
-			doc.Blocks.Add(block);
+				Style = BlockStyle,
+			}));
 
-			block = new Paragraph { Style = BlockStyle };
-			//WrapDirection = WrapDirection.None нужно что бы текст заголовка не пытался заполнить пустое пространство
-			//а располагался отдельно
-			block.Inlines.Add(new Figure(new Paragraph(new Run("УТВЕРЖДАЮ\n"
-				+ $"Зав.аптекой ______________{settings.Director}"))) {
-					HorizontalAnchor = FigureHorizontalAnchor.PageRight,
-					WrapDirection = WrapDirection.None,
-					Padding = new Thickness(0, 0, 29, 0),
-					FontSize = 8
-				});
-			doc.Blocks.Add(block);
+			row2.Cells.Add(new TableCell());
+			row2.Cells.Add(new TableCell(new Paragraph(new Run("УТВЕРЖДАЮ\n"
+				+ $"Зав.аптекой _____________________{settings.Director}")) {
+					TextAlignment = TextAlignment.Right,
+					FontSize = 8,
+					Style = BlockStyle,
+				}));
 
+			doc.Blocks.Add(headerTable);
 			var header = Header(String.Format("РЕЕСТР  №{0} от {1:d}\n"
 				+ "розничных цен на лекарственные средства и изделия медицинского назначения,\n"
 				+ "полученные от {4}-по счету (накладной) №{2} от {3:d}",
@@ -192,7 +202,7 @@ namespace AnalitF.Net.Client.Models.Print
 			BuildTable(rows, columns, columnGrops);
 
 			var retailsSum = lines.Sum(l => l.RetailSum);
-			block = Block("Продажная сумма: " + (retailsSum != null ? RusCurrency.Str((double)retailsSum) : ""));
+			var block = Block("Продажная сумма: " + (retailsSum != null ? RusCurrency.Str((double)retailsSum) : ""));
 			block.FontSize = 14;
 			block.Inlines.Add(new Figure(new Paragraph(new Run(retailsSum != null ? retailsSum.Value.ToString("0.00") : ""))) {
 				FontWeight = FontWeights.Bold,
@@ -211,13 +221,13 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			if (docSettings.Type == RegistryDocumentSettings.SignerType.Acceptor) {
 				var signBlock = Block("Товар принял:\n"
-					+ $"_{docSettings.Acceptor}____/             /\n");
+					+ $"_{docSettings.Acceptor}____/                                   /\n");
 				signBlock.FontSize = 8;
 			} else {
 				var signBlock = Block("Члены комиссии:\n"
-					+ $"_{docSettings.CommitteeMember1}____/             /\n"
-					+ $"_{docSettings.CommitteeMember2}____/             /\n"
-					+ $"_{docSettings.CommitteeMember3}____/             /");
+					+ $"_{docSettings.CommitteeMember1}____/                                   /\n"
+					+ $"_{docSettings.CommitteeMember2}____/                                   /\n"
+					+ $"_{docSettings.CommitteeMember3}____/                                   /");
 				signBlock.FontSize = 8;
 			}
 		}

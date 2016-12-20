@@ -141,6 +141,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Waybill = Session.Load<Waybill>(id);
 
+			if (Waybill.IsNew)
+			{
+				Waybill.IsNew = false;
+				if (Shell.NewDocsCount.Value > 0)
+					Shell.NewDocsCount.Value--;
+			}
+
 			Calculate();
 
 			Lines.Value = new ListCollectionView(Waybill.Lines.OrderBy(l => l.Product).ToList());

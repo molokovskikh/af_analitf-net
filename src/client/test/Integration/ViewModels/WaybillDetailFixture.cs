@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var doc = new RegistryDocument(waybill, waybillLines);
 			var flowDoc = doc.Build();
 
-			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().First()
+			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().Skip(1).First()
 					.RowGroups.Select(x => x.Rows).ToList()
 					.First().Select(x => x.Cells).ToList();
 
@@ -250,6 +250,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var result = model.RestoredExportWaybill();
 			Assert.IsInstanceOf(typeof (OpenResult), result);
 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
+		}
+
+		[Test]
+		public void Mark_as_read()
+		{
+			var id = model.Waybill.Id;
+			model.Waybill.IsNew = true;
+			model.Session.Flush();
+			Assert.IsTrue(model.Waybill.IsNew);
+			Close(model);
+			model = Open(new WaybillDetails(id));
+			Assert.IsTrue(!model.Waybill.IsNew);
 		}
 	}
 }

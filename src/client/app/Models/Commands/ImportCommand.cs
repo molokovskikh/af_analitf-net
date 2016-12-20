@@ -162,7 +162,6 @@ where o.Sum = 0;")
 			if (Session.Query<LoadedDocument>().Any()) {
 				Log.Info("Пересчет накладных");
 				Session.CreateSQLQuery(@"
-update Waybills set IsNew = 0;
 update Waybills w
 	join LoadedDocuments d on d.Id = w.Id
 set IsNew = 1;")

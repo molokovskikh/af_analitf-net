@@ -148,7 +148,7 @@ namespace AnalitF.Net.Client.Controls
 						var paginator = Document.DocumentPaginator;
 						for (int i = 0; i < paginator.PageCount; i++) {
 							var bitmap = PrintHelper.ToBitmap(paginator, i, true);
-							BitmapFrame bmf = BitmapFrame.Create(bitmap);
+							var bmf = BitmapFrame.Create(bitmap);
 							var enc = new PngBitmapEncoder();
 							enc.Frames.Add(bmf);
 							using (var fs = result.Stream($"_{i + 1}")) {
@@ -158,9 +158,6 @@ namespace AnalitF.Net.Client.Controls
 					}
 				}
 			} else {
-				var printDoc = PrintResult.Docs.First().Value;
-				var bd = printDoc.Item2;
-				var baseFd = bd.Build();
 				var result = new SaveFileResult(new[] {
 					Tuple.Create("Файл PNG (*.png)", ".png"),
 					Tuple.Create("Файл RTF (*.rtf)", ".rtf")
@@ -171,7 +168,7 @@ namespace AnalitF.Net.Client.Controls
 						var paginator = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
 						for (int i = 0; i < paginator.PageCount; i++) {
 							var bitmap = PrintHelper.ToBitmap(paginator, i, true);
-							BitmapFrame bmf = BitmapFrame.Create(bitmap);
+							var bmf = BitmapFrame.Create(bitmap);
 							var enc = new PngBitmapEncoder();
 							enc.Frames.Add(bmf);
 							using (var fs = result.Stream($"_{i + 1}")) {
@@ -179,8 +176,9 @@ namespace AnalitF.Net.Client.Controls
 							}
 						}
 					} else if (result.Dialog.FilterIndex == 2) {
+						var printDoc = PrintResult.Docs.First().Value;
 						using (var writer = result.Writer()) {
-							var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
+							var rtfString = PrintHelper.ToRtfString(printDoc.Item2.Build(), Orientation);
 							writer.WriteLine(rtfString);
 						}
 					}

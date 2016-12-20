@@ -86,6 +86,20 @@ namespace AnalitF.Net.Client.Test.Unit
 		}
 
 		[Test]
+		public void Invalidate_cache()
+		{
+			var baseDoc = new RejectsDocument(Enumerable.Repeat(1, 100).Select(i => new Reject()).ToList(), false);
+			var flowDoc = baseDoc.Build();
+			var paginator = new WrapDocumentPaginator(flowDoc, baseDoc, PageRangeSelection.UserPages, new PageRange(1, 100));
+			paginator.GetPage(0);
+			Assert.AreEqual(2, paginator.PageCount);
+
+			paginator = new WrapDocumentPaginator(flowDoc, baseDoc, PageRangeSelection.UserPages, new PageRange(1, 100));
+			paginator.GetPage(0);
+			Assert.AreEqual(2, paginator.PageCount);
+		}
+
+		[Test]
 		public void Print_price_tag()
 		{
 			var address = new Address("Тестовый");
