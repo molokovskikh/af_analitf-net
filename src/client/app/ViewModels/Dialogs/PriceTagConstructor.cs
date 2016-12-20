@@ -10,20 +10,19 @@ using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
-using Dapper;
-using Dapper.Contrib.Extensions;
 using NHibernate.Linq;
-using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class PriceTagConstructor : BaseScreen
 	{
 		private TagType tagType;
+		private Address address;
 
-		public PriceTagConstructor(TagType tagType)
+		public PriceTagConstructor(TagType tagType, Address address)
 		{
 			this.tagType = tagType;
+			this.address = address;
 			InitFields();
 			DisplayName = tagType == TagType.PriceTag ? "Конструктор ценника" : "Конструктор стеллажной карты";
 			Alignments = new[] {
@@ -47,13 +46,17 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				Items.Clear();
 				Items.AddEach(Tag.Value?.Items ?? Enumerable.Empty<PriceTagItem>());
 			});
+
+			Tag.Value =
+				Session.Query<PriceTag>()
+					.FirstOrDefault(r => r.TagType == tagType && (tagType == TagType.RackingMap || r.Address == address));
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, tagType)).Subscribe(Tag);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, tagType, address)).Subscribe(Tag);
 		}
 
 		public string Text
@@ -338,32 +341,31 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			Query(s => {
 				// Tag.Value.Id = 0 не только у впервые вставляемого тега, но и при сбросе настроек на дефолтные
-				var exist = s.Query<PriceTag>().Where(x => x.TagType == Tag.Value.TagType).FirstOrDefault();
-				uint priceTagId = 0;
-				if (exist == null) {
-					s.Connection.Insert(Tag.Value);
-					priceTagId = Tag.Value.Id;
+				var priceTag = s.Query<PriceTag>().SingleOrDefault(x => x.TagType == Tag.Value.TagType && x.Address == Tag.Value.Address);
+				if (priceTag == null) {
+					s.Insert(Tag.Value);
+					priceTag = Tag.Value;
 				}
 				else {
-					priceTagId = exist.Id;
-					exist.Width = Tag.Value.Width;
-					exist.Height = Tag.Value.Height;
-					exist.BorderThickness = Tag.Value.BorderThickness;
-					s.Connection.Update(exist);
+					priceTag.Width = Tag.Value.Width;
+					priceTag.Height = Tag.Value.Height;
+					priceTag.BorderThickness = Tag.Value.BorderThickness;
+					s.Update(priceTag);
 				}
-				var dbItems = s.Query<PriceTagItem>().Where(x => x.PriceTagId == priceTagId).ToArray();
-				for(var i = 0; i < Items.Count; i++) {
+				var dbItems = s.Query<PriceTagItem>().Where(x => x.PriceTag == priceTag).ToArray();
+				for (var i = 0; i < Items.Count; i++) {
 					var item = Items[i];
-					item.PriceTagId = priceTagId;
+					item.PriceTag = priceTag;
 					item.Position = i;
 					if (item.Id == 0) {
-						s.Connection.Insert(item);
-					}  else {
-						s.Connection.Update(item);
+						s.Insert(item);
+					}
+					else {
+						s.Update(item);
 					}
 				}
 				foreach (var item in dbItems.Where(x => Items.All(y => x.Id != y.Id)))
-					s.Connection.Delete(item);
+					s.Delete(item);
 			}).Wait();
 			TryClose();
 		}
@@ -375,7 +377,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void Reset()
 		{
-			Tag.Value = PriceTag.Default(tagType);
+			Tag.Value = PriceTag.Default(tagType, address);
 		}
 
 		public void Delete()

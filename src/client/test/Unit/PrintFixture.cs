@@ -117,7 +117,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
 			Assert.IsNotNull(doc);
 
-			var priceTag = PriceTag.Default(TagType.RackingMap);
+			var priceTag = PriceTag.Default(TagType.RackingMap, null);
 			settings.RackingMap.Size = RackingMapSize.Custom;
 			var doc2 = new RackingMapDocument(waybill, waybill.Lines, settings, priceTag).Build();
 			Assert.IsNotNull(doc2);
@@ -128,7 +128,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var address = new Address("Тестовый");
 			var settings = new Settings(address);
-			settings.PriceTag.Type = PriceTagType.Normal;
+			settings.PriceTags.First(r => r.Address == address).Type = PriceTagType.Normal;
 			var waybill = new Waybill(address, new Supplier());
 			for(var i = 0; i < 25; i++) {
 				var line = new WaybillLine(waybill) {
