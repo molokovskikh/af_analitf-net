@@ -368,45 +368,6 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 					s.Delete(item);
 			}).Wait();
 			TryClose();
-
-
-
-			//var session = Session.SessionFactory.OpenStatelessSession();
-			//var tag = Tag.Value;
-			//var tx = session.BeginTransaction();
-
-			//try
-			//{
-			//	if (tag.Id == 0)
-			//		session.Insert(tag);
-			//	else
-			//		session.Update(tag);
-
-			//	foreach (var item in tag.Items)
-			//	{
-			//		item.PriceTag = tag;
-			//		if (item.Id == 0)
-			//			session.Insert(item);
-			//		else
-			//			session.Update(item);
-			//	}
-
-			//	var items = session.Query<PriceTagItem>().Where(r => r.PriceTag == tag);
-			//	session.DeleteEach(items.Where(r => !tag.Items.Contains(r)));
-
-			//	tx.Commit();
-			//}
-			//catch
-			//{
-			//	tx.Rollback();
-			//	throw;
-			//}
-			//finally
-			//{
-			//	session.Close();
-			//}
-
-			//TryClose();
 		}
 
 		public void Clear()
