@@ -50,18 +50,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		private Check CreateCheck()
 		{
 			session.DeleteEach<Check>();
-			var department = session.Query<Address>().First();
-			var check = new Check
+			var check = new Check(address, Enumerable.Empty<CheckLine>(), CheckType.CheckReturn)
 			{
-				CheckType = CheckType.CheckReturn,
 				Date = DateTime.Today.AddDays(-7),
 				ChangeOpening = DateTime.Today.AddDays(-7),
-				Status = Status.Open,
 				Clerk = "Тестовый кассир",
-				Department = department,
 				KKM = "1(0000000)",
-				PaymentType = PaymentType.Cash,
-				SaleType = SaleType.FullCost,
 				Discont = 10,
 				ChangeId = 0,
 				ChangeNumber = 42,
@@ -83,7 +77,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ProducerId = 12,
 				Product = "Тестовый продукт",
 				RetailCost = 110,
-				Cost = 100,
+				SupplierCost = 100,
 				Quantity = 1,
 				DiscontSum = 10,
 				CheckId = 0,
@@ -113,7 +107,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var newAddress = new Address("Тестовый адрес доставки");
 			session.Save(newAddress);
 			var check = CreateCheck();
-			check.Department = newAddress;
+			check.Address = newAddress;
 			model.AddressSelector.All.Value = true;
 			Assert.That(model.Items.Value.Count, Is.EqualTo(1));
 			model.AddressSelector.All.Value = false;

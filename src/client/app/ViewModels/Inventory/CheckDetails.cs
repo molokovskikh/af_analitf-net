@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 			RxQuery(s => s.Query<Check>()
-					.Fetch(x => x.Department)
+					.Fetch(x => x.Address)
 					.FirstOrDefault(y => y.Id == id))
 				.Subscribe(Header);
 			RxQuery(x => {

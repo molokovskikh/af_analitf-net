@@ -22,6 +22,36 @@ using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
+	public class ChecksStat : BaseNotify
+	{
+		private decimal _sum;
+		private decimal _retailSum;
+
+		public decimal Sum
+		{
+			get { return _sum; }
+			set
+			{
+				if (_sum == value)
+					return;
+				_sum = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public decimal RetailSum
+		{
+			get { return _retailSum; }
+			set
+			{
+				if (_retailSum == value)
+					return;
+				_retailSum = value;
+				OnPropertyChanged();
+			}
+		}
+	}
+
 	public class Checks : BaseScreen2, IPrintableStock
 	{
 		public Checks()
@@ -37,8 +67,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
+			var stat = new ChecksStat();
+			Stat = new List<ChecksStat> {
+				stat
+			};
+			Items.Subscribe(x => {
+				stat.Sum = x?.Sum(y => y.CheckType == CheckType.CheckReturn ? -y.Sum : y.Sum) ?? 0;
+				stat.RetailSum = x?.Sum(y => y.CheckType == CheckType.CheckReturn ? -y.RetailSum : y.RetailSum) ?? 0;
+			});
 		}
 
+		public List<ChecksStat> Stat { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 		public NotifyValue<DateTime> ChangeDate { get; set; }
@@ -63,9 +102,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Throttle(Consts.FilterUpdateTimeout, UiScheduler)
 				.SelectMany(_ => RxQuery(s => s.Query<Check>()
 					.Where(c => c.Date <= End.Value.AddDays(1) && c.Date >= Begin.Value
-						&& AddressSelector.GetActiveFilter().Contains(c.Department))
+						&& AddressSelector.GetActiveFilter().Contains(c.Address))
 					.OrderByDescending(x => x.Date)
-					.Fetch(x => x.Department)
+					.Fetch(x => x.Address)
 					.ToList()))
 				.Subscribe(Items);
 		}
@@ -127,7 +166,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.Id,
 				o.Date,
 				o.KKM,
-				o.Department.Name,
+				o.Address.Name,
 				o.Cancelled,
 				o.RetailSum,
 				o.DiscountSum,

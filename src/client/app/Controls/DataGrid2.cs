@@ -31,6 +31,11 @@ namespace AnalitF.Net.Client.Controls
 				typeof(DataGrid2),
 				new FrameworkPropertyMetadata(false, ShowAddressColumnPropertyChanged));
 
+		public static DependencyProperty AddressColumnProperty
+			= DependencyProperty.RegisterAttached("AddressColumn",
+				typeof(DataGridColumn),
+				typeof(DataGrid2));
+
 		//свойство нужно тк в 4.0
 		//биндинг на CurrentItem сбрасывается http://connect.microsoft.com/visualstudio/feedback/details/696155/wpf
 		public static DependencyProperty CurrentItemStubProperty
@@ -82,15 +87,16 @@ namespace AnalitF.Net.Client.Controls
 			set { SetValue(ShowAddressColumnProperty, value); }
 		}
 
+		public DataGridColumn AddressColumn
+		{
+			get { return (DataGridColumn)GetValue(AddressColumnProperty); }
+			set { SetValue(AddressColumnProperty, value); }
+		}
+
 		public bool CanUserSelectMultipleItems
 		{
 			get { return CanSelectMultipleItems; }
 			set { CanSelectMultipleItems = value; }
-		}
-
-		protected override void OnExecutedBeginEdit(ExecutedRoutedEventArgs e)
-		{
-			base.OnExecutedBeginEdit(e);
 		}
 
 		/*
@@ -170,7 +176,8 @@ namespace AnalitF.Net.Client.Controls
 		private static void ShowAddressColumnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var grid = (DataGrid2)d;
-			var column = DataGridHelper.FindColumn(grid.Columns, "Адрес заказа");
+			var column = DataGridHelper.FindColumn(grid.Columns, "Адрес заказа")
+				?? grid.AddressColumn;
 			if (column == null)
 				return;
 

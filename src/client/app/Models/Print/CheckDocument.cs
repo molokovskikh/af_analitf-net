@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Id,
 				o.Date.ToString("dd/M/yyyy"),
 				o.KKM,
-				o.Department.Name,
+				o.Address.Name,
 				o.Cancelled,
 				o.RetailSum,
 				o.DiscountSum,
