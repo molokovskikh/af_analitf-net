@@ -104,6 +104,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 		}
 
+		public IEnumerable<IResult> AddFromCatalog()
+		{
+			while (true) {
+				var search = new StockSearch();
+				yield return new DialogResult(search, resizable: true);
+				var edit = new EditStock(search.CurrentItem)
+				{
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
+				var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
+				Save();
+			}
+		}
+
 		public void Delete()
 		{
 			// с поставки наружу

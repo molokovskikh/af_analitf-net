@@ -272,7 +272,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (String.IsNullOrEmpty(term))
 				term = Input.Value;
 			var model = new StockSearch(term);
-			yield return new DialogResult(model);
+			yield return new DialogResult(model, resizable: true);
 			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
 
