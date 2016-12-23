@@ -136,7 +136,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Filename { get; set; }
 
 		//для биндинга
-		public virtual bool IsReadOnly => !IsCreatedByUser;
+		public virtual bool IsReadOnly => !IsCreatedByUser || Status == DocStatus.Posted;
 
 		[Style(Description = "Накладная, созданная пользователем")]
 		public virtual bool IsCreatedByUser
@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.Models
 			get { return _isCreatedByUser; }
 			set
 			{
-				if (_isCreatedByUser != value)
+				if (Status != DocStatus.Posted && _isCreatedByUser != value)
 				{
 					_isCreatedByUser = value;
 					Recalculate();
@@ -169,7 +169,7 @@ namespace AnalitF.Net.Client.Models
 			get { return _rounding; }
 			set
 			{
-				if (_rounding != value) {
+				if (Status != DocStatus.Posted && _rounding != value) {
 					_rounding = value;
 					Recalculate();
 					OnPropertyChanged();
@@ -183,7 +183,7 @@ namespace AnalitF.Net.Client.Models
 			get { return _vitallyImportant; }
 			set
 			{
-				if (!CanBeVitallyImportant)
+				if (Status == DocStatus.Posted || !CanBeVitallyImportant)
 					return;
 				if (_vitallyImportant == value)
 					return;
@@ -249,6 +249,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			if (UserSupplierName == null)
 				UserSupplierName = SupplierName;
 			Settings = settings;
@@ -267,6 +269,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Recalculate()
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			if (Settings == null)
 				return;
 			var isMigrated = IsMigrated && Sum == 0;
@@ -283,6 +287,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateRetailSum()
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			RetailSum = Lines.Sum(l => l.RetailCost * l.Quantity).GetValueOrDefault();
 			if (IsCreatedByUser) {
 				TaxSum = Lines.Sum(l => l.NdsAmount).GetValueOrDefault();
@@ -292,7 +298,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void DeleteFiles(Settings settings)
 		{
-			try {
+			if (Status == DocStatus.Posted)
+				return;
+			try
+			{
 				if (String.IsNullOrEmpty(Filename)) {
 					var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
 					files.Each(f => File.Delete(f));
@@ -308,6 +317,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void RemoveLine(WaybillLine line)
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			line.Waybill = null;
 			Lines.Remove(line);
 			Recalculate();
@@ -315,6 +326,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void AddLine(WaybillLine line)
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			line.Waybill = this;
 			Lines.Add(line);
 			Recalculate();

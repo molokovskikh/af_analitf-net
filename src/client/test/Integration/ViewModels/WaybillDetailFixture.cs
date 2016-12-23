@@ -308,5 +308,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.ToEditable();
 			Assert.IsFalse(model.Waybill.IsReadOnly);
 		}
+
+		[Test]
+		public void Waybill_posted_to_editable()
+		{
+			model.Waybill.IsCreatedByUser = false;
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+			model.ToEditable();
+			Assert.IsFalse(model.Waybill.IsReadOnly);
+			model.Waybill.Status = DocStatus.Posted;
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+			model.ToEditable();
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+		}
 	}
 }

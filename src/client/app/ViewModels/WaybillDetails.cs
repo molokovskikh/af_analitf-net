@@ -126,6 +126,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Reject> Reject { get; set; }
 		public NotifyValue<bool> CanStock { get; set; }
 		public NotifyValue<bool> CanToEditable { get; set; }
+		public NotifyValue<bool> CanEditSum { get; set; }
 
 		private void Calculate()
 		{
@@ -145,6 +146,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Waybill = Session.Load<Waybill>(id);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
+			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
+				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanEditSum);
 
 			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
 			.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))

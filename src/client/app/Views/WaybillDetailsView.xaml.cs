@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 
@@ -261,7 +262,12 @@ namespace AnalitF.Net.Client.Views
 						Init();
 						lines.ItemsSource = model.Lines.Value;
 					}
+					else if (args.PropertyName == "Status") {
+						lines.IsReadOnly = model.Waybill.Status == DocStatus.Posted;
+					}
 				};
+
+				lines.IsReadOnly = model.Waybill.Status == DocStatus.Posted;
 			}
 			grid.BeginningEdit += (sender, args) => {
 				var line = args.Row.DataContext as WaybillLine;
@@ -269,6 +275,11 @@ namespace AnalitF.Net.Client.Views
 					return;
 				if (line.ServerRetailCost != null) {
 					MessageBox.Show(Application.Current.MainWindow, "Редактирование розничной цены запрещено поставщиком",
+						Consts.WarningTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+					args.Cancel = true;
+				}
+				else if (model.Waybill.Status == DocStatus.Posted) {
+					MessageBox.Show(Application.Current.MainWindow, "Накладная оприходована, редактирование запрещено",
 						Consts.WarningTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
 					args.Cancel = true;
 				}
