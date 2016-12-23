@@ -393,6 +393,11 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
+			if (Mode == CatalogViewMode.CatalogSelector) {
+				TryClose();
+				return;
+			}
+
 			base.NavigateBackward();
 		}
 

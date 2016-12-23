@@ -55,7 +55,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Env.RxQuery(s => s.Query<Waybill>()
 				.Where(x => x.Status == DocStatus.Posted)
 				.Select(x => x.Supplier).ToList()
-				.Distinct().OrderBy(x => x.Name).ToList()
+				//у нас могут быть документы без поставщика
+				.Distinct().Where(x => x != null).OrderBy(x => x.Name).ToList()
 				.Select(x => new Selectable<Supplier>(x)).ToList())
 			.Subscribe(Suppliers);
 
@@ -83,7 +84,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield break;
 			}
 			var catalogList = new List<Catalog>();
-			yield return new DialogResult(new CatalogViewModel(catalogList), fullScreen: true);
+			yield return new DialogResult(new CatalogViewModel(catalogList), resizable: true);
 			catalogList.AddRange(Items);
 			catalogList = catalogList.Distinct().OrderBy(x => x.FullName).ToList();
 			Items = new ReactiveCollection<Catalog>(catalogList);
