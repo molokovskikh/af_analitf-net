@@ -85,8 +85,7 @@
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
             <DataGrid.Columns>
                 <c:DataGridTextColumnEx x:Name="clmnAddressName" Width="65*" Header="Адрес заказа"
-					Binding="{Binding AddressName}"
-					Visibility="Collapsed" />
+					Binding="{Binding AddressName}" />
                 <c:DataGridTextColumnEx x:Name="clmnId" Width="64*" Header="№"
 					Binding="{Binding Id}"
 					TextAlignment="Right" />

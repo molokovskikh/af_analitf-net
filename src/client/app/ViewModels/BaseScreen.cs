@@ -328,7 +328,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Broadcast();
 		}
 
-		private IEnumerable<DataGrid> GetControls(object view)
+		protected IEnumerable<DataGrid> GetControls(object view)
 		{
 			var dependencyObject = view as DependencyObject;
 			if (dependencyObject == null)
