@@ -256,9 +256,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (AddressToMove != null)
 				AddressToMove = Session.Load<Address>(AddressToMove.Id);
 
-			AddressesToMove = Addresses.Where(a => a != Address)
+			AddressesToMove.Clear();
+			AddressesToMove.AddRange(Addresses.Where(a => a != Address)
 				.OrderBy(a => a.Name)
-				.ToList();
+				.ToList());
 		}
 
 		public IOrder EditableOrder
