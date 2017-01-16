@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using NUnit.Framework;
 using AnalitF.Net.Client.Models;
+using Common.NHibernate;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
@@ -44,14 +45,22 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Line_in_Frozen_Orders()
 		{
+			session.DeleteEach<Order>();
 			var order = MakeOrder();
 			order.Frozen = true;
 			session.Flush();
-			var productId = order.Lines[0].ProductId;
+
+			var line = order.Lines[0];
+			var offer = session.Load<Offer>(line.OfferId);
+			var productId = line.ProductId;
+			// второй заказ того же самого товара, незамороженный
+			var order2 = MakeOrder(offer);
+			var productId2 = order2.Lines[0].ProductId;
+			Assert.IsTrue(productId == productId2);
 
 			// детализация текущего заказа
 			var productInFrozenOrders = order.Lines.Select(x => x.ProductId).ToList();
-			var model = new OrderDetailsViewModel(order, productInFrozenOrders);
+			var model = new OrderDetailsViewModel(order2, productInFrozenOrders);
 			var view = Bind(model);
 			scheduler.Start();
 			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
@@ -62,13 +71,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var model2 = new OrderLinesViewModel();
 			var view2 = Bind(model2);
 			var grid2 = view2.Descendants<DataGrid>().First(g => g.Name == "Lines");
-			var item2 = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
+			var item2 = grid2.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
 			Assert.IsTrue(item2.InFrozenOrders);
 		}
 
 		[Test]
 		public void Line_is_MinCost()
 		{
+			session.DeleteEach<Order>();
 			var order = MakeOrder();
 			var line = order.Lines[0];
 			line.OptimalFactor = 0;
@@ -87,7 +97,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var model2 = new OrderLinesViewModel();
 			var view2 = Bind(model2);
 			var grid2 = view2.Descendants<DataGrid>().First(g => g.Name == "Lines");
-			var item2 = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
+			var item2 = grid2.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
 			Assert.IsTrue(item2.IsMinCost);
 		}
 	}
