@@ -30,6 +30,7 @@
 				<MenuItem Header="Списание" Name="WriteoffDocs" />
 				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
 				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
+				<MenuItem Header="Распаковка" Name="UnpackingDocs" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
@@ -43,8 +44,11 @@
 				ButtonContent="Статус"
 				Member="Name" />
 		</WrapPanel>
-		<controls:DataGrid2 x:Name="Items" Grid.Row="2">
+		<controls:DataGrid2 x:Name="Items" Grid.Row="2" ShowAddressColumn="{Binding AddressSelector.All.Value}" AddressColumn="{x:Reference Name=AddressColumn}">
 			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx x:Name="AddressColumn" Width="*" Header="Адрес" Binding="{Binding Address.Name}"
+					Visibility="Collapsed"
+					IsReadOnly="True" />
 				<controls:DataGridTextColumnEx x:Name="ClmnBarcode" Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
@@ -61,8 +65,11 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 		<controls:DataGrid2 x:Name="DgItemsTotal" ItemsSource="{Binding ItemsTotal}" Grid.Row="3" HeadersVisibility="Row" Margin="0 5 0 0"
-												HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+			HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled"
+			ShowAddressColumn="{Binding AddressSelector.All.Value}"
+			AddressColumn="{x:Reference Name=AddressName}">
 			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx x:Name="AddressName" Width="{Binding Source={x:Reference AddressColumn}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnBarcode}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProduct}, Path=ActualWidth}"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProducer}, Path=ActualWidth}"/>

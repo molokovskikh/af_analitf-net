@@ -12,6 +12,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition />
+			<RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <Grid Grid.Row="0">
       <Grid.RowDefinitions>
@@ -35,36 +36,96 @@
             <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
           </StackPanel>
         </GroupBox>
-        <controls:PopupSelector x:Name="KKMFilter" ButtonContent="ККМ"
-					Member="Item" />
+				<!--это код потребуется когда доведем до ума работу с ккм-->
+        <!--<controls:PopupSelector x:Name="KKMFilter" ButtonContent="ККМ"
+					Member="Item" />-->
         <ContentControl x:Name="AddressSelector" />
       </StackPanel>
     </Grid>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items"
-			ShowAddressColumn="{Binding AddressSelector.All.Value}">
+			ShowAddressColumn="{Binding AddressSelector.All.Value}" AddressColumn="{x:Reference Name=AddressColumn}">
       <DataGrid.Columns>
-        <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Отдел" Binding="{Binding Department.Name}" Width="*" />
-        <controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Тип чека" Binding="{Binding CheckType}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Открытие смены" Binding="{Binding ChangeOpening}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Кассир" Binding="{Binding Clerk}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Тип оплаты" Binding="{Binding PaymentType}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Тип продажи" Binding="{Binding SaleType}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Скидка" Binding="{Binding Discont}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="ИД смены" Binding="{Binding ChangeId}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Номер смены" Binding="{Binding ChangeNumber}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Аннулирован" Binding="{Binding Cancelled}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Чек продажи" Binding="{Binding SaleCheck}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Дисконтная карта" Binding="{Binding DiscountCard}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Рецепт" Binding="{Binding Recipe}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Агент" Binding="{Binding Agent}" Width="*" Visibility="Collapsed"/>
-        <controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Сумма с учетом скидки" Binding="{Binding Sum}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplySum}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="AddressColumn" Width="*" Header="Адрес" Binding="{Binding Address.Name}"
+					Visibility="Collapsed"
+					IsReadOnly="True" />
+        <controls:DataGridTextColumnEx x:Name="IdColumn" Header="Номер" Binding="{Binding Id}" Width="*" />
+        <controls:DataGridTextColumnEx x:Name="DateColumn" Header="Дата" Binding="{Binding Date}" Width="*" />
+				<!--это код потребуется когда доведем до ума работу с ккм-->
+        <!--<controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />-->
+        <controls:DataGridTextColumnEx x:Name="TypeColumn" Header="Тип чека" Binding="{Binding CheckType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="ShiftDateColumn" Header="Открытие смены" Binding="{Binding ChangeOpening}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="StatusColumn" Header="Статус" Binding="{Binding Status}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="OperatorColumn" Header="Кассир" Binding="{Binding Clerk}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="PayTypeColumn"  Header="Тип оплаты" Binding="{Binding PaymentType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="SaleTypeColumn" Header="Тип продажи" Binding="{Binding SaleType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="DiscountColumn" Header="Скидка" Binding="{Binding Discont}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="ChangeIdColumn" Header="ИД смены" Binding="{Binding ChangeId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="ChangeNumberColumn" Header="Номер смены" Binding="{Binding ChangeNumber}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="CancelledColumn" Header="Аннулирован" Binding="{Binding Cancelled}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="RetailSumColumn" Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
+        <controls:DataGridTextColumnEx x:Name="SumColumn" Header="Сумма с учетом скидки" Binding="{Binding Sum}" Width="*" />
+        <controls:DataGridTextColumnEx x:Name="SupplySumColumn" Header="Сумма закупки" Binding="{Binding SupplySum}" Width="*" />
       </DataGrid.Columns>
     </controls:DataGrid2>
+		<controls:DataGrid2 ItemsSource="{Binding Stat}" Grid.Row="2" HeadersVisibility="Row" Margin="0 5 0 0"
+			HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx
+					Width="{Binding Source={x:Reference AddressColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference AddressColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference IdColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference IdColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference DateColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference DateColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference TypeColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference TypeColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ShiftDateColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference ShiftDateColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference StatusColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference StatusColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference OperatorColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference OperatorColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference PayTypeColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference PayTypeColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference SaleTypeColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference SaleTypeColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference DiscountColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference DiscountColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ChangeIdColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference ChangeIdColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ChangeNumberColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference ChangeNumberColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference CancelledColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference CancelledColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference RetailSumColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference RetailSumColumn}, Path=Visibility}"
+					Binding="{Binding RetailSum}"
+					FontWeight="Bold"
+					TextAlignment="Right" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference SumColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference SumColumn}, Path=Visibility}"
+					Binding="{Binding Sum}"
+					FontWeight="Bold"
+					TextAlignment="Right" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference SupplySumColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference SupplySumColumn}, Path=Visibility}" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+
   </Grid>
 </UserControl>

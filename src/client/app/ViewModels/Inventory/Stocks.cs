@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					}
 					var addresses = AddressSelector.GetActiveFilter().Select(y => y.Id);
 					query = query.Where(y => addresses.Contains(y.Address.Id));
-					return query.OrderBy(y => y.Product).ToList();
+					return query.Fetch(y => y.Address).OrderBy(y => y.Product).ToList();
 				}))
 				.Subscribe(Items, CloseCancellation.Token);
 		}
@@ -246,6 +246,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void DisplacementDocs()
 		{
 			Shell.Navigate(new DisplacementDocs());
+		}
+
+		public void UnpackingDocs()
+		{
+			Shell.Navigate(new UnpackingDocs());
 		}
 
 		public void SetMenuItems()

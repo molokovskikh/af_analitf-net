@@ -128,6 +128,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _maxRetailMarkup; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				_maxRetailMarkup = value;
 				OnPropertyChanged();
 			}
@@ -138,6 +140,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _retailMarkup; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				if (_realRetailMarkup == value)
 					return;
 
@@ -153,6 +157,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _realRetailMarkup; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				if (_realRetailMarkup == value)
 					return;
 
@@ -177,6 +183,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _retailCost; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				if (_retailCost == value)
 					return;
 
@@ -343,6 +351,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateMarkups(decimal? rawRetailCost)
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			UpdateMarkups(rawRetailCost);
 			OnPropertyChanged("RealRetailMarkup");
 			OnPropertyChanged("RetailMarkup");
@@ -352,6 +362,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRetailMarkup()
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			decimal? rawCost;
 			_retailCost = CalculateRetailCost(RetailMarkup, out rawCost);
 			RecalculateMarkups(rawCost);
@@ -361,6 +373,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRealRetailMarkup()
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			_retailCost = CalculateFromRealMarkup(RealRetailMarkup);
 			RecalculateMarkups(RetailCost);
 			OnPropertyChanged("RetailCost");
@@ -385,6 +399,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings)
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			if (ServerRetailCost != null) {
 				RetailCost = ServerRetailCost;
 				if (ServerRetailMarkup != null) {
@@ -491,6 +507,8 @@ namespace AnalitF.Net.Client.Models
 
 		private bool IsCalculable()
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return false;
 			if (SupplierCost.GetValueOrDefault() == 0)
 				return false;
 			if (GetMarkupType() == MarkupType.VitallyImportant && ProducerCost.GetValueOrDefault() == 0)

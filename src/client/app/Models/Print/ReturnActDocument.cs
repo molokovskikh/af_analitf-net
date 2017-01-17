@@ -46,11 +46,11 @@ namespace AnalitF.Net.Client.Models.Print
 			var rows = _checks.Select((o, i) => new object[]
 			{
 				o.Id,
-				o.Department,
+				o.Address.Name,
 				o.ChangeNumber,
 				o.Id,
 				o.Sum,
-				o.Agent,
+				o.Clerk,
 			});
 
 			var table = BuildTable(rows, headers);

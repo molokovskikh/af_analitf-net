@@ -52,6 +52,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 					results = Model.SearchByTerm();
 				} else if (args.Key == Key.F7) {
 					results = Model.SearchByCost();
+				} else if (args.Key == Key.R && ((Keyboard.Modifiers & ModifierKeys.Control) != 0)) {
+					results = Model.Unpack();
 				} else if (args.Key == Key.Enter) {
 					if (String.IsNullOrEmpty(Input.Text))
 						results = Model.Close();

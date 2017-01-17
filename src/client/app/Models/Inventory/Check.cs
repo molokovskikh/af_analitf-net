@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Date = DateTime.Now;
 			ChangeOpening = DateTime.Today;
 			Status = Status.Closed;
-			Department = address;
+			Address = address;
 			PaymentType = PaymentType.Cash;
 			SaleType = SaleType.FullCost;
 			Lines.AddEach(lines);
@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual Status Status { get; set; }
 
 		public virtual string Clerk { get; set; } //Пока пусть будет строка
-		public virtual Address Department { get; set; }
+		public virtual Address Address { get; set; }
 
 		public virtual string KKM { get; set; }
 		public virtual PaymentType PaymentType { get; set; }
@@ -87,12 +87,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal DiscountSum { get; set; }
 		public virtual decimal SupplySum { get; set; }
 
-		//Эти поля были пустыми
-		public virtual string SaleCheck { get; set; }
-		public virtual string DiscountCard { get; set; }
-		public virtual string Recipe { get; set; }
-		public virtual string Agent { get; set; }
-
 		public virtual DateTime Timestamp { get; set; }
 
 		public virtual IList<CheckLine> Lines { get; set; }
@@ -101,7 +95,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			RetailSum = Lines.Sum(l => l.RetailSum);
 			DiscountSum = Lines.Sum(l => l.DiscontSum);
-			SupplySum = Lines.Sum(x => x.Cost);
+			SupplySum = Lines.Sum(x => x.Quantity * x.SupplierCost.GetValueOrDefault());
 		}
 
 		public virtual void Print(string printer, WaybillSettings settings)

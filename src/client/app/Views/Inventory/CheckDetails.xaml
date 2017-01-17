@@ -39,7 +39,7 @@
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="4">Дата чека:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="5" Name="Header_Date" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="6">Отдел:</Label>
-      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_Department_Name" />
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_Address_Name" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="8">Статус:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="9" Name="Header_Status" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="0">Смена ИД:</Label>
@@ -88,7 +88,7 @@
         <controls:DataGridTextColumnEx Header="НП%" Binding="{Binding NP}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx Header="Номер партии" Binding="{Binding PartyNumber}" Width="*" />
         <controls:DataGridTextColumnEx Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Цена" Binding="{Binding Cost}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Цена" Binding="{Binding SupplierCost}" Width="*" />
         <controls:DataGridTextColumnEx Header="Количество" Binding="{Binding Quantity}" Width="*" />
         <controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
         <controls:DataGridTextColumnEx Header="Сумма скидки" Binding="{Binding DiscontSum}" Width="*" />

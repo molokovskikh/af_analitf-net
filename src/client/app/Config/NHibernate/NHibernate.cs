@@ -213,12 +213,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Inverse(true);
 				});
 			});
-			mapper.Class<ReceivingOrder>(m => {
-				m.Bag(o => o.Lines, c => {
-					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
-					c.Inverse(false);
-				});
-			});
 			mapper.Class<Waybill>(m => {
 				//при миграции могут если поставщик отсутствует nhibernate будет перезаписывать
 				m.ManyToOne(x => x.Address, x => x.Update(false));
@@ -243,6 +237,14 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			mapper.Class<InventoryDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 			}));
+			mapper.Class<UnpackingDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<UnpackingDocLine>(m => {
+				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
+				m.ManyToOne(x => x.SrcStock, p => p.Cascade(Cascade.All));
+			});
+
 			mapper.Class<WriteoffDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 			}));

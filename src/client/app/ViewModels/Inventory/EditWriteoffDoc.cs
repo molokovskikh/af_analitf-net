@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> Add()
 		{
 			var search = new StockSearch();
-			yield return new DialogResult(search);
+			yield return new DialogResult(search, resizable: true);
 			var edit = new EditStock(search.CurrentItem) {
 				EditMode = EditStock.Mode.EditQuantity
 			};

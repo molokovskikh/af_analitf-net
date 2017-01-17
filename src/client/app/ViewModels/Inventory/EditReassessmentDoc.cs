@@ -123,7 +123,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> Add()
 		{
 			var search = new StockSearch();
-			yield return new DialogResult(search);
+			yield return new DialogResult(search, resizable: true);
 			var srcStock = Session.Load<Stock>(search.CurrentItem.Value.Id);
 			var dstStock = srcStock.Copy();
 			var edit = new EditStock(dstStock) {

@@ -131,6 +131,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Category { get; set; }
 		public virtual string RegionCert { get; set; }
 		public virtual decimal Quantity { get; set; }
+		// кратность
+		public virtual int Multiplicity { get; set; }
+		// флаг распаковки
+		public virtual bool Unpacked { get; set; }
 		public virtual decimal ReservedQuantity { get; set; }
 
 		public virtual int? Nds { get; set; }
