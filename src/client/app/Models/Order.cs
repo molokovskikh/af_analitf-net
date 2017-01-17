@@ -395,7 +395,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateStyle(Address address)
 		{
-			IsCurrentAddress = SafeAddress?.Id == address.Id;
+			IsCurrentAddress = SafeAddress?.Id == address?.Id;
 		}
 
 		public virtual string ToString(string format, IFormatProvider formatProvider)
