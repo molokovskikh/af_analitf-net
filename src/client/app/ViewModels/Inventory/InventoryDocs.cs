@@ -115,6 +115,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
+			CurrentItem.Value.BeforeDelete(Session);
 			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}

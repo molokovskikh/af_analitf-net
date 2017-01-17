@@ -261,6 +261,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new DisplacementDocs());
 		}
 
+		public void UnpackingDocs()
+		{
+			Shell.Navigate(new UnpackingDocs());
+		}
+
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Ценники"};

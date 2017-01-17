@@ -295,6 +295,7 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\Inventory\DisplacementDoc.cs" />
+    <Compile Include="Models\Inventory\UnpackingDoc.cs" />
     <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
     <Compile Include="Models\Inventory\DisplacementLine.cs" />
@@ -434,6 +435,8 @@
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
     <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
+    <Compile Include="ViewModels\Inventory\EditUnpackingDoc.cs" />
+    <Compile Include="ViewModels\Inventory\UnpackingDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
     <Compile Include="ViewModels\Diadok\Delete.cs" />
     <Compile Include="ViewModels\Diadok\Reject.cs" />
@@ -620,6 +623,12 @@
     </Compile>
     <Compile Include="Views\Inventory\EditDisplacementDoc.xaml.cs">
       <DependentUpon>EditDisplacementDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\EditUnpackingDoc.xaml.cs">
+      <DependentUpon>EditUnpackingDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\UnpackingDocs.xaml.cs">
+      <DependentUpon>UnpackingDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\PrintForm\ReassessmentActDocumentForm.xaml.cs">
       <DependentUpon>ReassessmentActDocumentForm.xaml</DependentUpon>
@@ -952,6 +961,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\EditDisplacementDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\EditUnpackingDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\UnpackingDocs.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

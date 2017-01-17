@@ -11,6 +11,10 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
+using AnalitF.Net.Client.ViewModels.Dialogs;
+using System.Windows;
+using System.ComponentModel.DataAnnotations;
+using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -34,6 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			});
 			Status.Value = "Готов к работе (F1 для справки)";
 			checkType = CheckType.SaleBuyer;
+			Session.FlushMode = FlushMode.Never;
 		}
 
 		public NotifyValue<bool> HasError { get; set; }
@@ -306,6 +311,55 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (Quantity.Value == null)
 				Quantity.Value = 1;
 			UpdateProduct(stock, "Штрих код");
+		}
+
+		public class UnpackSettings
+		{
+			[Display(Name = "Количество")]
+			public uint Quantity { get; set; }
+
+			[Display(Name = "Кратность")]
+			public int Multiplicity { get; set; }
+
+			public UnpackSettings(decimal quantity)
+			{
+				Quantity = (uint)quantity;
+			}
+		}
+		// Распаковка Ctrl+R
+		public IEnumerable<IResult> Unpack()
+		{
+			var settings = new UnpackSettings(CurrentLine.Value.Quantity);
+			yield return new DialogResult(new SimpleSettings(settings) { DisplayName = "Распаковка"});
+			if (settings.Quantity <= 0 || settings.Multiplicity <= 0)
+			{
+				MessageBox.Show(
+						"Суммы должны быть больше нуля",
+						"АналитФАРМАЦИЯ: Внимание",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				yield break;
+			}
+
+			var srcStock = CurrentLine.Value.Stock;
+			if (srcStock.Unpacked)
+				yield break;
+
+			srcStock.Quantity += CurrentLine.Value.Quantity;
+			Lines.Remove(CurrentLine.Value);
+
+			var doc = new UnpackingDoc(Address);
+			var uline = new UnpackingDocLine(srcStock, settings.Multiplicity);
+			doc.Lines.Add(uline);
+			doc.UpdateStat();
+			doc.Post();
+			Session.Save(doc);
+			Session.Flush();
+
+			var line = new CheckLine(uline.DstStock, settings.Quantity, checkType);
+			Lines.Add(line);
+			CurrentLine.Value = line;
+			Quantity.Value = null;
 		}
 	}
 }
