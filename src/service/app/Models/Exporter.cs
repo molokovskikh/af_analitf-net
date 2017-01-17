@@ -704,7 +704,24 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	rd.OperativeInfo,
 	rd.ContactInfo,
 	rd.SupportPhone as Phone,
-	rd.AdminMail as Email,
+	(select group_concat(
+			case
+				when c.Id is not null and c.`Type` = 0 then c.ContactText
+				else cp.ContactText
+			end)
+		from Contacts.contact_groups cg
+			left join Contacts.contacts c on cg.Id = c.ContactOwnerId
+			left join Contacts.persons p on cg.Id = p.ContactGroupId
+			left join Contacts.contacts cp on p.Id = cp.ContactOwnerId
+		where cg.ContactGroupOwnerId = s.ContactGroupOwnerId
+			and cg.`Type` = 1
+			and (
+				(c.Id is not null and c.`Type` = 0)
+				or
+				(cp.Id is not null and cp.`Type` = 0)
+			)
+		group by cg.ContactGroupOwnerId
+	) as Email,
 	p.FirmCategory as Category,
 	p.DisabledByClient,
 	ifnull(ap.Fresh, 1) IsSynced,
@@ -716,7 +733,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	pc.CostName
 from (Usersettings.Prices p, Customers.Users u)
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
-		join Customers.Suppliers s on s.Id = pd.FirmCode
+	join Customers.Suppliers s on s.Id = pd.FirmCode
 	join Farm.Regions r on r.RegionCode = p.RegionCode
 	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
 	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
