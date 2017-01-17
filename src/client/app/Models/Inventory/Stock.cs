@@ -72,7 +72,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Status = StockStatus.Available;
 			Address = waybill.Address;
 			SupplierFullName = waybill.Supplier?.FullName;
-			ProviderDocumentId = waybill.ProviderDocumentId;
+			WaybillNumber = waybill.ProviderDocumentId;
 
 			Product = line.Product;
 			ProductId = line.ProductId;
@@ -305,7 +305,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual DateTime? Exp { get; set; }
 		public virtual string Period { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
-		public virtual string ProviderDocumentId { get; set; }
+		public virtual string WaybillNumber { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
 
@@ -447,7 +447,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 				SupplierName = SupplierFullName,
 				ClientName = clientName,
 				Producer = Producer,
-				ProviderDocumentId = ProviderDocumentId,
+				ProviderDocumentId = WaybillNumber,
 				DocumentDate = DocumentDate,
 				Barcode = Barcode,
 				AltBarcode = AltBarcode,
