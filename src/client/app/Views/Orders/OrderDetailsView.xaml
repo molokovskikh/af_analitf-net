@@ -78,40 +78,59 @@
 		<c:DataGrid2 x:Name="Lines"
 			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]" AutoGenerateColumns="False">
 			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
-				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}"
+					IsReadOnly="True"/>
+				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="Кат.производитель"
 					Visibility="Collapsed"
-					Binding="{Binding Producer}" />
+					Binding="{Binding Producer}"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="65*" Header="Срок годн."
 					Binding="{Binding Period}"
-					TextAlignment="Center" />
+					TextAlignment="Center"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
 					Binding="{Binding MaxProducerCost}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
 					Binding="{Binding ProducerCost}"
-					TextAlignment="Right"  />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
 					Binding="{Binding SupplierMarkup}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Эффективность" Binding="{Binding OptimalFactor}" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
+				<c:DataGridTextColumnEx Width="*" Header="Эффективность" Binding="{Binding OptimalFactor}"
+					IsReadOnly="True"/>
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="65" Header="Цена"
 					Binding="{Binding MixedCost}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
-					SortMemberPath="SortQuantity" TextAlignment="Right" />
+					SortMemberPath="SortQuantity" TextAlignment="Right"
+					IsReadOnly="True"/>
+				<c:DataGridTextColumnEx Width="65" Header="Розничная наценка" Binding="{Binding RetailMarkup}"
+					TextAlignment="Right" IsReadOnly="False"/>
+				<c:DataGridTextColumnEx Width="65" Header="Розничная цена" Binding="{Binding RetailPrice}"
+					TextAlignment="Right" IsReadOnly="False"/>
 				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
 					CellStyle="{StaticResource CountColumn}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding MixedSum}"
 					CellStyle="{StaticResource CountColumn}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="True"/>
 			</DataGrid.Columns>
 		</c:DataGrid2>
 		</c:MainControllerWrap>

@@ -21,8 +21,6 @@
 			CommandParameter="ShowCatalog" />
 		<KeyBinding Gesture="CTRL+N" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalogWithMnnFilter" />
-		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
-			CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
@@ -153,7 +151,7 @@
 			Height="20"
 			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
 
-		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
+		<Parts:ProductInfoView x:Name="ProductInfo" Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
 
 		<StackPanel Grid.Row="4" Name="Legend" />
 

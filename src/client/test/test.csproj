@@ -238,6 +238,7 @@
     <Compile Include="Integration\Views\GlobalFixture.cs" />
     <Compile Include="Integration\Views\MailsFixture.cs" />
     <Compile Include="Integration\Views\MinCostsFixture.cs" />
+    <Compile Include="Integration\Views\OrderDetailsFixture.cs" />
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
     <Compile Include="Integration\Views\OrdersFixture.cs" />
     <Compile Include="Integration\Views\PricesViewFixture.cs" />
@@ -374,14 +375,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-	<ItemGroup>
-		<ShareFiles Include="..\..\..\lib\libmysqld\**\*.*"/>
-	</ItemGroup>
-
-	<Target Name="BeforeBuild">
-		<Copy SkipUnchangedFiles="True"
-			SourceFiles="@(ShareFiles)"
-			DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
-		/>
-	</Target>
+  <ItemGroup>
+    <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
+  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>
