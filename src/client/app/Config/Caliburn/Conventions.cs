@@ -140,6 +140,8 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					if (boundColumn.Binding.StringFormat == null)
 					if (columnType == typeof(decimal) || columnType == typeof(decimal?)) {
 						boundColumn.Binding.StringFormat = "0.00";
+					} else if (columnType.IsEnum) {
+						((Binding)boundColumn.Binding).Converter = EnumConverterInstance;
 					}
 
 					var exColumn = column as DataGridTextColumnEx;
