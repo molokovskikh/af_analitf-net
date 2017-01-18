@@ -13,6 +13,7 @@
 		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
 		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Post" />
 		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel" CommandParameter="UnPost" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>

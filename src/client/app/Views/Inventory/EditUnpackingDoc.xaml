@@ -8,6 +8,10 @@
 						 xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="1000">
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+
 
 	<Grid>
 		<Grid.RowDefinitions>

@@ -16,6 +16,7 @@
 		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel" CommandParameter="UnPost" />
 		<KeyBinding Gesture="F3" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ExportExcel" />
 		<KeyBinding Gesture="Ctrl+P" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Print" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>

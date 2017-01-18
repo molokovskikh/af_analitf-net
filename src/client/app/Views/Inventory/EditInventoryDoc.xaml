@@ -17,6 +17,7 @@
 		<KeyBinding Gesture="F3" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ExportExcel" />
 		<KeyBinding Gesture="Ctrl+P" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Print" />
 		<KeyBinding Gesture="Ctrl+L" Command="caliburn:Commands.InvokeViewModel" CommandParameter="PrintStockPriceTags" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>
