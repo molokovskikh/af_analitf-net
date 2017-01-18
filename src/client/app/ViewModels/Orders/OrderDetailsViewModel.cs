@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Inventory;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
@@ -153,7 +154,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return;
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
-				var sentLines =  (IList<SentOrderLine>)Order.Value.Lines;
+				var sentLines = (IList<SentOrderLine>)Order.Value.Lines;
 				sentLines.Each(l => l.Configure(User));
 				Env.RxQuery(s => MatchedWaybills.GetLookUp(s, sentLines))
 					.Subscribe(x => sentLines.Each(y => y.Configure(x)));

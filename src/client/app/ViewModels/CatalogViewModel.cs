@@ -36,6 +36,12 @@ namespace AnalitF.Net.Client.ViewModels
 		Awaited
 	}
 
+	public enum CatalogViewMode
+	{
+		Basic,
+		CatalogSelector
+	}
+
 	public class FilterDeclaration
 	{
 		public FilterType FilterType;
@@ -72,11 +78,19 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool viewOffersByCatalog;
 		private BaseScreen activeItem;
 		private IDisposable observable = Disposable.Empty;
+		private CatalogViewMode mode;
+		private List<Catalog> _catalogList;
 
 		public CatalogViewModel()
 		{
 			ViewOffersByCatalog = true;
 			ViewOffersByCatalogEnabled = Settings.Select(s => s.CanViewOffersByCatalogName).ToValue();
+
+			this.ObservableForProperty(m => m.Mode).Subscribe(x => {
+				CatalogSelectorVisible.Value = Mode == CatalogViewMode.CatalogSelector;
+				AddToAwaitedVisible.Value = Mode == CatalogViewMode.Basic;
+				ShowAwaitedVisible.Value = Mode == CatalogViewMode.Basic;
+			});
 
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new[] {
@@ -117,6 +131,12 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(v => GuessCatalog() != null)
 				.ToValue();
 
+			CanCatalogSelector = this
+				.ObservableForProperty(m => (object)m.CurrentCatalog, skipInitial: false)
+				.Merge(this.ObservableForProperty(m => (object)m.CurrentCatalogName))
+				.Select(v => CurrentCatalog != null)
+				.ToValue();
+
 			this.ObservableForProperty(m => m.CurrentCatalogName)
 				.Subscribe(_ => NotifyOfPropertyChange("CanShowDescription"));
 
@@ -130,8 +150,19 @@ namespace AnalitF.Net.Client.ViewModels
 			}));
 			IsEnabled = new NotifyValue<bool>(true);
 			InitFields();
+			Mode = CatalogViewMode.Basic;
 		}
 
+		public CatalogViewModel(List<Catalog> catalogList) : this()
+		{
+			_catalogList = catalogList;
+			Mode = CatalogViewMode.CatalogSelector;
+		}
+
+		public NotifyValue<bool> CatalogSelectorVisible { get; private set; }
+		public NotifyValue<bool> CanCatalogSelector { get; set; }
+		public NotifyValue<bool> AddToAwaitedVisible { get; private set; }
+		public NotifyValue<bool> ShowAwaitedVisible { get; private set; }
 		public NotifyValue<bool> ViewOffersByCatalogVisible { get; private set; }
 		public NotifyValue<bool> ViewOffersByCatalogEnabled { get; private set; }
 		public NotifyValue<bool> CanAddToAwaited { get; set; }
@@ -214,6 +245,16 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				showWithoutOffers = value;
 				NotifyOfPropertyChange("ShowWithoutOffers");
+			}
+		}
+
+		public CatalogViewMode Mode
+		{
+			get { return mode; }
+			set
+			{
+				mode = value;
+				NotifyOfPropertyChange("Mode");
 			}
 		}
 
@@ -352,6 +393,11 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
+			if (Mode == CatalogViewMode.CatalogSelector) {
+				TryClose();
+				return;
+			}
+
 			base.NavigateBackward();
 		}
 
@@ -376,7 +422,6 @@ namespace AnalitF.Net.Client.ViewModels
 				NotifyOfPropertyChange("ViewOffersByCatalog");
 			}
 		}
-
 
 		protected override void OnInitialize()
 		{
@@ -473,6 +518,22 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				yield return new MessageResult("Выбранное наименование добавлено в список ожидаемых позиций.");
 			}
+		}
+
+		public IEnumerable<IResult> CatalogSelector()
+		{
+			if (CurrentCatalog == null)
+				yield break;
+			_catalogList.Add(CurrentCatalog);
+			if(!Confirm("Наименование выбрано. Продолжить выбор?"))
+				TryClose();
+		}
+
+		public void CatalogSelector(Catalog currentCatalog)
+		{
+			_catalogList.Add(currentCatalog);
+			if (!Confirm("Наименование выбрано. Продолжить выбор?"))
+				TryClose();
 		}
 
 		public IEnumerable<IResult> ShowOrderHistory()

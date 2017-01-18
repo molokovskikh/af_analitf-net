@@ -1,0 +1,99 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.CheckDetails"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+						 xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="0">Тип чека:</Label>
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="1" Name="Header_CheckType" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="2">№ чека:</Label>
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="3" Name="Header_Number" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="4">Дата чека:</Label>
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="5" Name="Header_Date" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="6">Отдел:</Label>
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_Address_Name" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="8">Статус:</Label>
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="9" Name="Header_Status" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="0">Смена ИД:</Label>
+      <Label FontWeight="Bold" Grid.Row="1" Grid.Column="1" Name="Header_ChangeId" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="2">Смена №:</Label>
+      <Label FontWeight="Bold" Grid.Row="1" Grid.Column="3" Name="Header_ChangeNumber" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="4">Открытие:</Label>
+      <Label FontWeight="Bold" Grid.Row="1" Grid.Column="5" Name="Header_ChangeOpening" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="6">ККМ:</Label>
+      <Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Header_KKM" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="8">Аннулирован:</Label>
+      <Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Cancelled" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="0">Тип отпуска:</Label>
+      <Label FontWeight="Bold" Grid.Row="2" Grid.Column="1" Name="Header_SaleType" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="2">Скидка:</Label>
+      <Label FontWeight="Bold" Grid.Row="2" Grid.Column="3" Name="Header_Discont" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="4">Способ оплаты:</Label>
+      <Label FontWeight="Bold" Grid.Row="2" Grid.Column="5" Name="Header_PaymentType" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="6">Дисконтная карта:</Label>
+      <Label FontWeight="Bold" Grid.Row="2" Grid.Column="7" Name="Header_DiscountCard" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="0">Кассир:</Label>
+      <Label FontWeight="Bold" Grid.Row="3" Grid.Column="1" Name="Header_Clerk" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="2">Рецепт №:</Label>
+      <Label FontWeight="Bold" Grid.Row="3" Grid.Column="3" Name="Header_Recipe" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="4">Чек продажи:</Label>
+      <Label FontWeight="Bold" Grid.Row="3" Grid.Column="5" Name="Header_SaleCheck" />
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Агент:</Label>
+      <Label FontWeight="Bold" Grid.Row="3" Grid.Column="7" Name="Header_Agent" />
+    </Grid>
+    <WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="1">
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Экспорт</Button>
+    </WrapPanel>
+    <controls:DataGrid2 Grid.Row="2" x:Name="Lines">
+      <DataGrid.Columns>
+        <controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Название" Binding="{Binding Product}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Код товара" Binding="{Binding ProductId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Форма товара" Binding="{Binding ProductKind}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Тип товара" Binding="{Binding PKU}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Делитель" Binding="{Binding Divider}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Сумма наценки" Binding="{Binding MarkupSum}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Сумма с НДС" Binding="{Binding NDSSum}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Сумма с НП" Binding="{Binding NPSum}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="НДС%" Binding="{Binding NDS}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="НП%" Binding="{Binding NP}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Номер партии" Binding="{Binding PartyNumber}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Цена" Binding="{Binding SupplierCost}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Количество" Binding="{Binding Quantity}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма скидки" Binding="{Binding DiscontSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма с учетом скидки" Binding="{Binding Sum}" Width="*" />
+      </DataGrid.Columns>
+    </controls:DataGrid2>
+  </Grid>
+</UserControl>

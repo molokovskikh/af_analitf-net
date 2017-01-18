@@ -12,6 +12,7 @@
 	<helpers:InvertConverter x:Key="BoolInvert" />
 	<helpers:NullableConverter x:Key="NullableConverter" />
 	<helpers:InputConverter x:Key="InputConverter" />
+	<helpers:EnumConverter x:Key="EnumConverter" />
 
 	<Style x:Key="Borderless" TargetType="Control">
 		<Style.Triggers>
@@ -221,6 +222,11 @@
 	<Style TargetType="FrameworkElement" x:Key="FilterElement">
 		<Setter Property="Margin" Value="0, 2, 4, 0" />
 		<Setter Property="VerticalAlignment" Value="Center" />
+	</Style>
+
+	<Style TargetType="Label" x:Key="DetailsLabel">
+		<Setter Property="HorizontalAlignment" Value="Right" />
+		<Setter Property="FontWeight" Value="Bold" />
 	</Style>
 
 	<Style TargetType="DatePicker">

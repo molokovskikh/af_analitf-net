@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.Views;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Helpers
@@ -190,6 +191,47 @@ namespace AnalitF.Net.Client.Helpers
 						dataGrid.Columns.Remove(column);
 				}
 			};
+		}
+
+		public static StackPanel CheckAllHeader(string name, Action<bool> checkAll, bool isChecked)
+		{
+			var check = new CheckBox {
+				IsChecked = isChecked,
+				Focusable = false,
+				VerticalAlignment = VerticalAlignment.Center,
+				Name = "CheckAllPrint"
+			};
+			var textBlock = new TextBlock {
+				Text = name
+			};
+			var header = new StackPanel {
+				Orientation = Orientation.Horizontal,
+				Children = {check, textBlock}
+			};
+			check.Checked += (sender, args) => checkAll(check.IsChecked.GetValueOrDefault());
+			check.Unchecked += (sender, args) => checkAll(check.IsChecked.GetValueOrDefault());
+			return header;
+		}
+
+		public static DataGridColumn CheckBoxColumn(string header, string member, Action<bool> checkAll, bool isChecked)
+		{
+			var column = new CustomDataGridColumn {
+				Header = DataGridHelper.CheckAllHeader(header, checkAll, isChecked),
+				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
+				SortMemberPath = member,
+				Generator = (c, i) => {
+					var el = new CheckBox {
+						VerticalAlignment = VerticalAlignment.Center,
+						HorizontalAlignment = HorizontalAlignment.Center
+					};
+					BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding(member) {
+						UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+					});
+					return el;
+				}
+			};
+			DataGridHelper.SetColumnDisplayName(column, header);
+			return column;
 		}
 	}
 }

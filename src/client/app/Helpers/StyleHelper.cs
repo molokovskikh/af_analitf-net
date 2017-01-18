@@ -186,6 +186,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsMinCost", Background("#ACFF97") },
 				{ "ExistsInFreezed", Background("#C0C0C0") },
 				{ "IsCreatedByUser", Background("#C0DCC0") },
+				{ "IsNotPosted", Background(Colors.PaleTurquoise) },
 				{ "IsCertificateNotFound", Background(Colors.Gray) },
 				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF)) },
 				{ "IsUnmatchedByWaybill", Background(Color.FromRgb(248, 238, 141)) },
@@ -209,8 +210,11 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsFullyStocked", Background("#25BC37") },
+				{ "IsPartialyStocked", Background("#94BA99") },
 				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
 				{ "InFrozenOrders", Background(Colors.Gray) },
+				{ "IsNotConducted", Background(Colors.Gray) },
 			};
 		}
 

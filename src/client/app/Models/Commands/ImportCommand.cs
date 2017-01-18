@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					//вычисляемые поля, поиск забраковки
 					"IsRejectCanceled", "IsRejectNew", "RejectId", "IsRetailCostFixed",
 					//вычисления розничной цены
-					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost",
+					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost", "ReceivedQuantity"
 				}},
 				{"Mails",new [] {
 					//локальные поля
@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				{"Waybills", new [] {
 					//вычисления розничной цены
 					"Sum", "RetailSum", "TaxSum", "UserSupplierName", "IsCreatedByUser", "IsRejectChanged", "IsNew", "Error",
-					"IsMigrated", "Rounding", "UserSum", "UserTaxSum"
+					"IsMigrated", "Rounding", "Status", "UserSum", "UserTaxSum"
 				}},
 				{"Orders", new [] {
 					//локальные поля
@@ -53,11 +53,16 @@ namespace AnalitF.Net.Client.Models.Commands
 				}},
 				{"SentOrders", new [] {
 					//локальные поля
-					"Id", "LinesCount", "Sum", "PersonalComment"
+					"Id", "LinesCount", "Sum", "PersonalComment", "ReceivingOrderId"
 				}}
 			};
 
 		public bool Strict = true;
+
+		public ImportCommand(string dir)
+		{
+			data = GetDbData(dir);
+		}
 
 		public ImportCommand(List<Tuple<string, string[]>> data)
 		{
@@ -72,25 +77,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
-			Log.Info("Начинаю импорт");
-			var ordered = data.OrderBy(d => Tuple.Create(weight.GetValueOrDefault(Path.GetFileNameWithoutExtension(d.Item1)), d.Item1));
-			foreach (var table in ordered) {
-				try {
-					var sql = BuildSql(table);
-					if (String.IsNullOrEmpty(sql))
-						continue;
-
-					var dbCommand = Session.Connection.CreateCommand();
-					dbCommand.CommandText = sql;
-					dbCommand.ExecuteNonQuery();
-					CheckWarning(dbCommand);
-					Reporter.Progress();
-				}
-				catch (Exception e) {
-					throw new Exception($"Не могу импортировать {table.Item1}", e);
-				}
-			}
-			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
+			ImportTables();
 
 			//очистка результатов автозаказа
 			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
@@ -108,6 +95,11 @@ where a.Id is null;
 delete s
 from AddressConfigs s
 left join Addresses a on a.Id = s.AddressId
+where a.Id is null;
+
+delete s
+from WaybillSettings s
+left join Addresses a on a.Id = s.BelongsToAddressId
 where a.Id is null;
 
 -- очищаем ожидаемые позиции если товар был удален
@@ -217,6 +209,29 @@ drop temporary table ExistsCatalogs;")
 			settings.ApplyChanges(Session);
 		}
 
+		public void ImportTables()
+		{
+			Log.Info("Начинаю импорт");
+			var ordered =
+				data.OrderBy(d => Tuple.Create(weight.GetValueOrDefault(Path.GetFileNameWithoutExtension(d.Item1)), d.Item1));
+			foreach (var table in ordered) {
+				try {
+					var sql = BuildSql(table);
+					if (String.IsNullOrEmpty(sql))
+						continue;
+
+					var dbCommand = Session.Connection.CreateCommand();
+					dbCommand.CommandText = sql;
+					dbCommand.ExecuteNonQuery();
+					CheckWarning(dbCommand);
+					Reporter.Progress();
+				} catch (Exception e) {
+					throw new Exception($"Не могу импортировать {table.Item1}", e);
+				}
+			}
+			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
+		}
+
 		private bool IsImported<T>()
 		{
 			return data
@@ -271,6 +286,8 @@ where p.IsSynced = 1 or p.PriceId is null;";
 		[Conditional("DEBUG")]
 		private void CheckWarning(IDbCommand cmd)
 		{
+			if (!Strict)
+				return;
 			var warnings = new List<string>();
 			cmd.CommandText = "show warnings";
 			using (var reader = cmd.ExecuteReader()) {
@@ -286,6 +303,8 @@ where p.IsSynced = 1 or p.PriceId is null;";
 		private void StrictCheck(Table dbTable, string[] tableColumns, string[] exportedColumns)
 		{
 			if (!Strict)
+				return;
+			if (dbTable.Name.Match("stocks"))
 				return;
 			//код для отладки, при тестировании мы должны передавать\принимать все колонки таблицы
 			//проверяем что все колонки которые есть в таблице передаются с сервера
@@ -342,6 +361,21 @@ where p.IsSynced = 1 or p.PriceId is null;";
 			if (notFoundInData.Length > 0) {
 				throw new Exception($"В таблице {dbTable.Name} есть колонки которые отсутствуют в данных {notFoundInData.Implode()}");
 			}
+		}
+
+		public static List<Tuple<string, string[]>> GetDbData(string dir)
+		{
+			var files = Directory.GetFiles(dir).Select(Path.GetFileName);
+			return files.Where(f => f.EndsWith("meta.txt"))
+				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
+					.Match(f.Replace(".meta.txt", "")))))
+				.Where(t => t.Item2 != null)
+				.Select(t => Tuple.Create(
+					Path.GetFullPath(Path.Combine(dir, t.Item2)),
+					File.ReadAllLines(Path.Combine(dir, t.Item1))))
+				.Concat(files.Where(x => Path.GetFileNameWithoutExtension(x).Match("cmds"))
+					.Select(x => Tuple.Create(Path.Combine(dir, x), new string[0])))
+				.ToList();
 		}
 	}
 }

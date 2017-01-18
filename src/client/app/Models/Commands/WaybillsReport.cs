@@ -9,9 +9,348 @@ using Common.Tools.Calendar;
 using Dapper;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
+using System.Collections.Generic;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
+	public class GoodsMovementReportSettings
+	{
+		public DateTime Begin { get; set; }
+		public DateTime End { get; set; }
+
+		public uint[] AddressIds { get; set; }
+		public string AddressNames { get; set; }
+
+		public uint[] CatalogIds { get; set; }
+		public string CatalogNames { get; set; }
+
+		public uint[] SupplierIds { get; set; }
+		public string SupplierNames { get; set; }
+
+		public uint[] ProducerIds { get; set; }
+		public string ProducerNames { get; set; }
+
+		public bool FilterByWriteTime { get; set; }
+
+		public GoodsMovementReportSettings()
+		{
+			AddressIds = CatalogIds = SupplierIds = ProducerIds = new uint[] { };
+			AddressNames = CatalogNames = SupplierNames = ProducerNames = "все";
+		}
+	}
+
+	public class GoodsMovementReport : DbCommand<string>
+	{
+		private GoodsMovementReportSettings _settings;
+
+		public class GoodsMovementRow
+		{
+			public string Name { get; set; }
+			public DateTime WriteTime { get; set; }
+			public string ProviderDocumentId { get; set; }
+			public string UserSupplierName { get; set; }
+			public decimal Quantity { get; set; }
+			public decimal SupplierSum { get; set; }
+			public decimal RetailSum { get; set; }
+		}
+
+		public GoodsMovementReport(GoodsMovementReportSettings settings)
+		{
+			_settings = settings;
+		}
+
+		public override void Execute()
+		{
+			var settings = Session.Query<Settings>().First();
+			var dir = settings.InitAndMap("Reports");
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Движение товара по накладным-{_settings.Begin:d}-{_settings.End:d}.xls"));
+
+			var field = "WriteTime";
+			if (_settings.FilterByWriteTime)
+				field = "DocumentDate";
+			var sql = $@"
+select CONCAT_WS(' ', l.Product, l.SerialNumber, d.InnR, l.Certificates) as Name,
+w.WriteTime, w.ProviderDocumentId, w.UserSupplierName,
+SUM(l.Quantity) as Quantity, SUM(l.SupplierCost*l.Quantity) as SupplierSum, SUM(l.RetailCost*l.Quantity) as RetailSum
+from WaybillLines l
+join Waybills w on w.Id = l.WaybillId
+left join Drugs d on d.EAN = l.EAN13
+where DocType = 1
+	and Status = 1
+	and w.{field} > ?
+	and w.{field} < ?
+";
+			if (_settings.AddressIds.Any())
+				sql += $" and w.AddressId in ({_settings.AddressIds.Implode()})";
+			if (_settings.CatalogIds.Any())
+				sql += $" and l.CatalogId in ({_settings.CatalogIds.Implode()})";
+			if (_settings.SupplierIds.Any())
+				sql += $" and w.SupplierId in ({_settings.SupplierIds.Implode()})";
+			if (_settings.ProducerIds.Any())
+				sql += $" and l.ProducerId in ({_settings.ProducerIds.Implode()})";
+			sql += @" group by Name, w.WriteTime, w.ProviderDocumentId, w.UserSupplierName
+								order by Name asc, w.WriteTime asc;";
+
+			var book = new HSSFWorkbook();
+
+			var headerStyle = book.CreateCellStyle();
+			headerStyle.Alignment = HorizontalAlignment.Center;
+
+			var groupStyle = book.CreateCellStyle();
+			groupStyle.FillForegroundColor = IndexedColors.Grey25Percent.Index;
+			groupStyle.FillPattern = FillPattern.SolidForeground;
+			groupStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+
+			var boldFont = book.CreateFont();
+			boldFont.Boldweight = (short)FontBoldWeight.Bold;
+			var totalStyle = book.CreateCellStyle();
+			totalStyle.Alignment = HorizontalAlignment.Right;
+			totalStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+			totalStyle.SetFont(boldFont);
+
+			var numericStyle = book.CreateCellStyle();
+			numericStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+
+			var sheet = book.CreateSheet("Движение товара по накладным");
+			var rowIndex = 0;
+
+			var headers = new[]
+			{
+				$"Движение товаров за период {_settings.Begin.ToShortDateString()} — {_settings.End.ToShortDateString()}",
+				"По фирме: все",
+				$"По отделу: {_settings.AddressNames}",
+				$"По товару: {_settings.CatalogNames}",
+				$"По поставщику: {_settings.SupplierNames}",
+				$"По производителю: {_settings.ProducerNames}",
+				"",
+			};
+			foreach (var header in headers)
+				ExcelExporter.WriteRow(sheet, new object[] { header }, rowIndex++);
+
+			var columns = new object[] {
+				"Товар / Документ движения / Серия / МНН / Номер сертификата",
+				"",
+				"Получатель / Поставщик",
+				"Приход, шт.",
+				"Сумма опт, руб.",
+				"Сумма розница, руб."
+			};
+			ExcelExporter.WriteRow(sheet, columns, rowIndex).Cells.ForEach(x => x.CellStyle = headerStyle);
+			MergeCells(sheet, rowIndex++);
+
+			var items = StatelessSession.Connection.Query<GoodsMovementRow>(sql, new { begin = _settings.Begin, end = _settings.End.AddDays(1) });
+			var groups = items.GroupBy(x => x.Name)
+				.Select(x => new object[]{ x.Key,
+					"",
+					"",
+					x.Sum(y => y.Quantity),
+					x.Sum(y => y.SupplierSum),
+					x.Sum(y => y.RetailSum)
+				}).ToList();
+
+			foreach (var group in groups) {
+				ExcelExporter.WriteRow(sheet, group, rowIndex).Cells.ForEach(x => x.CellStyle = groupStyle);
+				MergeCells(sheet, rowIndex++);
+				var rows = items.Where(x => x.Name == (string)group[0]).Select((o, i) => new object[] {
+					o.WriteTime.ToString("dd.MM.yyyy HH:mm"),
+					$"Приходная накладная {o.ProviderDocumentId}",
+					o.UserSupplierName,
+					o.Quantity,
+					o.SupplierSum,
+					o.RetailSum,
+				});
+				foreach (var row in rows)
+					ExcelExporter.WriteRow(sheet, row, rowIndex++).Cells.ForEach(x => x.CellStyle = numericStyle);
+			}
+
+			if (items.Any()) {
+				WriteStatRow(sheet, rowIndex, items, "ВСЕГО").Cells.ForEach(x => x.CellStyle = totalStyle);
+				MergeCells(sheet, rowIndex++);
+			}
+
+			for (int columnIndex = 0; columnIndex < columns.Length; columnIndex++)
+				sheet.AutoSizeColumn(columnIndex, true);
+
+			using (var stream = File.Create(Result))
+				book.Write(stream);
+		}
+
+		private static void MergeCells(ISheet sheet, int rowIndex)
+		{
+			var cra = new CellRangeAddress(rowIndex, rowIndex, 0, 1);
+			sheet.AddMergedRegion(cra);
+		}
+
+		private static IRow WriteStatRow(ISheet sheet, int rowIndex, IEnumerable<GoodsMovementRow> items, string label)
+		{
+			var row = sheet.CreateRow(rowIndex);
+			ExcelExporter.SetCellValue(row, 0, label);
+			ExcelExporter.SetCellValue(row, 3, items.Sum(x => x.Quantity));
+			ExcelExporter.SetCellValue(row, 4, items.Sum(x => x.SupplierSum));
+			ExcelExporter.SetCellValue(row, 5, items.Sum(x => x.RetailSum));
+			return row;
+		}
+	}
+
+	public class ConsumptionReport : DbCommand<string>
+	{
+		private Waybill _waybill;
+
+		public class ConsumptionDocumentRow
+		{
+			public string Name { get; set; }
+			public decimal Quantity { get; set; }
+			public string DocType { get; set; }
+			public uint DocumentId { get; set; }
+			public DateTime Date { get; set; }
+			public decimal Quantity2 { get; set; }
+		}
+
+		public ConsumptionReport(Waybill waybill)
+		{
+			_waybill = waybill;
+		}
+
+		public override void Execute()
+		{
+			var settings = Session.Query<Settings>().First();
+			var dir = settings.InitAndMap("Reports");
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Расход по документу {_waybill.ProviderDocumentId}.xls"));
+
+			var book = new HSSFWorkbook();
+
+			var titleFont = book.CreateFont();
+			titleFont.Boldweight = (short)FontBoldWeight.Bold;
+			titleFont.FontHeightInPoints = 12;
+			var titleStyle = book.CreateCellStyle();
+			titleStyle.Alignment = HorizontalAlignment.Center;
+			titleStyle.VerticalAlignment = VerticalAlignment.Center;
+			titleStyle.SetFont(titleFont);
+
+			var headerFont = book.CreateFont();
+			headerFont.Boldweight = (short)FontBoldWeight.Bold;
+			var headerStyle = book.CreateCellStyle();
+			headerStyle.Alignment = HorizontalAlignment.Center;
+			headerStyle.VerticalAlignment = VerticalAlignment.Center;
+			headerStyle.WrapText = true;
+			headerStyle.SetFont(headerFont);
+
+			var numericStyle = book.CreateCellStyle();
+			numericStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
+
+			var wrapStyle = book.CreateCellStyle();
+			wrapStyle.WrapText = true;
+
+			var sheet = book.CreateSheet($"Расход по документу {_waybill.ProviderDocumentId}");
+			var rowIndex = 0;
+
+			var titles = new[]
+			{
+				$"Расход по документу {_waybill.ProviderDocumentId}",
+				"",
+			};
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 4));
+			foreach (var header in titles)
+				ExcelExporter.WriteRow(sheet, new object[] { header }, rowIndex++).Cells.ForEach(x => x.CellStyle = titleStyle);
+
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex + 1, 0, 0));
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex + 1, 1, 1));
+			sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
+			var columns = new object[] {
+				"Наименование\nПроизводитель",
+				"Кол-во",
+				"Расход"
+			};
+			ExcelExporter.WriteRow(sheet, columns, rowIndex++).Cells.ForEach(x => x.CellStyle = headerStyle);
+
+			var columns2 = new object[] {
+				null,
+				null,
+				"Документ",
+				"Дата",
+				"Кол-во"
+			};
+			ExcelExporter.WriteRow(sheet, columns2, rowIndex++).Cells.ForEach(x => x.CellStyle = headerStyle);
+
+			var sql = $@"
+drop temporary table if exists consumption_report;
+create temporary table consumption_report engine=memory
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Списание' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from writeofflines l
+join writeoffdocs d on d.Id = l.WriteoffDocId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where d.`Status` = 1 and wl.WaybillId = ?
+union all
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Возврат поставщику' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from returntosupplierlines l
+join returntosuppliers d on d.Id = l.ReturnToSupplierId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where d.`Status` = 1 and wl.WaybillId = ?
+union all
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Внутреннее перемещение' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from displacementlines l
+join displacementdocs d on d.Id = l.DisplacementDocId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where (d.`Status` = 1 or d.`Status` = 2) and wl.WaybillId = ?
+union all
+select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
+'Чек' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
+from checklines l
+join checks d on d.Id = l.CheckId
+join waybilllines wl on wl.Id = l.WaybillLineId
+where d.`Status` = 0 and d.CheckType = 0 and wl.WaybillId = ?
+;";
+
+			StatelessSession.Connection.Execute(sql, new { a = _waybill.Id, b = _waybill.Id, c = _waybill.Id, d = _waybill.Id });
+
+			sql = $@"
+select CONCAT(Product, '\n', Producer) as Name, SUM(Quantity) as Quantity,
+DocType, DocumentId, Date, SUM(Quantity2) as Quantity2
+from consumption_report
+group by Product, Producer, SerialNumber, DocType, DocumentId, Date
+order by Name asc, Date desc
+;";
+			var items = StatelessSession.Connection.Query<ConsumptionDocumentRow>(sql);
+			var prevName = "";
+			foreach (var item in items)
+			{
+				if (item.Name == prevName)
+					item.Name = "";
+				else
+					prevName = item.Name;
+			}
+
+			var rows = items.Select(x => new object[]{
+							x.Name,
+							x.Quantity,
+							$"{x.DocType} №{x.DocumentId}",
+							x.Date.ToString("dd.MM.yyyy"),
+							x.Quantity2
+						}).ToList();
+
+			foreach (var row in rows)
+			{
+				var cells = ExcelExporter.WriteRow(sheet, row, rowIndex++).Cells;
+				cells[0].CellStyle = wrapStyle;
+				cells[1].CellStyle = numericStyle;
+				cells[4].CellStyle = numericStyle;
+			}
+
+			for (int columnIndex = 0; columnIndex < columns2.Length; columnIndex++)
+				sheet.AutoSizeColumn(columnIndex, true);
+			// увеличил первую колонку относительно значения по автосайзу, т.к. при WrapText = true текст переносится не только по \n
+			sheet.SetColumnWidth(0, sheet.GetColumnWidth(0) * 2);
+
+			using (var stream = File.Create(Result))
+				book.Write(stream);
+		}
+	}
+
 	public class VitallyImportantReport : DbCommand<string>
 	{
 		public DateTime Begin;

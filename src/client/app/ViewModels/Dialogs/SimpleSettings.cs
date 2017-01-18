@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
@@ -59,19 +60,30 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				grid.Children.Add(label);
 
 				UIElement input;
-				DependencyProperty inputProperty;
-				if (property.Item1.PropertyType == typeof(DateTime)) {
+				DependencyProperty inputProperty = null;
+				var propertyType = property.Item1.PropertyType;
+				if (propertyType == typeof(DateTime)) {
 					input = new DatePicker();
 					inputProperty = DatePicker.SelectedDateProperty;
-				}
-				else {
+				} else if (propertyType.IsEnum) {
+					input = new ComboBox();
+					var items = DescriptionHelper.GetDescriptions(propertyType);
+					input.SetValue(ItemsControl.DisplayMemberPathProperty, "Name");
+					input.SetValue(ItemsControl.ItemsSourceProperty, items);
+
+					var binding = new Binding(property.Item1.Name);
+					binding.Converter = new ComboBoxSelectedItemConverter();
+					binding.ConverterParameter = items;
+					BindingOperations.SetBinding(input, Selector.SelectedItemProperty, binding);
+				} else {
 					input = new TextBox {
 						MinWidth = 100,
 						VerticalAlignment = VerticalAlignment.Center
 					};
 					inputProperty = TextBox.TextProperty;
 				}
-				BindingOperations.SetBinding(input, inputProperty, new Binding(property.Item1.Name));
+				if (inputProperty != null)
+					BindingOperations.SetBinding(input, inputProperty, new Binding(property.Item1.Name));
 				input.SetValue(Grid.RowProperty, i);
 				input.SetValue(Grid.ColumnProperty, 1);
 				grid.Children.Add(input);

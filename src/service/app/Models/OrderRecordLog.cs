@@ -6,24 +6,25 @@ namespace AnalitF.Net.Service.Models
 	public enum RecordType
 	{
 		Loaded = 1,
-		Confirmed = 2,
+		Confirmed = 2
 	}
+
 	public class OrderRecordLog
 	{
 		public OrderRecordLog()
- 		{
- 			WriteTime = DateTime.Now;
- 		}
+		{
+			WriteTime = DateTime.Now;
+		}
 
- 		public OrderRecordLog(Order order, User user, uint requestId, RecordType recordType) : this()
- 		{
- 			Order = order;
- 			User = user;
- 			RecordType = recordType;
- 			RequestId = requestId;
- 		}
+		public OrderRecordLog(Order order, User user, uint requestId, RecordType recordType) : this()
+		{
+			Order = order;
+			User = user;
+			RecordType = recordType;
+			RequestId = requestId;
+		}
 
- 		public virtual uint Id { get; set; }
+		public virtual uint Id { get; set; }
 
 		public virtual Order Order { get; set; }
 

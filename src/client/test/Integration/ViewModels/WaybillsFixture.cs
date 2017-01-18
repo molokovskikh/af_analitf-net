@@ -11,6 +11,8 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
 using System.Reactive.Disposables;
+using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {

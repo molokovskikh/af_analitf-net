@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AnalitF.Net.Service.Models.Inventory;
 using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
@@ -1269,13 +1270,13 @@ where sp.Status = 1";
 
 				// Экспортируем файлы из БД если ранее они не скачивались
 
-				if (!System.IO.File.Exists(local))
+				if (!File.Exists(local))
 				{
 					var Query = session.CreateSQLQuery("select ImageFile from ProducerInterface.MediaFiles Where Id=:FileId");
 					Query.SetParameter("FileId", FileId);
 					byte[] FileBytes = (byte[])Query.UniqueResult();
 
-					using (System.IO.FileStream SW = new FileStream(local, FileMode.OpenOrCreate))
+					using (FileStream SW = new FileStream(local, FileMode.OpenOrCreate))
 					{
 						SW.Write(FileBytes, 0, FileBytes.Length);
 					}
@@ -1902,6 +1903,7 @@ where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 			session.CreateSQLQuery(@"drop temporary table if exists RetailCostFixed;").ExecuteUpdate();
 
+			Stock.CreateInTransitStocks(session, user);
 			sql = $@"
 select db.Id,
 	d.RowId as WaybillId,
@@ -1931,11 +1933,14 @@ select db.Id,
 	db.EAN13,
 	db.CountryCode,
 	db.RetailCost as ServerRetailCost,
-	db.RetailCostMarkup as ServerRetailMarkup
+	db.RetailCostMarkup as ServerRetailMarkup,
+	s.Id as StockId,
+	s.Version as StockVersion
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 				left join Catalogs.Products p on p.Id = db.ProductId
+				left join Inventory.Stocks s on s.WaybillLineId = db.Id
 where d.RowId in ({ids})
 group by dh.Id, db.Id";
 			Export(Result, sql, "WaybillLines", truncate: false, parameters: new { userId = user.Id });
@@ -1948,6 +1953,7 @@ from Documents.WaybillOrders wo
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
 where d.RowId in ({ids})";
 			Export(Result, sql, "WaybillOrders", truncate: false);
+			ExportStocks(data.LastUpdateAt);
 
 			var documentExported = session.CreateSQLQuery(@"
 select dh.DownloadId
@@ -2357,6 +2363,53 @@ where UserId = :userId;")
 				.SetParameter("MessageShowCount", messageShowCount)
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
+		}
+
+		public void ExportStocks(DateTime lastSync)
+		{
+			var sql = @"
+select if(s.CreatedByUserId = ?userId, s.ClientPrimaryKey, null) as Id,
+	s.Id as ServerId,
+	s.Version as ServerVersion,
+	s.AddressId,
+	s.ProductId,
+	s.CatalogId,
+	s.Product,
+	s.ProducerId,
+	s.Producer,
+	s.Country,
+	s.Period,
+	s.Exp,
+	s.SerialNumber,
+	s.Certificates,
+	s.Unit,
+	s.ExciseTax,
+	s.BillOfEntryNumber,
+	s.VitallyImportant,
+	s.ProducerCost,
+	s.RegistryCost,
+	s.SupplierPriceMarkup,
+	s.SupplierCostWithoutNds,
+	s.SupplierCost,
+	s.Nds,
+	s.NdsAmount,
+	s.Barcode,
+	s.Status,
+	s.Quantity,
+	s.SupplyQuantity,
+	s.RetailCost,
+	s.RetailMarkup,
+	dh.DownloadId as WaybillId
+from Inventory.Stocks s
+	join Customers.Addresses a on a.Id = s.AddressId
+		join Customers.UserAddresses ua on ua.Addressid = a.Id
+			join Customers.Users u on u.Id = ua.UserId
+	left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
+		left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
+where a.Enabled = 1
+	and u.Id = ?userId
+	and s.Timestamp > ?lastSync";
+			Export(Result, sql, "stocks", false, new {userId = user.Id, lastSync});
 		}
 	}
 

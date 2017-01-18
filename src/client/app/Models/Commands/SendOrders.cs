@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Text;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
@@ -86,6 +87,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var settings = Session.Query<Settings>().First();
 			var user = Session.Query<User>().First();
+
 			if (rejectedOrders.Any()) {
 				//если мы получили заказ без номера заказа с сервера значит он не принят
 				//тк включена опция предзаказа и есть проблемы с другими заказами

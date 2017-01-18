@@ -36,13 +36,13 @@ namespace AnalitF.Net.Client.Models.Results
 	{
 		public Screen Model;
 		public bool FullScreen;
-		public bool FixedSize;
+		public bool Resizable;
 
-		public DialogResult(Screen model, bool fullScreen = false, bool fixedSize = false)
+		public DialogResult(Screen model, bool fullScreen = false, bool resizable = false)
 		{
 			Model = model;
 			FullScreen = fullScreen;
-			FixedSize = fixedSize;
+			Resizable = resizable;
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 
-			if (FixedSize || FullScreen)
+			if (Resizable || FullScreen)
 				manager.ShowDialog(Model, null, settings);
 			else
 				manager.ShowFixedDialog(Model);

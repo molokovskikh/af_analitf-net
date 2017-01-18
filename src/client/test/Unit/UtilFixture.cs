@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using Common.NHibernate;
 using Newtonsoft.Json;

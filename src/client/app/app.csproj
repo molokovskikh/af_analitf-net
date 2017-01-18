@@ -261,6 +261,7 @@
     <Compile Include="Helpers\FailFastLog.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
+    <Compile Include="Helpers\KeyboardHelper.cs" />
     <Compile Include="Helpers\LazyEnumerable.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
@@ -294,8 +295,49 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\DisplacementDoc.cs" />
+    <Compile Include="Models\Inventory\UnpackingDoc.cs" />
+    <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
+    <Compile Include="Models\Inventory\Check.cs" />
+    <Compile Include="Models\Inventory\DisplacementLine.cs" />
+    <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
+    <Compile Include="Models\Inventory\CheckLine.cs" />
+    <Compile Include="Models\Inventory\InventoryDoc.cs" />
+    <Compile Include="Models\Inventory\ReassessmentDoc.cs" />
+    <Compile Include="Models\Inventory\ReceivingLine.cs" />
+    <Compile Include="Models\Inventory\Stock.cs" />
+    <Compile Include="Models\Inventory\StockAction.cs" />
+    <Compile Include="Models\Inventory\StockTotal.cs" />
+    <Compile Include="Models\Inventory\SyncCommand.cs" />
+    <Compile Include="Models\Inventory\WriteoffDoc.cs" />
+    <Compile Include="Models\Inventory\WriteoffReason.cs" />
+    <Compile Include="Models\Print\CheckDetailsDocument.cs" />
+    <Compile Include="Models\Print\CheckDocument.cs" />
+    <Compile Include="Models\Print\DisplacementDocumentWaybill.cs" />
+    <Compile Include="Models\Print\InventoryDocument.cs" />
+    <Compile Include="Models\Print\InventoryActDocument.cs" />
+    <Compile Include="Models\Print\PriceNegotiationProtocol.cs" />
+    <Compile Include="Models\Print\ReturnDivergenceAct.cs" />
+    <Compile Include="Models\Print\ReturnInvoice.cs" />
+    <Compile Include="Models\Print\ReturnLabel.cs" />
+    <Compile Include="Models\Print\DisplacementDocument.cs" />
+    <Compile Include="Models\Print\WaybillProtocolDocument.cs" />
+    <Compile Include="Models\Print\WaybillActDocument.cs" />
+    <Compile Include="Models\Print\ReassessmentDocument.cs" />
+    <Compile Include="Models\Print\ReassessmentActDocument.cs" />
+    <Compile Include="Models\Print\WriteoffActDocument.cs" />
+    <Compile Include="Models\Print\WriteoffDocument.cs" />
+    <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
+    <Compile Include="Models\Print\ReturnActDocument.cs" />
+    <Compile Include="Models\Print\DefectStockDocument.cs" />
+    <Compile Include="Models\Print\ReturnWaybill.cs" />
+    <Compile Include="Models\Print\StockDocument.cs" />
+    <Compile Include="Models\Print\StockLimitMonthDocument.cs" />
+    <Compile Include="Models\Print\StockPriceTagDocument.cs" />
+    <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\PriceTag.cs" />
     <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />
+    <Compile Include="Models\Print\DisplacementWDocument.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\DeletedOrder.cs" />
     <Compile Include="Models\DeletedOrderLine.cs" />
@@ -388,16 +430,46 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
+    <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
+    <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
+    <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
+    <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
+    <Compile Include="ViewModels\Inventory\EditUnpackingDoc.cs" />
+    <Compile Include="ViewModels\Inventory\UnpackingDocs.cs" />
+    <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
     <Compile Include="ViewModels\Diadok\Delete.cs" />
     <Compile Include="ViewModels\Diadok\Reject.cs" />
     <Compile Include="ViewModels\Diadok\Revocation.cs" />
     <Compile Include="ViewModels\Diadok\Resolution.cs" />
     <Compile Include="ViewModels\Diadok\Sign.cs" />
+    <Compile Include="ViewModels\Dialogs\EditDefectSeries.cs" />
+    <Compile Include="ViewModels\Dialogs\EditStock.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
+    <Compile Include="ViewModels\Dialogs\ScannerConfig.cs" />
+    <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
     <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
+    <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
+    <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
+    <Compile Include="ViewModels\Inventory\Checkout.cs" />
+    <Compile Include="ViewModels\Inventory\Checks.cs" />
+    <Compile Include="ViewModels\Inventory\EditReassessmentDoc.cs" />
+    <Compile Include="ViewModels\Inventory\EditInventoryDoc.cs" />
+    <Compile Include="ViewModels\Inventory\EditWriteoffDoc.cs" />
+    <Compile Include="ViewModels\Inventory\ProductSearch.cs" />
+    <Compile Include="ViewModels\Inventory\Frontend.cs" />
+    <Compile Include="ViewModels\Inventory\Help.cs" />
+    <Compile Include="ViewModels\Inventory\InventoryDocs.cs" />
+    <Compile Include="ViewModels\Inventory\ReassessmentDocs.cs" />
+    <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
+    <Compile Include="ViewModels\Inventory\StockGroupSearch.cs" />
+    <Compile Include="ViewModels\Inventory\StockSearch.cs" />
+    <Compile Include="ViewModels\Inventory\Stocks.cs" />
+    <Compile Include="ViewModels\Inventory\WriteoffDocs.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
     <Compile Include="ViewModels\Offers\BaseOfferViewModel.cs" />
@@ -446,6 +518,7 @@
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\Sbis\Index.cs" />
     <Compile Include="ViewModels\Sbis\Reject.cs" />
+    <Compile Include="ViewModels\Inventory\ReturnToSupplierDetails.cs" />
     <Compile Include="ViewModels\WaybillLineSearch.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -456,6 +529,18 @@
     <Compile Include="ViewModels\WaybillsViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\ReportSetting.xaml.cs">
+      <DependentUpon>ReportSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\RequirementNegotiationProtocol.xaml.cs">
+      <DependentUpon>RequirementNegotiationProtocol.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\RequirementWaybill.xaml.cs">
+      <DependentUpon>RequirementWaybill.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\ScannerConfig.xaml.cs">
+      <DependentUpon>ScannerConfig.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CatalogNameView.xaml.cs">
       <DependentUpon>CatalogNameView.xaml</DependentUpon>
@@ -495,6 +580,12 @@
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\EditDefectSeries.xaml.cs">
+      <DependentUpon>EditDefectSeries.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\EditStock.xaml.cs">
+      <DependentUpon>EditStock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\GridConfig.xaml.cs">
       <DependentUpon>GridConfig.xaml</DependentUpon>
     </Compile>
@@ -503,6 +594,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PostUpdate.xaml.cs">
       <DependentUpon>PostUpdate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\SelectStockPeriod.xaml.cs">
+      <DependentUpon>SelectStockPeriod.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
       <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
@@ -524,6 +618,78 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\GoodsMovement.xaml.cs">
+      <DependentUpon>GoodsMovement.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\EditDisplacementDoc.xaml.cs">
+      <DependentUpon>EditDisplacementDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\EditUnpackingDoc.xaml.cs">
+      <DependentUpon>EditUnpackingDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\UnpackingDocs.xaml.cs">
+      <DependentUpon>UnpackingDocs.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\PrintForm\ReassessmentActDocumentForm.xaml.cs">
+      <DependentUpon>ReassessmentActDocumentForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReturnToSupplierDetails.xaml.cs">
+      <DependentUpon>ReturnToSupplierDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\DisplacementDocs.xaml.cs">
+      <DependentUpon>DisplacementDocs.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReturnToSuppliers.xaml.cs">
+      <DependentUpon>ReturnToSuppliers.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CheckDetails.xaml.cs">
+      <DependentUpon>CheckDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Checkout.xaml.cs">
+      <DependentUpon>Checkout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Checks.xaml.cs">
+      <DependentUpon>Checks.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\EditInventoryDoc.xaml.cs">
+      <DependentUpon>EditInventoryDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\EditReassessmentDoc.xaml.cs">
+      <DependentUpon>EditReassessmentDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\EditWriteoffDoc.xaml.cs">
+      <DependentUpon>EditWriteoffDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Frontend.xaml.cs">
+      <DependentUpon>Frontend.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Help.xaml.cs">
+      <DependentUpon>Help.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\InventoryDocs.xaml.cs">
+      <DependentUpon>InventoryDocs.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ProductSearch.xaml.cs">
+      <DependentUpon>ProductSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReassessmentDocs.xaml.cs">
+      <DependentUpon>ReassessmentDocs.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CheckDefectSeries.xaml.cs">
+      <DependentUpon>CheckDefectSeries.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Stocks.xaml.cs">
+      <DependentUpon>Stocks.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\StockGroupSearch.xaml.cs">
+      <DependentUpon>StockGroupSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\StockSearch.xaml.cs">
+      <DependentUpon>StockSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\WriteoffDocs.xaml.cs">
+      <DependentUpon>WriteoffDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Offers\AddAwaited.xaml.cs">
       <DependentUpon>AddAwaited.xaml</DependentUpon>
@@ -723,6 +889,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\EditDefectSeries.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Dialogs\EditStock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\GridConfig.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -732,6 +906,26 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ReportSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RequirementNegotiationProtocol.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RequirementWaybill.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ScannerConfig.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\SelectStockPeriod.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -762,6 +956,102 @@
     <Page Include="Views\Feedback.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\GoodsMovement.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\EditDisplacementDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\EditUnpackingDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\UnpackingDocs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\PrintForm\ReassessmentActDocumentForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReturnToSupplierDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\DisplacementDocs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\ReturnToSuppliers.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\CheckDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Checkout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Checks.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\EditInventoryDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\EditReassessmentDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\EditWriteoffDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\Frontend.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Help.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\InventoryDocs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ProductSearch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReassessmentDocs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CheckDefectSeries.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\Stocks.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\StockGroupSearch.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\StockSearch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\WriteoffDocs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Offers\AddAwaited.xaml">
       <SubType>Designer</SubType>
@@ -934,9 +1224,12 @@
     <None Include="App.release.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="App.stock.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <Resource Include="Assets\shaders\grayscale.ps" />
   </ItemGroup>
   <ItemGroup>
@@ -1016,6 +1309,8 @@
     <Resource Include="Assets\images\zoom_in.ico" />
     <Resource Include="Assets\images\copy.ico" />
     <Resource Include="Assets\images\printer.ico" />
+    <Resource Include="Assets\images\Stocks_32.ico" />
+    <Resource Include="Assets\images\cash.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -138,7 +138,10 @@ namespace AnalitF.Net.Client.ViewModels
 				conditions.Add("(cn.Name like @term or c.Form like @term)");
 			}
 			if (!ParentModel.ShowWithoutOffers) {
-				conditions.Add("c.HaveOffers = 1");
+				if (ParentModel.Mode == CatalogViewMode.Basic)
+					conditions.Add("c.HaveOffers = 1");
+				else if (ParentModel.Mode == CatalogViewMode.CatalogSelector)
+					conditions.Add("exists ( select * from Waybilllines l join Waybills w on w.Id = l.WaybillId where w.DocType = 1 and w.Status = 1 and l.CatalogId = c.Id )");
 			}
 			var filterType = ParentModel.CurrentFilter?.FilterType;
 			if (ParentModel.CurrentFilter == ParentModel.Filters[1]) {

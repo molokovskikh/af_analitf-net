@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			});
 			Build(typeof(WaybillLine));
 			var legend = Legend(grid, typeof(WaybillLine));
-			Assert.AreEqual("Подсказка\r\nЗабракованная позиция\r\nНовая забракованная позиция\r\nНовая разбракованная позиция\r\nРозничная цена: не рассчитана\r\nРозничная цена: редактирование запрещено поставщиком", legend);
+			Assert.That(legend, Does.Contain("Розничная цена: редактирование запрещено поставщиком"));
 		}
 
 

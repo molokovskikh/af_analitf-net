@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config;
@@ -27,6 +28,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Diadok;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Inventory;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -39,11 +41,14 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Util;
 using ReactiveUI;
+using Xceed.Wpf.Toolkit;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
+using WindowState = System.Windows.WindowState;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -52,6 +57,17 @@ namespace AnalitF.Net.Client.ViewModels
 		bool CanPrint { get; }
 
 		PrintResult Print();
+	}
+
+	public interface IPrintableStock
+	{
+		bool CanPrintStock { get; }
+		bool IsView { get; set; }
+		ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		PrintResult PrintStock();
+		string LastOperation { get; set; }
+		string PrinterName { get; set; }
+		void SetMenuItems();
 	}
 
 #if DEBUG
@@ -83,6 +99,7 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class ShellViewModel : BaseShell, IDisposable
 	{
+		private ManualResetEventSlim startSync = new ManualResetEventSlim();
 		private WindowManager windowManager;
 		private ISession session;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
@@ -128,6 +145,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Config = config;
 			CloseDisposable.Add(CancelDisposable);
 			PendingDownloads = new ObservableCollection<Loadable>();
+			IsView = true;
 
 #if DEBUG
 			if (!Env.IsUnitTesting)
@@ -181,6 +199,9 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange(nameof(CanShowAwaited));
 					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
 					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
+
+					NotifyOfPropertyChange(nameof(CanShowInventory));
+					NotifyOfPropertyChange(nameof(CanShowFrontend));
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -217,6 +238,33 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 				CanPrintPreview = CanPrint.ToValue();
+
+			CanPrintStock = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintableStock
+					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.CanPrintStock, skipInitial: false)
+					: Observable.Return(new ObservedChange<IPrintableStock, bool>()))
+				.Switch()
+				.Select(e => e.Value)
+				.ToValue(CancelDisposable);
+
+			PrintStockMenuItems = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintableStock
+					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.PrintStockMenuItems, skipInitial: false, beforeChange: true)
+					: Observable.Return(new ObservedChange<IPrintableStock, ObservableCollection<MenuItem>>()))
+				.Switch()
+				.Select(e => e.Value)
+				.ToValue(CancelDisposable);
+
+			this.ObservableForProperty(m => m.ActiveItem)
+				.Subscribe(_ => SetMenuItems());
+
+			//if (Env.Factory != null) {
+			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
+			//	CloseDisposable.Add(Disposable.Create(() => {
+			//		CancelDisposable.Dispose();
+			//		task.Wait(TimeSpan.FromSeconds(10));
+			//	}));
+			//}
 		}
 
 		public Config.Config Config { get; set; }
@@ -396,12 +444,19 @@ namespace AnalitF.Net.Client.ViewModels
 					var items = PersistentNavigationStack
 						.Where(t => t.TypeName != typeof(Main).FullName)
 						.Select(t => {
-							var v = Activator.CreateInstance(Type.GetType(t.TypeName), t.Args);
+							var type = Type.GetType(t.TypeName);
+							if (type == null)
+								return null;
+							var constructor = type.GetConstructor(t.Args.Select(x => x.GetType()).ToArray());
+							if (constructor == null)
+								return null;
+							var v = Activator.CreateInstance(type, t.Args);
 							if (v is IDisposable) {
 								disposable.Add((IDisposable)v);
 							}
 							return v;
 						})
+						.Where(x => x != null)
 						.OfType<IScreen>()
 						.ToArray();
 					if (Navigator is Navigator) {
@@ -501,6 +556,70 @@ namespace AnalitF.Net.Client.ViewModels
 
 			return ((IPrintable)ActiveItem).Print();
 		}
+
+		public NotifyValue<bool> CanPrintStock { get; set; }
+		public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems { get; set;}
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public static RoutedCommand PrintStockRoutedCommand = new RoutedCommand();
+
+		public IResult PrintStock()
+		{
+			if (!CanPrintStock.Value)
+				return null;
+			return ((IPrintableStock) ActiveItem).PrintStock();
+		}
+
+		private void ExecutedPrintStockCommand(object sender, ExecutedRoutedEventArgs e)
+		{
+			var item = (MenuItem) sender;
+			var printableStock = (IPrintableStock) ActiveItem;
+			printableStock.IsView = IsView;
+			printableStock.LastOperation = item.Header.ToString();
+			if (IsView)
+				printableStock.PrintStock();
+		}
+
+		private void CanExecutePrintStocCommand(object sender, CanExecuteRoutedEventArgs e)
+		{
+			e.CanExecute = CanPrintStock;
+		}
+
+		public void SetMenuItems()
+		{
+			if (!CanPrintStock)
+				return;
+			PrintStockMenuItems.Value.Clear();
+			((IPrintableStock) ActiveItem).SetMenuItems();
+			CommandBinding commandBinding = new CommandBinding(PrintStockRoutedCommand, ExecutedPrintStockCommand,
+				CanExecutePrintStocCommand);
+			foreach (var it in PrintStockMenuItems.Value) {
+				it.CommandBindings.Add(commandBinding);
+				it.Command = PrintStockRoutedCommand;
+			}
+			var item = new MenuItem {Header = "Настройки"};
+			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
+			PrintStockMenuItems.Value.Add(item);
+		}
+
+		public IEnumerable<IResult> ReportSetting()
+		{
+			var req = new ReportSetting();
+			yield return new DialogResult(req);
+			PrinterName = req.PrinterName;
+			if (req.IsView) {
+				IsView = true;
+				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = false);
+				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsChecked = false);
+			}
+
+			if (req.IsPrint) {
+				IsView = false;
+				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = true);
+			}
+
+		}
+
 
 		public NotifyValue<bool> CanPrintPreview { get; set; }
 
@@ -604,6 +723,20 @@ namespace AnalitF.Net.Client.ViewModels
 			return model.IsCredentialsChanged;
 		}
 
+		public bool CanShowInventory => Settings.Value.LastUpdate != null;
+
+		public void ShowInventory()
+		{
+			NavigateRoot(new Inventory.Stocks());
+		}
+
+		public bool CanShowFrontend => Settings.Value.LastUpdate != null;
+
+		public void ShowFrontend()
+		{
+			NavigateRoot(new Inventory.Frontend());
+		}
+
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;
 
 		public void ShowOrderLines()
@@ -692,6 +825,46 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowJournal()
 		{
 			NavigateRoot(new Journal());
+		}
+
+		public void CheckDefectSeries()
+		{
+			NavigateRoot(new CheckDefectSeries());
+		}
+
+		public void ReceivingOrders()
+		{
+			NavigateRoot(new WaybillsViewModel());
+		}
+
+		public void Checks()
+		{
+			NavigateRoot(new Checks());
+		}
+
+		public void InventoryDocs()
+		{
+			NavigateRoot(new InventoryDocs());
+		}
+
+		public void WriteoffDocs()
+		{
+			NavigateRoot(new WriteoffDocs());
+		}
+
+		public void ReturnToSuppliers()
+		{
+			NavigateRoot(new ReturnToSuppliers());
+		}
+
+		public void ReassessmentDocs()
+		{
+			NavigateRoot(new ReassessmentDocs());
+		}
+
+		public void DisplacementDocs()
+		{
+			NavigateRoot(new DisplacementDocs());
 		}
 
 		public bool CanMicroUpdate => Settings.Value.LastUpdate != null;
@@ -936,6 +1109,11 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool Confirm(string text)
 		{
 			return windowManager.Question(text) == MessageBoxResult.Yes;
+		}
+
+		public void SyncInventory()
+		{
+			startSync.Set();
 		}
 
 		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)

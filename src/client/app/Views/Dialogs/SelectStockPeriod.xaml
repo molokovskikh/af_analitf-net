@@ -1,0 +1,27 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Dialogs"
+             xmlns:cal="http://www.caliburnproject.org" x:Class="AnalitF.Net.Client.Views.Dialogs.SelectStockPeriod"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+	<Grid>
+		<StackPanel Margin="4">
+			<Label Content="Отображать товары со сроками годности"/>
+			<StackPanel Orientation="Horizontal" Margin="0, 10, 0, 10">
+				<CheckBox x:Name="IsStart" Width="50" VerticalAlignment="Center" Content="С"/>
+				<DatePicker x:Name="Start" IsEnabled="{Binding IsChecked, ElementName=IsStart}" />
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" Margin="0, 10, 0, 10">
+				<CheckBox x:Name="IsEnd" Width="50" VerticalAlignment="Center" Content="По"/>
+				<DatePicker x:Name="End" IsEnabled="{Binding IsChecked, ElementName=IsEnd}"/>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" Margin="0, 10, 0, 10">
+				<Button x:Name="OK" Margin="0, 0, 5, 0" Content="ОК"/>
+				<Button x:Name="TryClose" Content="Отмена"/>
+			</StackPanel>
+		</StackPanel>
+	</Grid>
+</UserControl>

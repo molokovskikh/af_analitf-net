@@ -11,6 +11,8 @@
 	<Window.InputBindings>
 		<KeyBinding Gesture="CTRL+S" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="SendOrders" />
+		<KeyBinding Gesture="CTRL+SHIFT+S" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="SyncInventory" />
 		<KeyBinding Gesture="CTRL+R" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="Update" />
 		<KeyBinding Gesture="CTRL+T" Command="caliburn:Commands.InvokeViewModel"
@@ -49,30 +51,30 @@
 			<TextBlock Text="{Binding Name}" />
 		</DataTemplate>
 
-		<Style x:Key="RootTabs" TargetType="TabControl">
-			<Setter Property="Background" Value="White" />
-			<Setter Property="ItemTemplate">
-				<Setter.Value>
-					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
-							<Button Focusable="False" cal:Message.Attach="CloseScreen($this)" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
-								<Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
+    <Style x:Key="RootTabs" TargetType="TabControl">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="ItemTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
+              <Button Focusable="False" cal:Message.Attach="CloseScreen($this)" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
+                <Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
 									StrokeThickness="1" StrokeEndLineCap="Round" StrokeStartLineCap="Round" />
-							</Button>
-						</StackPanel>
-					</DataTemplate>
-				</Setter.Value>
-			</Setter>
-			<Setter Property="ContentTemplate">
-				<Setter.Value>
-					<DataTemplate>
-						<ContentControl cal:View.Model="{TemplateBinding DataContext}" />
-					</DataTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-	</Window.Resources>
+              </Button>
+            </StackPanel>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="ContentTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <ContentControl cal:View.Model="{TemplateBinding DataContext}" />
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
 
 	<Grid Name="RootGrid">
 		<Grid.RowDefinitions>
@@ -88,6 +90,8 @@
 					cal:Message.Attach="Update" />
 				<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
 					cal:Message.Attach="SendOrders" />
+				<MenuItem Header="Синхронизировать остатки" InputGestureText="CTRL+SHIFT+S"
+					cal:Message.Attach="SyncInventory" />
 				<MenuItem Header="Загрузить и получить накладные, сертификаты"
 					cal:Message.Attach="MicroUpdate" />
 				<MenuItem Header="Кумулятивное обновление"
@@ -137,7 +141,27 @@
 				</MenuItem>
 			</MenuItem>
 
-			<MenuItem Header="Справка">
+      <MenuItem Header="Склад">
+        <MenuItem Header="Документы">
+          <MenuItem Header="Приходные документы">
+						<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
+						<MenuItem Header="Излишки" Name="InventoryDocs" />
+					</MenuItem>
+					<MenuItem Header="Расходные документы">
+						<MenuItem Header="Переоценка" Name="ReassessmentDocs" />
+						<MenuItem Header="Списание" Name="WriteoffDocs" />
+						<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
+						<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
+					</MenuItem>
+					<MenuItem Header="Отчеты">
+						<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
+						<MenuItem Header="Чеки" Name="Checks" />
+					</MenuItem>
+        </MenuItem>
+        <MenuItem Header="Товарные запасы" cal:Message.Attach="ShowInventory" />
+      </MenuItem>
+
+      <MenuItem Header="Справка">
 				<MenuItem Header="О программе..." cal:Message.Attach="ShowAbout" />
 			</MenuItem>
 		</Menu>
@@ -177,8 +201,15 @@
 				<Image Source="/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
+      <xctk:SplitButton x:Name="PrintStock" ToolTip="Печать склад" Background="Transparent">
+        <Image Source="/assets/images/Printer 2_32.ico"
+						Style="{StaticResource ButtonImage}" />
+        <xctk:SplitButton.DropDownContent>
+          <ItemsControl ItemsSource ="{Binding Path=PrintStockMenuItems.Value}"/>
+        </xctk:SplitButton.DropDownContent>
+      </xctk:SplitButton>
 
-			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
+      <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге (F8)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Folder Green_32.ico"
@@ -279,6 +310,16 @@
 					<Image Source="/assets/images/sbis.png"
 							Style="{StaticResource ButtonImage}" />
 				</Grid>
+			</Button>
+
+			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/assets/images/Stocks_32.ico"
+						Style="{StaticResource ButtonImage}" />
+			</Button>
+
+			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/assets/images/cash.png"
+						Style="{StaticResource ButtonImage}" />
 			</Button>
 
 			<Button x:Name="ShowMain" ToolTip="На главную страницу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">

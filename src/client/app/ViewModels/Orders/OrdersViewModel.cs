@@ -209,11 +209,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.ToList();
 				}
 				else {
-				orders = AddressSelector.GetActiveFilter()
-					.SelectMany(a => a.Orders)
-					.Where(x => priceIds.Contains(x.SafePrice.Id) || IsSelectedAllPrices())
-					.OrderBy(o => o.PriceName)
-					.ToList();
+					orders = AddressSelector.GetActiveFilter()
+						.SelectMany(a => a.Orders)
+						.Where(x => priceIds.Contains(x.SafePrice.Id) || IsSelectedAllPrices())
+						.OrderBy(o => o.PriceName)
+						.ToList();
 					orders.Each(o => o.CalculateStyle(Address));
 				}
 				if (CurrentOrder != null)

@@ -25,13 +25,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void OK()
 		{
-			foreach (var field in Waybill.FieldsForValidate) {
-				var error = Waybill[field];
-				if (!string.IsNullOrEmpty(error)) {
-					Manager.Warning(error);
-					return;
-				}
-			}
+			if (!IsValide(Waybill))
+				return;
 			WasCancelled = false;
 			TryClose();
 		}

@@ -9,17 +9,21 @@ using System.Windows;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using Dapper;
 using NHibernate.Linq;
 using NPOI.SS.UserModel;
+using ReactiveUI;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
 using System.ComponentModel.DataAnnotations;
+using AnalitF.Net.Client.Models.Commands;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -54,11 +58,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Детализация накладной";
 			this.id = id;
-			CurrentLine = new NotifyValue<object>();
+			InitFields();
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
-			CurrentTax = new NotifyValue<ValueDescription<int?>>();
-			CurrentOrderLine = new NotifyValue<SentOrderLine>();
-			Lines = new NotifyValue<ListCollectionView>();
 
 			Settings.Changed()
 				.Subscribe(v => Calculate());
@@ -123,6 +124,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Visibility> EmptyLabelVisibility { get; set; }
 		public NotifyValue<bool> IsRejectVisible { get; set; }
 		public NotifyValue<Reject> Reject { get; set; }
+		public NotifyValue<bool> CanStock { get; set; }
+		public NotifyValue<bool> CanToEditable { get; set; }
+		public NotifyValue<bool> CanEditSum { get; set; }
 
 		private void Calculate()
 		{
@@ -140,6 +144,17 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			Waybill = Session.Load<Waybill>(id);
+			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
+				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
+			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
+				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanEditSum);
+
+			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
+			.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
+			.Select(_ => {
+					return Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser;
+			})
+			.Subscribe(CanToEditable);
 
 			if (Waybill.IsNew)
 			{
@@ -149,6 +164,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			Calculate();
+
+			var stockids =  Waybill.Lines.Where(x => x.StockId != null).Select(x => x.StockId).ToArray();
+			RxQuery(s => s.Query<Stock>().Where(x => stockids.Contains(x.ServerId)).ToDictionary(x => x.ServerId))
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => {
+					Waybill.Lines.Each(y => {
+						y.Stock = x.GetValueOrDefault(y.StockId);
+					});
+				});
 
 			Lines.Value = new ListCollectionView(Waybill.Lines.OrderBy(l => l.Product).ToList());
 			Taxes = new List<ValueDescription<int?>> {
@@ -208,6 +232,16 @@ namespace AnalitF.Net.Client.ViewModels
 			return Preview("Накладная", new WaybillDocument(Waybill, PrintableLines()));
 		}
 
+		public IEnumerable<IResult> PrintAct()
+		{
+			return Preview("Акт прихода", new WaybillActDocument(Waybill, PrintableLines()));
+		}
+
+		public IEnumerable<IResult> PrintProtocol()
+		{
+			return Preview("Протокол согласования цен", new WaybillProtocolDocument(Waybill, PrintableLines()));
+		}
+
 		public IEnumerable<IResult> PrintInvoice()
 		{
 			return Preview("Счет-фактура", new InvoiceDocument(Waybill));
@@ -248,6 +282,13 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
+		public IEnumerable<IResult> ConsumptionReport()
+		{
+			var commnand = new ConsumptionReport(Waybill);
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
+			yield return new OpenResult(commnand.Result);
+		}
+
 		public IResult ExportWaybill()
 		{
 			var columns = new[] {
@@ -285,7 +326,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
-                l.RetailMarkupInRubles,
+        l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum
@@ -438,9 +479,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			row = sheet.CreateRow(3);
 			row.CreateCell(0).SetCellValue("Требование №");
- 			row.CreateCell(1).SetCellValue("_______________________");
- 			row.CreateCell(5).SetCellValue("Накладная №");
- 			row.CreateCell(6).SetCellValue("_______________________");
+			row.CreateCell(1).SetCellValue("_______________________");
+			row.CreateCell(5).SetCellValue("Накладная №");
+			row.CreateCell(6).SetCellValue("_______________________");
 
 			row = sheet.CreateRow(4);
 			row.CreateCell(1).SetCellValue("от \"___\"_________________20___г");
@@ -448,15 +489,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 			row = sheet.CreateRow(5);
 			row.CreateCell(0).SetCellValue("Кому: Аптечный пункт");
- 			row.CreateCell(1).SetCellValue("_______________________");
- 			row.CreateCell(5).SetCellValue("Через кого");
- 			row.CreateCell(6).SetCellValue("_______________________");
+			row.CreateCell(1).SetCellValue("_______________________");
+			row.CreateCell(5).SetCellValue("Через кого");
+			row.CreateCell(6).SetCellValue("_______________________");
 
 			row = sheet.CreateRow(6);
 			row.CreateCell(0).SetCellValue("Основание отпуска");
- 			row.CreateCell(1).SetCellValue("_______________________");
- 			row.CreateCell(5).SetCellValue("Доверенность №_____");
- 			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
+			row.CreateCell(1).SetCellValue("_______________________");
+			row.CreateCell(5).SetCellValue("Доверенность №_____");
+			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
 
 			return ExcelExporter.Export(book);
 		}
@@ -494,7 +535,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
-                l.RetailMarkupInRubles,
+        l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum
@@ -525,6 +566,26 @@ namespace AnalitF.Net.Client.ViewModels
 		public void HideReject()
 		{
 			IsRejectVisible.Value = false;
+		}
+
+		public void Stock()
+		{
+			if (!CanStock.Value)
+				return;
+			Waybill.Stock(Session);
+			Manager.Notify("Накладная оприходована");
+		}
+
+		public void ToEditable()
+		{
+			if (!CanToEditable.Value)
+				return;
+
+			if (!Confirm("Накладная будет переведена в редактируемые, продолжить?"))
+				return;
+
+			Waybill.IsCreatedByUser = true;
+			Manager.Notify("Накладная переведена в редактируемые");
 		}
 
 #if DEBUG

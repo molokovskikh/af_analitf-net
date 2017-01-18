@@ -688,7 +688,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new GridConfig(grid));
 		}
 
-		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		public virtual IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
 			return Env.RxQuery(select, CloseCancellation.Token);
 		}
@@ -739,6 +739,18 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var propertyInfo in notifiable)
 				if (propertyInfo.GetValue(screen, null) == null)
 					propertyInfo.SetValue(screen, Activator.CreateInstance(propertyInfo.PropertyType), null);
+		}
+
+		protected bool IsValide(IDataErrorInfo2 mode)
+		{
+			foreach (var field in mode.FieldsForValidate) {
+				var error = mode[field];
+				if (!string.IsNullOrEmpty(error)) {
+					Manager.Warning(error);
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }

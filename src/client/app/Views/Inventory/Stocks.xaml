@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.Stocks"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	mc:Ignorable="d"
+	d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="CTRL+SHIFT+R" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="Update" />
+	</UserControl.InputBindings>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Menu Grid.Row="0">
+			<MenuItem Header="Приходные документы">
+				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
+				<MenuItem Header="Излишки" Name="InventoryDocs" />
+			</MenuItem>
+			<MenuItem Header="Расходные документы">
+				<MenuItem Header="Переоценка" Name="ReassessmentDocs" />
+				<MenuItem Header="Списание" Name="WriteoffDocs" />
+				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
+				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
+				<MenuItem Header="Распаковка" Name="UnpackingDocs" />
+			</MenuItem>
+			<MenuItem Header="Отчеты">
+				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
+				<MenuItem Header="Чеки" Name="Checks" />
+				<MenuItem Header="Движение товара по накладным" Name="GoodsMovement" />
+			</MenuItem>
+		</Menu>
+		<WrapPanel Grid.Row="1" Style="{StaticResource FilterWrapPanel}" >
+			<ContentControl x:Name="AddressSelector" />
+			<controls:PopupSelector VerticalAlignment="Center" x:Name="StatusFilter"
+				ButtonContent="Статус"
+				Member="Name" />
+		</WrapPanel>
+		<controls:DataGrid2 x:Name="Items" Grid.Row="2" ShowAddressColumn="{Binding AddressSelector.All.Value}" AddressColumn="{x:Reference Name=AddressColumn}">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx x:Name="AddressColumn" Width="*" Header="Адрес" Binding="{Binding Address.Name}"
+					Visibility="Collapsed"
+					IsReadOnly="True" />
+				<controls:DataGridTextColumnEx x:Name="ClmnBarcode" Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnStatus" Header="Статус" Binding="{Binding StatusName}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnWaybill" Header="Накладная" Binding="{Binding WaybillId}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCount" Header="Кол-во" Binding="{Binding Quantity}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnReservedQuantity" Header="В резерве" Binding="{Binding ReservedQuantity}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding SupplierCost}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnRetailCost" Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSum" Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSumWithNds" Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnRetailSum" Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCountDelivery" Header="Кол-во поставки" Binding="{Binding SupplyQuantity}" Width="*" TextAlignment="Right" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<controls:DataGrid2 x:Name="DgItemsTotal" ItemsSource="{Binding ItemsTotal}" Grid.Row="3" HeadersVisibility="Row" Margin="0 5 0 0"
+			HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled"
+			ShowAddressColumn="{Binding AddressSelector.All.Value}"
+			AddressColumn="{x:Reference Name=AddressName}">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx x:Name="AddressName" Width="{Binding Source={x:Reference AddressColumn}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnBarcode}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProduct}, Path=ActualWidth}"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProducer}, Path=ActualWidth}"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnStatus}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnWaybill}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCount}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalCount}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnReservedQuantity}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding ReservedQuantity}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCost}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnRetailCost}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnSum}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalSum}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnSumWithNds}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalSumWithNds}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnRetailSum}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalRetailSum}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCountDelivery}, Path=ActualWidth}" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<ContentControl x:Name="QuickSearch" Grid.Row="2" Grid.Column="0" caliburn:QuickSearchBehavior.GridRef="{x:Reference Items}"/>
+	</Grid>
+</UserControl>

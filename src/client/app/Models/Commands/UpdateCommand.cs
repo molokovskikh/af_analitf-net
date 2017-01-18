@@ -58,7 +58,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		private bool reportProgress;
 		private int downloadedBytes;
 		private int offset;
-		private FileCleaner cleaner = new FileCleaner();
 
 		public Func<Exception, ErrorResolution> ErrorSolver = x => ErrorResolution.Fail;
 		public bool Clean = true;
@@ -70,7 +69,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
 			SuccessMessage = "Обновление завершено успешно.";
-			Disposable.Add(cleaner);
 		}
 
 		public string SyncData
@@ -86,12 +84,6 @@ namespace AnalitF.Net.Client.Models.Commands
 					SuccessMessage = "Обновление завершено успешно.";
 				}
 			}
-		}
-
-		public override void Configure(Settings value, Config.Config config, CancellationToken token = new CancellationToken())
-		{
-			cleaner.DefaultRandomFileDir = config.TmpDir;
-			base.Configure(value, config, token);
 		}
 
 		protected override UpdateResult Execute()
@@ -117,7 +109,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public Task<HttpResponseMessage> Download()
 		{
-			var logs = PackLogs(cleaner.RandomFile());
+			var logs = PackLogs(Cleaner.RandomFile());
 			var sendLogsTask = PostFile("Logs", logs);
 			var errorCount = 0;
 			var maxErrorCount = 5;
@@ -184,7 +176,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					//для того что бы обеспечить возможность отмены запускаем загрузку с помощью async
 					//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
 					using (response) {
-						var task = DownloadContent(response, cleaner);
+						var task = DownloadContent(response, Cleaner);
 						task.ContinueWith(x => {
 							//нам не интересны ошибки которые возникли здесь
 							//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
@@ -917,7 +909,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 #else
 			requestId = Convert.ToUInt32(File.ReadAllText(Path.Combine(Config.TmpDir, "id")));
 #endif
-			var data = GetDbData(Directory.GetFiles(Config.UpdateTmpDir).Select(Path.GetFileName), Config.UpdateTmpDir);
+			var data = ImportCommand.GetDbData(Config.UpdateTmpDir);
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
 			//будь бдителен ImportCommand очистит сессию
@@ -1233,7 +1225,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				if (!String.IsNullOrEmpty(report)) {
 					//формы должны показываться в определенном порядке
 					Results.Add(new DialogResult(new DocModel<TextDoc>(new TextDoc("Не найденные позиции", report)),
-						fixedSize: true));
+						resizable: true));
 					Results.Add(new MessageResult(SuccessMessage));
 					result = UpdateResult.SilentOk;
 				}
@@ -1323,20 +1315,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				}
 			}
 			return result;
-		}
-
-		private static List<Tuple<string, string[]>> GetDbData(IEnumerable<string> files, string tmpDir)
-		{
-			return files.Where(f => f.EndsWith("meta.txt"))
-				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
-					.Match(f.Replace(".meta.txt", "")))))
-				.Where(t => t.Item2 != null)
-				.Select(t => Tuple.Create(
-					Path.GetFullPath(Path.Combine(tmpDir, t.Item2)),
-					File.ReadAllLines(Path.Combine(tmpDir, t.Item1))))
-				.Concat(files.Where(x => Path.GetFileNameWithoutExtension(x).Match("cmds"))
-					.Select(x => Tuple.Create(Path.Combine(tmpDir, x), new string[0])))
-				.ToList();
 		}
 
 		private async Task<string[]> DownloadContent(HttpResponseMessage response, FileCleaner cleaner)

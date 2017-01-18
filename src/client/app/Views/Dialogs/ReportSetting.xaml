@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.ReportSetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Dialogs"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <GroupBox Header="Действие" Style="{StaticResource FilterElement}" Grid.Row="0">
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <RadioButton GroupName="Source" Name="IsView" Margin="5">Просмотр</RadioButton>
+        <RadioButton GroupName="Source" Name="IsPrint" Margin="5">Печать</RadioButton>
+      </StackPanel>
+    </GroupBox>
+    <TextBlock Grid.Row="1" Text="Принтер по умолчанию"/>
+    <ComboBox Grid.Row="2" ItemsSource="{Binding Printers}" SelectedItem="{Binding PrinterName}"/>
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Row="3">
+      <Button Name="Save" Margin="5">Выбор</Button>
+      <Button Name="Close" Margin="5">Отмена</Button>
+    </StackPanel>
+  </Grid>
+</UserControl>

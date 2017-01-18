@@ -21,6 +21,12 @@ namespace AnalitF.Net.Client.Helpers
 
 	public class ValueDescription
 	{
+		public ValueDescription(Enum value)
+		{
+			Name = DescriptionHelper.GetDescription(value);
+			Value = value;
+		}
+
 		public ValueDescription(string name, object value)
 		{
 			Name = name;

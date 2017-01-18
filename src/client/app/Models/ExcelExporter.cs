@@ -146,12 +146,13 @@ namespace AnalitF.Net.Client.Models
 			return book;
 		}
 
-		public static void WriteRow(ISheet sheet, object[] items, int rowIndex)
+		public static IRow WriteRow(ISheet sheet, object[] items, int rowIndex)
 		{
 			var row = sheet.CreateRow(rowIndex++);
 			for (var i = 0; i < items.Length; i++) {
 				SetCellValue(row, i, items[i]);
 			}
+			return row;
 		}
 
 		public static int WriteRows(ISheet sheet, IEnumerable<object[]> items, int rowIndex)
