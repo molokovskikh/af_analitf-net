@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
+			CurrentItem.Select(x => x?.WaybillId != null).Subscribe(CanOpenWaybill);
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -60,6 +61,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public ObservableCollection<StockTotal> ItemsTotal { get; set; }
 		public AddressSelector AddressSelector { get; set; }
 		public NotifyValue<IList<Selectable<StockStatus>>> StatusFilter { get; set; }
+		public NotifyValue<bool> CanOpenWaybill { get; set; }
 
 		private void Items_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
@@ -264,6 +266,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void UnpackingDocs()
 		{
 			Shell.Navigate(new UnpackingDocs());
+		}
+
+		public void OpenWaybill()
+		{
+			Shell.Navigate(new WaybillDetails(CurrentItem.Value.WaybillId.Value));
 		}
 
 		public void SetMenuItems()
