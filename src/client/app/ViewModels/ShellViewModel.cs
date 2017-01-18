@@ -257,6 +257,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => SetMenuItems());
+			User.Select(x => x?.IsStockEnabled ?? false)
+				.Subscribe(IsStockEnabled);
 
 			//if (Env.Factory != null) {
 			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
@@ -279,6 +281,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<int> NewMailsCount { get; set; }
 		public NotifyValue<int> NewDocsCount { get; set; }
 		public NotifyValue<string[]> Instances { get; set; }
+		public NotifyValue<bool> IsStockEnabled { get; set; }
 
 		public string Version { get; set; }
 

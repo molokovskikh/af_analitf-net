@@ -403,7 +403,8 @@ select u.Id,
 			join Usersettings.Prices p on p.FirmCode = l.SupplierId
 		where ua.UserId = u.Id and a.Enabled = 1
 	) as HaveLimits,
-  rcs.SendRetailMarkup
+  rcs.SendRetailMarkup,
+	rcs.IsStockEnabled
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
@@ -1903,7 +1904,8 @@ where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 			session.CreateSQLQuery(@"drop temporary table if exists RetailCostFixed;").ExecuteUpdate();
 
-			Stock.CreateInTransitStocks(session, user);
+			if (clientSettings.IsStockEnabled)
+				Stock.CreateInTransitStocks(session, user);
 			sql = $@"
 select db.Id,
 	d.RowId as WaybillId,
@@ -1953,7 +1955,8 @@ from Documents.WaybillOrders wo
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
 where d.RowId in ({ids})";
 			Export(Result, sql, "WaybillOrders", truncate: false);
-			ExportStocks(data.LastUpdateAt);
+			if (clientSettings.IsStockEnabled)
+				ExportStocks(data.LastUpdateAt);
 
 			var documentExported = session.CreateSQLQuery(@"
 select dh.DownloadId
