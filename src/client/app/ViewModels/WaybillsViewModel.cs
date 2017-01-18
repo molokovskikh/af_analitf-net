@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
-			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
+			CanDelete = CurrentWaybill.Select(v => v != null && v.Status != Models.Inventory.DocStatus.Posted).ToValue();
 			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
 			};
