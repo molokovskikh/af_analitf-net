@@ -207,6 +207,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.Where(x => priceIds.Contains(x.Price.Id) || IsSelectedAllPrices())
 						.OrderBy(o => o.PriceName)
 						.ToList();
+					orders.Each(o => o.CalculateStyle(Address));
 				}
 				else {
 					orders = AddressSelector.GetActiveFilter()

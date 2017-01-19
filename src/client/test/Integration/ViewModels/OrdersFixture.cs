@@ -483,5 +483,28 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var displayAfter = model.Orders.First().DisplayId;
 			Assert.AreEqual(displayId, displayAfter);
 		}
+
+		[Test(Description = "Тест на выделение жирным шрифтом заказы по текущему адресу при действующей галочке 'Все заказы'")]
+		public void Check_bold_orders()
+		{
+			session.DeleteEach<Order>();
+
+			restore = true;
+			var newAddress = new Address { Name = "Тестовый адрес доставки" };
+			session.Save(newAddress);
+
+			var offer = session.Query<Offer>().First(x => !x.Junk);
+			MakeOrder(offer, newAddress);
+
+			model.AddressSelector.All.Value = true;
+			shell.CurrentAddress.Value = newAddress;
+			Assert.IsTrue(model.Orders.First().IsCurrentAddress);
+
+			shell.CurrentAddress.Value = null;
+			Assert.IsFalse(model.Orders.First().IsCurrentAddress);
+
+			session.Delete(newAddress);
+		}
+
 	}
 }
