@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var localWaybill = session.Query<RequestLog>().Where(x => x.Id == requestId);
 			var files = Directory.GetFiles(clientConfig.UpdateTmpDir).Implode(Path.GetFileName);
 			Assert.AreEqual("Новых файлов документов нет.", command.SuccessMessage);
-			Assert.AreEqual("LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
+			Assert.AreEqual("LoadedDocuments.meta.txt, LoadedDocuments.txt, stocks.meta.txt, stocks.txt", files);
 			Assert.AreEqual("Новых документов нет", localWaybill.First().ErrorDescription);
 		}
 

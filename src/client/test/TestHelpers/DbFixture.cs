@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
-			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null);
+			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null && !x.Junk);
 			var order = new Order(offer.Price, toAddress ?? address);
 			order.TryOrder(offer, offer.RequestRatio ?? 1);
 			offer.OrderLine = order.Lines[0];
