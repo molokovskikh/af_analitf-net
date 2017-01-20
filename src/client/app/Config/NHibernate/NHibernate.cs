@@ -242,6 +242,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				m.Property(l => l.RetailCost, p => p.Access(Accessor.Field));
 				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
 				m.Property(l => l.RealRetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.MaxRetailMarkup, p => p.Access(Accessor.Field));
 				m.Bag(l => l.CertificateFiles, c => {
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
