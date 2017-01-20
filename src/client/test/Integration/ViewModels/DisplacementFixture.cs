@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
+			restore = true;
 			stock = new Stock()
 			{
 				Product = "Папаверин",
