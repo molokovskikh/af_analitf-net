@@ -141,7 +141,7 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (Waybill.Status == DocStatus.Posted)
 					return;
-				if (_realRetailMarkup == value)
+				if (_retailMarkup == value)
 					return;
 
 				Edited = true;
