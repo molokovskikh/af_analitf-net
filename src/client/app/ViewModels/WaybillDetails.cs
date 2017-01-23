@@ -146,14 +146,19 @@ namespace AnalitF.Net.Client.ViewModels
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
-				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanEditSum);
+				.Select(x => x.Value == DocStatus.NotPosted && Waybill.SupplierSum == null).Subscribe(CanEditSum);
 
 			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
-			.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
-			.Select(_ => {
-					return Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser;
-			})
-			.Subscribe(CanToEditable);
+				.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
+				.Select(_ => Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser)
+				.Subscribe(CanToEditable);
+
+			if (Waybill.IsNew)
+			{
+				Waybill.IsNew = false;
+				if (Shell.NewDocsCount.Value > 0)
+					Shell.NewDocsCount.Value--;
+			}
 
 			Calculate();
 

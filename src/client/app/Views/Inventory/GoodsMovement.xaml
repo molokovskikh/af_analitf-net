@@ -13,6 +13,7 @@
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>

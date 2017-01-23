@@ -80,7 +80,6 @@ namespace AnalitF.Net.Client.Views
 
 		private void Init()
 		{
-			EditSum.Visibility = model.Waybill.SupplierSum.HasValue ? Visibility.Collapsed : Visibility.Visible;
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
 			//что негативно отражается на производительности

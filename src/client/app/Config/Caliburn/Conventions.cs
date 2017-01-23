@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
 					var dataGrid = (DataGrid)element;
 					if (dataGrid.Columns.Count > 1)
-						Interaction.GetBehaviors(element).Add(new Persistable());
+						Interaction.GetBehaviors(element).Add(new CustomMenu());
 
 					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
 					if (fallback != null) {
@@ -140,6 +140,8 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					if (boundColumn.Binding.StringFormat == null)
 					if (columnType == typeof(decimal) || columnType == typeof(decimal?)) {
 						boundColumn.Binding.StringFormat = "0.00";
+					} else if (columnType.IsEnum) {
+						((Binding)boundColumn.Binding).Converter = EnumConverterInstance;
 					}
 
 					var exColumn = column as DataGridTextColumnEx;

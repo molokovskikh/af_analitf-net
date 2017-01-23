@@ -32,9 +32,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, Address))
 				.Subscribe(x => priceTag = x);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap))
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, null))
 				.Subscribe(x => rackingMap = x);
 		}
 
@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
-				Document = new PriceTagDocument(PrintableLines(), Settings, priceTag).Build()
+				Document = new PriceTagDocument(PrintableLines(), Settings, priceTag, Address).Build()
 			}, fullScreen: true);
 		}
 

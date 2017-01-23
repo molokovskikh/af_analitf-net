@@ -113,10 +113,10 @@ namespace AnalitF.Net.Client.Test.Unit
 			};
 			lines.Add(line);
 
-			var doc = new PriceTagDocument(lines, settings, null).Build();
+			var doc = new PriceTagDocument(lines, settings, null, address).Build();
 			Assert.IsNotNull(doc);
 
-			var priceTag = PriceTag.Default(TagType.RackingMap);
+			var priceTag = PriceTag.Default(TagType.RackingMap, null);
 			settings.RackingMap.Size = RackingMapSize.Custom;
 			var doc2 = new RackingMapDocument(lines, settings, priceTag).Build();
 			Assert.IsNotNull(doc2);
@@ -127,8 +127,8 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var address = new Address("Тестовый");
 			var settings = new Settings(address);
-			settings.PriceTag.Type = PriceTagType.Normal;
 			var lines = new List<TagPrintable>();
+			settings.PriceTags.First(r => r.Address == address).Type = PriceTagType.Normal;
 			for(var i = 0; i < 25; i++) {
 				var line = new TagPrintable() {
 					Nds = 10,
@@ -139,7 +139,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				lines.Add(line);
 			}
 
-			var doc = new PriceTagDocument(lines, settings, null).Build();
+			var doc = new PriceTagDocument(lines, settings, null, address).Build();
 
 			Assert.IsNotNull(doc);
 			Assert.AreEqual(2, doc.Pages.Count);

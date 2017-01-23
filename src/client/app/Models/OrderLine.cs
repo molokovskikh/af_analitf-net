@@ -159,6 +159,7 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged("Sum");
 				OnPropertyChanged("ResultSum");
 				OnPropertyChanged("MixedSum");
+				OnPropertyChanged("RetailPrice");
 			}
 		}
 

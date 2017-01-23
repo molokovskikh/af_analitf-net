@@ -139,13 +139,29 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Import_waybill()
 		{
+			var waybill = localSession.Query<Waybill>().FirstOrDefault();
+			if (waybill == null)
+			{
+				Fixture(new LocalWaybill());
+				waybill = localSession.Query<Waybill>().First();
+			}
+			if (!waybill.IsNew)
+			{
+				waybill.IsNew = true;
+				session.Flush();
+			}
+			var waybillId = waybill.Id;
+			Assert.IsTrue(waybill.IsNew);
+
 			var fixture = Fixture<CreateWaybill>();
 			var sendLog = fixture.SendLog;
 			Run(new UpdateCommand());
 
 			var waybills = localSession.Query<Waybill>().Where(w => w.DocType == DocType.Waybill).ToList();
 			Assert.That(waybills.Count(), Is.GreaterThanOrEqualTo(1));
-			var waybill = waybills.First(w => w.Id == fixture.Document.Id);
+			waybill = localSession.Query<Waybill>().First(r => r.Id == waybillId);
+			Assert.IsTrue(waybill.IsNew);
+			waybill = waybills.First(w => w.Id == fixture.Document.Id);
 			Assert.That(waybill.Sum, Is.GreaterThan(0));
 			Assert.That(waybill.RetailSum, Is.GreaterThan(0));
 			Assert.IsTrue(waybill.IsNew);

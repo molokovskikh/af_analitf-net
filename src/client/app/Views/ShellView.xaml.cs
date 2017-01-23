@@ -346,6 +346,7 @@ namespace AnalitF.Net.Client.Views
 
 					return false;
 			}));
+			if (index == -1 && addressesProxy.Count > 0) index = 0;
 
 			Addresses.SelectedIndex = index;
 		}

@@ -28,6 +28,8 @@ namespace AnalitF.Net.Client.Views.Offers
 					DataGridHelper.Focus(Offers);
 				}
 			};
+
+			ProductInfo.ShowDescription.Content = "Описание (F1)";
 		}
 
 		public void ApplyStyles()

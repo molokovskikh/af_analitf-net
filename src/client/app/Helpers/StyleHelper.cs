@@ -86,6 +86,15 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsImported",
+					new DataTrigger {
+						Binding = new Binding("IsImported"),
+						Value = true,
+						Setters = {
+							new Setter(Control.BackgroundProperty, Brushes.LightCoral)
+						}
+					}
+				},
 				{ "DoNotHaveOffers",
 					new DataTrigger {
 						Binding = new Binding("DoNotHaveOffers"),

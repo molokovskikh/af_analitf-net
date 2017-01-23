@@ -68,8 +68,8 @@ namespace AnalitF.Net.Client.Test.Unit
 			});
 			Build(typeof(Order));
 
-			Assert.AreEqual("Подсказка\r\n\"Заморожен\"", Legend(grid, typeof(Order)));
-			Assert.AreEqual("Подсказка\r\n\"Заморожен\"" +
+			Assert.AreEqual("Подсказка\r\n\"Загружен\"\r\n\"Заморожен\"", Legend(grid, typeof(Order)));
+			Assert.AreEqual("Подсказка\r\n\"Загружен\"\r\n\"Заморожен\"" +
 				"\r\nИмеется позиция с корректировкой по цене и/или по количеству", Legend(grid, typeof(Order), "CorrectionEnabled"));
 		}
 

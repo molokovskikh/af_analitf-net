@@ -257,6 +257,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => SetMenuItems());
+			User.Select(x => x?.IsStockEnabled ?? false)
+				.Subscribe(IsStockEnabled);
 
 			//if (Env.Factory != null) {
 			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
@@ -279,6 +281,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<int> NewMailsCount { get; set; }
 		public NotifyValue<int> NewDocsCount { get; set; }
 		public NotifyValue<string[]> Instances { get; set; }
+		public NotifyValue<bool> IsStockEnabled { get; set; }
 
 		public string Version { get; set; }
 
@@ -981,7 +984,12 @@ namespace AnalitF.Net.Client.ViewModels
 				yield return new DialogResult(orderWarning);
 			}
 
-			var results = Sync(new SendOrders(CurrentAddress, force));
+			var cmd = new SendOrders(CurrentAddress, force);
+			var settings = ViewSettings.GetValueOrDefault(typeof(OrderDetailsViewModel).FullName + ".Line");
+			var sort = settings?.FirstOrDefault(x => x.SortDirection != null);
+			if (sort != null)
+				cmd.SortComparer = new PropertyComparer<SentOrderLine>(sort.SortDirection.Value == ListSortDirection.Ascending ? SortDirection.Asc : SortDirection.Desc, sort.Name);
+			var results = Sync(cmd);
 			foreach (var result in results)
 				yield return result;
 			//говорим форме что изменились данные

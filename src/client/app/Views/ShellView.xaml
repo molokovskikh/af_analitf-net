@@ -141,7 +141,7 @@
 				</MenuItem>
 			</MenuItem>
 
-      <MenuItem Header="Склад">
+      <MenuItem Header="Склад" Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
         <MenuItem Header="Документы">
           <MenuItem Header="Приходные документы">
 						<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
@@ -312,12 +312,14 @@
 				</Grid>
 			</Button>
 
-			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
 				<Image Source="/assets/images/Stocks_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
-			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
 				<Image Source="/assets/images/cash.png"
 						Style="{StaticResource ButtonImage}" />
 			</Button>

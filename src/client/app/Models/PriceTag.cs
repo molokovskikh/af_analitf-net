@@ -60,6 +60,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual TagType TagType { get; set; }
 
+		public virtual Address Address { get; set; }
+
 		public virtual double BorderThickness
 		{
 			get { return _borderThickness; }
@@ -72,7 +74,6 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Write(false)]
 		public virtual IList<PriceTagItem> Items { get; set; }
 
 		public static Border Preview(double width, double height, double borderThickness, IList<PriceTagItem> items)
@@ -91,20 +92,24 @@ namespace AnalitF.Net.Client.Models
 			return Preview(Width, Height, BorderThickness, Items);
 		}
 
-		public static PriceTag LoadOrDefault(IDbConnection connection, TagType tagType)
+		public static PriceTag LoadOrDefault(IDbConnection connection, TagType tagType, Address address)
 		{
-			var tag = connection.Query<PriceTag>($"select * from PriceTags where TagType = {(int)tagType}").FirstOrDefault();
+			var sql = tagType == TagType.RackingMap
+				? $"select * from PriceTags where TagType = {(int) tagType}"
+				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address.Id}";
+			var tag = connection.Query<PriceTag>(sql).FirstOrDefault();
 			if (tag != null)
 				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
 			else
-				tag = Default(tagType);
+				tag = Default(tagType, address);
 			return tag;
 		}
 
-		public static PriceTag Default(TagType tagType)
+		public static PriceTag Default(TagType tagType, Address address)
 		{
 			var tag = new PriceTag {
 				TagType = tagType,
+				Address = tagType == TagType.PriceTag ? address : null,
 				Height = 5,
 				Width = 5,
 				BorderThickness = 0.5d,
@@ -330,7 +335,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool TopBorder { get; set; }
 		public virtual bool RightBorder { get; set; }
 		public virtual bool BottomBorder { get; set; }
-		public virtual uint PriceTagId { get; set; }
+		public virtual PriceTag PriceTag { get; set; }
 		public virtual bool IsAutoWidth { get; set; }
 		public virtual double? Width { get; set; }
 		public virtual bool IsAutoHeight { get; set; }

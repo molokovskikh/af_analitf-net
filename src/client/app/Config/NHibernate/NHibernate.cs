@@ -119,12 +119,28 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Inverse(true);
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
+				m.Bag(o => o.PriceTags, c => {
+					c.Inverse(true);
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+				});
 				m.Bag(o => o.Waybills, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
 				m.Property(x => x.ClientTokenV2, c => c.Length(10000));
 			});
 			mapper.Class<MarkupConfig>(m => {
 				m.Property(o => o.Begin, om => om.Access(Accessor.Field));
 				m.Property(o => o.End, om => om.Access(Accessor.Field));
+			});
+			mapper.Class<PriceTagSettings>(o => {
+				o.Id(r => r.Id);
+			});
+			mapper.Class<PriceTag>(m => {
+				m.Bag(o => o.Items, c => {
+					c.Inverse(true);
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+				});
+			});
+			mapper.Class<PriceTagItem>(o => {
+				o.Id(r => r.Id);
 			});
 			mapper.Class<MinOrderSumRule>(m => {
 				m.ComposedId(c => {

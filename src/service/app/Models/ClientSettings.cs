@@ -9,5 +9,7 @@
 		public virtual bool AllowDelayOfPayment { get; set; }
 
 		public virtual bool AllowAnalitFSchedule { get; set; }
+
+		public virtual bool IsStockEnabled { get; set; }
 	}
 }

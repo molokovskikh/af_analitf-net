@@ -293,7 +293,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						docs.Add(new ReassessmentActDocument(Lines.ToArray()));
 					if ((string) item.Header == "Ярлыки") {
 						var tags = Lines.Select(x => x.DstStock.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new PriceTagDocument(tags, Settings, null).Build().DocumentPaginator, "Ценники");
+						PrintFixedDoc(new PriceTagDocument(tags, Settings, null, Address).Build().DocumentPaginator, "Ценники");
 					}
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);

@@ -130,5 +130,44 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(newOffer.Junk, newOffer.Id.ToString());
 			Assert.IsFalse(newOffer.OriginalJunk);
 		}
+
+		[Test]
+		public void Save_price_tag_settings()
+		{
+			int i = 0;
+			while (session.Query<Address>().Count() < 2)
+			{
+				i++;
+				var addr = new Address($"Тестовый {i}");
+				session.Save(addr);
+			}
+			session.Flush();
+
+			foreach (var addr in session.Query<Address>().ToList())
+			{
+				if (!model.Settings.Value.PriceTags.Any(r => r.Address == addr))
+				{
+					model.Settings.Value.PriceTags.Add(new PriceTagSettings(addr));
+				}
+			}
+
+			var print = true;
+			foreach (var addr in session.Query<Address>().OrderBy(r => r.Id).ToList())
+			{
+				address = addr;
+				model.MarkupAddress.Value = address;
+				model.PriceTagSettings.Value.PrintCountry = print;
+				print = !print;
+			}
+
+			print = true;
+			foreach (var addr in session.Query<Address>().OrderBy(r => r.Id).ToList())
+			{
+				address = addr;
+				model.MarkupAddress.Value = address;
+				Assert.AreEqual(print, model.PriceTagSettings.Value.PrintCountry);
+				print = !print;
+			}
+		}
 	}
 }

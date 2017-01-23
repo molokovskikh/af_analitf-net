@@ -23,6 +23,7 @@ using DotRas;
 using log4net;
 using NHibernate;
 using NHibernate.Linq;
+using System.Runtime.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -110,6 +111,7 @@ namespace AnalitF.Net.Client.Models
 		public Settings(params Address[] addresses) : this()
 		{
 			addresses.SelectMany(MarkupConfig.Defaults).Each(AddMarkup);
+			addresses.SelectMany(Models.PriceTagSettings.Defaults).Each(AddPriceTag);
 		}
 
 		public Settings(int token = 0) : this()
@@ -135,7 +137,7 @@ namespace AnalitF.Net.Client.Models
 			OpenRejects = true;
 			HighlightUnmatchedOrderLines = true;
 			RackingMap = new RackingMapSettings();
-			PriceTag = new PriceTagSettings();
+			PriceTags = new List<PriceTagSettings>();
 			Markups = new List<MarkupConfig>();
 			Waybills = new List<WaybillSettings>();
 			ModePKU = ModePKU.Warning;
@@ -197,7 +199,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual RackingMapSettings RackingMap { get; set; }
 
-		public virtual PriceTagSettings PriceTag { get; set; }
+		public virtual IList<PriceTagSettings> PriceTags { get; set; }
 
 		public virtual IList<MarkupConfig> Markups { get; set; }
 
@@ -538,6 +540,15 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			return null;
+		}
+
+		public virtual void AddPriceTag(PriceTagSettings item)
+		{
+			if (PriceTags.Contains(item))
+				return;
+
+			item.Settings = this;
+			PriceTags.Add(item);
 		}
 
 		public virtual ICredentials GetCredential()

@@ -59,7 +59,6 @@ namespace AnalitF.Net.Client.Models.Results
 			} else {
 				dialog.PrintQueue = new PrintQueue(new PrintServer(), PrinterName);
 			}
-			
 
 			foreach (var doc in Docs) {
 				var flowDocument = doc.Value.Item1;

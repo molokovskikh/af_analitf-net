@@ -236,6 +236,7 @@
     <Compile Include="Controls\Behaviors\Persistable.cs" />
     <Compile Include="Controls\Behaviors\Selectable.cs" />
     <Compile Include="Controls\Behaviors\Watermark.cs" />
+    <Compile Include="Controls\Behaviors\CustomMenu.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
     <Compile Include="Controls\MainControllerWrap.cs" />

@@ -402,7 +402,9 @@ select u.Id,
 			join OrderSendRules.SmartOrderLimits l on l.AddressId = a.Id
 			join Usersettings.Prices p on p.FirmCode = l.SupplierId
 		where ua.UserId = u.Id and a.Enabled = 1
-	) as HaveLimits
+	) as HaveLimits,
+  rcs.SendRetailMarkup,
+	rcs.IsStockEnabled
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
@@ -646,7 +648,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"BarCode",
 				"Properties",
 				"Nds",
-				"OriginalJunk"
+				"OriginalJunk",
+				"RetailMarkup",
+				"RetailPrice"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -684,6 +688,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.Properties,
 				o.Nds,
 				o.Junk,
+				0,
+				0
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -1479,6 +1485,8 @@ where a.MailId in ({ids.Implode()})";
 						"Junk",
 						"BarCode",
 						"OriginalJunk",
+						"RetailMarkup",
+						"RetailPrice"
 					},
 					items
 						.Select(i => new object[] {
@@ -1520,6 +1528,8 @@ where a.MailId in ({ids.Implode()})";
 							i.EAN13,
 							//оригинальная уценка
 							i.Junk,
+							0,
+							0
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1651,7 +1661,9 @@ select l.ExportId as ExportOrderId,
 	ol.Cost,
 	oh.RegionCode as RegionId,
 	ol.CoreId as OfferId,
-	ol.Junk as OriginalJunk
+	ol.Junk as OriginalJunk,
+	cast(0 as decimal(8,2)) as RetailMarkup,
+	cast(0 as decimal(8,2)) as RetailPrice
 from Logs.PendingOrderLogs l
 	join Orders.OrdersList ol on ol.OrderId = l.OrderId
 		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
@@ -1743,7 +1755,9 @@ select ol.RowId as ServerId,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
 	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
-	ol.Junk as OriginalJunk
+	ol.Junk as OriginalJunk,
+	cast(0 as decimal(8, 2)) as RetailMarkup,
+	cast(0 as decimal(8, 2)) as RetailPrice
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
@@ -1759,6 +1773,11 @@ group by ol.RowId";
 
 		public void ExportDocs()
 		{
+			if (clientSettings.IsStockEnabled) {
+				Stock.CreateInTransitStocks(session, user);
+				ExportStocks(data.LastUpdateAt);
+			}
+
 			string sql;
 
 			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
@@ -1890,7 +1909,6 @@ where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 			session.CreateSQLQuery(@"drop temporary table if exists RetailCostFixed;").ExecuteUpdate();
 
-			Stock.CreateInTransitStocks(session, user);
 			sql = $@"
 select db.Id,
 	d.RowId as WaybillId,
@@ -1940,7 +1958,6 @@ from Documents.WaybillOrders wo
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
 where d.RowId in ({ids})";
 			Export(Result, sql, "WaybillOrders", truncate: false);
-			ExportStocks(data.LastUpdateAt);
 
 			var documentExported = session.CreateSQLQuery(@"
 select dh.DownloadId

@@ -144,7 +144,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult AltExport()
 		{
-			var columns = new[] {"Дата",
+			var columns = new[] {
+				"Адрес заказа",
+				"Дата",
 				"Номер накладной",
 				"Поставщик",
 				"Сумма Опт без НДС",
@@ -155,6 +157,7 @@ namespace AnalitF.Net.Client.ViewModels
 				"Сумма НДС",
 				"Срок оплаты"};
 			Func<Waybill, object[]> toRow = x => new object[] {
+				x.AddressName,
 				x.DocumentDate.ToShortDateString(),
 				x.ProviderDocumentId,
 				x.SupplierName,

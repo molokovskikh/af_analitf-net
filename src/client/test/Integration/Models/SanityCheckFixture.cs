@@ -75,16 +75,15 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		[Test]
 		public void Update_schema()
 		{
-			var columns = typeof(PriceTagSettings).GetProperties().Select(p => "drop column PriceTag" + p.Name).Implode();
 			try {
-				session.CreateSQLQuery("alter table Settings " + columns).ExecuteUpdate();
+				session.CreateSQLQuery("alter table pricetagsettings drop column PrintProduct").ExecuteUpdate();
 			}
 			catch {
 			}
 			check.Check();
 
 			var settings = session.Query<Settings>().First();
-			Assert.IsTrue(settings.PriceTag.PrintProduct);
+			Assert.IsTrue(settings.PriceTags.FirstOrDefault().PrintProduct);
 		}
 
 		[Test]

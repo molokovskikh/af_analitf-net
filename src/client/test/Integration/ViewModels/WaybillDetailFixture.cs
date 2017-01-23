@@ -285,6 +285,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Mark_as_read()
+		{
+			var id = model.Waybill.Id;
+			model.Waybill.IsNew = true;
+			model.Session.Flush();
+			Assert.IsTrue(model.Waybill.IsNew);
+			Close(model);
+			model = Open(new WaybillDetails(id));
+			Assert.IsTrue(!model.Waybill.IsNew);
+		}
+
+		[Test]
 		public void Waybill_to_editable()
 		{
 			model.Waybill.IsCreatedByUser = false;

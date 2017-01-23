@@ -289,7 +289,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						docs.Add(new DisplacementDocument(Lines.ToArray()));
 					if ((string) item.Header == "Ярлыки") {
 						var tags = Lines.Select(x => x.SrcStock.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new PriceTagDocument(tags, Settings, null).Build().DocumentPaginator, "Ярлыки");
+						PrintFixedDoc(new PriceTagDocument(tags, Settings, null, Address).Build().DocumentPaginator, "Ярлыки");
 					}
 					if ((string) item.Header == "Постеллажная карта") {
 						var tags = Lines.Select(x => x.SrcStock.GeTagPrintable(User?.FullName)).ToList();

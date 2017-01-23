@@ -42,4 +42,3 @@ namespace AnalitF.Net.Client.Models.Print
 		}
 	}
 }
-

@@ -16,6 +16,7 @@
 		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Create" />
 		<KeyBinding Gesture="Enter" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Open" />
 		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<i:Interaction.Behaviors>

@@ -249,6 +249,7 @@
     <Compile Include="Integration\Views\GlobalFixture.cs" />
     <Compile Include="Integration\Views\MailsFixture.cs" />
     <Compile Include="Integration\Views\MinCostsFixture.cs" />
+    <Compile Include="Integration\Views\OrderDetailsFixture.cs" />
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
     <Compile Include="Integration\Views\OrdersFixture.cs" />
     <Compile Include="Integration\Views\PricesViewFixture.cs" />
