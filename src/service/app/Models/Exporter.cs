@@ -1185,7 +1185,7 @@ create temporary table Usersettings.MaxProducerCosts(
 	ProducerId int unsigned,
 	Producer varchar(255),
 	Product varchar(255),
-	Cost decimal not null,
+	Cost decimal(11, 2) not null,
 	primary key(id),
 	key(ProductId, ProducerId)
 ) engine=memory;
