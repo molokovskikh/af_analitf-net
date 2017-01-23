@@ -23,6 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public Frontend()
 		{
 			DisplayName = "Регистрация продаж";
+			InitFields();
 			Lines = new ReactiveCollection<CheckLine>();
 			Lines.Changed.Subscribe(_ => {
 				if (Lines.Count == 0) {
@@ -38,6 +39,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			});
 			Status.Value = "Готов к работе (F1 для справки)";
 			checkType = CheckType.SaleBuyer;
+			PaymentType.Value = Models.Inventory.PaymentType.Cash;
+			PaymentType.Subscribe(_ => {
+				PaymentTypeName.Value = DescriptionHelper.GetDescription(PaymentType.Value);
+			});
 			Session.FlushMode = FlushMode.Never;
 		}
 
@@ -51,8 +56,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<string> LastOperation { get; set; }
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
+		public NotifyValue<string> PaymentTypeName { get; set; }
 
 		private CheckType checkType { get; set; }
+		public NotifyValue<PaymentType> PaymentType { get; set; }
 
 		private void Message(string text)
 		{
@@ -247,6 +254,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		// Оплата/Возврат F4
 		public void Trigger()
 		{
+			Reset();
 			if (checkType == CheckType.SaleBuyer)
 			{
 				checkType = CheckType.CheckReturn;
@@ -257,7 +265,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				checkType = CheckType.SaleBuyer;
 				Status.Value = "Открыт чек продажи";
 			}
-			Reset();
 		}
 
 		private void Reset()
@@ -265,6 +272,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Clear();
 			Status.Value = "Готов к работе";
 			Quantity.Value = null;
+			PaymentType.Value = Models.Inventory.PaymentType.Cash;
+		}
+
+		// Смена типа оплаты F5
+		public void SwitchPaymentType()
+		{
+			PaymentType.Value = PaymentType.Value == Models.Inventory.PaymentType.Cash
+				? Models.Inventory.PaymentType.Cashless
+				: Models.Inventory.PaymentType.Cash;
 		}
 
 		// Поиск товара  F6

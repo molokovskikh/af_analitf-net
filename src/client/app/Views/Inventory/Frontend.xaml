@@ -134,16 +134,19 @@
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
-			<Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SmallHeader}">Итого скидка</Label>
-			<Label Grid.Row="0" Grid.Column="1" Style="{StaticResource SmallHeader}">К оплате</Label>
-			<Label Grid.Row="0" Grid.Column="2" Style="{StaticResource SmallHeader}">Сдача</Label>
-			<Label Grid.Row="1" Grid.Column="0" Name="Discount" Style="{StaticResource BigHeader}" />
-			<Label Grid.Row="1" Grid.Column="1" Name="Sum" Style="{StaticResource BigHeader}" />
-			<Label Grid.Row="1" Grid.Column="2" Name="Change" Style="{StaticResource BigHeader}" />
-			<TextBox Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Name="Input" Style="{StaticResource Input}" />
-			<Label Grid.Row="2" Grid.Column="2" Style="{StaticResource LineHeader}">кол-во</Label>
-			<Label Grid.Row="3" Grid.Column="2" Name="Quantity" Style="{StaticResource SmallValue}" />
+			<Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SmallHeader}">Тип оплаты</Label>
+			<Label Grid.Row="0" Grid.Column="1" Style="{StaticResource SmallHeader}">Итого скидка</Label>
+			<Label Grid.Row="0" Grid.Column="2" Style="{StaticResource SmallHeader}">К оплате</Label>
+			<Label Grid.Row="0" Grid.Column="3" Style="{StaticResource SmallHeader}">Сдача</Label>
+			<Label Grid.Row="1" Grid.Column="0" Name="PaymentTypeName" Style="{StaticResource BigHeader}" />
+			<Label Grid.Row="1" Grid.Column="1" Name="Discount" Style="{StaticResource BigHeader}" />
+			<Label Grid.Row="1" Grid.Column="2" Name="Sum" Style="{StaticResource BigHeader}" />
+			<Label Grid.Row="1" Grid.Column="3" Name="Change" Style="{StaticResource BigHeader}" />
+			<TextBox Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="Input" Style="{StaticResource Input}" />
+			<Label Grid.Row="2" Grid.Column="3" Style="{StaticResource LineHeader}">кол-во</Label>
+			<Label Grid.Row="3" Grid.Column="3" Name="Quantity" Style="{StaticResource SmallValue}" />
 		</Grid>
 	</Grid>
 </UserControl>
