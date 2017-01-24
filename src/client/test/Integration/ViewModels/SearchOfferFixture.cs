@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			}
 		}
 
-		[Test, Ignore("Нестабильный")]
+		[Test]
 		public void Filter_by_producer_SavingState()
 		{
 			//получаем исходный набор данных по всем поставщикам
@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentProducer.Value = allProducers;
 			//обновляем список фильтра
 			scheduler.Start();
-			//проверяем количемтво выводимых записей при заполненном фильтре на новой форме
+			//проверяем количество выводимых записей при заполненном фильтре на новой форме
 			Assert.That(model.Offers.Value.Count, Is.EqualTo(maxCount));
 			//закрываем форму
 			model.TryClose();
