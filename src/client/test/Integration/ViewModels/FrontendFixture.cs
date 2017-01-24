@@ -187,5 +187,26 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(dstStock.Quantity, 6 - 2);
 			Assert.AreEqual(model.CurrentLine.Value.Quantity, 2);
 		}
+
+		[Test]
+		public void Switch_payment_type()
+		{
+			Assert.AreEqual(PaymentType.Cash, model.PaymentType.Value);
+			Assert.AreEqual(DescriptionHelper.GetDescription(PaymentType.Cash), model.PaymentTypeName.Value);
+
+			model.SwitchPaymentType();
+
+			Assert.AreEqual(PaymentType.Cashless, model.PaymentType.Value);
+			Assert.AreEqual(DescriptionHelper.GetDescription(PaymentType.Cashless), model.PaymentTypeName.Value);
+		}
+
+		[Test]
+		public void Switch_check_type()
+		{
+			model.Trigger();
+			var status = model.Status.Value == "Открыт чек продажи" ? "Открыт возврат по чеку" : "Открыт чек продажи";
+			model.Trigger();
+			Assert.AreEqual(status, model.Status.Value);
+		}
 	}
 }
