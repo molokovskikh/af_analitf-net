@@ -48,6 +48,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 					Model.SearchByBarcode();
 				} else if (args.Key == Key.F4) {
 					Model.Trigger();
+				} else if (args.Key == Key.F5) {
+					Model.SwitchPaymentType();
 				} else if (args.Key == Key.F6) {
 					results = Model.SearchByTerm();
 				} else if (args.Key == Key.F7) {

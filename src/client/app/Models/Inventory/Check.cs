@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 	public enum PaymentType
 	{
 		[Description("Наличный рубль")] Cash,
+		[Description("Безналичный рубль")] Cashless
 	}
 
 	public enum Status
