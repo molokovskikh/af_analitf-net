@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Views.Orders
 
 			Loaded += (sender, args) => {
 				ApplyStyles();
-				var context = (BaseScreen)DataContext;
+				var context = (OrderDetailsViewModel)DataContext;
 				if (!context.User.SendRetailMarkup)
 				{
 					var col = DataGridHelper.FindColumn(Lines, "Розничная наценка");
@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.Views.Orders
 				}
 				else
 				{
-					Lines.IsReadOnly = false;
+					Lines.IsReadOnly = !context.IsCurrentOrder;
 				}
 			};
 
