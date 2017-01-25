@@ -24,6 +24,7 @@ using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
 using System.ComponentModel.DataAnnotations;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.ViewModels.Inventory;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -45,8 +46,6 @@ namespace AnalitF.Net.Client.ViewModels
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
-		private PriceTag priceTag;
-		private PriceTag rackingMap;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -189,10 +188,6 @@ namespace AnalitF.Net.Client.ViewModels
 				}))
 				.Switch()
 				.ToValue(CloseCancellation);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, Address))
-				.Subscribe(x => priceTag = x);
-			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, null))
-				.Subscribe(x => rackingMap = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)
 			{
@@ -201,20 +196,10 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IResult PrintRackingMap()
+		public void Tags()
 		{
-			return new DialogResult(new PrintPreviewViewModel {
-				DisplayName = "Стеллажная карта",
-				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value, rackingMap).Build()
-			}, fullScreen: true);
-		}
-
-		public IResult PrintPriceTags()
-		{
-			return new DialogResult(new PrintPreviewViewModel {
-				DisplayName = "Ценники",
-				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value, priceTag).Build()
-			}, fullScreen: true);
+			var tags = PrintableLinesForTag();
+			Shell.Navigate(new Tags(Waybill.Address, tags));
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
@@ -249,6 +234,34 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//в случае редактирование пользовательской накладной в коллекции будет NamedObject
 			return Lines.Value.OfType<WaybillLine>().Where(l => l.Print).ToList();
+		}
+
+		private List<TagPrintable> PrintableLinesForTag()
+		{
+			return PrintableLines().Select(x => new TagPrintable() {
+				Product = x.Product,
+				RetailCost = x.RetailCost,
+				SupplierName = Waybill.Supplier?.FullName,
+				ClientName = User?.FullName,
+				Producer = x.Producer,
+				ProviderDocumentId = Waybill.ProviderDocumentId,
+				DocumentDate = Waybill.DocumentDate,
+				Barcode = x.EAN13,
+				AltBarcode = x.Stock?.AltBarcode,
+				SerialNumber = x.SerialNumber,
+				Quantity = x.Quantity.GetValueOrDefault(),
+				Period = x.Period,
+				Country = x.Country,
+				Certificates = x.Certificates,
+				SupplierPriceMarkup = x.SupplierPriceMarkup,
+				RetailMarkup = x.RetailMarkup,
+				SupplierCost = x.SupplierCost,
+				Nds = x.Stock?.NdsPers ?? 0,
+				Np = x.Stock?.NpPers ?? 0,
+				WaybillId = Waybill.Id,
+				CopyCount = x.Quantity.GetValueOrDefault(),
+				Selected = true,
+			}).ToList();
 		}
 
 		public IEnumerable<IResult> EditSum()

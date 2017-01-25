@@ -24,14 +24,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class EditInventoryDoc : BaseScreen2, IPrintableStock
 	{
-		private string Name;
-
 		private EditInventoryDoc()
 		{
 			Lines = new ReactiveCollection<InventoryDocLine>();
 			Session.FlushMode = FlushMode.Never;
-			Name = User?.FullName ?? "";
-
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
@@ -217,13 +213,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
-		public IResult PrintStockPriceTags()
+		public void Tags()
 		{
-			return new DialogResult(new PrintPreviewViewModel
-			{
-				DisplayName = "Ярлыки",
-				Document = new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build()
-			}, fullScreen: true);
+			var tags = Lines.Select(x => x.Stock.GeTagPrintable(User?.FullName)).ToList();
+			Shell.Navigate(new Tags(null, tags));
 		}
 
 		public IEnumerable<IResult> PrintInventoryAct()
@@ -254,7 +247,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					if ((string) item.Header == "Акт об излишках")
 						docs.Add(new InventoryActDocument(Lines.ToArray()));
 					if ((string) item.Header == "Ярлыки")
-						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ярлыки");
+						Tags();
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
@@ -262,7 +255,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Излишки")
 				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Ярлыки")
-				PrintStockPriceTags().Execute(null);
+				Tags();
 			if(LastOperation == "Акт об излишках")
 				Coroutine.BeginExecute(PrintInventoryAct().GetEnumerator());
 			return null;

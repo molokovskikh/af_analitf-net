@@ -35,17 +35,13 @@ namespace AnalitF.Net.Client.Models.Print
 		};
 
 		private Settings settings;
-		private WaybillSettings waybillSettings;
-		private Waybill waybill;
-		private IList<WaybillLine> lines;
+		private IList<TagPrintable> lines;
 		private IDictionary<string, object> properties;
 		private PriceTag priceTag;
 
-		public RackingMapDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, PriceTag priceTag = null)
+		public RackingMapDocument(IList<TagPrintable> lines, Settings settings, PriceTag priceTag = null)
 		{
 			this.settings = settings;
-			this.waybill = waybill;
-			this.waybillSettings = waybill.WaybillSettings;
 			this.lines = lines;
 			this.priceTag = priceTag;
 		}
@@ -53,7 +49,7 @@ namespace AnalitF.Net.Client.Models.Print
 		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.RackingMap);
-			Func<WaybillLine, FrameworkElement> map = Map;
+			Func<TagPrintable, FrameworkElement> map = Map;
 			var borderThickness = 2.5d;
 
 			if (settings.RackingMap.Size == RackingMapSize.Normal2) {
@@ -82,7 +78,7 @@ namespace AnalitF.Net.Client.Models.Print
 				map = x => Border(priceTag.ToElement(x), borderThickness);
 			}
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, map, borderThickness);
+			return FixedDocumentHelper.BuildFixedDoc(lines, map, borderThickness);
 		}
 
 		private static Border Border(FrameworkElement element, double borderThickness)
@@ -96,7 +92,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return border;
 		}
 
-		private Grid Map(WaybillLine line)
+		private Grid Map(TagPrintable line)
 		{
 			var grid = new Grid();
 			grid.RowDefinitions.Add(new RowDefinition { Height = defaultHeight });
@@ -121,15 +117,15 @@ namespace AnalitF.Net.Client.Models.Print
 			Line(grid, "PrintSerialNumber", "Серия", line.SerialNumber, defaultHeight, ref row);
 			Line(grid, "PrintPeriod", "Срок годности", line.Period, defaultHeight, ref row);
 			Line(grid, "PrintQuantity", "Количество", line.Quantity.ToString(), defaultHeight, ref row);
-			Line(grid, "PrintSupplier", "Поставщик", line.Waybill.SupplierName, defaultHeight, ref row);
+			Line(grid, "PrintSupplier", "Поставщик", line.SupplierName, defaultHeight, ref row);
 			Line(grid, "PrintCertificates", "Номер сертификата", line.Certificates, defaultHeight, ref row);
-			Line(grid, "PrintDocumentDate", "Дата поступления", line.Waybill.DocumentDate.ToString(), defaultHeight, ref row);
+			Line(grid, "PrintDocumentDate", "Дата поступления", line.DocumentDate.ToString(), defaultHeight, ref row);
 			Line(grid, "PrintRetailCost", "Цена", Util.FormatCost(line.RetailCost), defaultHeight, ref row);
 
 			return grid;
 		}
 
-		private FrameworkElement Map2(WaybillLine line)
+		private FrameworkElement Map2(TagPrintable line)
 		{
 			var body = new Grid {
 				Height = 206,
@@ -165,7 +161,7 @@ namespace AnalitF.Net.Client.Models.Print
 			header.Cell(1, 0, textBlock);
 
 			textBlock = new TextBlock {
-				Text = line.Waybill.ProviderDocumentId,
+				Text = line.ProviderDocumentId,
 				FontSize = 10,
 				FontFamily = new FontFamily("Arial"),
 			};
@@ -179,7 +175,7 @@ namespace AnalitF.Net.Client.Models.Print
 			header.Cell(2, 0, textBlock);
 
 			textBlock = new TextBlock {
-				Text = line.Waybill.SupplierName,
+				Text = line.SupplierName,
 				FontSize = 10,
 				FontFamily = new FontFamily("Arial"),
 			};
@@ -205,7 +201,7 @@ namespace AnalitF.Net.Client.Models.Print
 			textBlock.SetValue(Grid.ColumnSpanProperty, 2);
 
 			textBlock = new TextBlock {
-				Text = line.Waybill.DocumentDate.ToShortDateString(),
+				Text = line.DocumentDate.ToShortDateString(),
 				FontSize = 10,
 				HorizontalAlignment = HorizontalAlignment.Center,
 				FontFamily = new FontFamily("Arial"),
@@ -275,7 +271,7 @@ namespace AnalitF.Net.Client.Models.Print
 				FontFamily = new FontFamily("Arial"),
 			});
 			subBody.Cell(1, 1, new TextBlock {
-				Text = line.EAN13,
+				Text = line.Barcode,
 				FontSize = 10,
 				FontFamily = new FontFamily("Arial"),
 			});

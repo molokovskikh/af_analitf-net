@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Config.NHibernate;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
+using AnalitF.Net.Client.Models.Print;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -70,6 +71,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			WaybillLineId = line.Id;
 			Status = StockStatus.Available;
 			Address = waybill.Address;
+			SupplierFullName = waybill.Supplier?.FullName;
+			WaybillNumber = waybill.ProviderDocumentId;
 
 			Product = line.Product;
 			ProductId = line.ProductId;
@@ -109,6 +112,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? WaybillId { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
+		public virtual string SupplierFullName { get; set; }
 
 		public virtual string AnalogCode { get; set; }
 		public virtual string ProducerBarcode { get; set; }
@@ -432,6 +436,35 @@ namespace AnalitF.Net.Client.Models.Inventory
 				var dstProp = dstProps.GetValueOrDefault(srcProp.Name);
 				dstProp?.SetValue(dstItem, srcProp.GetValue(srcItem, null), null);
 			}
+		}
+
+		public virtual TagPrintable GeTagPrintable(string clientName)
+		{
+			return new TagPrintable()
+			{
+				Product = Product,
+				RetailCost = RetailCost,
+				SupplierName = SupplierFullName,
+				ClientName = clientName,
+				Producer = Producer,
+				ProviderDocumentId = WaybillNumber,
+				DocumentDate = DocumentDate,
+				Barcode = Barcode,
+				AltBarcode = AltBarcode,
+				SerialNumber = SerialNumber,
+				Quantity = Quantity,
+				Period = Period,
+				Country = Country,
+				Certificates = Certificates,
+				SupplierPriceMarkup = SupplierPriceMarkup,
+				RetailMarkup = RetailMarkup,
+				SupplierCost = SupplierCost,
+				Nds = NdsPers,
+				Np = NpPers,
+				WaybillId = WaybillId,
+				CopyCount = (int)Quantity,
+				Selected = true,
+			};
 		}
 	}
 }

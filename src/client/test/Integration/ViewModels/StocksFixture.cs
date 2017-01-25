@@ -24,24 +24,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Print_racking_map()
-		{
-			var result = (DialogResult) model.PrintStockRackingMaps();
-			var preview = ((PrintPreviewViewModel)result.Model);
-
-			Assert.IsNotNull(preview);
-		}
-
-		[Test]
-		public void Print_price_tags()
-		{
-			var result = (DialogResult)model.PrintStockPriceTags();
-			var preview = ((PrintPreviewViewModel)result.Model);
-
-			Assert.IsNotNull(preview);
-		}
-
-		[Test]
 		public void Print_stock()
 		{
 			var results = model.PrintStock().GetEnumerator();

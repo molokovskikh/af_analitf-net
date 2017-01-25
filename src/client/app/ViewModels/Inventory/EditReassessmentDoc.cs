@@ -26,14 +26,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class EditReassessmentDoc : BaseScreen2, IPrintableStock
 	{
-		private string Name;
-
 		private EditReassessmentDoc()
 		{
 			Lines = new ReactiveCollection<ReassessmentLine>();
 			Session.FlushMode = FlushMode.Never;
-			Name = User?.FullName ?? "";
-
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
@@ -199,7 +195,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!IsValide(Doc))
 				return;
-			Session.Save(Doc);
+			if (Doc.Id == 0)
+				Session.Save(Doc);
+			else
+				Session.Update(Doc);
 			Session.Flush();
 			Bus.SendMessage(nameof(ReassessmentDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
@@ -255,13 +254,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return Preview("Акт переоценки", new ReassessmentActDocument(Lines.ToArray()));
 		}
 
-		public IResult PrintStockPriceTags()
+		public void Tags()
 		{
-			return new DialogResult(new PrintPreviewViewModel
-			{
-				DisplayName = "Ценники",
-				Document = new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build()
-			}, fullScreen: true);
+			var tags = Lines.Select(x => x.DstStock.GeTagPrintable(User?.FullName)).ToList();
+			Shell.Navigate(new Tags(null, tags));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -282,7 +278,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			item = new MenuItem {Header = "Акт переоценки"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem {Header = "Ценники"};
+			item = new MenuItem {Header = "Ярлыки"};
 			PrintStockMenuItems.Add(item);
 		}
 
@@ -295,8 +291,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						docs.Add(new ReassessmentDocument(Lines.ToArray()));
 					if ((string) item.Header == "Акт переоценки")
 						docs.Add(new ReassessmentActDocument(Lines.ToArray()));
-					if ((string) item.Header == "Ценники")
-						PrintFixedDoc(new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build().DocumentPaginator, "Ценники");
+					if ((string) item.Header == "Ярлыки")
+						Tags();
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
@@ -305,8 +301,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Акт переоценки")
 				Coroutine.BeginExecute(PrintAct().GetEnumerator());
-			if(LastOperation == "Ценники")
-				PrintStockPriceTags().Execute(null);
+			if(LastOperation == "Ярлыки")
+				Tags();
 			return null;
 		}
 

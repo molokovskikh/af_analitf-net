@@ -137,7 +137,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!IsValide(Doc))
 				return;
-			Session.Save(Doc);
+			if (Doc.Id == 0)
+				Session.Save(Doc);
+			else
+				Session.Update(Doc);
 			Session.Flush();
 			Bus.SendMessage(nameof(WriteoffDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");

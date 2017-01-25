@@ -13,6 +13,7 @@
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="Ctrl+L" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Tags" />
 	</UserControl.InputBindings>
 
 	<Grid Name="MainGrid">
@@ -56,8 +57,8 @@
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
 				</Grid.RowDefinitions>
-				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
-					Печать ценников
+				<Button Grid.Column="0" Grid.Row="0" Name="Tags" ToolTip="Печать ярлыков (Ctrl+L)" Style="{StaticResource FilterElement}">
+					Печать ярлыков
 				</Button>
 				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
 					Печать реестра
@@ -77,11 +78,8 @@
 				<Button Grid.Column="1" Grid.Row="2" Name="PrintAct" Style="{StaticResource FilterElement}">
 					Печать акта прихода
 				</Button>
-				<Button Grid.Column="1" Grid.Row="3" Name="ConsumptionReport" Style="{StaticResource FilterElement}">
+				<Button Grid.Column="2" Grid.Row="0" Name="ConsumptionReport" Style="{StaticResource FilterElement}">
 					Расход по документу
-				</Button>
-				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">
-					Стеллажная карта
 				</Button>
 				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">
 					Реестр в Excel

@@ -45,6 +45,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BarcodeLib, Version=1.0.0.22, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\BarcodeLib.1.0.0.22\lib\net20\BarcodeLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Caliburn.Micro" />
     <Reference Include="Devart.Data, Version=5.0.792.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -316,6 +320,8 @@
     <Compile Include="Models\Print\DisplacementDocumentWaybill.cs" />
     <Compile Include="Models\Print\InventoryDocument.cs" />
     <Compile Include="Models\Print\InventoryActDocument.cs" />
+    <Compile Include="Models\Print\BarcodeDocument.cs" />
+    <Compile Include="Models\Print\TagPrintable.cs" />
     <Compile Include="Models\Print\PriceNegotiationProtocol.cs" />
     <Compile Include="Models\Print\ReturnDivergenceAct.cs" />
     <Compile Include="Models\Print\ReturnInvoice.cs" />
@@ -333,8 +339,6 @@
     <Compile Include="Models\Print\ReturnWaybill.cs" />
     <Compile Include="Models\Print\StockDocument.cs" />
     <Compile Include="Models\Print\StockLimitMonthDocument.cs" />
-    <Compile Include="Models\Print\StockPriceTagDocument.cs" />
-    <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\PriceTag.cs" />
     <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />
     <Compile Include="Models\Print\DisplacementWDocument.cs" />
@@ -433,6 +437,7 @@
     <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Inventory\Tags.cs" />
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
     <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
@@ -618,6 +623,9 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Tags.xaml.cs">
+      <DependentUpon>Tags.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\GoodsMovement.xaml.cs">
       <DependentUpon>GoodsMovement.xaml</DependentUpon>
@@ -956,6 +964,10 @@
     <Page Include="Views\Feedback.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Tags.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\GoodsMovement.xaml">
       <Generator>MSBuild:Compile</Generator>

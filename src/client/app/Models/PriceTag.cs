@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Views.Dialogs;
 using Common.Tools;
 using Dapper;
@@ -250,7 +251,7 @@ namespace AnalitF.Net.Client.Models
 			return tag;
 		}
 
-		public virtual FrameworkElement ToElement(WaybillLine line)
+		public virtual FrameworkElement ToElement(TagPrintable line)
 		{
 			return PriceTagItem.ToElement(Width, Height, Items, PriceTagItem.Map(line));
 		}
@@ -419,8 +420,6 @@ namespace AnalitF.Net.Client.Models
 			return value * 10 * 2.54 / 96d;
 		}
 
-
-
 		private static NumberFormatInfo GetFormat()
 		{
 			var format = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
@@ -428,19 +427,19 @@ namespace AnalitF.Net.Client.Models
 			return format;
 		}
 
-		public static Dictionary<string, string> Map(WaybillLine line)
+		public static Dictionary<string, string> Map(TagPrintable line)
 		{
 			return new Dictionary<string, string> {
 				{"Цена", String.Format(GetFormat(), "{0:0.00}", line.RetailCost)},
-				{"Наименование клиента", line.Waybill.WaybillSettings.FullName},
+				{"Наименование клиента", line.ClientName},
 				{"Наименование", line.Product},
 				{"Страна", line.Country},
 				{"Производитель", line.Producer},
 				{"Срок годности", line.Period},
-				{"Номер накладной", line.Waybill.ProviderDocumentId},
-				{"Поставщик", line.Waybill.SupplierName},
+				{"Номер накладной", line.ProviderDocumentId},
+				{"Поставщик", line.SupplierName},
 				{"Серия товара", line.SerialNumber},
-				{"Дата накладной", line.Waybill.DocumentDate.ToShortDateString() },
+				{"Дата накладной", line.DocumentDate.ToShortDateString() },
 				{"Количество", line.Quantity.ToString() },
 				{"Номер сертификата", line.Certificates },
 			};
