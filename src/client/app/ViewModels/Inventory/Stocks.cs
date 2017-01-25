@@ -202,7 +202,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Tags()
 		{
 			var tags = Items.Value.Select(x => x.GeTagPrintable(User?.FullName)).ToList();
-			Shell.Navigate(new Tags(tags));
+			Shell.Navigate(new Tags(Address, tags));
 		}
 
 		public void CheckDefectSeries()
@@ -273,22 +273,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			item = new MenuItem {Header = "Товары со сроком годности менее 1 месяца"};
 			PrintStockMenuItems.Add(item);
-
-			item = new MenuItem {Header = "Постеллажная карта"};
-			PrintStockMenuItems.Add(item);
 		}
 
 		PrintResult IPrintableStock.PrintStock()
 		{
 			var docs = new List<BaseDocument>();
+
 			if (!IsView) {
 				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == "Товарные запасы")
 						docs.Add(new StockDocument(Items.Value.ToArray()));
-					if ((string) item.Header == "Ярлыки") {
-						var tags = Items.Value.Select(x => x.GeTagPrintable(Name)).ToList();
-						PrintFixedDoc(new PriceTagDocument(tags, Settings, null, Address).Build().DocumentPaginator, "Ценники");
-					}
+					if ((string) item.Header == "Ярлыки")
+						Tags();
 					if ((string)item.Header == "Товары со сроком годности") {
 						var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
 						var per = new DialogResult(new SelectStockPeriod(stocks, Name));
@@ -297,10 +293,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					if ((string)item.Header == "Товары со сроком годности менее 1 месяца")
 						docs.Add(new StockLimitMonthDocument(Items.Value.Where(s => s.Exp < DateTime.Today.AddMonths(1)).ToArray(),
 							"Товары со сроком годности менее 1 месяца", Name));
-					if ((string)item.Header == "Постеллажная карта") {
-						var tags = Items.Value.Select(x => x.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new RackingMapDocument(tags, Settings, null).Build().DocumentPaginator, "Постеллажная карта");
-					}
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
@@ -313,8 +305,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Coroutine.BeginExecute(PrintStockLimit().GetEnumerator());
 			if(LastOperation == "Товары со сроком годности менее 1 месяца")
 				Coroutine.BeginExecute(PrintStockLimitMonth().GetEnumerator());
-			if(LastOperation == "Постеллажная карта")
-				Tags();
 			return null;
 		}
 

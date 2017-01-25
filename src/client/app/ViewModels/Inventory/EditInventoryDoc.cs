@@ -216,7 +216,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Tags()
 		{
 			var tags = Lines.Select(x => x.Stock.GeTagPrintable(User?.FullName)).ToList();
-			Shell.Navigate(new Tags(tags));
+			Shell.Navigate(new Tags(null, tags));
 		}
 
 		public IEnumerable<IResult> PrintInventoryAct()
@@ -246,10 +246,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						docs.Add(new InventoryDocument(Lines.ToArray()));
 					if ((string) item.Header == "Акт об излишках")
 						docs.Add(new InventoryActDocument(Lines.ToArray()));
-					if ((string) item.Header == "Ярлыки") {
-						var tags = Lines.Select(x => x.Stock.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new PriceTagDocument(tags, Settings, null, Address).Build().DocumentPaginator, "Ярлыки");
-					}
+					if ((string) item.Header == "Ярлыки")
+						Tags();
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}

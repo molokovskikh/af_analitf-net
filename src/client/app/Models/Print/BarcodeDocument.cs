@@ -62,8 +62,8 @@ namespace AnalitF.Net.Client.Models.Print
 				}
 			};
 
-			if (line.AltBarcode?.Length == 12) {
-				var img = new Barcode().Encode(TYPE.UPCA, line.AltBarcode, 100, 18);
+			if (line.Barcode?.Length == 13) {
+				var img = new Barcode().Encode(TYPE.EAN13, line.Barcode, 100, 18);
 				ImageSource imageSource;
 				using (var stream = new MemoryStream()) {
 					img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var label2 = new TextBlock
 			{
 				FontSize = 7,
-				Text = line.AltBarcode,
+				Text = line.Barcode,
 			};
 			label2.SetValue(Grid.RowProperty, 2);
 			panel.Children.Add(label2);

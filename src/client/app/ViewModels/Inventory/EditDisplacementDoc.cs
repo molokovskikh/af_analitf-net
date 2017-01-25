@@ -246,7 +246,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Tags()
 		{
 			var tags = Lines.Select(x => x.SrcStock.GeTagPrintable(User?.FullName)).ToList();
-			Shell.Navigate(new Tags(tags));
+			Shell.Navigate(new Tags(null, tags));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -267,9 +267,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			item = new MenuItem {Header = "Ярлыки"};
 			PrintStockMenuItems.Add(item);
 
-			item = new MenuItem {Header = "Постеллажная карта"};
-			PrintStockMenuItems.Add(item);
-
 			item = new MenuItem {Header = "Требование-накладная"};
 			PrintStockMenuItems.Add(item);
 
@@ -287,14 +284,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == "Печать документов")
 						docs.Add(new DisplacementDocument(Lines.ToArray()));
-					if ((string) item.Header == "Ярлыки") {
-						var tags = Lines.Select(x => x.SrcStock.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new PriceTagDocument(tags, Settings, null, Address).Build().DocumentPaginator, "Ярлыки");
-					}
-					if ((string) item.Header == "Постеллажная карта") {
-						var tags = Lines.Select(x => x.SrcStock.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new RackingMapDocument(tags, Settings, null).Build().DocumentPaginator, "Постеллажная карта");
-					}
+					if ((string) item.Header == "Ярлыки")
+						Tags();
 					if ((string) item.Header == "Требование-накладная") {
 						var req = new RequirementWaybill();
 						var reqDialog = new DialogResult(req);
@@ -320,8 +311,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Ярлыки")
 				Tags();
-			if(LastOperation == "Постеллажная карта")
-				Tags();
 			if (LastOperation == "Требование-накладная")
 				Coroutine.BeginExecute(PrintDisplacementWaybill().GetEnumerator());
 			if(LastOperation == "Внутреннее-перемещение")
@@ -330,7 +319,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Coroutine.BeginExecute(PrintPriceNegotiationProtocol().GetEnumerator());
 			return null;
 		}
-
 
 		private void PrintFixedDoc(DocumentPaginator doc, string name)
 		{

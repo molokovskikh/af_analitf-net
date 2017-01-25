@@ -192,7 +192,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Tags()
 		{
 			var tags = CurrentItem.Value.Lines.Select(x => x.Stock.GeTagPrintable(User?.FullName)).ToList();
-			Shell.Navigate(new Tags(tags));
+			Shell.Navigate(new Tags(null, tags));
 		}
 	}
 }

@@ -257,7 +257,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Tags()
 		{
 			var tags = Lines.Select(x => x.DstStock.GeTagPrintable(User?.FullName)).ToList();
-			Shell.Navigate(new Tags(tags));
+			Shell.Navigate(new Tags(null, tags));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -291,10 +291,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						docs.Add(new ReassessmentDocument(Lines.ToArray()));
 					if ((string) item.Header == "Акт переоценки")
 						docs.Add(new ReassessmentActDocument(Lines.ToArray()));
-					if ((string) item.Header == "Ярлыки") {
-						var tags = Lines.Select(x => x.DstStock.GeTagPrintable(User?.FullName)).ToList();
-						PrintFixedDoc(new PriceTagDocument(tags, Settings, null, Address).Build().DocumentPaginator, "Ценники");
-					}
+					if ((string) item.Header == "Ярлыки")
+						Tags();
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}

@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				new TagPrintable{Product = "Диклофенак", Quantity = 1}
 			};
 			autoStartScheduler = false;
-			model = Open(new Tags(tags));
+			model = Open(new Tags(null, tags));
 		}
 
 		[Test]
@@ -58,6 +58,5 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var preview = (PrintPreviewViewModel)result.Model;
 			Assert.IsNotNull(preview);
 		}
-
 	}
 }

@@ -73,11 +73,11 @@ namespace AnalitF.Net.Client.Models.Print
 		private PriceTag priceTag;
 		private PriceTagSettings priceTagSettings;
 
-		public PriceTagDocument(IList<TagPrintable> lines, Settings settings, PriceTag priceTag, Address address)
+		public PriceTagDocument(IList<TagPrintable> lines, PriceTagSettings priceTagSettings, PriceTag priceTag)
 		{
 			this.lines = lines;
 			this.priceTag = priceTag;
-			this.priceTagSettings = settings.PriceTags.First(r => r.Address == address);
+			this.priceTagSettings = priceTagSettings;
 		}
 
 		public FixedDocument Build()

@@ -199,7 +199,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Tags()
 		{
 			var tags = PrintableLinesForTag();
-			Shell.Navigate(new Tags(tags));
+			Shell.Navigate(new Tags(Waybill.Address, tags));
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
