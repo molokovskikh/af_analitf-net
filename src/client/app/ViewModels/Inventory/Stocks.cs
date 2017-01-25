@@ -78,6 +78,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 			AddressSelector.Init();
+			AddressSelector.Description = "Все накладные";
 
 			Bus.Listen<string>("reload").Cast<object>()
 				.Merge(DbReloadToken)
