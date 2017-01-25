@@ -479,7 +479,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Activate_stock_view()
 		{
 			shell.ShowInventory();
-			Assert.AreEqual(6, shell.PrintStockMenuItems.Value.Count);
+			Assert.AreEqual(5, shell.PrintStockMenuItems.Value.Count);
 			shell.Checks();
 			Assert.AreEqual(3, shell.PrintStockMenuItems.Value.Count);
 		}
