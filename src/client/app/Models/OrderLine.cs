@@ -10,6 +10,7 @@ using Common.Tools;
 using Newtonsoft.Json;
 using NHibernate;
 using NPOI.SS.Formula.Functions;
+using System.ComponentModel;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -21,6 +22,7 @@ namespace AnalitF.Net.Client.Models
 
 		public OrderLine()
 		{
+			PropertyChanged += CalculateRetailData;
 		}
 
 		public OrderLine(Order order, Offer offer, uint count)
@@ -31,6 +33,20 @@ namespace AnalitF.Net.Client.Models
 			Count = count;
 			OptimalFactor = offer.ResultCost - offer.LeaderCost;
 			Junk = offer.Junk;
+			PropertyChanged += CalculateRetailData;
+		}
+
+		private void CalculateRetailData(object sender, PropertyChangedEventArgs args)
+		{
+			if (args.PropertyName == "RetailMarkup")
+			{
+				RetailPrice = Math.Round(MixedCost * (1m + (RetailMarkup ?? 0) / 100m), 2);
+			}
+			else if (args.PropertyName == "RetailPrice")
+			{
+				var markup = (RetailPrice ?? 0) - MixedCost;
+				RetailMarkup = markup > 0 && MixedCost > 0 ? Math.Round(markup * 100 / MixedCost, 2) : (decimal?)null;
+			}
 		}
 
 		public virtual uint Id { get; set; }

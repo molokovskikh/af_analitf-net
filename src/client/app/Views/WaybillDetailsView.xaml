@@ -63,8 +63,8 @@
 				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
 					Печать реестра
 				</Button>
-				<Button Grid.Column="0" Grid.Row="2" Name="Stock" Style="{StaticResource FilterElement}">
-					Оприходовать
+				<Button Grid.Column="0" Grid.Row="2" Name="ToEditable" Style="{StaticResource FilterElement}">
+					В редактируемые
 				</Button>
 				<Button Grid.Column="0" Grid.Row="3" Name="EditSum" Style="{StaticResource FilterElement}">
 					Коррекция сумм
@@ -93,8 +93,9 @@
 				<Button Grid.Column="3" Grid.Row="1" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
 					Накладная в Excel
 				</Button>
-				<Button Grid.Column="3" Grid.Row="2" Name="ToEditable" Style="{StaticResource FilterElement}">
-					В редактируемые
+				<Button Grid.Column="3" Grid.Row="2" Name="Stock" Style="{StaticResource FilterElement}"
+					Visibility="{Binding User.IsStockEnabled, Converter={StaticResource BoolToCollapsed}}">
+					Оприходовать
 				</Button>
 			</Grid>
 		</StackPanel>

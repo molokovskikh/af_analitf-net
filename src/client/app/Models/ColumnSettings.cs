@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Models
 			Name = DataGridHelper.GetHeader(column);
 			//видимостью колонки управляет флаг на форме
 			//состояние не нужно сохранять
-			if (Name != "Адрес заказа")
+			if (Name != "Адрес заказа") 
 				Visible = column.Visibility;
 			if (column.Width.IsStar)
 				Width = column.Width;
@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Models
 			if (column == null)
 				return;
 			column.Width = Width;
-			if (Name != "Адрес заказа")
+			if (Name != "Адрес заказа") 
 				column.Visibility = Visible;
 			//мы не можем установить неопределенный индекс или больше максимально индекса
 			if (DisplayIndex >= 0 && DisplayIndex <= columns.Count - 1)

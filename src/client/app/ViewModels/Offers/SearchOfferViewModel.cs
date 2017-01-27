@@ -59,13 +59,22 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			DbReloadToken
-				.SelectMany(_ => RxQuery(s => new [] { EmptyProducer }
+			var obProducers = DbReloadToken
+				.SelectMany(_ => RxQuery(s => new[] {EmptyProducer}
 					.Concat(s.Query<Producer>()
 						.OrderBy(p => p.Name)
 						.ToList())
-					.ToList()))
-				.Subscribe(Producers);
+					.ToList()));
+			obProducers.Subscribe(Producers);
+			obProducers.Subscribe(_ =>
+			{
+				var currentFilterProducerId = CurrentFilterProducer.HasValue ? CurrentFilterProducer.Value.Id : 0;
+				if (CanSaveFilterProducer.Value && currentFilterProducerId > 0 &&
+					  Producers.Value.Any(d => d.Id == currentFilterProducerId))
+				{
+					CurrentProducer.Value = CurrentFilterProducer.Value;
+				}
+			});
 
 			SearchBehavior.ActiveSearchTerm.Cast<object>()
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
@@ -74,6 +83,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(HideJunk.Changed())
 				.Merge(DbReloadToken)
 				.Select(v => {
+					ProducerFilterStateSet();
+
 					var term = SearchBehavior.ActiveSearchTerm.Value;
 					if (String.IsNullOrEmpty(term))
 						return Observable.Return(new List<Offer>());
@@ -83,8 +94,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 						query = Util.ContainsAny(query, o => o.ProductSynonym,
 							term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
 						query = Util.Filter(query, o => o.Price.Id, Prices);
-
-						ProducerFilterStateGet(query.ToList());
 
 						var producer = CurrentProducer.Value;
 						if (producer != null && producer.Id > 0) {
@@ -137,12 +146,6 @@ where match (ProductSynonym) against (:term in natural language mode)")
 				.AddJoin("p", "o.Price")
 				.SetParameter("term", term)
 				.List<Offer>();
-		}
-
-		public override void TryClose()
-		{
-			ProducerFilterStateSet();
-			base.TryClose();
 		}
 
 		private IList<Offer> SortOffers(IList<Offer> offers)

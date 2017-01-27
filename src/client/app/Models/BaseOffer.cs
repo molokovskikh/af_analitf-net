@@ -138,9 +138,31 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual decimal? RetailMarkup { get; set; }
+		private decimal? _retailMarkup;
 
-		public virtual decimal? RetailPrice { get; set; }
+		public virtual decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				if (_retailMarkup == value)
+					return;
+				_retailMarkup = value;
+				OnPropertyChanged();
+			}
+		}
+
+		private decimal? _retailPrice;
+		public virtual decimal? RetailPrice {
+			get { return _retailPrice; }
+			set
+			{
+				if (_retailPrice == value)
+					return;
+				_retailPrice = value;
+				OnPropertyChanged();
+			}
+		}
 
 		//поля для сортировки
 		[IgnoreDataMember]
