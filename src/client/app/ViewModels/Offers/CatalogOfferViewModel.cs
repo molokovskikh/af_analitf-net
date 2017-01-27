@@ -153,7 +153,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			})).CatchSubscribe(x => {
 				CatalogOffers = x;
 				UpdateFilters();
-				Filter();
+				Filter(false);
 				UpdateOffers(Offers.Value);
 				if (x.Count == 0) {
 					Manager.Warning("Нет предложений");
@@ -197,15 +197,22 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			FillProducerFilter(CatalogOffers);
 		}
 
-		public void Filter()
+		/// <summary>
+		/// Фильтр
+		/// </summary>
+		/// <param name="fromControl">true - если фильтр вызван пользователем из компонента.
+		/// false - если фильтр вызван вручную</param>
+		public void Filter(bool fromControl = true)
 		{
+			if (skipFilter) return;
+
 			var region = CurrentRegion.Value;
 			IEnumerable<Offer> offers = CatalogOffers;
 			if (region != Consts.AllRegionLabel) {
 				offers = offers.Where(o => o.Price.RegionName == region);
 			}
 
-			ProducerFilterStateGet(offers.ToList());
+			if (fromControl) ProducerFilterStateSet(); else ProducerFilterStateGet(offers.ToList());
 
 			var producer = CurrentProducer.Value;
 			if (producer != null && producer.Id > 0) {
@@ -284,12 +291,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			args.Handled = true;
 			catalog.SearchText = text;
 			TryClose();
-		}
-
-		public override void TryClose()
-		{
-			ProducerFilterStateSet();
-			base.TryClose();
 		}
 
 		public void Delete()
