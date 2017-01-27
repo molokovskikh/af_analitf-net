@@ -292,6 +292,8 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				});
 			}));
 			mapper.Class<Offer>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
 				m.ManyToOne(o => o.Price, c => {
 					c.Insert(false);
 					c.Update(false);
@@ -300,6 +302,10 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c => c.Columns(cm => cm.Name("LeaderPriceId"),
 					cm => cm.Name("LeaderRegionId")));
 			});
+			mapper.Class<OrderLine>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
+			});
 			mapper.Class<SentOrder>(m => {
 				m.Bag(o => o.Lines, c => {
 					c.Key(k => k.Column("OrderId"));
@@ -307,12 +313,20 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Inverse(true);
 				});
 			});
+			mapper.Class<SentOrderLine>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
+			});
 			mapper.Class<DeletedOrder>(m => {
 				m.Bag(o => o.Lines, c => {
 					c.Key(k => k.Column("OrderId"));
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
 				});
+			});
+			mapper.Class<DeletedOrderLine>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
 			});
 			mapper.Class<Mail>(m => {
 				m.Bag(o => o.Attachments, c => {
