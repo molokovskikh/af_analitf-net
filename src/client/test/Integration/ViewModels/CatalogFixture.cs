@@ -234,5 +234,39 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			catalogModel.FilterByMnn = true;
 			scheduler.Start();
 		}
+
+		[Test(Description ="По кнопке Escape(навигация назад) мы должны оставаться в каталоге, если в каталог попали не из Мнн")]
+		public void Catalog_navigate_on_escape()
+		{
+			//Включаем в каталоге "Показать синонимы"
+			ApplyMnnFilter();
+
+			//Проверка, после навигации назад "синонимы" выключены, остаемся в каталоге
+			catalogModel.NavigateBackward();
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+
+			//Проверка, после навигации назад из каталога остаемся в каталоге
+			catalogModel.NavigateBackward();
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+
+			//Запускаем форму "Поиск по МНН", проверка, что мы в Мнн
+			var mnnModel = Open(new MnnViewModel());
+			Assert.IsInstanceOf<MnnViewModel>(shell.ActiveItem);
+
+			//Запускаем из Мнн каталог, проверка, что мы в каталоге
+			mnnModel.CurrentMnn = mnnModel.Mnns.Value.First();
+			mnnModel.EnterMnn();
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+
+			//Проверка, после навигации назад "синонимы" выключены, остаемся в каталоге
+			var catalogFromMnn = ((CatalogViewModel)mnnModel.Shell.ActiveItem);
+			catalogFromMnn.NavigateBackward();
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+
+			//Проверка, после навигации назад из каталога возвращаемся в Мнн
+			catalogFromMnn.NavigateBackward();
+			Assert.IsInstanceOf<MnnViewModel>(shell.ActiveItem);
+		}
+
 	}
 }
