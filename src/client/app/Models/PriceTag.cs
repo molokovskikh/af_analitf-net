@@ -31,6 +31,43 @@ namespace AnalitF.Net.Client.Models
 			Items = new List<PriceTagItem>();
 		}
 
+		public PriceTag(PriceTag source, Address address) : this()
+		{
+			Address = address;
+			BorderThickness = source.BorderThickness;
+			Height = source.Height;
+			TagType = source.TagType;
+			Width = source.Width;
+			foreach (var item in source.Items) {
+				var i = new PriceTagItem(item) {
+					Bold = item.Bold,
+					BorderThickness = item.BorderThickness,
+					BottomBorder = item.BottomBorder,
+					BottomMargin = item.BottomMargin,
+					FontSize = item.FontSize,
+					Height = item.Height,
+					IsAutoHeight = item.IsAutoHeight,
+					IsAutoWidth = item.IsAutoWidth,
+					IsNewLine = item.IsNewLine,
+					Italic = item.Italic,
+					LeftBorder = item.LeftBorder,
+					LeftMargin = item.LeftMargin,
+					Position = item.Position,
+					PriceTag = this,
+					RightBorder = item.RightBorder,
+					RightMargin = item.RightMargin,
+					Text = item.Text,
+					TextAlignment = item.TextAlignment,
+					TopBorder = item.TopBorder,
+					TopMargin = item.TopMargin,
+					Underline = item.Underline,
+					Width = item.Width,
+					Wrap = item.Wrap
+				};
+				Items.Add(i);
+			}
+		}
+
 		public virtual uint Id { get; set; }
 
 		public virtual double Height
@@ -97,8 +134,11 @@ namespace AnalitF.Net.Client.Models
 				? $"select * from PriceTags where TagType = {(int) tagType}"
 				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address.Id}";
 			var tag = connection.Query<PriceTag>(sql).FirstOrDefault();
-			if (tag != null)
+			if (tag != null) {
+				if (tagType == TagType.PriceTag)
+					tag.Address = connection.Query<Address>($"select * from Addresses where Id = {address.Id}").SingleOrDefault();
 				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
+			}
 			else
 				tag = Default(tagType, address);
 			return tag;
