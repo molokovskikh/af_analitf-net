@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentLine.Value.SrcStock.Release(CurrentLine.Value.Quantity);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
-			// после этой операции CurrentLine равно null
+			// после этой операции при удалении последней строки CurrentLine становится null
 			Lines.Remove(CurrentLine.Value);
 			Save();
 		}

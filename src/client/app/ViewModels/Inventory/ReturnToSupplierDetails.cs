@@ -71,7 +71,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		protected override void OnDeactivate(bool close)
 		{
-			Doc.UpdateStat();
 			Save();
 			base.OnDeactivate(close);
 		}
