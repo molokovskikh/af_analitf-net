@@ -54,6 +54,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual IList<ReassessmentLine> Lines { get; set; }
 
+		public virtual string Comment { get; set; }
+
 		public virtual void Post(ISession session)
 		{
 			CloseDate = DateTime.Now;

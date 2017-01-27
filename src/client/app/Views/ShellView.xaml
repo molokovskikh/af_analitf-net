@@ -280,6 +280,18 @@
 				</Grid>
 			</Button>
 
+			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+				<Image Source="/assets/images/Stocks_32.ico"
+						Style="{StaticResource ButtonImage}" />
+			</Button>
+
+			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+				<Image Source="/assets/images/cash.png"
+						Style="{StaticResource ButtonImage}" />
+			</Button>
+
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<Button x:Name="ShowMails" ToolTip="Мини-почта" IsEnabled="{Binding IsDataLoaded.Value}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
@@ -310,18 +322,6 @@
 					<Image Source="/assets/images/sbis.png"
 							Style="{StaticResource ButtonImage}" />
 				</Grid>
-			</Button>
-
-			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
-				<Image Source="/assets/images/Stocks_32.ico"
-						Style="{StaticResource ButtonImage}" />
-			</Button>
-
-			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
-				<Image Source="/assets/images/cash.png"
-						Style="{StaticResource ButtonImage}" />
 			</Button>
 
 			<Button x:Name="ShowMain" ToolTip="На главную страницу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
