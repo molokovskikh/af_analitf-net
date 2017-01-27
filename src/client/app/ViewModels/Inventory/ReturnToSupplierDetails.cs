@@ -109,9 +109,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Delete()
 		{
 			CurrentLine.Value.Stock.Release(CurrentLine.Value.Quantity);
-			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Lines.Remove(CurrentLine.Value);
 		}
 
 		public IEnumerable<IResult> EditLine()
@@ -136,16 +136,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
-			if (!IsValide(Doc))
+			if (!Doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
 				return;
+			}
 			Doc.Post(Session);
 			Save();
 		}
 
 		public void UnPost()
 		{
-			if (!IsValide(Doc))
-				return;
 			Doc.UnPost(Session);
 			Save();
 		}

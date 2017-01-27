@@ -61,15 +61,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 					return "Поле 'Причина' должно быть заполнено";
 				if ((columnName == nameof(Address)) && (Address == null))
 					return "Поле 'Адрес' должно быть заполнено";
-				if (columnName == nameof(Lines) && !Lines.Any())
-					return "Документ не может быть пустым";
 				return null;
 			}
 		}
 
 		public virtual string Error { get; protected set; }
 
-		public virtual string[] FieldsForValidate => new[] {nameof(Address), nameof(Reason), nameof(Lines) };
+		public virtual string[] FieldsForValidate => new[] {nameof(Address), nameof(Reason) };
 
 		public virtual void Post(ISession session)
 		{

@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Проведен")] Posted
 	}
 
-	public class InventoryDoc : BaseNotify, IEditableObject, IDataErrorInfo2
+	public class InventoryDoc : BaseNotify, IEditableObject
 	{
 		private DocStatus _status;
 
@@ -62,20 +62,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Comment { get; set; }
 
 		public virtual IList<InventoryDocLine> Lines { get; set; }
-
-		public virtual string this[string columnName]
-		{
-			get
-			{
-				if (columnName == nameof(Lines) && !Lines.Any())
-					return "Документ не может быть пустым";
-				return null;
-			}
-		}
-
-		public virtual string Error { get; protected set; }
-
-		public virtual string[] FieldsForValidate => new[] { nameof(Lines) };
 
 		public virtual void Post()
 		{

@@ -123,6 +123,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Провести выбранный документ?"))
 				return;
 			var doc = Session.Load<InventoryDoc>(CurrentItem.Value.Id);
+			if (!doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
 			doc.Post();
 			Session.Update(doc);
 			Session.Flush();

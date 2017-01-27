@@ -81,8 +81,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Провести выбранный документ?"))
 				return;
 			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
-			if (!IsValide(doc))
+			if (!doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
 				return;
+			}
 			doc.Post(Session);
 			Session.Update(doc);
 			Session.Flush();
@@ -96,8 +98,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
 			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
-			if (!IsValide(doc))
-				return;
 			doc.UnPost(Session);
 			Session.Update(doc);
 			Session.Flush();
