@@ -253,9 +253,17 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			}));
 			mapper.Class<InventoryDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				m.Version(p => p.Timestamp, x => {
+					x.Type(new TimestampType());
+					x.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
 			}));
 			mapper.Class<UnpackingDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				m.Version(p => p.Timestamp, x => {
+					x.Type(new TimestampType());
+					x.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
 			}));
 			mapper.Class<UnpackingDocLine>(m => {
 				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
@@ -264,12 +272,24 @@ namespace AnalitF.Net.Client.Config.NHibernate
 
 			mapper.Class<WriteoffDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				m.Version(p => p.Timestamp, x => {
+					x.Type(new TimestampType());
+					x.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
 			}));
 			mapper.Class<ReturnToSupplier>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				m.Version(p => p.Timestamp, x => {
+					x.Type(new TimestampType());
+					x.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
 			}));
 			mapper.Class<DisplacementDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				m.Version(p => p.Timestamp, x => {
+					x.Type(new TimestampType());
+					x.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
 			}));
 			mapper.Class<Offer>(m => {
 				m.ManyToOne(o => o.Price, c => {
