@@ -80,7 +80,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			Session.Load<ReturnToSupplier>(CurrentItem.Value.Id).Post(Session);
+			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			if (!IsValide(doc))
+				return;
+			doc.Post(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 
@@ -88,7 +95,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			Session.Load<ReturnToSupplier>(CurrentItem.Value.Id).UnPost(Session);
+			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			if (!IsValide(doc))
+				return;
+			doc.UnPost(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 

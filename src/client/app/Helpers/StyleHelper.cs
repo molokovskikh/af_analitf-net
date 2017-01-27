@@ -214,7 +214,6 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsPartialyStocked", Background("#94BA99") },
 				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
 				{ "InFrozenOrders", Background(Colors.Gray) },
-				{ "IsNotConducted", Background(Colors.Gray) },
 			};
 		}
 

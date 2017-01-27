@@ -153,7 +153,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			CurrentItem.Value.Post(Session);
+			var doc = Session.Load<DisplacementDoc>(CurrentItem.Value.Id);
+			doc.Post(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 
@@ -161,7 +166,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			CurrentItem.Value.UnPost(Session);
+			var doc = Session.Load<DisplacementDoc>(CurrentItem.Value.Id);
+			doc.UnPost(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 	}

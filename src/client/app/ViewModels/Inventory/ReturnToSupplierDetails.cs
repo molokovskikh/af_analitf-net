@@ -71,6 +71,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		protected override void OnDeactivate(bool close)
 		{
+			Doc.UpdateStat();
 			Save();
 			base.OnDeactivate(close);
 		}
@@ -92,16 +93,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			while (true) {
 				var search = new StockSearch();
-			yield return new DialogResult(search, false, true);
-			var edit = new EditStock(search.CurrentItem)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
-			var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
-			Lines.Add(line);
-			Doc.Lines.Add(line);
-			Doc.UpdateStat();
+				yield return new DialogResult(search, false, true);
+				var edit = new EditStock(search.CurrentItem)
+				{
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
+				var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
 			}
 		}
 
@@ -135,12 +136,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
+			if (!IsValide(Doc))
+				return;
 			Doc.Post(Session);
 			Save();
 		}
 
 		public void UnPost()
 		{
+			if (!IsValide(Doc))
+				return;
 			Doc.UnPost(Session);
 			Save();
 		}

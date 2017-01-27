@@ -78,15 +78,17 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			get
 			{
-				if (columnName == nameof(Address) && Address == null) {
+				if (columnName == nameof(Address) && Address == null)
 					return "Поле 'Адрес' должно быть заполнено";
-				}
+				if (columnName == nameof(Lines) && !Lines.Any())
+					return "Документ не может быть пустым";
 				return null;
 			}
 		}
 
-		public virtual string Error { get; }
-		public virtual string[] FieldsForValidate => new [] { nameof(Address) };
+		public virtual string Error { get; protected set; }
+
+		public virtual string[] FieldsForValidate => new [] { nameof(Address), nameof(Lines) };
 
 		public virtual void DeleteLine(ReassessmentLine line)
 		{
