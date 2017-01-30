@@ -66,13 +66,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new ReturnToSupplierDetails(CurrentItem.Value.Id));
 		}
 
-		public async Task Delete()
+		public void Delete()
 		{
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
-
-			CurrentItem.Value.BeforeDelete();
-			await Env.Query(s => s.Delete(CurrentItem.Value));
+			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			doc.BeforeDelete();
+			Session.Delete(doc);
+			Session.Flush();
 			Update();
 		}
 

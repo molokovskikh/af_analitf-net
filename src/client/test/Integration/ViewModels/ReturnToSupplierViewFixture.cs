@@ -25,21 +25,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		private Stock stock;
 
+		private Supplier supplier;
+
 		[SetUp]
 		public void Setup()
 		{
+			supplier = session.Query<Supplier>().First();
 			stock = new Stock()
 			{
 				Product = "Папаверин",
 				Status = StockStatus.Available,
 				Address = address,
 				Quantity = 5,
-				ReservedQuantity = 0
+				ReservedQuantity = 0,
+				SupplierId = supplier.Id,
 			};
 			session.Save(stock);
 
 			session.DeleteEach<ReturnToSupplier>();
-			var supplier = session.Query<Supplier>().First();
 
 			doc = new ReturnToSupplier
 			{
@@ -51,6 +54,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			model = Open(new ReturnToSuppliers());
 			modelDetails = Open(new ReturnToSupplierDetails(doc.Id));
+		}
+
+		[Test]
+		public void Add_line()
+		{
+			var result = modelDetails.Add().GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(1, dialog.Items.Value.Count);
 		}
 
 		[Test]

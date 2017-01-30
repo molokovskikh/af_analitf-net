@@ -15,10 +15,6 @@ using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
 using System.Collections.ObjectModel;
-using System.Printing;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -90,8 +86,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
+			if (Doc.Supplier == null) {
+				Manager.Warning("Укажите поставщика");
+				yield break;
+			}
 			while (true) {
-				var search = new StockSearch();
+				var search = new StockSearch(Doc.Supplier.Id);
 				yield return new DialogResult(search, false, true);
 				var edit = new EditStock(search.CurrentItem)
 				{
