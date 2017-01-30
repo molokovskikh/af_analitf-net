@@ -752,5 +752,21 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			return true;
 		}
+
+		//доступность шапки документа для редактирования
+		public bool TitleReadOnly => CalcTitleReadOnly();
+		public NotifyValue<bool> TitleEnable { get; set; }
+		protected virtual bool CalcTitleReadOnly()
+		{
+			return false;
+		}
+
+		//доступность спецификации документа для редактирования
+		public bool SpecificationReadOnly => CalcSpecificationReadOnly();
+		public NotifyValue<bool> SpecificationEnable { get; set; }
+		protected virtual bool CalcSpecificationReadOnly()
+		{
+			return false;
+		}
 	}
 }

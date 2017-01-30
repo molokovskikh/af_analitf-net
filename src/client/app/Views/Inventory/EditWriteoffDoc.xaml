@@ -58,13 +58,13 @@
 			<Label Grid.Row="0" Grid.Column="0" FontWeight="Bold">Номер документа</Label>
 			<Label Grid.Row="0" Grid.Column="1" Name="Doc_Id" />
 			<Label Grid.Row="0" Grid.Column="2" FontWeight="Bold">Дата документа</Label>
-			<DatePicker Grid.Row="0" Grid.Column="3"  IsEnabled="{Binding CanPost.Value}" VerticalAlignment="Center"
+			<DatePicker Grid.Row="0" Grid.Column="3"  IsEnabled="{Binding TitleEnable.Value}" VerticalAlignment="Center"
 								VerticalContentAlignment="Center" Name="Doc_Date" />
 			<Label Grid.Row="0" Grid.Column="4" FontWeight="Bold">Адрес</Label>
-			<ComboBox Grid.Row="0" Grid.Column="5" IsEnabled="{Binding CanPost.Value}" Style="{StaticResource Select}"
+			<ComboBox Grid.Row="0" Grid.Column="5" IsEnabled="{Binding TitleEnable.Value}" Style="{StaticResource Select}"
 								Width="100" ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" SelectedItem="{Binding Doc.Address}" />
 			<Label Grid.Row="0" Grid.Column="6" FontWeight="Bold">Причина</Label>
-			<ComboBox Grid.Row="0" Grid.Column="7" IsEnabled="{Binding CanPost.Value}" Style="{StaticResource Select}"
+			<ComboBox Grid.Row="0" Grid.Column="7" IsEnabled="{Binding TitleEnable.Value}" Style="{StaticResource Select}"
 								Width="100" DisplayMemberPath="Name" ItemsSource="{Binding Reasons.Value}" SelectedItem="{Binding Doc.Reason}" />
 			<Label Grid.Row="0" Grid.Column="8" FontWeight="Bold">Статус</Label>
 			<Label Grid.Row="0" Grid.Column="9" Name="Doc_Status" />

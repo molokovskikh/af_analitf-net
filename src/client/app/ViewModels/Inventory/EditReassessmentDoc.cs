@@ -79,12 +79,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
-			var editOrDelete = docStatus
-				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
+			var spec = this.ObservableForProperty(x => x.SpecificationReadOnly, skipInitial: false)
+				.CombineLatest(docStatus, (x, y) => !x.Value && y.Value == DocStatus.NotPosted);
+			var title = Lines.ObservableForProperty(x => x.Count, skipInitial: false)
+				.CombineLatest(docStatus, (x, y) => x.Value == 0 && y.Value == DocStatus.NotPosted);
+
+			spec.Subscribe(_ => SpecificationEnable.Value = !SpecificationReadOnly);
+			title.Subscribe(_ => TitleEnable.Value = !TitleReadOnly);
+
+			SpecificationEnable.Subscribe(CanAdd);
+			var editOrDelete = CurrentLine
+				.CombineLatest(SpecificationEnable, (x, y) => x != null && y);
 			editOrDelete.Subscribe(CanEditLine);
 			editOrDelete.Subscribe(CanDelete);
 			var opened = docStatus.Select(x => x.Value == DocStatus.NotPosted);
-			opened.Subscribe(CanAdd);
 			opened.Subscribe(CanPost);
 			opened.Subscribe(CanReasssessment);
 		}
@@ -324,6 +332,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public bool CanPrintStock
 		{
 			get { return true; }
+		}
+
+		protected override bool CalcTitleReadOnly()
+		{
+			return Lines.Count > 0 || Doc.Status != DocStatus.NotPosted;
+		}
+
+		protected override bool CalcSpecificationReadOnly()
+		{
+			return Doc.Address == null || Doc.Status != DocStatus.NotPosted;
 		}
 	}
 }
