@@ -31,6 +31,8 @@
 			CommandParameter="ShowMnn" />
 		<KeyBinding Gesture="CTRL+W" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="CloseActive" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="NavigateBackward" />
 	</Window.InputBindings>
 
 	<Window.Resources>
