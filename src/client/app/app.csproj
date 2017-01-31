@@ -1238,7 +1238,6 @@
     <None Include="App.release.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App.stock.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
     <None Include="packages.config">
