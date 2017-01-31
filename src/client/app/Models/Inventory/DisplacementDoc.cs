@@ -78,13 +78,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			get
 			{
 				if (columnName == nameof(Address) && Address == null)
-				{
 					return "Поле 'Отправитель' должно быть заполнено";
-				}
 				if (columnName == nameof(DstAddress) && DstAddress == null)
-				{
 					return "Поле 'Получатель' должно быть заполнено";
-				}
 				return null;
 			}
 		}
@@ -92,9 +88,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Error { get; protected set; }
 
 		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(DstAddress) };
-
-		[Style(Description = "\"Непроведен\"")]
-		public virtual bool IsNotConducted => Status == DisplacementDocStatus.NotPosted;
 
 		public virtual void Post(ISession session)
 		{

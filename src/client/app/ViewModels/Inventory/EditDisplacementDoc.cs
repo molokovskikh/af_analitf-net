@@ -117,9 +117,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Delete()
 		{
 			CurrentLine.Value.SrcStock.Release(CurrentLine.Value.Quantity);
-			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			// после этой операции при удалении последней строки CurrentLine становится null
+			Lines.Remove(CurrentLine.Value);
 			Save();
 		}
 
@@ -146,6 +147,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
+			if (!Doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
 			Doc.Post(Session);
 			Save();
 		}

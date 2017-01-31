@@ -15,10 +15,6 @@ using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
 using System.Collections.ObjectModel;
-using System.Printing;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -90,27 +86,31 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Add()
 		{
+			if (Doc.Supplier == null) {
+				Manager.Warning("Укажите поставщика");
+				yield break;
+			}
 			while (true) {
-				var search = new StockSearch();
-			yield return new DialogResult(search, false, true);
-			var edit = new EditStock(search.CurrentItem)
-			{
-				EditMode = EditStock.Mode.EditQuantity
-			};
-			yield return new DialogResult(edit);
-			var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
-			Lines.Add(line);
-			Doc.Lines.Add(line);
-			Doc.UpdateStat();
+				var search = new StockSearch(Doc.Supplier.Id);
+				yield return new DialogResult(search, false, true);
+				var edit = new EditStock(search.CurrentItem)
+				{
+					EditMode = EditStock.Mode.EditQuantity
+				};
+				yield return new DialogResult(edit);
+				var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
+				Lines.Add(line);
+				Doc.Lines.Add(line);
+				Doc.UpdateStat();
 			}
 		}
 
 		public void Delete()
 		{
 			CurrentLine.Value.Stock.Release(CurrentLine.Value.Quantity);
-			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Lines.Remove(CurrentLine.Value);
 		}
 
 		public IEnumerable<IResult> EditLine()
@@ -135,6 +135,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
+			if (!Doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
 			Doc.Post(Session);
 			Save();
 		}

@@ -7,7 +7,6 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
-using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -15,7 +14,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		[Description("По наименование")] ByName,
 		[Description("По цене")] ByCost,
+		[Description("По поставщику")] BySupplier,
 	}
+
 	public class StockSearch : BaseScreen2, ICancelable
 	{
 		public StockSearch(string term = "")
@@ -38,6 +39,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Type = SearchType.ByCost;
 		}
 
+		public StockSearch(uint id)
+		{
+			DisplayName = "Поиск товара по поставщику";
+			SearchBehavior = new SearchBehavior(this);
+			SearchBehavior.ActiveSearchTerm.Value = id.ToString();
+			SearchBehavior.SearchText.Value = id.ToString();
+			WasCancelled = true;
+			Type = SearchType.BySupplier;
+		}
+
 		public bool WasCancelled { get; private set; }
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<Stock> CurrentItem { get; set; }
@@ -54,6 +65,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if(Type == SearchType.ByCost)
 				SearhByCost();
 
+			if (Type == SearchType.BySupplier)
+				SearhBySupplier();
 		}
 
 		private void SearchByName()
@@ -70,6 +83,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			SearchBehavior.ActiveSearchTerm.Throttle(Consts.TextInputLoadTimeout, UiScheduler)
 				.SelectMany(_ => RxQuery(s => Stock.AvailableStocks(s, Address).Where(x => x.RetailCost == Convert.ToDecimal(SearchBehavior.ActiveSearchTerm.Value))
+					.OrderBy(x => x.Product)
+					.ThenBy(x => x.RetailCost)
+					.ToList()))
+				.Subscribe(Items);
+		}
+
+		private void SearhBySupplier()
+		{
+			SearchBehavior.ActiveSearchTerm.Throttle(Consts.TextInputLoadTimeout, UiScheduler)
+				.SelectMany(_ => RxQuery(s => Stock.AvailableStocks(s, Address).Where(x => x.SupplierId == Convert.ToUInt32(SearchBehavior.ActiveSearchTerm.Value))
 					.OrderBy(x => x.Product)
 					.ThenBy(x => x.RetailCost)
 					.ToList()))

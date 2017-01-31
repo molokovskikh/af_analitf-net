@@ -71,6 +71,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			WaybillLineId = line.Id;
 			Status = StockStatus.Available;
 			Address = waybill.Address;
+			SupplierId = waybill.Supplier?.Id;
 			SupplierFullName = waybill.Supplier?.FullName;
 			WaybillNumber = waybill.ProviderDocumentId;
 
@@ -112,6 +113,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? WaybillId { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
+		public virtual uint? SupplierId { get; set; }
 		public virtual string SupplierFullName { get; set; }
 
 		public virtual string AnalogCode { get; set; }

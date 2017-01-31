@@ -66,13 +66,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new ReturnToSupplierDetails(CurrentItem.Value.Id));
 		}
 
-		public async Task Delete()
+		public void Delete()
 		{
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
-
-			CurrentItem.Value.BeforeDelete();
-			await Env.Query(s => s.Delete(CurrentItem.Value));
+			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			doc.BeforeDelete();
+			Session.Delete(doc);
+			Session.Flush();
 			Update();
 		}
 
@@ -80,7 +81,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			Session.Load<ReturnToSupplier>(CurrentItem.Value.Id).Post(Session);
+			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			if (!doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
+			doc.Post(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 
@@ -88,7 +98,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			Session.Load<ReturnToSupplier>(CurrentItem.Value.Id).UnPost(Session);
+			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			doc.UnPost(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 

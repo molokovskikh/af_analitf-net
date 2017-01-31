@@ -68,13 +68,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			get
 			{
 				if (columnName == nameof(Supplier) && Supplier == null)
-				{
 					return "Поле 'Поставщик' должно быть заполнено";
-				}
 				if (columnName == nameof(Address) && Address == null)
-				{
 					return "Поле 'Адрес' должно быть заполнено";
-				}
 				return null;
 			}
 		}
