@@ -60,7 +60,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(File.Exists(result.Filename));
 		}
 
-
 		[Test]
 		public void Export_ReturnToSupplierDetails_details()
 		{
@@ -119,32 +118,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//добавлена и документ сохранен, на складе у нас будет - Папаверин 2шт, 3шт в резерве
 			var line = new ReturnToSupplierLine(stock, 3);
 			doc.Lines.Add(line);
-			session.Save(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы закроем документ то получим - Папаверен 2шт, 0шт в резерве
 			doc.Post(session);
-			session.Save(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
 			doc.UnPost(session);
-			session.Save(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве
 			doc.BeforeDelete();
-			session.Delete(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 5);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 		}
