@@ -46,10 +46,6 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				Items.Clear();
 				Items.AddEach(Tag.Value?.Items ?? Enumerable.Empty<PriceTagItem>());
 			});
-
-			Tag.Value =
-				Session.Query<PriceTag>()
-					.FirstOrDefault(r => r.TagType == tagType && (tagType == TagType.RackingMap || r.Address == address));
 		}
 
 		protected override void OnInitialize()

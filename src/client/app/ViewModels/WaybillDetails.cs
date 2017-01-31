@@ -46,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
+		private PriceTag priceTag;
+		private PriceTag rackingMap;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -194,6 +196,11 @@ namespace AnalitF.Net.Client.ViewModels
 				EmptyLabelVisibility = EmptyLabelVisibility.Select(s => Visibility.Collapsed).ToValue();
 				OrderDetailsVisibility = OrderDetailsVisibility.Select(s => Visibility.Collapsed).ToValue();
 			}
+
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, Waybill.Address))
+				.Subscribe(x => priceTag = x);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, Waybill.Address))
+				.Subscribe(x => rackingMap = x);
 		}
 
 		public void Tags()
@@ -234,6 +241,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//в случае редактирование пользовательской накладной в коллекции будет NamedObject
 			return Lines.Value.OfType<WaybillLine>().Where(l => l.Print).ToList();
+		}
+
+		public IResult PrintRackingMap()
+		{
+			return new DialogResult(new PrintPreviewViewModel {
+				DisplayName = "Стеллажная карта",
+				Document = new RackingMapDocument(PrintableLinesForTag(), Settings.Value, rackingMap).Build()
+			}, fullScreen: true);
+		}
+
+		public IResult PrintPriceTags()
+		{
+			var settings = Settings.Value.PriceTags.First(x => x.Address.Id == Waybill.Address.Id);
+			return new DialogResult(new PrintPreviewViewModel {
+				DisplayName = "Ценники",
+				Document = new PriceTagDocument(PrintableLinesForTag(), settings, priceTag).Build()
+			}, fullScreen: true);
 		}
 
 		private List<TagPrintable> PrintableLinesForTag()

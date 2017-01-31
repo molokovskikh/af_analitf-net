@@ -121,6 +121,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						PriceTagSettings.Defaults(address).Each(settings.AddPriceTag);
 				}
 
+				settings.PriceTags.RemoveEach(settings.PriceTags.Where(x => x.Address == null || !addresses.Contains(x.Address)));
+
 				var addressConfigs = session.Query<AddressConfig>().ToArray();
 				session.DeleteEach(addressConfigs.Where(x => x.Address == null));
 				session.SaveEach(addresses.Except(addressConfigs.Select(x => x.Address)).Select(x => new AddressConfig(x)));
