@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
+using Caliburn.Micro;
+using AnalitF.Net.Client.Models.Results;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -43,9 +45,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Subscribe(Items);
 		}
 
-		public void Create()
+		public IEnumerable<IResult> Create()
 		{
-			Shell.Navigate(new EditReassessmentDoc(new ReassessmentDoc(Address)));
+			if (Address == null)
+				yield break;
+			var doc = new ReassessmentDoc(Address);
+			yield return new DialogResult(new CreateReassessmentDoc(doc));
+			Session.Save(doc);
+			Update();
 		}
 
 		public void Open()

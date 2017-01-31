@@ -11,6 +11,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using NHibernate;
 using NPOI.HSSF.UserModel;
+using AnalitF.Net.Client.Models.Results;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -81,9 +82,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return items;
 		}
 
-		public void Create()
+		public IEnumerable<IResult> Create()
 		{
-			Shell.Navigate(new EditDisplacementDoc(new DisplacementDoc(Address)));
+			if (Address == null)
+				yield break;
+			var doc = new DisplacementDoc(Address);
+			yield return new DialogResult(new CreateDisplacementDoc(doc));
+			Session.Save(doc);
+			Update();
 		}
 
 		public void Open()

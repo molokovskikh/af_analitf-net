@@ -439,6 +439,10 @@
     <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Inventory\CreateDisplacementDoc.cs" />
+    <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
+    <Compile Include="ViewModels\Inventory\CreateReturnToSupplier.cs" />
+    <Compile Include="ViewModels\Inventory\CreateWriteoffDoc.cs" />
     <Compile Include="ViewModels\Inventory\Tags.cs" />
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
@@ -625,6 +629,18 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateDisplacementDoc.xaml.cs">
+      <DependentUpon>CreateDisplacementDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateReassessmentDoc.xaml.cs">
+      <DependentUpon>CreateReassessmentDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateReturnToSupplier.xaml.cs">
+      <DependentUpon>CreateReturnToSupplier.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateWriteoffDoc.xaml.cs">
+      <DependentUpon>CreateWriteoffDoc.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Tags.xaml.cs">
       <DependentUpon>Tags.xaml</DependentUpon>
@@ -964,6 +980,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Feedback.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateDisplacementDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateReassessmentDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateReturnToSupplier.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateWriteoffDoc.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
