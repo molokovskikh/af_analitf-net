@@ -62,8 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 			InitFields();
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
 
-			Settings.Changed()
-				.Subscribe(v => Calculate());
+			Settings.Subscribe(_ => Calculate());
 			CurrentTax.Subscribe(v => {
 				if (Lines.Value == null)
 					return;
@@ -144,7 +143,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Session == null)
 				return;
 
-			Waybill = Session.Load<Waybill>(id);
+			Waybill = Session.Get<Waybill>(id);
+			if (Waybill == null) {
+				return;
+			}
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
@@ -201,6 +203,16 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(x => priceTag = x);
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, Waybill.Address))
 				.Subscribe(x => rackingMap = x);
+		}
+
+		protected override void OnActivate()
+		{
+			if (Waybill == null) {
+				Manager.Warning("Накладная отсутствует");
+				IsSuccessfulActivated = false;
+				return;
+			}
+			base.OnActivate();
 		}
 
 		public void Tags()

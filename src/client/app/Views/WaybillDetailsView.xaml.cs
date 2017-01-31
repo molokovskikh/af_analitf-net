@@ -80,6 +80,8 @@ namespace AnalitF.Net.Client.Views
 
 		private void Init()
 		{
+			if (model?.Waybill == null)
+				return;
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
 			//что негативно отражается на производительности
@@ -132,7 +134,7 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
 				Generator = (c, i) => new ContentControl { Style = (Style)FindResource("DownloadLink") }
 			});
-			if (model?.Waybill.IsCreatedByUser == true) {
+			if (model.Waybill.IsCreatedByUser == true) {
 				lines.CanUserAddRows = true;
 				lines.CanUserDeleteRows = true;
 				lines.Columns.Add(new CustomDataGridColumn {
