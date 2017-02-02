@@ -79,6 +79,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(SpecialMarkups);
 			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
 				.Subscribe(PriceTagSettings);
+			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
+				.Subscribe(_ => LoadPriceTagPreview());
 
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
@@ -258,12 +260,14 @@ limit 300";
 			Settings.Value.PriceTags.AddEach(dstAddresses.SelectMany(x => src.Select(y => new PriceTagSettings(y, x))));
 
 			var priceTags = Session.Query<PriceTag>().ToArray();
-			var priceTagSrc = priceTags.Where(r => r.Address == MarkupAddress.Value).ToArray();
+			var priceTagSrc = priceTags.Where(r => r.AddressId == MarkupAddress.Value.Id).ToArray();
 			var tagItems = Session.Query<PriceTagItem>().ToArray();
-			var tagItemSrc = tagItems.Where(r => priceTagSrc.Contains(r.PriceTag)).ToArray();
+			var tagItemSrc = tagItems.Where(r => priceTagSrc.FirstOrDefault(x => x.Id == r.PriceTagId) != null).ToArray();
 			Session.DeleteEach(tagItems.Except(tagItemSrc));
 			Session.DeleteEach(priceTags.Except(priceTagSrc));
 			Session.SaveEach(dstAddresses.SelectMany(a => priceTagSrc.Select(t => new PriceTag(t, a))));
+			var newPriceTags = Session.Query<PriceTag>().Where(r => !priceTags.Contains(r)).ToArray();
+			Session.SaveEach(newPriceTags.SelectMany(t => tagItemSrc.Select(i => new PriceTagItem(i, t))));
 		}
 
 		public NotifyValue<FrameworkElement> RackingMapPreview { get; set; }
@@ -280,6 +284,8 @@ limit 300";
 
 		private void LoadPriceTagPreview()
 		{
+			if (!MarkupAddress.HasValue)
+				return;
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, MarkupAddress.Value))
 				.Subscribe(x => PriceTagPreview.Value = x.Preview());
 		}

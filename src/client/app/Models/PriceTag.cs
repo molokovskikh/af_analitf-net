@@ -33,39 +33,11 @@ namespace AnalitF.Net.Client.Models
 
 		public PriceTag(PriceTag source, Address address) : this()
 		{
-			Address = address;
+			AddressId = address.Id;
 			BorderThickness = source.BorderThickness;
 			Height = source.Height;
 			TagType = source.TagType;
 			Width = source.Width;
-			foreach (var item in source.Items) {
-				var i = new PriceTagItem(item) {
-					Bold = item.Bold,
-					BorderThickness = item.BorderThickness,
-					BottomBorder = item.BottomBorder,
-					BottomMargin = item.BottomMargin,
-					FontSize = item.FontSize,
-					Height = item.Height,
-					IsAutoHeight = item.IsAutoHeight,
-					IsAutoWidth = item.IsAutoWidth,
-					IsNewLine = item.IsNewLine,
-					Italic = item.Italic,
-					LeftBorder = item.LeftBorder,
-					LeftMargin = item.LeftMargin,
-					Position = item.Position,
-					PriceTag = this,
-					RightBorder = item.RightBorder,
-					RightMargin = item.RightMargin,
-					Text = item.Text,
-					TextAlignment = item.TextAlignment,
-					TopBorder = item.TopBorder,
-					TopMargin = item.TopMargin,
-					Underline = item.Underline,
-					Width = item.Width,
-					Wrap = item.Wrap
-				};
-				Items.Add(i);
-			}
 		}
 
 		public virtual uint Id { get; set; }
@@ -96,7 +68,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual TagType TagType { get; set; }
 
-		public virtual Address Address { get; set; }
+		public virtual uint? AddressId { get; set; }
 
 		public virtual double BorderThickness
 		{
@@ -110,6 +82,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Write(false)]
 		public virtual IList<PriceTagItem> Items { get; set; }
 
 		public static Border Preview(double width, double height, double borderThickness, IList<PriceTagItem> items)
@@ -135,8 +108,6 @@ namespace AnalitF.Net.Client.Models
 				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address.Id}";
 			var tag = connection.Query<PriceTag>(sql).FirstOrDefault();
 			if (tag != null) {
-				if (tagType == TagType.PriceTag)
-					tag.Address = connection.Query<Address>($"select * from Addresses where Id = {address.Id}").SingleOrDefault();
 				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
 			}
 			else
@@ -148,7 +119,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			var tag = new PriceTag {
 				TagType = tagType,
-				Address = tagType == TagType.PriceTag ? address : null,
+				AddressId = tagType == TagType.PriceTag ? address.Id : (uint?)null,
 				Height = 5,
 				Width = 5,
 				BorderThickness = 0.5d,
@@ -338,6 +309,34 @@ namespace AnalitF.Net.Client.Models
 			TextAlignment = TextAlignment.Left;
 		}
 
+		public PriceTagItem(PriceTagItem source, PriceTag priceTag)
+		{
+			Bold = source.Bold;
+			BorderThickness = source.BorderThickness;
+			BottomBorder = source.BottomBorder;
+			BottomMargin = source.BottomMargin;
+			FontSize = source.FontSize;
+			Height = source.Height;
+			IsAutoHeight = source.IsAutoHeight;
+			IsAutoWidth = source.IsAutoWidth;
+			IsNewLine = source.IsNewLine;
+			Italic = source.Italic;
+			LeftBorder = source.LeftBorder;
+			LeftMargin = source.LeftMargin;
+			Name = source.Name;
+			Position = source.Position;
+			PriceTagId = priceTag.Id;
+			RightBorder = source.RightBorder;
+			RightMargin = source.RightMargin;
+			Text = source.Text;
+			TextAlignment = source.TextAlignment;
+			TopBorder = source.TopBorder;
+			TopMargin = source.TopMargin;
+			Underline = source.Underline;
+			Width = source.Width;
+			Wrap = source.Wrap;
+		}
+
 		public virtual uint Id { get; set; }
 		public virtual int Position { get; set; }
 		public virtual string Name { get; set; }
@@ -374,7 +373,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool TopBorder { get; set; }
 		public virtual bool RightBorder { get; set; }
 		public virtual bool BottomBorder { get; set; }
-		public virtual PriceTag PriceTag { get; set; }
+		public virtual uint PriceTagId { get; set; }
 		public virtual bool IsAutoWidth { get; set; }
 		public virtual double? Width { get; set; }
 		public virtual bool IsAutoHeight { get; set; }
