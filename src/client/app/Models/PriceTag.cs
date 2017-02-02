@@ -33,6 +33,15 @@ namespace AnalitF.Net.Client.Models
 			Items = new List<PriceTagItem>();
 		}
 
+		public PriceTag(PriceTag source, Address address) : this()
+		{
+			AddressId = address.Id;
+			BorderThickness = source.BorderThickness;
+			Height = source.Height;
+			TagType = source.TagType;
+			Width = source.Width;
+		}
+
 		public virtual uint Id { get; set; }
 
 		public virtual double Height
@@ -61,7 +70,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual TagType TagType { get; set; }
 
-		public virtual Address Address { get; set; }
+		public virtual uint? AddressId { get; set; }
 
 		public virtual double BorderThickness
 		{
@@ -75,6 +84,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Write(false)]
 		public virtual IList<PriceTagItem> Items { get; set; }
 
 		public static Border Preview(double width, double height, double borderThickness, IList<PriceTagItem> items)
@@ -99,8 +109,9 @@ namespace AnalitF.Net.Client.Models
 				? $"select * from PriceTags where TagType = {(int) tagType}"
 				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address.Id}";
 			var tag = connection.Query<PriceTag>(sql).FirstOrDefault();
-			if (tag != null)
+			if (tag != null) {
 				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
+			}
 			else
 				tag = Default(tagType, address);
 			return tag;
@@ -110,7 +121,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			var tag = new PriceTag {
 				TagType = tagType,
-				Address = tagType == TagType.PriceTag ? address : null,
+				AddressId = tagType == TagType.PriceTag ? address.Id : (uint?)null,
 				Height = 5,
 				Width = 5,
 				BorderThickness = 0.5d,
@@ -300,6 +311,34 @@ namespace AnalitF.Net.Client.Models
 			TextAlignment = TextAlignment.Left;
 		}
 
+		public PriceTagItem(PriceTagItem source, PriceTag priceTag)
+		{
+			Bold = source.Bold;
+			BorderThickness = source.BorderThickness;
+			BottomBorder = source.BottomBorder;
+			BottomMargin = source.BottomMargin;
+			FontSize = source.FontSize;
+			Height = source.Height;
+			IsAutoHeight = source.IsAutoHeight;
+			IsAutoWidth = source.IsAutoWidth;
+			IsNewLine = source.IsNewLine;
+			Italic = source.Italic;
+			LeftBorder = source.LeftBorder;
+			LeftMargin = source.LeftMargin;
+			Name = source.Name;
+			Position = source.Position;
+			PriceTagId = priceTag.Id;
+			RightBorder = source.RightBorder;
+			RightMargin = source.RightMargin;
+			Text = source.Text;
+			TextAlignment = source.TextAlignment;
+			TopBorder = source.TopBorder;
+			TopMargin = source.TopMargin;
+			Underline = source.Underline;
+			Width = source.Width;
+			Wrap = source.Wrap;
+		}
+
 		public virtual uint Id { get; set; }
 		public virtual int Position { get; set; }
 		public virtual string Name { get; set; }
@@ -336,7 +375,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool TopBorder { get; set; }
 		public virtual bool RightBorder { get; set; }
 		public virtual bool BottomBorder { get; set; }
-		public virtual PriceTag PriceTag { get; set; }
+		public virtual uint PriceTagId { get; set; }
 		public virtual bool IsAutoWidth { get; set; }
 		public virtual double? Width { get; set; }
 		public virtual bool IsAutoHeight { get; set; }

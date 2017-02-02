@@ -675,6 +675,9 @@
 							<ContentControl Content="{Binding PriceTagPreview.Value}" />
 						</StackPanel>
 					</StackPanel>
+					<StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+						<CheckBox x:Name="OverwritePriceTags" Content="Применить ко всем адресам(точкам) доставки" />
+					</StackPanel>
 				</Grid>
 			</TabItem>
 			<TabItem Header="Отладка" Name="DebugTab">
