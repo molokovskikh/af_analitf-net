@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			//из-за чего нижний грид смещается, т.к. ориентируется на AddressColumn.ActualWidth
 			//Исправляем синхронизацией ActualWidth с реальной шириной
 			var view = (Views.Inventory.Stocks)GetView();
-			view.AddressColumn.Width = view.AddressColumn.ActualWidth;
+			if (view != null) view.AddressColumn.Width = view.AddressColumn.ActualWidth;
 		}
 
 		protected override void OnInitialize()
