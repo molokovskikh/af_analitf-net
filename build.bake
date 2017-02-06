@@ -16,6 +16,7 @@ import Mono.Cecil
 import Newtonsoft.Json
 
 def SignFileLocal(file as string):
+	return
 	SignFile(file, "assets/cs.pfx", "password")
 
 def SignDir(dir as string):
