@@ -15,10 +15,10 @@ namespace AnalitF.Net.Client.Models.Print
 	public class ReturnInvoice : BaseDocument
 	{
 		private DocumentTemplate template;
-		private ReturnToSupplier returnToSupplier;
+		private ReturnDoc returnToSupplier;
 		private WaybillSettings waybillSettings;
 		private BlockUIContainer bodyBlock;
-		public ReturnInvoice(ReturnToSupplier returnToSupplier , WaybillSettings waybillSettings)
+		public ReturnInvoice(ReturnDoc returnToSupplier , WaybillSettings waybillSettings)
 		{
 			this.returnToSupplier = returnToSupplier;
 			this.waybillSettings = waybillSettings;

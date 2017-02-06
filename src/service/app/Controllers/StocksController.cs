@@ -72,6 +72,12 @@ namespace AnalitF.Net.Service.Controllers
 						cmd = new MySqlCommand($"insert into Inventory.Checks (UserId, {columns}) values (?userId, {parametersSql})");
 					} else if (item.FileName == "check-lines") {
 						cmd = new MySqlCommand($"insert into Inventory.CheckLines ({columns}) values ({parametersSql})");
+					} else if (item.FileName.EndsWith("Docs")) {
+						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} (UserId, {columns}) values (?userId, {parametersSql})");
+					} else if (item.FileName.EndsWith("Lines")) {
+						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} ({columns}) values ({parametersSql})");
+					} else if (item.FileName.EndsWith("Waybills")) {
+						cmd = new MySqlCommand("insert into Inventory.StockedWaybills (UserId, DownloadId, ClientTimestamp) values (?userId, ?ClientPrimaryKey, ?Timestamp)");
 					} else {
 						throw new Exception($"Неизвестный тип данных {item.FileName}");
 					}
@@ -90,7 +96,11 @@ namespace AnalitF.Net.Service.Controllers
 						foreach (DataColumn column in table.Columns) {
 							cmd.Parameters[columnMap[column.ColumnName]].Value = row[column];
 						}
-						cmd.ExecuteNonQuery();
+						try {
+							cmd.ExecuteNonQuery();
+						} catch(Exception e) {
+							throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
+						}
 					}
 				}
 			}

@@ -1867,6 +1867,18 @@ left join Documents.DocumentBodies db on db.DocumentId = dh.Id
 where dh.DownloadId in ({0})
 group by dh.Id;
 
+drop temporary table if exists StockedWaybillIds;
+create temporary table StockedWaybillIds (
+	Id int unsigned,
+	primary key(Id)
+);
+
+insert into StockedWaybillIds(Id)
+select DownloadId
+from Inventory.StockedWaybills
+where DownloadId in ({0})
+group by DownloadId;
+
 select d.RowId as Id,
 	dh.ProviderDocumentId,
 	convert_tz(now(), @@session.time_zone,'+00:00') as WriteTime,
@@ -1889,11 +1901,13 @@ select d.RowId as Id,
 	if(i.IsSupplierAmount, i.NDSAmount, null) as SupplierTaxSum,
 	if(i.IsSupplierAmount, i.Amount, null) as SupplierSum,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	rf.IsRetailCostFixed
+	rf.IsRetailCostFixed,
+	if(sw.Id is null, 0, 1) as Status
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 	join RetailCostFixed rf on rf.Id = dh.Id
 	left join Documents.InvoiceHeaders i on i.Id = dh.Id
+	left join StockedWaybillIds sw on sw.Id = d.RowId
 where d.RowId in ({0})
 group by dh.Id
 union
@@ -1919,12 +1933,15 @@ select d.RowId as Id,
 	null as SupplierTaxSum,
 	null as SupplierSum,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	0 as IsRetailCostFixed
+	0 as IsRetailCostFixed,
+	0 as Status
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
-			session.CreateSQLQuery(@"drop temporary table if exists RetailCostFixed;").ExecuteUpdate();
+			session.CreateSQLQuery(@"
+drop temporary table if exists RetailCostFixed;
+drop temporary table if exists StockedWaybillIds;").ExecuteUpdate();
 
 			sql = $@"
 select db.Id,

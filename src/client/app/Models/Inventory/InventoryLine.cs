@@ -4,13 +4,13 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class InventoryDocLine : BaseStock, IEditableObject
+	public class InventoryLine : BaseStock, IEditableObject
 	{
-		public InventoryDocLine()
+		public InventoryLine()
 		{
 		}
 
-		public InventoryDocLine(Stock stock, decimal quantity, ISession session)
+		public InventoryLine(Stock stock, decimal quantity, ISession session)
 		{
 			Stock.Copy(stock, this);
 			Id = 0;

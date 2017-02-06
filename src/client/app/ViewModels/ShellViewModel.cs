@@ -260,13 +260,13 @@ namespace AnalitF.Net.Client.ViewModels
 			User.Select(x => x?.IsStockEnabled ?? false)
 				.Subscribe(IsStockEnabled);
 
-			//if (Env.Factory != null) {
-			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
-			//	CloseDisposable.Add(Disposable.Create(() => {
-			//		CancelDisposable.Dispose();
-			//		task.Wait(TimeSpan.FromSeconds(10));
-			//	}));
-			//}
+			if (Env.Factory != null) {
+				var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token, User).Wait());
+				CloseDisposable.Add(Disposable.Create(() => {
+					CancelDisposable.Dispose();
+					task.Wait(TimeSpan.FromSeconds(10));
+				}));
+			}
 		}
 
 		public Config.Config Config { get; set; }

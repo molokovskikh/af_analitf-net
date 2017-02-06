@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -707,6 +708,12 @@ update Addresses set Id =  2575 where Id = :addressId")
 			cmd.SyncData = "Waybills";
 			Run(cmd);
 			Assert.AreEqual(0, cmd.Results.Count);
+		}
+
+		[Test]
+		public void Sync_command()
+		{
+			Run(new SyncCommand());
 		}
 	}
 }

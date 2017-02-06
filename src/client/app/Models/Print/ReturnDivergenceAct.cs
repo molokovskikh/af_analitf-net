@@ -15,10 +15,10 @@ namespace AnalitF.Net.Client.Models.Print
 	public class ReturnDivergenceAct : BaseDocument
 	{
 		private DocumentTemplate template;
-		private ReturnToSupplier returnToSupplier;
+		private ReturnDoc returnToSupplier;
 		private WaybillSettings waybillSettings;
 
-		public ReturnDivergenceAct(ReturnToSupplier returnToSupplier, WaybillSettings waybillSettings)
+		public ReturnDivergenceAct(ReturnDoc returnToSupplier, WaybillSettings waybillSettings)
 		{
 			this.returnToSupplier = returnToSupplier;
 			this.waybillSettings = waybillSettings;

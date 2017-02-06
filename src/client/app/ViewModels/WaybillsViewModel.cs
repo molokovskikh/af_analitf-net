@@ -111,6 +111,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(TypeFilter.Changed())
 				.Merge(Suppliers.Where(x => x != null).Cast<object>())
 				.Merge(Bus.Listen<Waybill>())
+				.Merge(DbReloadToken)
 				.Throttle(TimeSpan.FromMilliseconds(50), Scheduler)
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}

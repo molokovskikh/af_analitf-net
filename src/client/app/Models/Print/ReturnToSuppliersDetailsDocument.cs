@@ -10,12 +10,12 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	class ReturnToSuppliersDetailsDocument : BaseDocument
 	{
-		private ReturnToSupplierLine[] _items;
+		private ReturnLine[] _items;
 		private DocumentTemplate template;
-		private ReturnToSupplier _doc;
+		private ReturnDoc _doc;
 		private WaybillSettings _waybillSettings;
 
-		public ReturnToSuppliersDetailsDocument(ReturnToSupplierLine[] items, ReturnToSupplier doc, WaybillSettings waybillSettings)
+		public ReturnToSuppliersDetailsDocument(ReturnLine[] items, ReturnDoc doc, WaybillSettings waybillSettings)
 		{
 			_items = items;
 			_doc = doc;

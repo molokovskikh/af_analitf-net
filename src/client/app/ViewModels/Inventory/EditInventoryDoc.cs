@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		private EditInventoryDoc()
 		{
-			Lines = new ReactiveCollection<InventoryDocLine>();
+			Lines = new ReactiveCollection<InventoryLine>();
 			Session.FlushMode = FlushMode.Never;
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
@@ -46,8 +46,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 		public InventoryDoc Doc { get; set; }
-		public ReactiveCollection<InventoryDocLine> Lines { get; set; }
-		public NotifyValue<InventoryDocLine> CurrentLine { get; set; }
+		public ReactiveCollection<InventoryLine> Lines { get; set; }
+		public NotifyValue<InventoryLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanAdd { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				var line = new InventoryLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new InventoryDocLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				var line = new InventoryLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -125,7 +125,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Save();
 		}
 
-		public void UpdateQuantity(InventoryDocLine line, decimal oldQuantity)
+		public void UpdateQuantity(InventoryLine line, decimal oldQuantity)
 		{
 			if (Session == null)
 				return;

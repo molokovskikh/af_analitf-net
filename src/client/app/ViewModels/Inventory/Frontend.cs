@@ -365,7 +365,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 
 			var doc = new UnpackingDoc(Address);
-			var uline = new UnpackingDocLine(srcStock, settings.Multiplicity);
+			var uline = new UnpackingLine(srcStock, settings.Multiplicity);
 			doc.Lines.Add(uline);
 			doc.UpdateStat();
 			doc.Post();

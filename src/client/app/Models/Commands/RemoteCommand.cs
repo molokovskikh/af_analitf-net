@@ -110,6 +110,10 @@ namespace AnalitF.Net.Client.Models.Commands
 							$" об ошибке при обработке запроса {response.RequestMessage}", e);
 					}
 				}
+#if DEBUG
+				if (response.Content.Headers.ContentType?.MediaType == "application/json")
+					throw new Exception(response.Content.ReadAsAsync<DebugServerError>().Result.ToString());
+#endif
 				throw new RequestException($"Произошла ошибка при обработке запроса, код ошибки {response.StatusCode}",
 					response.StatusCode);
 			}

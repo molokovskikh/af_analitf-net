@@ -10,7 +10,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		private EditUnpackingDoc()
 		{
-			Lines = new ReactiveCollection<UnpackingDocLine>();
+			Lines = new ReactiveCollection<UnpackingLine>();
 			Session.FlushMode = FlushMode.Never;
 		}
 
@@ -23,8 +23,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 		public UnpackingDoc Doc { get; set; }
-		public ReactiveCollection<UnpackingDocLine> Lines { get; set; }
-		public NotifyValue<UnpackingDocLine> CurrentLine { get; set; }
+		public ReactiveCollection<UnpackingLine> Lines { get; set; }
+		public NotifyValue<UnpackingLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
 
