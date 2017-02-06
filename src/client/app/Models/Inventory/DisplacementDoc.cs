@@ -61,10 +61,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
 		public virtual Address Address { get; set; }
-		public virtual string AddressName => Address.Name;
+		public virtual string AddressName => Address?.Name;
 
 		public virtual Address DstAddress { get; set; }
-		public virtual string DstAddressName => DstAddress.Name;
+		public virtual string DstAddressName => DstAddress?.Name;
 
 		public virtual decimal SupplierSum { get; set; }
 		public virtual int PosCount { get; set; }
@@ -84,6 +84,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 				if (columnName == nameof(DstAddress) && DstAddress == null)
 				{
 					return "Поле 'Получатель' должно быть заполнено";
+				}
+				if (DstAddress?.Id == Address?.Id)
+				{
+					return "'Отправитель' и 'Получатель' не могут совпадать";
 				}
 				return null;
 			}

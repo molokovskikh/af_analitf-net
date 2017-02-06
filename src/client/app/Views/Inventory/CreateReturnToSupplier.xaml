@@ -6,6 +6,7 @@
 		<Label>Адрес</Label>
 		<ComboBox Name="Addresses"
 			ItemsSource="{Binding Addresses}"
+			Text="{Binding Path=Doc.AddressName, Mode=OneWay}"
 			SelectedItem="{Binding Doc.Address}" DisplayMemberPath="Name" IsEditable="True" />
 		<Label>Дата документа</Label>
 		<DatePicker Name="Doc_Date" HorizontalAlignment="Left" />

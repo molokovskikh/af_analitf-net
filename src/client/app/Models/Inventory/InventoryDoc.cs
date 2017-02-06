@@ -35,6 +35,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
+		public virtual string AddressName => Address?.Name;
 
 		public virtual DocStatus Status
 		{

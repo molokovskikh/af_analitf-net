@@ -6,6 +6,7 @@
 		<Label>Отправитель:</Label>
 		<ComboBox Name="Address"
 			ItemsSource="{Binding Addresses}"
+			Text="{Binding Path=Doc.AddressName, Mode=OneWay}"
 			SelectedItem="{Binding Doc.Address}" DisplayMemberPath="Name" IsEditable="True" />
 		<Label>Получатель:</Label>
 		<ComboBox Name="DstAddress"
