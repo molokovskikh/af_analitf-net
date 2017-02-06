@@ -56,6 +56,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new CreateWriteoffDoc(doc));
 			Session.Save(doc);
 			Update();
+			Shell.Navigate(new EditWriteoffDoc(doc.Id));
 		}
 
 		public void Open()

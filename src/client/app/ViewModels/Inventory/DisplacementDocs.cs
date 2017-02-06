@@ -90,6 +90,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new CreateDisplacementDoc(doc));
 			Session.Save(doc);
 			Update();
+			Shell.Navigate(new EditDisplacementDoc(doc.Id));
 		}
 
 		public void Open()

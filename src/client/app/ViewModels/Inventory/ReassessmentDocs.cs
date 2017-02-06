@@ -53,6 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new CreateReassessmentDoc(doc));
 			Session.Save(doc);
 			Update();
+			Shell.Navigate(new EditReassessmentDoc(doc.Id));
 		}
 
 		public void Open()

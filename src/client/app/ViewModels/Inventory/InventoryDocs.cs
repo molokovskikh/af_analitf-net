@@ -95,9 +95,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			};
 		}
 
-		public void Create()
+		public IEnumerable<IResult> Create()
 		{
-			Shell.Navigate(new EditInventoryDoc(new InventoryDoc(Address)));
+			if (Address == null)
+				yield break;
+			var doc = new InventoryDoc(Address);
+			yield return new DialogResult(new CreateInventoryDoc(doc));
+			Session.Save(doc);
+			Update();
+			Shell.Navigate(new EditInventoryDoc(doc.Id));
 		}
 
 		public void Open()

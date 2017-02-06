@@ -63,6 +63,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new CreateReturnToSupplier(doc));
 			Session.Save(doc);
 			Update();
+			Shell.Navigate(new ReturnToSupplierDetails(doc.Id));
 		}
 
 		public void Open()

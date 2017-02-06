@@ -440,6 +440,7 @@
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\CreateDisplacementDoc.cs" />
+    <Compile Include="ViewModels\Inventory\CreateInventoryDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReturnToSupplier.cs" />
     <Compile Include="ViewModels\Inventory\CreateWriteoffDoc.cs" />
@@ -632,6 +633,9 @@
     </Compile>
     <Compile Include="Views\Inventory\CreateDisplacementDoc.xaml.cs">
       <DependentUpon>CreateDisplacementDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateInventoryDoc.xaml.cs">
+      <DependentUpon>CreateInventoryDoc.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\CreateReassessmentDoc.xaml.cs">
       <DependentUpon>CreateReassessmentDoc.xaml</DependentUpon>
@@ -984,6 +988,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\CreateDisplacementDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateInventoryDoc.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
