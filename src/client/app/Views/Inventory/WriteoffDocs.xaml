@@ -33,7 +33,6 @@
 
 		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
 			<Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать (Ctrl+N)">Создать</Button>
-			<Button Name="Open" Style="{StaticResource FilterElement}" ToolTip="Редактировать (Enter)">Открыть</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
