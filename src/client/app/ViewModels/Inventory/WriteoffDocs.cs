@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Views.Inventory;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
