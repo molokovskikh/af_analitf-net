@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
+using AnalitF.Net.Client.Models.Results;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -54,9 +55,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Subscribe(Items);
 		}
 
-		public void Create()
+		public IEnumerable<IResult> Create()
 		{
-			Shell.Navigate(new ReturnToSupplierDetails(new ReturnToSupplier(Address)));
+			if (Address == null)
+				yield break;
+			var doc = new ReturnToSupplier(Address);
+			yield return new DialogResult(new CreateReturnToSupplier(doc));
+			Session.Save(doc);
+			Update();
+			Shell.Navigate(new ReturnToSupplierDetails(doc.Id));
 		}
 
 		public void Open()

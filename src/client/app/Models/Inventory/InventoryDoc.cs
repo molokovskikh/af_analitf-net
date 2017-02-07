@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Проведен")] Posted
 	}
 
-	public class InventoryDoc : BaseNotify, IEditableObject
+	public class InventoryDoc : BaseNotify, IEditableObject, IDataErrorInfo2
 	{
 		private DocStatus _status;
 
@@ -35,6 +35,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
+		public virtual string AddressName => Address?.Name;
 
 		public virtual DocStatus Status
 		{
@@ -63,6 +64,22 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Comment { get; set; }
 
 		public virtual IList<InventoryDocLine> Lines { get; set; }
+
+		public virtual string[] FieldsForValidate => new[] { nameof(Address) };
+
+		public virtual string Error { get; }
+
+		public virtual string this[string columnName]
+		{
+			get
+			{
+				if (columnName == nameof(Address) && Address == null)
+				{
+					return "Поле 'Адрес' должно быть заполнено";
+				}
+				return null;
+			}
+		}
 
 		public virtual void Post()
 		{

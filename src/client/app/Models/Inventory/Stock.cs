@@ -427,7 +427,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual void Configure(Settings settings)
 		{
 			Settings = settings;
-			WaybillSettings = settings.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
+			WaybillSettings = settings.Waybills.First(x => x.BelongsToAddress?.Id == Address.Id);
 		}
 
 		public static void Copy(object srcItem, object dstItem)

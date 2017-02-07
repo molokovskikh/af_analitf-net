@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual Address Address { get; set; }
 		public virtual Supplier Supplier { get; set; }
 		public virtual string SupplierName => Supplier.FullName;
-		public virtual string AddressName => Address.Name;
+		public virtual string AddressName => Address?.Name;
 
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal SupplierSumWithoutNds { get; set; }
