@@ -320,6 +320,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override IEnumerable<IResult> OnViewReady()
 		{
+			if (!Env.IsUnitTesting) {
+				var result = new DialogResult(new Login());
+				result.Execute(null);
+				if ((result.Model as Login).WasCancelled) {
+					windowManager.Notify("Вход в приложение отменён");
+					TryClose();
+					return Enumerable.Empty<IResult>();
+				}
+				Reload();
+			}
+
 			Env.Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
 				//если в папке с обновлением есть данные то мы должны их импортировать
