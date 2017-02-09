@@ -283,7 +283,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				: Models.Inventory.PaymentType.Cash;
 		}
 
-		// Поиск товара  F6
+		// Поиск товара по наименованию F6
 		public IEnumerable<IResult> SearchByTerm(string term = "")
 		{
 			if (Quantity.Value == null) {
@@ -297,6 +297,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
 
+		// Поиск товара по цене F7
 		public IEnumerable<IResult> SearchByCost(decimal cost = 0)
 		{
 			if (Quantity.Value == null) {
