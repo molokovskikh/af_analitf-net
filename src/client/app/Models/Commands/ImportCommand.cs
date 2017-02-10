@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			{ "prices", -1 }
 		};
 
+		private List<Address> listAdreses = new List<Address>();
+
 		private static Dictionary<string, string[]> ignoredColumns
 			= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) {
 				{"WaybillLines", new [] {
@@ -74,6 +76,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			//перед импортом нужно очистить сессию, тк в процессе импорта могут быть удалены данные которые содержатся в сессии
 			//например прайс-листы если на каком то этапе эти данные изменятся и сессия попытается сохранить изменения
 			//это приведет к ошибке
+			listAdreses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
@@ -229,7 +232,21 @@ drop temporary table ExistsCatalogs;")
 					throw new Exception($"Не могу импортировать {table.Item1}", e);
 				}
 			}
+			ChangeAdress();
 			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
+		}
+
+		private void ChangeAdress()
+		{
+			var Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+
+			var result = Addresses.Where(n => listAdreses.Any(t => t.Id == n.Id && t.Name != n.Name));
+			foreach (var adr in result)
+			{
+				WaybillSettings ws = Session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == adr.Id);
+				ws.Address = adr.Name;
+				Session.Save(ws);
+			}
 		}
 
 		private bool IsImported<T>()

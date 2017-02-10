@@ -92,6 +92,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return filename;
 		}
 
+		protected string TempFile(string filename, string content, System.Text.Encoding encoding)
+		{
+			cleaner.Watch(filename);
+			File.WriteAllText(filename, content, encoding);
+			return filename;
+		}
+
 		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
 			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null && !x.Junk);
