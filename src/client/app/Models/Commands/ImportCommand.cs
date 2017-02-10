@@ -20,8 +20,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			{ "prices", -1 }
 		};
 
-		private List<Address> listAdreses = new List<Address>();
-
 		private static Dictionary<string, string[]> ignoredColumns
 			= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) {
 				{"WaybillLines", new [] {
@@ -76,11 +74,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			//перед импортом нужно очистить сессию, тк в процессе импорта могут быть удалены данные которые содержатся в сессии
 			//например прайс-листы если на каком то этапе эти данные изменятся и сессия попытается сохранить изменения
 			//это приведет к ошибке
-			listAdreses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+			var ListAdresesBeforeImport = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
-			ImportTables();
+			ImportTables(ListAdresesBeforeImport);
 
 			//очистка результатов автозаказа
 			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
@@ -212,7 +210,7 @@ drop temporary table ExistsCatalogs;")
 			settings.ApplyChanges(Session);
 		}
 
-		public void ImportTables()
+		public void ImportTables(List<Address> ListAdresesBeforeImport)
 		{
 			Log.Info("Начинаю импорт");
 			var ordered =
@@ -232,22 +230,22 @@ drop temporary table ExistsCatalogs;")
 					throw new Exception($"Не могу импортировать {table.Item1}", e);
 				}
 			}
-			ChangeAdress();
+			ChangeAdress(ListAdresesBeforeImport);
 			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
 		}
 
-		private void ChangeAdress()
+		private void ChangeAdress(List<Address> ListAdresesBeforeImport)
 		{
-			var Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+			var ListAdresesAfterImport = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 
-			var result = Addresses.Where(n => listAdreses.Any(t => t.Id == n.Id && t.Name != n.Name));
+			var result = ListAdresesAfterImport.Where(n => ListAdresesBeforeImport.Any(t => t.Id == n.Id && t.Name != n.Name));
 			foreach (var adr in result)
 			{
-				WaybillSettings ws = Session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == adr.Id);
-				if (listAdreses.Where(n => n.Id == ws.BelongsToAddress.Id && n.Name == ws.Address).Count() > 0)
+				WaybillSettings waybillSettings = Session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == adr.Id);
+				if (ListAdresesBeforeImport.Where(n => n.Id == waybillSettings.BelongsToAddress.Id && n.Name == waybillSettings.Address).Count() > 0)
 				{
-					ws.Address = adr.Name;
-					Session.Save(ws);
+					waybillSettings.Address = adr.Name;
+					Session.Save(waybillSettings);
 				}
 			}
 		}
