@@ -58,8 +58,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 						session.Flush();
 						transaction.Commit();
 					}
-					WaybillSettings ws1 = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("измененый тестовый адрес доставки", ws1.Address);
+					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("измененый тестовый адрес доставки", ws.Address);
 					// проверка на неизменость WaybillSettings.Address
 					//задаем начальные условия
 					using (var transaction = session.BeginTransaction())
