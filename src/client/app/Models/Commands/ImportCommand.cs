@@ -244,8 +244,11 @@ drop temporary table ExistsCatalogs;")
 			foreach (var adr in result)
 			{
 				WaybillSettings ws = Session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == adr.Id);
-				ws.Address = adr.Name;
-				Session.Save(ws);
+				if (listAdreses.Where(n => n.Id == ws.BelongsToAddress.Id && n.Name == ws.Address).Count() > 0)
+				{
+					ws.Address = adr.Name;
+					Session.Save(ws);
+				}
 			}
 		}
 
