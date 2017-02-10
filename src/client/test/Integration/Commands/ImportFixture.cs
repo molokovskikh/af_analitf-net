@@ -60,8 +60,41 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 					}
 					WaybillSettings ws1 = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
 					Assert.AreEqual("измененый тестовый адрес доставки", ws1.Address);
+					// проверка на неизменость WaybillSettings.Address
+					//задаем начальные условия
+					using (var transaction = session.BeginTransaction())
+					{
+						address.Name = "тестовый адрес доставки до изменения";
+						ws.Address = "тестовый адрес доставки до изменения";
+						session.Save(ws);
+						transaction.Commit();
+					}
+					//меняем адрес
+					using (var transaction = session.BeginTransaction())
+					{
+						ws.Address = "тестовый адрес доставки после ручного изменения";
+						session.Save(ws);
+						transaction.Commit();
+					}
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					// проводим загрузку
+					var data1 = new List<Tuple<string, string[]>> {Tuple.Create(TempFile("Users.txt", "5\ttest\t"), new[] { "Id", "NonExistsColumn" })};
+					using (var transaction = session.BeginTransaction())
+					{
+						var cmd = InitCmd(new ImportCommand(data1)
+						{
+							Strict = false
+						});
+						cmd.Execute();
+						session.Flush();
+						transaction.Commit();
+					}
+					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
 				}
 			}
+
+
 		}
 	}
 }
