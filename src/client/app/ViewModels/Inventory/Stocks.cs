@@ -217,6 +217,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new CheckDefectSeries());
 		}
 
+		public void ShelfLife()
+		{
+			Shell.Navigate(new ShelfLife());
+		}
+
 		public void GoodsMovement()
 		{
 			Shell.Navigate(new GoodsMovement());

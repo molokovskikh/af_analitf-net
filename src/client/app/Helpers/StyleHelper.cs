@@ -10,6 +10,7 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Iesi.Collections;
@@ -213,6 +214,14 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsFullyStocked", Background("#25BC37") },
 				{ "IsPartialyStocked", Background("#94BA99") },
 				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
+				{ "IsOverdue", new DataTrigger {
+						Binding = new Binding("IsOverdue"),
+						Value = true,
+						Setters = {
+							new Setter(Control.ForegroundProperty, new SolidColorBrush(Colors.Red)),
+						}
+					}
+				},
 				{ "InFrozenOrders", Background(Colors.Gray) },
 			};
 		}

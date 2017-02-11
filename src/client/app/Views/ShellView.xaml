@@ -143,8 +143,8 @@
 				</MenuItem>
 			</MenuItem>
 
-      <MenuItem Header="Склад" Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
-        <MenuItem Header="Документы">
+			<MenuItem Header="Склад" Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+				<MenuItem Header="Документы">
           <MenuItem Header="Приходные документы">
 						<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
 						<MenuItem Header="Излишки" Name="InventoryDocs" />
@@ -158,6 +158,7 @@
 					<MenuItem Header="Отчеты">
 						<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
 						<MenuItem Header="Чеки" Name="Checks" />
+						<MenuItem Header="Отчет по срокам годности" Name="ShelfLife" />
 					</MenuItem>
         </MenuItem>
         <MenuItem Header="Товарные запасы" cal:Message.Attach="ShowInventory" />
