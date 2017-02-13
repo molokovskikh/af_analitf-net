@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
-using NHibernate.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -44,10 +43,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 
-			//var ff = Session.Query<Stock>().Single(x => x.Period == "09.01.2017");
-			//ff.Period = "09.12.2016";
-			//Session.Flush();
-
 			DbReloadToken
 				.Merge(Begin.Changed())
 				.Merge(End.Changed())
@@ -74,13 +69,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return items;
 		}
 
-		public IResult ExportExcel()
+		// словарь колока-видимость
+		private Dictionary<string, bool> GetVisibilityDic()
 		{
-			var visibilityDic = new Dictionary<string, bool>();
+			var result = new Dictionary<string, bool>();
 			var grid = GetControls(GetView()).SingleOrDefault(x => x.Name == "Items");
 			if (grid != null)
-				visibilityDic = grid.Columns.ToDictionary(x => x.SortMemberPath, x => x.Visibility == Visibility.Visible);
+				result = grid.Columns.ToDictionary(x => x.SortMemberPath, x => x.Visibility == Visibility.Visible);
+			return result;
+		}
 
+		public IResult ExportExcel()
+		{
+			var visibilityDic = GetVisibilityDic();
 			var colObj = new[]
 			{
 				Tuple.Create("Period", (object)"Срок годности"),
@@ -145,7 +146,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			return Preview("Отчет по срокам годности", new ShelfLifeDocument(Items.Value.ToArray()));
+			return Preview("Отчет по срокам годности", new ShelfLifeDocument(Items.Value.ToArray(), GetVisibilityDic()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -169,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!IsView) {
 				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == "Отчет по срокам годности")
-						docs.Add(new ShelfLifeDocument(Items.Value.ToArray()));
+						docs.Add(new ShelfLifeDocument(Items.Value.ToArray(), GetVisibilityDic()));
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
