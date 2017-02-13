@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using AnalitF.Net.Client.ViewModels.Offers;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -52,6 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public ReactiveCollection<InventoryDocLine> Lines { get; set; }
 		public NotifyValue<InventoryDocLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanAdd { get; set; }
+		public NotifyValue<bool> CanAddFromCatalog { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
@@ -78,6 +80,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
 			editOrDelete.Subscribe(CanDelete);
 			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
+			docStatus.Subscribe(x => CanAddFromCatalog.Value = x.Value == DocStatus.NotPosted);
 			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
 			docStatus.Select(x => x.Value == DocStatus.Posted).Subscribe(CanUnPost);
 		}
@@ -103,10 +106,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> AddFromCatalog()
 		{
 			while (true) {
-				var search = new StockSearch();
-				yield return new DialogResult(search, resizable: true);
-				var edit = new EditStock(search.CurrentItem)
-				{
+				var search = new AddStockFromCatalog(Session, Address);
+				yield return new DialogResult(search);
+				var edit = new EditStock(search.Item) {
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
