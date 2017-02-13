@@ -16,8 +16,7 @@ import Mono.Cecil
 import Newtonsoft.Json
 
 def SignFileLocal(file as string):
-	return
-	SignFile(file, "assets/cs.pfx", "password")
+	SignFile(file, "assets/cs.pfx", "")
 
 def SignDir(dir as string):
 	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
