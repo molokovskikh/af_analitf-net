@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private DisplacementDocStatus _status;
 
 		public override uint Id { get; set; }
+		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
 		public virtual DisplacementDocStatus Status
@@ -60,10 +61,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
 		public virtual Address Address { get; set; }
-		public virtual string AddressName => Address.Name;
+		public virtual string AddressName => Address?.Name;
 
 		public virtual Address DstAddress { get; set; }
-		public virtual string DstAddressName => DstAddress.Name;
+		public virtual string DstAddressName => DstAddress?.Name;
 
 		public virtual decimal SupplierSum { get; set; }
 		public virtual int PosCount { get; set; }
@@ -77,12 +78,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 			get
 			{
 				if (columnName == nameof(Address) && Address == null)
-				{
 					return "Поле 'Отправитель' должно быть заполнено";
-				}
 				if (columnName == nameof(DstAddress) && DstAddress == null)
-				{
 					return "Поле 'Получатель' должно быть заполнено";
+				if (DstAddress?.Id == Address?.Id)
+				{
+					return "'Отправитель' и 'Получатель' не могут совпадать";
 				}
 				return null;
 			}
@@ -91,9 +92,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Error { get; protected set; }
 
 		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(DstAddress) };
-
-		[Style(Description = "\"Непроведен\"")]
-		public virtual bool IsNotConducted => Status == DisplacementDocStatus.NotPosted;
 
 		public virtual void Post(ISession session)
 		{

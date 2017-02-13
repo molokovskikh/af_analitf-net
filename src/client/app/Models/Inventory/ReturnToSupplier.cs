@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private DocStatus _status;
 
 		public override uint Id { get; set; }
+		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
 		public virtual DocStatus Status
@@ -51,7 +52,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual Address Address { get; set; }
 		public virtual Supplier Supplier { get; set; }
 		public virtual string SupplierName => Supplier.FullName;
-		public virtual string AddressName => Address.Name;
+		public virtual string AddressName => Address?.Name;
 
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal SupplierSumWithoutNds { get; set; }
@@ -67,13 +68,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			get
 			{
 				if (columnName == nameof(Supplier) && Supplier == null)
-				{
 					return "Поле 'Поставщик' должно быть заполнено";
-				}
 				if (columnName == nameof(Address) && Address == null)
-				{
 					return "Поле 'Адрес' должно быть заполнено";
-				}
 				return null;
 			}
 		}

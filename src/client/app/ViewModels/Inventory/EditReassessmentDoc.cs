@@ -161,8 +161,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!CanDelete)
 				return;
 			Doc.DeleteLine(CurrentLine.Value);
-			Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Lines.Remove(CurrentLine.Value);
 		}
 
 		public IEnumerable<IResult> EditLine()
@@ -187,6 +187,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
+			if (!Doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
 			Doc.Post(Session);
 			Save();
 		}

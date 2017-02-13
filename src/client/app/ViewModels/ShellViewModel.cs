@@ -1288,6 +1288,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.Navigate(item);
 		}
 
+		public void NavigateBackward()
+		{
+			Navigator.NavigateBack();
+		}
+
 		public void ActivateItemAt(int index)
 		{
 			if (index < Items.Count)
@@ -1296,8 +1301,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnActivationProcessed(IScreen item, bool success)
 		{
-			var screen = item as BaseScreen;
-			screen?.PostActivated();
+			(item as BaseScreen)?.PostActivated();
 		}
 
 		protected override void Configure(IScreen newItem)

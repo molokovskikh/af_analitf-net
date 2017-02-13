@@ -46,6 +46,23 @@ namespace AnalitF.Net.Client.Models
 			Address = address;
 		}
 
+		public PriceTagSettings(PriceTagSettings source, Address address) : this(address)
+		{
+			HideNotPrinted = source.HideNotPrinted;
+			PrintCountry = source.PrintCountry;
+			PrintDocumentDate = source.PrintDocumentDate;
+			PrintEmpty = source.PrintEmpty;
+			PrintFullName = source.PrintFullName;
+			PrintPeriod = source.PrintPeriod;
+			PrintProducer = source.PrintProducer;
+			PrintProduct = source.PrintProduct;
+			PrintProviderDocumentId = source.PrintProviderDocumentId;
+			PrintSerialNumber = source.PrintSerialNumber;
+			PrintSupplier = source.PrintSupplier;
+			Settings = source.Settings;
+			Type = source.Type;
+		}
+
 		public virtual uint Id { get; set; }
 		public virtual Settings Settings { get; set; }
 		public virtual Address Address { get; set; }

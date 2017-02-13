@@ -121,6 +121,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						PriceTagSettings.Defaults(address).Each(settings.AddPriceTag);
 				}
 
+				settings.PriceTags.RemoveEach(settings.PriceTags.Where(x => x.Address == null || !addresses.Contains(x.Address)));
+
 				var addressConfigs = session.Query<AddressConfig>().ToArray();
 				session.DeleteEach(addressConfigs.Where(x => x.Address == null));
 				session.SaveEach(addresses.Except(addressConfigs.Select(x => x.Address)).Select(x => new AddressConfig(x)));
@@ -261,7 +263,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 					// #56897 привязали элементы, чтоб сохранить настройки конструктора, удалили теги без элементов
 					if (table.Name.Match("PriceTags")) {
-						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where PriceTagId is null;");
+						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where ifnull(PriceTagId, 0) = 0;");
 						alters.Add("delete t from PriceTags t left join PriceTagItems i on i.PriceTagId = t.Id where i.PriceTagId is null;");
 					}
 

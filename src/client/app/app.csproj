@@ -300,6 +300,8 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\Inventory\DisplacementDoc.cs" />
+    <Compile Include="Models\Inventory\InventoryDocLine.cs" />
+    <Compile Include="Models\Inventory\ReassessmentLine.cs" />
     <Compile Include="Models\Inventory\UnpackingDoc.cs" />
     <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
@@ -308,12 +310,12 @@
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
     <Compile Include="Models\Inventory\ReassessmentDoc.cs" />
-    <Compile Include="Models\Inventory\ReceivingLine.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
     <Compile Include="Models\Inventory\StockAction.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
     <Compile Include="Models\Inventory\SyncCommand.cs" />
     <Compile Include="Models\Inventory\WriteoffDoc.cs" />
+    <Compile Include="Models\Inventory\WriteoffLine.cs" />
     <Compile Include="Models\Inventory\WriteoffReason.cs" />
     <Compile Include="Models\Print\CheckDetailsDocument.cs" />
     <Compile Include="Models\Print\CheckDocument.cs" />
@@ -438,6 +440,11 @@
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\AddStockFromCatalog.cs" />
+    <Compile Include="ViewModels\Inventory\CreateDisplacementDoc.cs" />
+    <Compile Include="ViewModels\Inventory\CreateInventoryDoc.cs" />
+    <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
+    <Compile Include="ViewModels\Inventory\CreateReturnToSupplier.cs" />
+    <Compile Include="ViewModels\Inventory\CreateWriteoffDoc.cs" />
     <Compile Include="ViewModels\Inventory\Tags.cs" />
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
@@ -627,6 +634,21 @@
     </Compile>
     <Compile Include="Views\Inventory\AddStockFromCatalog.xaml.cs">
       <DependentUpon>AddStockFromCatalog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateDisplacementDoc.xaml.cs">
+      <DependentUpon>CreateDisplacementDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateInventoryDoc.xaml.cs">
+      <DependentUpon>CreateInventoryDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateReassessmentDoc.xaml.cs">
+      <DependentUpon>CreateReassessmentDoc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateReturnToSupplier.xaml.cs">
+      <DependentUpon>CreateReturnToSupplier.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CreateWriteoffDoc.xaml.cs">
+      <DependentUpon>CreateWriteoffDoc.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Tags.xaml.cs">
       <DependentUpon>Tags.xaml</DependentUpon>
@@ -973,6 +995,26 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\CreateDisplacementDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateInventoryDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateReassessmentDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateReturnToSupplier.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\CreateWriteoffDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Inventory\Tags.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1244,7 +1286,6 @@
     <None Include="App.release.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App.stock.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
     <None Include="packages.config">

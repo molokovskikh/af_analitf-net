@@ -11,6 +11,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using NHibernate;
 using NPOI.HSSF.UserModel;
+using AnalitF.Net.Client.Models.Results;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -81,9 +82,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return items;
 		}
 
-		public void Create()
+		public IEnumerable<IResult> Create()
 		{
-			Shell.Navigate(new EditDisplacementDoc(new DisplacementDoc(Address)));
+			if (Address == null)
+				yield break;
+			var doc = new DisplacementDoc(Address);
+			yield return new DialogResult(new CreateDisplacementDoc(doc));
+			Session.Save(doc);
+			Update();
+			Shell.Navigate(new EditDisplacementDoc(doc.Id));
 		}
 
 		public void Open()
@@ -153,7 +160,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			CurrentItem.Value.Post(Session);
+			var doc = Session.Load<DisplacementDoc>(CurrentItem.Value.Id);
+			if (!doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
+			doc.Post(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 
@@ -161,7 +177,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			CurrentItem.Value.UnPost(Session);
+			var doc = Session.Load<DisplacementDoc>(CurrentItem.Value.Id);
+			doc.UnPost(Session);
+			Session.Update(doc);
+			Session.Flush();
+			CurrentItem.Value.Status = doc.Status;
+			CurrentItem.Refresh();
 			Update();
 		}
 	}

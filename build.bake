@@ -16,6 +16,7 @@ import Mono.Cecil
 import Newtonsoft.Json
 
 def SignFileLocal(file as string):
+	return
 	SignFile(file, "assets/cs.pfx", "password")
 
 def SignDir(dir as string):
@@ -82,18 +83,9 @@ Global(
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service.Test",
 			@ProxyUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
 		},
-		@Stock: {
-			@BaseEnv: "Production",
-			@DeployAlias: "stocks",
-			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\stocks\var\update\""",
-			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service.Stocks",
-			@DefaultUpdateChannel: "rtm",
-			@TargetChannels: ("beta", "alpha"),
-			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net\stock""",
-		},
 		@Production : {
-			@FtpRoot: """\\adc.analit.net\Inforoom\FTP\anonymous\""",
-			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
+			@FtpRoot: """\\adc.analit.net\inforoom\firstQueue\FTP\anonymous""",
+			@UpdateDeployRoot: """\\adc.analit.net\inforoom\secondQueue\WebApps\var\update\""",
 			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
@@ -504,7 +496,7 @@ task "deploy:announce":
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	client.UploadString("$url/issues.json", content)
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
-	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\""", true)
+	Cp(setupBin, Globals.FtpRoot, true)
 
 desc """
 делает текущий релиз релизом по умолчанию - отправляет обновление всем клиента

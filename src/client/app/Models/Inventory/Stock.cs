@@ -71,6 +71,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			WaybillLineId = line.Id;
 			Status = StockStatus.Available;
 			Address = waybill.Address;
+			SupplierId = waybill.Supplier?.Id;
 			SupplierFullName = waybill.Supplier?.FullName;
 			WaybillNumber = waybill.ProviderDocumentId;
 
@@ -112,6 +113,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? WaybillId { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
+		public virtual uint? SupplierId { get; set; }
 		public virtual string SupplierFullName { get; set; }
 
 		public virtual string AnalogCode { get; set; }
@@ -139,6 +141,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
+		[Ignore]
+		public virtual decimal? NdsAmountResidue
+		{
+			get
+			{
+				if ((SupplierCost == SupplierCostWithoutNds) && (Nds == null || Nds == 0))
+					return Nds;
+				return Math.Round(((SupplierCost - SupplierCostWithoutNds) * Quantity).Value, 2);
+			}
+		}
 		public virtual double NdsPers { get; set; }
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
@@ -425,7 +437,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual void Configure(Settings settings)
 		{
 			Settings = settings;
-			WaybillSettings = settings.Waybills.FirstOrDefault(x => x.BelongsToAddress.Id == Address.Id);
+			WaybillSettings = settings.Waybills.First(x => x.BelongsToAddress?.Id == Address.Id);
 		}
 
 		public static void Copy(object srcItem, object dstItem)

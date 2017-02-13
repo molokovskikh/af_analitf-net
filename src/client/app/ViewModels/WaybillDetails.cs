@@ -46,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
+		private PriceTag priceTag;
+		private PriceTag rackingMap;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -60,8 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 			InitFields();
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
 
-			Settings.Changed()
-				.Subscribe(v => Calculate());
+			Settings.Subscribe(_ => Calculate());
 			CurrentTax.Subscribe(v => {
 				if (Lines.Value == null)
 					return;
@@ -142,7 +143,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Session == null)
 				return;
 
-			Waybill = Session.Load<Waybill>(id);
+			Waybill = Session.Get<Waybill>(id);
+			if (Waybill == null) {
+				return;
+			}
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
@@ -194,6 +198,21 @@ namespace AnalitF.Net.Client.ViewModels
 				EmptyLabelVisibility = EmptyLabelVisibility.Select(s => Visibility.Collapsed).ToValue();
 				OrderDetailsVisibility = OrderDetailsVisibility.Select(s => Visibility.Collapsed).ToValue();
 			}
+
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, Waybill.Address))
+				.Subscribe(x => priceTag = x);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.RackingMap, Waybill.Address))
+				.Subscribe(x => rackingMap = x);
+		}
+
+		protected override void OnActivate()
+		{
+			if (Waybill == null) {
+				Manager.Warning("Накладная отсутствует");
+				IsSuccessfulActivated = false;
+				return;
+			}
+			base.OnActivate();
 		}
 
 		public void Tags()
@@ -234,6 +253,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//в случае редактирование пользовательской накладной в коллекции будет NamedObject
 			return Lines.Value.OfType<WaybillLine>().Where(l => l.Print).ToList();
+		}
+
+		public IResult PrintRackingMap()
+		{
+			return new DialogResult(new PrintPreviewViewModel {
+				DisplayName = "Стеллажная карта",
+				Document = new RackingMapDocument(PrintableLinesForTag(), Settings.Value, rackingMap).Build()
+			}, fullScreen: true);
+		}
+
+		public IResult PrintPriceTags()
+		{
+			var settings = Settings.Value.PriceTags.First(x => x.Address.Id == Waybill.Address.Id);
+			return new DialogResult(new PrintPreviewViewModel {
+				DisplayName = "Ценники",
+				Document = new PriceTagDocument(PrintableLinesForTag(), settings, priceTag).Build()
+			}, fullScreen: true);
 		}
 
 		private List<TagPrintable> PrintableLinesForTag()

@@ -104,7 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			LoadOrderItems(offers);
 			PriceOffers = offers;
 			FillProducerFilter(PriceOffers);
-			Filter();
+			Filter(false);
 			SelectOffer();
 			Price.Value = PriceOffers.Select(o => o.Price).FirstOrDefault()
 				?? Price.Value;
@@ -115,8 +115,15 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
-		public void Filter()
+		/// <summary>
+		/// Фильтр
+		/// </summary>
+		/// <param name="fromControl">true - если фильтр вызван пользователем из компонента.
+		/// false - если фильтр вызван вручную</param>
+		public void Filter(bool fromControl = true)
 		{
+			if (skipFilter) return;
+
 			var filter = CurrentFilter.Value;
 			IEnumerable<Offer> items = PriceOffers;
 			if (filter == filters[2]) {
@@ -126,7 +133,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				items = items.Where(o => o.OrderCount > 0);
 			}
 
-			ProducerFilterStateGet(items.ToList());
+			if (fromControl) ProducerFilterStateSet(); else ProducerFilterStateGet(items.ToList());
 
 			if (CurrentProducer.Value != null && CurrentProducer.Value.Id > 0) {
 				var id = CurrentProducer.Value.Id;
@@ -190,14 +197,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				offer.OrderLine = null;
 
 			if (CurrentFilter.Value == filters[1]) {
-				Filter();
+				Filter(false);
 			}
-		}
-
-		public override void TryClose()
-		{
-			ProducerFilterStateSet();
-			base.TryClose();
 		}
 
 		public override void OfferUpdated()
@@ -207,7 +208,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (LastEditOffer.Value == null)
 				return;
 			if (LastEditOffer.Value.OrderLine == null && CurrentFilter.Value == filters[1]) {
-				Filter();
+				Filter(false);
 			}
 		}
 

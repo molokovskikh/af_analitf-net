@@ -70,7 +70,8 @@
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
 			AddressColumn="{x:Reference Name=AddressName}">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx x:Name="AddressName" Width="{Binding Source={x:Reference AddressColumn}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx x:Name="AddressName" Width="{Binding Source={x:Reference AddressColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference AddressColumn}, Path=Visibility}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnBarcode}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProduct}, Path=ActualWidth}"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProducer}, Path=ActualWidth}"/>

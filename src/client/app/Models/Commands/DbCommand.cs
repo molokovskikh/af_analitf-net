@@ -66,8 +66,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected IEnumerable<Table> Tables()
 		{
 			var dialect = NHibernate.Dialect.Dialect.GetDialect(Configuration.Properties);
-			var tables = Configuration.CreateMappings(dialect).IterateTables;
-			return tables;
+			return Configuration.CreateMappings(dialect).IterateTables;
 		}
 
 		protected IEnumerable<string> TableNames()

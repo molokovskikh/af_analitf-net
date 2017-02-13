@@ -142,17 +142,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				session.Save(addr);
 			}
 			session.Flush();
+			model.Addresses = session.Query<Address>().ToArray();
 
-			foreach (var addr in session.Query<Address>().ToList())
+			foreach (var addr in model.Addresses)
 			{
-				if (!model.Settings.Value.PriceTags.Any(r => r.Address == addr))
+				if (model.Settings.Value.PriceTags.All(r => r.Address != addr))
 				{
 					model.Settings.Value.PriceTags.Add(new PriceTagSettings(addr));
 				}
 			}
 
 			var print = true;
-			foreach (var addr in session.Query<Address>().OrderBy(r => r.Id).ToList())
+			foreach (var addr in model.Addresses.OrderBy(r => r.Id).ToList())
 			{
 				address = addr;
 				model.MarkupAddress.Value = address;
@@ -161,12 +162,55 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			}
 
 			print = true;
-			foreach (var addr in session.Query<Address>().OrderBy(r => r.Id).ToList())
+			foreach (var addr in model.Addresses.OrderBy(r => r.Id).ToList())
 			{
 				address = addr;
 				model.MarkupAddress.Value = address;
 				Assert.AreEqual(print, model.PriceTagSettings.Value.PrintCountry);
 				print = !print;
+			}
+		}
+
+		[Test]
+		public void Save_price_tag_settings_for_all()
+		{
+			int i = 0;
+			while (session.Query<Address>().Count() < 2)
+			{
+				i++;
+				var addr = new Address($"Тестовый {i}");
+				session.Save(addr);
+			}
+			session.Flush();
+			model.Addresses = session.Query<Address>().ToArray();
+
+			foreach (var addr in model.Addresses)
+			{
+				if (model.Settings.Value.PriceTags.All(r => r.Address != addr))
+				{
+					model.Settings.Value.PriceTags.Add(new PriceTagSettings(addr));
+				}
+			}
+
+			var print = true;
+			foreach (var addr in model.Addresses.OrderBy(r => r.Id).ToList())
+			{
+				address = addr;
+				model.MarkupAddress.Value = address;
+				model.PriceTagSettings.Value.PrintCountry = print;
+				print = !print;
+			}
+			model.MarkupAddress.Value = model.Addresses.OrderBy(r => r.Id).First();
+			model.OverwritePriceTags = true;
+			print = model.PriceTagSettings.Value.PrintCountry;
+			model.UpdatePriceTags();
+
+			Assert.AreEqual(model.Addresses.Count(), model.Settings.Value.PriceTags.Count);
+			foreach (var addr in model.Addresses.OrderBy(r => r.Id).ToList())
+			{
+				address = addr;
+				model.MarkupAddress.Value = addr;
+				Assert.AreEqual(print, model.PriceTagSettings.Value.PrintCountry);
 			}
 		}
 	}

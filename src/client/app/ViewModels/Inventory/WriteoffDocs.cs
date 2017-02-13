@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
-using NPOI.HSSF.UserModel;
+using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Views.Inventory;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -46,9 +46,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Subscribe(Items);
 		}
 
-		public void Create()
+		public IEnumerable<IResult> Create()
 		{
-			Shell.Navigate(new EditWriteoffDoc(new WriteoffDoc(Address)));
+			if (Address == null)
+				yield break;
+			var doc = new WriteoffDoc(Address);
+			yield return new DialogResult(new CreateWriteoffDoc(doc));
+			Session.Save(doc);
+			Update();
+			Shell.Navigate(new EditWriteoffDoc(doc.Id));
 		}
 
 		public void Open()

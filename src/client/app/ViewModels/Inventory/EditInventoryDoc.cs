@@ -10,13 +10,10 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using NHibernate;
-using NHibernate.Linq;
 using ReactiveUI;
 using NPOI.HSSF.UserModel;
 using System.Collections.ObjectModel;
 using System.Printing;
-using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.ViewModels.Offers;
@@ -124,9 +121,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			// с поставки наружу
 			Session.Save(CurrentLine.Value.Stock.CancelInventoryDoc(CurrentLine.Value.Quantity));
-			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
+			Lines.Remove(CurrentLine.Value);
 			Save();
 		}
 
@@ -141,6 +138,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Post()
 		{
+			if (!Doc.Lines.Any()) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
 			Doc.Post();
 			Save();
 		}

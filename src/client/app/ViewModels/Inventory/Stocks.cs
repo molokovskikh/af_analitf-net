@@ -72,6 +72,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ItemsTotal[0].TotalSum = Items.Value.Sum(c => c.SupplySumWithoutNds);
 			ItemsTotal[0].TotalSumWithNds = Items.Value.Sum(c => c.SupplySum);
 			ItemsTotal[0].TotalRetailSum = Items.Value.Sum(c => c.RetailSum).GetValueOrDefault();
+
+			//В некоторых случаях у грида в адресной колонке ActualWidth меньше чем на самом деле,
+			//из-за чего нижний грид смещается, т.к. ориентируется на AddressColumn.ActualWidth
+			//Исправляем синхронизацией ActualWidth с реальной шириной
+			var view = (Views.Inventory.Stocks)GetView();
+			if (view != null) view.AddressColumn.Width = view.AddressColumn.ActualWidth;
 		}
 
 		protected override void OnInitialize()

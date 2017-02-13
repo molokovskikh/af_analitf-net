@@ -80,6 +80,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(SpecialMarkups);
 			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
 				.Subscribe(PriceTagSettings);
+			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
+				.Subscribe(_ => LoadPriceTagPreview());
 
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
@@ -247,8 +249,33 @@ limit 300";
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+		public bool OverwritePriceTags { get; set; }
 		public NotifyValue<PriceTagSettings> PriceTagSettings { get; set; }
 		public NotifyValue<FrameworkElement> PriceTagPreview { get; set; }
+
+		public void UpdatePriceTags()
+		{
+			if (!OverwritePriceTags)
+				return;
+
+			var dstAddresses = Addresses.Where(x => x != MarkupAddress.Value).ToArray();
+
+			var items = Settings.Value.PriceTags.ToArray();
+			var src = items.Where(x => x.Address == MarkupAddress.Value).ToArray();
+			Settings.Value.PriceTags.RemoveEach(items.Except(src));
+			Settings.Value.PriceTags.AddEach(dstAddresses.SelectMany(x => src.Select(y => new PriceTagSettings(y, x))));
+
+			var priceTags = Session.Query<PriceTag>().ToArray();
+			var priceTagSrc = priceTags.Where(r => r.AddressId == MarkupAddress.Value.Id).ToArray();
+			var tagItems = Session.Query<PriceTagItem>().ToArray();
+			var tagItemSrc = tagItems.Where(r => priceTagSrc.FirstOrDefault(x => x.Id == r.PriceTagId) != null).ToArray();
+			Session.DeleteEach(tagItems.Except(tagItemSrc));
+			Session.DeleteEach(priceTags.Except(priceTagSrc));
+			Session.SaveEach(dstAddresses.SelectMany(a => priceTagSrc.Select(t => new PriceTag(t, a))));
+			var newPriceTags = Session.Query<PriceTag>().Where(r => !priceTags.Contains(r)).ToArray();
+			Session.SaveEach(newPriceTags.SelectMany(t => tagItemSrc.Select(i => new PriceTagItem(i, t))));
+		}
+
 		public NotifyValue<FrameworkElement> RackingMapPreview { get; set; }
 
 		protected override void OnInitialize()
@@ -263,6 +290,8 @@ limit 300";
 
 		private void LoadPriceTagPreview()
 		{
+			if (!MarkupAddress.HasValue)
+				return;
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, MarkupAddress.Value))
 				.Subscribe(x => PriceTagPreview.Value = x.Preview());
 		}
@@ -403,6 +432,7 @@ limit 300";
 		public IEnumerable<IResult> Save()
 		{
 			UpdateMarkups();
+			UpdatePriceTags();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
 			if(error?.Count > 0){

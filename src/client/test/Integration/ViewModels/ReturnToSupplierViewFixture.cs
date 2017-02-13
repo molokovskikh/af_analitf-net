@@ -25,21 +25,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		private Stock stock;
 
+		private Supplier supplier;
+
 		[SetUp]
 		public void Setup()
 		{
+			supplier = session.Query<Supplier>().First();
 			stock = new Stock()
 			{
 				Product = "Папаверин",
 				Status = StockStatus.Available,
 				Address = address,
 				Quantity = 5,
-				ReservedQuantity = 0
+				ReservedQuantity = 0,
+				SupplierId = supplier.Id,
 			};
 			session.Save(stock);
 
 			session.DeleteEach<ReturnToSupplier>();
-			var supplier = session.Query<Supplier>().First();
 
 			doc = new ReturnToSupplier
 			{
@@ -54,12 +57,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Add_line()
+		{
+			var result = modelDetails.Add().GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(1, dialog.Items.Value.Count);
+		}
+
+		[Test]
 		public void Export_returnToSupplier()
 		{
 			var result = (OpenResult)model.ExportExcel();
 			Assert.IsTrue(File.Exists(result.Filename));
 		}
-
 
 		[Test]
 		public void Export_ReturnToSupplierDetails_details()
@@ -119,32 +131,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//добавлена и документ сохранен, на складе у нас будет - Папаверин 2шт, 3шт в резерве
 			var line = new ReturnToSupplierLine(stock, 3);
 			doc.Lines.Add(line);
-			session.Save(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы закроем документ то получим - Папаверен 2шт, 0шт в резерве
 			doc.Post(session);
-			session.Save(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
 			doc.UnPost(session);
-			session.Save(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 
 			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве
 			doc.BeforeDelete();
-			session.Delete(doc);
-			session.Flush();
 			Assert.AreEqual(stock.Quantity, 5);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 		}
