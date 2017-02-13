@@ -107,7 +107,7 @@
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="Цена закупки" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-							<TextBox Name="Stock_Cost" Width="100" />
+					<TextBox Name="Stock_SupplierCostWithoutNds" Width="100" />
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="НДС поставщика" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
@@ -119,7 +119,7 @@
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="Цена закупки с НДС" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Padding="5,5,3,5"/>
-							<TextBox Name="Stock_CostWithNds" Width="100" IsReadOnly="True" />
+						<TextBox Name="Stock_SupplierCost" Width="100" IsReadOnly="True" />
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="НДС %" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
