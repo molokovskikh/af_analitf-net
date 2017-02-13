@@ -141,6 +141,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
+		[Ignore]
+		public virtual decimal? NdsAmountResidue
+		{
+			get
+			{
+				if ((SupplierCost == SupplierCostWithoutNds) && (Nds == null || Nds == 0))
+					return Nds;
+				return Math.Round(((SupplierCost - SupplierCostWithoutNds) * Quantity).Value, 2);
+			}
+		}
 		public virtual double NdsPers { get; set; }
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
