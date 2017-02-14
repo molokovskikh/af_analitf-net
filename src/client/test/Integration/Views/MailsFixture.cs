@@ -203,9 +203,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 		private static void WaitDownloaded(Attachment attachment)
 		{
-			Assert.IsTrue(attachment.IsDownloading, attachment.ToString());
-			Assert.IsFalse(attachment.IsDownloaded, attachment.ToString());
-			attachment.Changed().Timeout(10.Second()).First(c => c.EventArgs.PropertyName == "IsDownloading");
+			var events = attachment.Changed().Where(c => c.EventArgs.PropertyName == "IsDownloading").Take(1).PublishLast();
+			using (events.Connect()) {
+				Assert.IsTrue(attachment.IsDownloading, attachment.ToString());
+				Assert.IsFalse(attachment.IsDownloaded, attachment.ToString());
+				events.Timeout(10.Second()).First();
+			}
 			Assert.IsNull(attachment.Exception);
 			Assert.IsFalse(attachment.IsError, attachment.ToString());
 			Assert.IsTrue(attachment.IsDownloaded, attachment.ToString());
