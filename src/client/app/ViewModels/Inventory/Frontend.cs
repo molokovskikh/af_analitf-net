@@ -157,6 +157,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					Error("Товар не найден");
 					return;
 			}
+			if (!StockCheck(stock))
+				return;
 			if (Quantity.Value == null) {
 				Error("Введите количество");
 				return;
@@ -178,10 +180,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void UpdateProduct(IQueryable<Stock> stocks, string operation)
 		{
-			if (Quantity.Value == null) {
-				Error("Введите количество");
-				return;
-			}
 			if (!stocks.Any()) {
 				Error("Товар не найден");
 				return;
@@ -192,6 +190,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			}
 			var stock = stocks.First();
+			if (!StockCheck(stock))
+				return;
+			if (Quantity.Value == null) {
+				Error("Введите количество");
+				return;
+			}
 			//списывать количество мы должны с загруженного объекта
 			var quantity = Quantity.Value.Value;
 			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
@@ -206,6 +210,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Add(line);
 			CurrentLine.Value = line;
 			Quantity.Value = null;
+		}
+
+		private bool StockCheck(Stock stock)
+		{
+			if (stock.RejectStatus == RejectStatus.Defective) {
+				var cause = "";
+				if (stock.RejectId.HasValue)
+					cause = Env.Query(s => s.Get<Reject>(stock.RejectId)?.CauseRejects).Result;
+				if (!Confirm($"Продажа забракованного товара. {cause}"))
+					return false;
+			}
+			return true;
 		}
 
 		// Закрыть чек Enter
