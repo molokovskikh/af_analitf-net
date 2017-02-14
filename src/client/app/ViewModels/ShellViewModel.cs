@@ -131,6 +131,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<string> UserName { get; set; }
+		private string password;
 
 		//не верь решарперу
 		public ShellViewModel()
@@ -167,6 +168,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => UpdateDisplayName());
 
 			Stat.CombineLatest(CurrentAddress, (x, y) => x?.ReadyForSendOrdersCount > 0 && y != null)
+				.CombineLatest(User, (x, y) => x && (y?.HasOrderPermission() ?? false))
 				.Subscribe(CanSendOrders);
 
 			CurrentAddress.Subscribe(_ => {
@@ -259,9 +261,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => SetMenuItems());
-			User.Select(x => x?.IsStockEnabled ?? false)
+			User.Select(x => (x?.IsStockEnabled ?? false) && (x?.HasStockPermission() ?? false))
 				.Subscribe(IsStockEnabled);
-			UserName.Subscribe(_ => ReinitDb());
+			User.Select(x => (x?.IsStockEnabled ?? false) && (x?.HasCashPermission() ?? false))
+				.Subscribe(IsCashEnabled);
+			User.Select(x => x?.HasOrderPermission() ?? false)
+				.Subscribe(IsOrderEnabled);
+			UserName.Subscribe(_ => SwitchUser());
 
 			//if (Env.Factory != null) {
 			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
@@ -285,6 +291,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<int> NewDocsCount { get; set; }
 		public NotifyValue<string[]> Instances { get; set; }
 		public NotifyValue<bool> IsStockEnabled { get; set; }
+		public NotifyValue<bool> IsCashEnabled { get; set; }
+		public NotifyValue<bool> IsOrderEnabled { get; set; }
 
 		public string Version { get; set; }
 
@@ -331,6 +339,7 @@ namespace AnalitF.Net.Client.ViewModels
 					TryClose();
 					return Enumerable.Empty<IResult>();
 				}
+				password = (result.Model as Login).Password;
 				UserName.Value = (result.Model as Login).UserName;
 			}
 
@@ -503,16 +512,27 @@ namespace AnalitF.Net.Client.ViewModels
 			return true;
 		}
 
-		private void ReinitDb()
+		private void SwitchUser()
 		{
 			if (string.IsNullOrEmpty(UserName))
 				return;
+			session.Close();
 			var dbName = $"ldb{UserName}";
 			AppBootstrapper.NHibernate.Init(database: dbName);
 			Config.DbDir = dbName;
 			using (var sanityCheck = new SanityCheck(Config) {SwitchUser = true})
 				sanityCheck.Check();
+			Env.Current = new Env();
+			Env = Env.Current;
+			session = Env.Factory.OpenSession();
 			Reload();
+			if (Settings.Value.UserName != UserName) {
+				Settings.Value.UserName = UserName;
+				Settings.Value.Password = password;
+				session.Flush();
+			}
+			NavigateBackward();
+			ShowMain();
 		}
 
 		public void Reload()
