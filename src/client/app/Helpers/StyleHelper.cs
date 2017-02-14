@@ -15,6 +15,7 @@ using Common.Tools;
 using Iesi.Collections;
 using Newtonsoft.Json.Utilities;
 using NPOI.SS.Formula.Functions;
+using WinForm = System.Windows.Forms;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -603,6 +604,13 @@ namespace AnalitF.Net.Client.Helpers
 			BuildLegend(type, grid, resources, legend, context);
 		}
 
+		public static void ApplyStyles(Type type, WinFormDataGrid grid, ResourceDictionary resources,
+			Panel legend = null,
+			string context = null)
+		{
+			BuildLegend(type, grid, resources, legend, context);
+		}
+
 		private static string GetKey(DataGridColumn column)
 		{
 			var key = column.GetValue(FrameworkElement.NameProperty) as string;
@@ -613,6 +621,12 @@ namespace AnalitF.Net.Client.Helpers
 					key = binding.Path.Path;
 				}
 			}
+			return key;
+		}
+
+		private static string GetKey(WinForm.DataGridViewColumn column)
+		{
+			var key = column.DataPropertyName;
 			return key;
 		}
 
@@ -678,6 +692,75 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
+		private static void BuildLegend(Type type, WinFormDataGrid grid, ResourceDictionary resources, Panel legend,
+			string context)
+		{
+			if (legend == null)
+				return;
+
+			var labels = from p in type.GetProperties()
+						 from StyleAttribute a in p.GetCustomAttributes(typeof(StyleAttribute), true)
+						 where (String.IsNullOrEmpty(a.Context) || context == a.Context) &&
+								IsApplicable(grid, a)
+						 orderby a.Description
+						 let key = LegendKey(type, p)
+						 let style = resources[key] as Style
+						 where style != null
+						 select ConnectEdit(new Label
+						 {
+							 Style = style,
+							 Tag = "generated" + grid.Name,
+							 Name = a.GetName(p) + "LegendItem",
+						 });
+
+			if (legend.Children.Count == 0)
+			{
+				var header = new StackPanel
+				{
+					Orientation = Orientation.Horizontal
+				};
+				header.Children.Add(new Label
+				{
+					Content = "Подсказка",
+					Padding = new Thickness(5, 0, 5, 0),
+					VerticalAlignment = VerticalAlignment.Center
+				});
+				var toggleButton = new ToggleButton
+				{
+					Content = "+",
+					ToolTip = "Свернуть\\развернуть",
+					Padding = new Thickness(5, 0, 5, 0),
+					Margin = new Thickness(0),
+					Background = Brushes.Transparent,
+					BorderBrush = Brushes.Transparent,
+					Focusable = false,
+				};
+				header.Children.Add(toggleButton);
+				legend.Children.Add(header);
+
+				var stack = new LegendPanel();
+				stack.BindTo<bool>("IsOverflow",
+					toggleButton, ToggleButton.VisibilityProperty, x => x ? Visibility.Visible : Visibility.Collapsed);
+				stack.BindTo<bool>("IsCollapsed",
+					toggleButton, ToggleButton.ContentProperty, x => x ? "+" : "-");
+				toggleButton.BindTo<bool?>("IsChecked",
+					stack, LegendPanel.IsCollapsedProperty, x => !x.GetValueOrDefault());
+
+				stack.Children.AddRange(labels);
+				legend.Children.Add(stack);
+			}
+			else
+			{
+				//если пользовательские стили изменились нужно перестроить легенду
+				var panel = legend.Children.OfType<LegendPanel>().First();
+				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated" + grid.Name, c.Tag))
+					.ToArray()
+					.Each(c => panel.Children.Remove(c));
+				panel.Children.AddRange(labels);
+				grid.isStyleAppled = true;
+			}
+		}
+
 		private static UIElement ConnectEdit(Label label)
 		{
 			label.MouseDoubleClick += (sender, args) => {
@@ -692,6 +775,17 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			var key = GetKey(col);
 			return attr.Columns.Length == 0 || (!String.IsNullOrEmpty(key) && attr.Columns.Contains(key));
+		}
+
+		private static bool IsApplicable(WinFormDataGrid grid, StyleAttribute attr)
+		{
+			foreach (WinForm.DataGridViewColumn col in grid.DataGrid.Columns)
+			{
+				var key = GetKey(col);
+				if (attr.Columns.Length == 0 || (!String.IsNullOrEmpty(key) && attr.Columns.Contains(key)))
+					return true;
+			}
+			return false;
 		}
 
 		public static List<CustomStyle> GetDefaultStyles()

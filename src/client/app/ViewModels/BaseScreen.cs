@@ -37,7 +37,7 @@ using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
-
+using AnalitF.Net.Client.Controls;
 namespace AnalitF.Net.Client.ViewModels
 {
 	/// <summary>
@@ -315,9 +315,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (close) {
+				foreach (var grid in GetWinFormDataGrids(GetView()))
+				{
+					grid.SaveColumnOrder();
+				}
+
 				Save();
 				TableSettings.SaveView(GetView());
 				Dispose();
+
 			}
 
 			if (!close) {
@@ -335,6 +341,13 @@ namespace AnalitF.Net.Client.ViewModels
 				return Enumerable.Empty<DataGrid>();
 			return dependencyObject.LogicalDescendants().OfType<DataGrid>()
 				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
+		}
+		private IEnumerable<WinFormDataGrid> GetWinFormDataGrids(object view)
+		{
+			var dependencyObject = view as DependencyObject;
+			if (dependencyObject == null)
+				return Enumerable.Empty<WinFormDataGrid>();
+			return dependencyObject.LogicalDescendants().OfType<WinFormDataGrid>();
 		}
 
 		private void SaveSettingWithReopenScreen()
@@ -355,6 +368,7 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var grid in GetControls(GetView())) {
 				RestoreView(grid, temporaryTableSettings);
 			}
+
 		}
 		private void RestoreView(DataGrid dataGrid, Dictionary<string, List<ColumnSettings>> storage)
 		{
@@ -453,6 +467,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (!SkipRestoreTable)
 				TableSettings.RestoreView(view);
+
+			foreach (var grid in GetWinFormDataGrids(view))
+			{
+				grid.SetColumnOrder();
+			}
+
 		}
 
 		//для тестов
@@ -686,6 +706,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult ConfigureGrid(DataGrid grid)
 		{
 			return new DialogResult(new GridConfig(grid));
+		}
+
+		public IResult ConfigureGrid(WinFormDataGrid grid)
+		{
+			return new DialogResult(new WinFormDataGridConfig(grid));
 		}
 
 		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)

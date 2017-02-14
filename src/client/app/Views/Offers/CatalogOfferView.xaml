@@ -24,7 +24,7 @@
 		так же в таблицы реализована своя навигация тк штатная перестает работать из-за переопределения структуры строки
 		включается она свойством GroupNav=true
 		-->
-		<Style x:Key="groupHeader" TargetType="DataGridRow">
+		<!--<Style x:Key="groupHeader" TargetType="DataGridRow">
 			<Style.Triggers>
 				<DataTrigger Binding="{Binding ., Converter={StaticResource GroupConverter}}" Value="True">
 					<Setter Property="Template">
@@ -52,7 +52,7 @@
 					</Setter>
 				</DataTrigger>
 			</Style.Triggers>
-		</Style>
+		</Style>-->
 	</UserControl.Resources>
 
 	<i:Interaction.Behaviors>
@@ -129,7 +129,11 @@
 			</Grid>
 		</DockPanel>
 
-		<c:DataGrid2 x:Name="Offers" Grid.Row="1"
+		<c:WinFormDataGrid x:Name="Offers" Grid.Row="1" 
+			MyDataSource="{Binding DisplayItems.Value, Mode=TwoWay}"
+			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"
+						  />
+		<!--<c:DataGrid2 x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"
 			ItemsSource="{Binding DisplayItems.Value}"
@@ -193,7 +197,7 @@
 					Header="Сумма"
 					Binding="{Binding OrderLine.ResultSum}" />
 			</c:DataGrid2.Columns>
-		</c:DataGrid2>
+		</c:DataGrid2>-->
 
 		<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Grid.RowDefinitions>

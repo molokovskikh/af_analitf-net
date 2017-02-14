@@ -57,103 +57,103 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		//вернуться в каталог "нажав букву" и если это повторная попытка поиска
 		//и в предыдущую попытку был выбран элементы который отображается на одном экране с выбранным
 		//в текущую попытку элементом то это приведет к эффекту похожему на "съедание" введенной буквы
-		[Test]
-		public async Task Open_catalog_on_quick_search()
-		{
-			StartWait();
+		//[Test]
+		//public async Task Open_catalog_on_quick_search()
+		//{
+		//	StartWait();
 
-			//открытие окна на весь экран нужно что бы отображалось максимальное количество элементов
-			activeWindow.Dispatcher.Invoke(() => {
-				activeWindow.WindowState = WindowState.Maximized;
-			});
+		//	//открытие окна на весь экран нужно что бы отображалось максимальное количество элементов
+		//	activeWindow.Dispatcher.Invoke(() => {
+		//		activeWindow.WindowState = WindowState.Maximized;
+		//	});
 
-			Click("ShowCatalog");
-			var catalog = (CatalogViewModel)shell.ActiveItem;
-			await ViewLoaded(catalog);
-			var names = (CatalogNameViewModel)catalog.ActiveItem;
-			var name = names.CurrentCatalogName.Value.Name;
-			WaitIdle();
+		//	Click("ShowCatalog");
+		//	var catalog = (CatalogViewModel)shell.ActiveItem;
+		//	await ViewLoaded(catalog);
+		//	var names = (CatalogNameViewModel)catalog.ActiveItem;
+		//	var name = names.CurrentCatalogName.Value.Name;
+		//	WaitIdle();
 
-			var term = "б";
-			//нужно сделать две итерации тк что бы FocusBehavior попытался восстановить выбранный элемент
-			await OpenAndReturnOnSearch(names, term);
-			AssertQuickSearch(catalog, term);
+		//	var term = "б";
+		//	//нужно сделать две итерации тк что бы FocusBehavior попытался восстановить выбранный элемент
+		//	await OpenAndReturnOnSearch(names, term);
+		//	AssertQuickSearch(catalog, term);
 
-			names = (CatalogNameViewModel)catalog.ActiveItem;
-			var frameworkElement = (FrameworkElement)names.GetView();
-			Input(frameworkElement, "CatalogNames", Key.Escape);
-			frameworkElement.Dispatcher.Invoke(() => {
-				names.CurrentCatalogName.Value = names.CatalogNames.Value.First(n => n.Name == name);
-			});
-			await OpenAndReturnOnSearch(names, term);
-			AssertQuickSearch(catalog, term);
-		}
+		//	names = (CatalogNameViewModel)catalog.ActiveItem;
+		//	var frameworkElement = (FrameworkElement)names.GetView();
+		//	Input(frameworkElement, "CatalogNames", Key.Escape);
+		//	frameworkElement.Dispatcher.Invoke(() => {
+		//		names.CurrentCatalogName.Value = names.CatalogNames.Value.First(n => n.Name == name);
+		//	});
+		//	await OpenAndReturnOnSearch(names, term);
+		//	AssertQuickSearch(catalog, term);
+		//}
 
-		[Test]
-		public async Task Open_catalog_offers()
-		{
-			var term = session.Query<CatalogName>()
-				.First(n => n.HaveOffers && n.Name.StartsWith("б"))
-				.Name.Slice(3).ToLower();
+		//[Test]
+		//public async Task Open_catalog_offers()
+		//{
+		//	var term = session.Query<CatalogName>()
+		//		.First(n => n.HaveOffers && n.Name.StartsWith("б"))
+		//		.Name.Slice(3).ToLower();
 
-			StartWait();
-			Click("ShowCatalog");
+		//	StartWait();
+		//	Click("ShowCatalog");
 
-			var catalog = await ViewLoaded<CatalogViewModel>();
-			dispatcher.Invoke(() => {
-				catalog.CatalogSearch.Value = true;
-			});
-			WaitIdle();
-			await ViewLoaded(catalog.ActiveItem);
-			var search = (CatalogSearchViewModel)catalog.ActiveItem;
-			var view = (FrameworkElement)search.GetView();
-			Input(view, "SearchText", term);
-			Input(view, "SearchText", Key.Enter);
+		//	var catalog = await ViewLoaded<CatalogViewModel>();
+		//	dispatcher.Invoke(() => {
+		//		catalog.CatalogSearch.Value = true;
+		//	});
+		//	WaitIdle();
+		//	await ViewLoaded(catalog.ActiveItem);
+		//	var search = (CatalogSearchViewModel)catalog.ActiveItem;
+		//	var view = (FrameworkElement)search.GetView();
+		//	Input(view, "SearchText", term);
+		//	Input(view, "SearchText", Key.Enter);
 
-			dispatcher.Invoke(() => {
-				scheduler.AdvanceByMs(100);
-			});
-			catalog.WaitQueryDrain().Wait();
+		//	dispatcher.Invoke(() => {
+		//		scheduler.AdvanceByMs(100);
+		//	});
+		//	catalog.WaitQueryDrain().Wait();
 
-			WaitIdle();
+		//	WaitIdle();
 
-			dispatcher.Invoke(() => {
-				var grid = (DataGrid)view.FindName("Items");
-				var selectMany = grid.Descendants<DataGridCell>()
-					.SelectMany(c => c.Descendants<Run>())
-					.Where(r => r.Text.ToLower().Contains(term));
-				var text = selectMany.FirstOrDefault();
-				Assert.IsNotNull(text, "Не удалось найти ни одного элемента с текстом {0}, всего элементов {1}",
-					term, grid.Items.Count);
-				DoubleClick(grid, text);
-			});
-			var offers = await ViewLoaded<CatalogOfferViewModel>();
-			Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));
-		}
+		//	dispatcher.Invoke(() => {
+		//		var grid = (DataGrid)view.FindName("Items");
+		//		var selectMany = grid.Descendants<DataGridCell>()
+		//			.SelectMany(c => c.Descendants<Run>())
+		//			.Where(r => r.Text.ToLower().Contains(term));
+		//		var text = selectMany.FirstOrDefault();
+		//		Assert.IsNotNull(text, "Не удалось найти ни одного элемента с текстом {0}, всего элементов {1}",
+		//			term, grid.Items.Count);
+		//		DoubleClick(grid, text);
+		//	});
+		//	var offers = await ViewLoaded<CatalogOfferViewModel>();
+		//	Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));
+		//}
 
-		[Test]
-		public async Task Open_catalog()
-		{
-			session.DeleteEach<Order>();
+		//[Test]
+		//public async Task Open_catalog()
+		//{
+		//	session.DeleteEach<Order>();
 
-			StartWait();
+		//	StartWait();
 
-			Click("ShowCatalog");
-			var catalog = await ViewLoaded<CatalogViewModel>();
-			await ViewLoaded(catalog.ActiveItem);
-			var name = (CatalogNameViewModel)catalog.ActiveItem;
-			var load = session.Load<Catalog>(session.Query<Offer>().First(x => x.RequestRatio == null).CatalogId);
-			var offers = await OpenOffers(name, load);
-			Input((FrameworkElement)offers.GetView(), "Offers", "1");
+		//	Click("ShowCatalog");
+		//	var catalog = await ViewLoaded<CatalogViewModel>();
+		//	await ViewLoaded(catalog.ActiveItem);
+		//	var name = (CatalogNameViewModel)catalog.ActiveItem;
+		//	var load = session.Load<Catalog>(session.Query<Offer>().First(x => x.RequestRatio == null).CatalogId);
+		//	var offers = await OpenOffers(name, load);
+		//	Input((FrameworkElement)offers.GetView(), "Offers", "1");
 
-			Click("ShowOrderLines");
-			var lines = (OrderLinesViewModel)shell.ActiveItem;
-			await ViewLoaded(lines);
-			AdvanceScheduler(500);
-			Assert.IsTrue(lines.ProductInfo.CanShowCatalog);
-			Input((FrameworkElement)lines.GetView(), "Lines", Key.F2);
-			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
-		}
+		//	Click("ShowOrderLines");
+		//	var lines = (OrderLinesViewModel)shell.ActiveItem;
+		//	await ViewLoaded(lines);
+		//	AdvanceScheduler(500);
+		//	Assert.IsTrue(lines.ProductInfo.CanShowCatalog);
+		//	Input((FrameworkElement)lines.GetView(), "Lines", Key.F2);
+		//	Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
+		//}
 
 		[Test]
 		public async Task Quick_search()
@@ -415,56 +415,56 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test]
-		public void Load_order_history()
-		{
-			var order = MakeSentOrder();
-			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
-			DebugContext.Add("CatalogId", catalog.Id);
+		//[Test]
+		//public void Load_order_history()
+		//{
+		//	var order = MakeSentOrder();
+		//	var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+		//	DebugContext.Add("CatalogId", catalog.Id);
 
-			StartWait();
-			Click("ShowCatalog");
-			var catalogModel = (CatalogViewModel)shell.ActiveItem;
-			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
-			var view = (FrameworkElement)viewModel.GetView();
-			dispatcher.Invoke(() => {
-				var names = (DataGrid)view.FindName("CatalogNames");
-				names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(n => n.Id == catalog.Name.Id);
-			});
-			WaitIdle();
-			dispatcher.Invoke(() => {
-				var catalogs = (DataGrid)view.FindName("Catalogs");
-				catalogs.SelectedItem = catalogs.ItemsSource.Cast<Catalog>().First(n => n.Id == catalog.Id);
-			});
-			Input(view, "CatalogNames", Key.Enter);
-			if (viewModel.Catalogs.Value.Count > 1)
-				Input(view, "Catalogs", Key.Enter);
-			AdvanceScheduler(3000);
-			dispatcher.Invoke(() => {
-				var element = (FrameworkElement)((Screen)shell.ActiveItem).GetView();
-				var grid = (DataGrid)element.FindName("HistoryOrders");
-				Assert.That(grid.Items.Count, Is.GreaterThan(0));
-			});
-		}
+		//	StartWait();
+		//	Click("ShowCatalog");
+		//	var catalogModel = (CatalogViewModel)shell.ActiveItem;
+		//	var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
+		//	var view = (FrameworkElement)viewModel.GetView();
+		//	dispatcher.Invoke(() => {
+		//		var names = (DataGrid)view.FindName("CatalogNames");
+		//		names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(n => n.Id == catalog.Name.Id);
+		//	});
+		//	WaitIdle();
+		//	dispatcher.Invoke(() => {
+		//		var catalogs = (DataGrid)view.FindName("Catalogs");
+		//		catalogs.SelectedItem = catalogs.ItemsSource.Cast<Catalog>().First(n => n.Id == catalog.Id);
+		//	});
+		//	Input(view, "CatalogNames", Key.Enter);
+		//	if (viewModel.Catalogs.Value.Count > 1)
+		//		Input(view, "Catalogs", Key.Enter);
+		//	AdvanceScheduler(3000);
+		//	dispatcher.Invoke(() => {
+		//		var element = (FrameworkElement)((Screen)shell.ActiveItem).GetView();
+		//		var grid = (DataGrid)element.FindName("HistoryOrders");
+		//		Assert.That(grid.Items.Count, Is.GreaterThan(0));
+		//	});
+		//}
 
-		[Test]
-		public void Dynamic_recalculate_markup_validation()
-		{
-			StartWait();
-			AsyncClick("ShowSettings");
-			dispatcher.Invoke(() => {
-				var content = (FrameworkElement)activeWindow.Content;
-				var tab = (TabItem)content.FindName("VitallyImportantMarkupsTab");
-				tab.IsSelected = true;
-			});
-			WaitIdle();
-			dispatcher.Invoke(() => {
-				var content = (FrameworkElement)activeWindow.Content;
-				var grid = (DataGrid)content.FindName("VitallyImportantMarkups");
-				EditCell(grid, 0, 1, "30");
-				Assert.AreEqual(Color.FromRgb(0x80, 0x80, 0).ToString(), GetCell(grid, 0, 1).Background.ToString());
-			});
-		}
+		//[Test]
+		//public void Dynamic_recalculate_markup_validation()
+		//{
+		//	StartWait();
+		//	AsyncClick("ShowSettings");
+		//	dispatcher.Invoke(() => {
+		//		var content = (FrameworkElement)activeWindow.Content;
+		//		var tab = (TabItem)content.FindName("VitallyImportantMarkupsTab");
+		//		tab.IsSelected = true;
+		//	});
+		//	WaitIdle();
+		//	dispatcher.Invoke(() => {
+		//		var content = (FrameworkElement)activeWindow.Content;
+		//		var grid = (DataGrid)content.FindName("VitallyImportantMarkups");
+		//		EditCell(grid, 0, 1, "30");
+		//		Assert.AreEqual(Color.FromRgb(0x80, 0x80, 0).ToString(), GetCell(grid, 0, 1).Background.ToString());
+		//	});
+		//}
 
 		[Test]
 		public void Update_catalog_info()
@@ -532,104 +532,104 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.AreEqual(hitTestResult.VisualHit, el);
 		}
 
-		[Test]
-		public void Delay_of_payment()
-		{
-			//нужно что бы отработала логика в StartCheck
-			settings.LastLeaderCalculation = DateTime.MinValue;
-			Fixture<LocalDelayOfPayment>();
-			var waitWindowAsync = manager.WindowOpened.Where(w => w.AsText().Contains("Пересчет отсрочки платежа")).Replay();
-			disposable.Add(waitWindowAsync.Connect());
-			StartWait();
+		//[Test]
+		//public void Delay_of_payment()
+		//{
+		//	//нужно что бы отработала логика в StartCheck
+		//	settings.LastLeaderCalculation = DateTime.MinValue;
+		//	Fixture<LocalDelayOfPayment>();
+		//	var waitWindowAsync = manager.WindowOpened.Where(w => w.AsText().Contains("Пересчет отсрочки платежа")).Replay();
+		//	disposable.Add(waitWindowAsync.Connect());
+		//	StartWait();
 
-			var waitWindow = waitWindowAsync.Timeout(10.Second()).First();
-			Assert.That(waitWindow.AsText(), Does.Contain("Пересчет отсрочки платежа"));
-			//ждем пока закроется
-			WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
+		//	var waitWindow = waitWindowAsync.Timeout(10.Second()).First();
+		//	Assert.That(waitWindow.AsText(), Does.Contain("Пересчет отсрочки платежа"));
+		//	//ждем пока закроется
+		//	WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
 
-			Click("ShowCatalog");
-			OpenOffers();
+		//	Click("ShowCatalog");
+		//	OpenOffers();
 
-			dispatcher.Invoke(() => {
-				var offers = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Offers");
+		//	dispatcher.Invoke(() => {
+		//		var offers = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Offers");
 
-				var supplierCost = GetCell(offers, "Цена поставщика");
-				var cost = GetCell(offers, "Цена");
-				Assert.AreNotEqual(supplierCost.AsText(), cost.AsText());
-			});
-		}
+		//		var supplierCost = GetCell(offers, "Цена поставщика");
+		//		var cost = GetCell(offers, "Цена");
+		//		Assert.AreNotEqual(supplierCost.AsText(), cost.AsText());
+		//	});
+		//}
 
-		[Test]
-		public void ProducerPromotion()
-		{
-			session.DeleteEach<ProducerPromotion>();
-			var fixture = new LocalProducerPromotion("assets/Валемидин.JPG");
+		//[Test]
+		//public void ProducerPromotion()
+		//{
+		//	session.DeleteEach<ProducerPromotion>();
+		//	var fixture = new LocalProducerPromotion("assets/Валемидин.JPG");
 
-			Fixture(fixture);
+		//	Fixture(fixture);
 
-			StartWait();
+		//	StartWait();
 
-			Click("ShowCatalog");
+		//	Click("ShowCatalog");
 
-			OpenOffers(fixture.ProducerPromotion.Catalogs.First());
+		//	OpenOffers(fixture.ProducerPromotion.Catalogs.First());
 
-			AdvanceScheduler(500);
+		//	AdvanceScheduler(500);
 
-			dispatcher.Invoke(() => {
-				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
-				Assert.IsTrue(producerPromotions.IsVisible);
-				Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
+		//	dispatcher.Invoke(() => {
+		//		var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
+		//		Assert.IsTrue(producerPromotions.IsVisible);
+		//		Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
 
-				var presenter = producerPromotions.Descendants<ContentPresenter>()
-					.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
+		//		var presenter = producerPromotions.Descendants<ContentPresenter>()
+		//			.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
 
-				var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
-				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
-			});
+		//		var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
+		//		dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
+		//	});
 
-			WaitWindow(fixture.ProducerPromotion.DisplayName);
-			dispatcher.Invoke(() => {
+		//	WaitWindow(fixture.ProducerPromotion.DisplayName);
+		//	dispatcher.Invoke(() => {
 
-				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
+		//		var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
 
-				var image = viewer.Document.Descendants<Image>().First();
+		//		var image = viewer.Document.Descendants<Image>().First();
 
-				Assert.IsNotNull(image);
+		//		Assert.IsNotNull(image);
 
-				Assert.That(image.Source.Height, Is.GreaterThan(0));
+		//		Assert.That(image.Source.Height, Is.GreaterThan(0));
 
-			});
-		}
+		//	});
+		//}
 
-		[Test]
-		public void Promotion()
-		{
-			session.DeleteEach<Promotion>();
-			var fixture = new LocalPromotion("assets/Валемидин.JPG");
-			Fixture(fixture);
+		//[Test]
+		//public void Promotion()
+		//{
+		//	session.DeleteEach<Promotion>();
+		//	var fixture = new LocalPromotion("assets/Валемидин.JPG");
+		//	Fixture(fixture);
 
-			StartWait();
-			Click("ShowCatalog");
-			OpenOffers(fixture.Promotion.Catalogs[0]);
-			AdvanceScheduler(500);
-			dispatcher.Invoke(() => {
-				var promotions = activeWindow.Descendants<PromotionPopup>().First();
-				Assert.IsTrue(promotions.IsVisible);
-				Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
-				var presenter = promotions.Descendants<ContentPresenter>()
-					.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
-				var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
-				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
-			});
+		//	StartWait();
+		//	Click("ShowCatalog");
+		//	OpenOffers(fixture.Promotion.Catalogs[0]);
+		//	AdvanceScheduler(500);
+		//	dispatcher.Invoke(() => {
+		//		var promotions = activeWindow.Descendants<PromotionPopup>().First();
+		//		Assert.IsTrue(promotions.IsVisible);
+		//		Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
+		//		var presenter = promotions.Descendants<ContentPresenter>()
+		//			.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
+		//		var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
+		//		dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
+		//	});
 
-			WaitWindow(fixture.Promotion.DisplayName);
-			dispatcher.Invoke(() => {
-				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
-				var image = viewer.Document.Descendants<Image>().First();
-				Assert.IsNotNull(image);
-				Assert.That(image.Source.Height, Is.GreaterThan(0));
-			});
-		}
+		//	WaitWindow(fixture.Promotion.DisplayName);
+		//	dispatcher.Invoke(() => {
+		//		var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
+		//		var image = viewer.Document.Descendants<Image>().First();
+		//		Assert.IsNotNull(image);
+		//		Assert.That(image.Source.Height, Is.GreaterThan(0));
+		//	});
+		//}
 
 		[Test]
 		public void Smart_order()
@@ -831,7 +831,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitIdle();
 		}
 
-		[Test]
+		/*[Test]
 		public async Task Create_waybill()
 		{
 			await Start();
@@ -863,7 +863,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				EditCell(grid, "НДС", 0, "10");
 				Assert.AreEqual("620.00", GetCell(grid, "Розничная цена").AsText());
 			});
-		}
+		}*/
 
 		private static void ShallowBindingErrors()
 		{

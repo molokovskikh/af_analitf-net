@@ -96,18 +96,102 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 				});
 		}
 
+		public void Attach(WinFormDataGrid grid)
+		{
+
+			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
+			var textInput = Observable.FromEventPattern<InputUInEventArgs>(grid, "InputUIntEvent");
+
+			var lastEdit = DateTime.MinValue;
+			var edit = textInput
+				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Str) != null)
+				.Do(e => e.EventArgs.Handled = true)
+				.Select(e => new Func<string, string>(v => {
+					var text = e.EventArgs.Str;
+					var now = DateTime.Now;
+					if ((now - lastEdit) > inputInterval)
+						return text;
+					else
+					{
+						return v + text;
+					}
+				}));
+
+			var backspace = keydown.Where(e => e.EventArgs.Key == Key.Back)
+				.Do(e => e.EventArgs.Handled = true)
+				.Select(e => new Func<string, string>(v => v.Slice(0, -2)));
+
+			var delete = keydown.Where(e => e.EventArgs.Key == Key.Delete)
+				.Do(e => e.EventArgs.Handled = true)
+				.Select(e => new Func<string, string>(v => ""));
+
+			var updated = edit.Merge(backspace).Merge(delete);
+
+			updated.Subscribe(a => {
+				UpdateValue(grid, a);
+				lastEdit = DateTime.Now;
+			});
+
+			//игнорировать события до тех пор пока не произошло событие редактирования
+			//когда произошло взять одно событие и повторить, фактически это state machine
+			//которая генерирует событие OfferCommitted только если было событие редактирования
+			updated.Throttle(commitInterval, scheduler)
+				.Merge(Observable.FromEventPattern<EventArgs>(grid, "CurrentCellChanged").Select(e => e.Sender))
+				.Merge(Observable.FromEventPattern<RoutedEventArgs>(grid, "Unloaded").Select(e => e.Sender))
+				.SkipUntil(updated)
+				.Take(1)
+				.Repeat()
+				.ObserveOn(scheduler)
+				.Subscribe(e => {
+					lastEdit = DateTime.MinValue;
+					var editor = GetEditor(grid);
+					if (editor != null)
+					{
+						editor.Committed();
+					}
+					else
+					{
+						ViewModelHelper.InvokeDataContext(grid, "OfferCommitted");
+					}
+				});
+		}
+
 		private void UpdateValue(object sender, Func<string, string> value)
 		{
-			var dataGrid = (DataGrid)sender;
-			var item = dataGrid.SelectedItem as IInlineEditable;
-			if (item == null)
-				return;
-			item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString()));
-			var editor = GetEditor(dataGrid);
-			if (editor != null) {
-				editor.Updated();
-			} else {
-				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
+
+			DataGrid dataGrid;
+			WinFormDataGrid winFormDataGrid;
+			if (sender is DataGrid)
+			{
+				dataGrid = (sender as DataGrid);
+				var item = dataGrid.SelectedItem as IInlineEditable;
+				if (item == null)
+					return;
+				item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString()));
+				var editor = GetEditor(dataGrid);
+				if (editor != null)
+				{
+					editor.Updated();
+				}
+				else
+				{
+					ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
+
+				}
+			}
+			else if (sender is WinFormDataGrid)
+			{
+				winFormDataGrid = (sender as WinFormDataGrid);
+				var item = winFormDataGrid.SelectedItem as IInlineEditable;
+				if (item == null)
+					return;
+				item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString()));
+				var editor = GetEditor(winFormDataGrid);
+				if (editor != null) {
+					editor.Updated();
+				} else {
+					ViewModelHelper.InvokeDataContext(winFormDataGrid, "OfferUpdated");
+				}
 			}
 		}
 

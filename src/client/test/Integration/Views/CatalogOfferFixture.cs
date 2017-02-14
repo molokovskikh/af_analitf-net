@@ -23,6 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 	[TestFixture]
 	public class CatalogOfferFixture : BaseViewFixture
 	{
+		/*
 		[Test]
 		public void Open_shell()
 		{
@@ -87,5 +88,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Offers");
 			Assert.AreEqual(DataGridClipboardCopyMode.None, grid.ClipboardCopyMode);
 		}
+		*/
 	}
 }

@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				File.Delete(result.Filename);
 		}
 
-		[Test]
+		/*[Test]
 		public void Export()
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -60,6 +60,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.IsTrue(model.CanExport.Value);
 			result = (OpenResult)model.Export();
 			Assert.That(File.Exists(result.Filename), result.Filename);
-		}
+		}*/
 	}
 }
