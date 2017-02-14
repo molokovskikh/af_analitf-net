@@ -35,17 +35,17 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			if (address != null)
 
 			{
-				WaybillSettings ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-				if (ws != null)
+				WaybillSettings waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+				if (waybillSettings != null)
 				{
 					using (var transaction = session.BeginTransaction())
 					{
 						address.Name = "тестовый адрес доставки до изменения";
-						ws.Address = "тестовый адрес доставки до изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки до изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
-					Assert.AreEqual("тестовый адрес доставки до изменения", ws.Address);
+					Assert.AreEqual("тестовый адрес доставки до изменения", waybillSettings.Address);
 
 					var data = new List<Tuple<string, string[]>> {
 						Tuple.Create(TempFile("Addresses.txt", address.Id.ToString() + "\tизмененый тестовый адрес доставки\t0\tЮридическое лицо\t", System.Text.Encoding.GetEncoding(1251)), new[] { "truncate", "Id", "Name", "HaveLimits", "Org"})};
@@ -59,25 +59,25 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 						session.Flush();
 						transaction.Commit();
 					}
-					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("измененый тестовый адрес доставки", ws.Address);
+					waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("измененый тестовый адрес доставки", waybillSettings.Address);
 					// проверка на неизменость WaybillSettings.Address
 					//задаем начальные условия
 					using (var transaction = session.BeginTransaction())
 					{
 						address.Name = "тестовый адрес доставки до изменения";
-						ws.Address = "тестовый адрес доставки до изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки до изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
 					//меняем адрес
 					using (var transaction = session.BeginTransaction())
 					{
-						ws.Address = "тестовый адрес доставки после ручного изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки после ручного изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
-					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", waybillSettings.Address);
 					// проводим загрузку
 					var data1 = new List<Tuple<string, string[]>> { Tuple.Create(TempFile("Users.txt", "5\ttest\t"), new[] { "Id", "NonExistsColumn" }) };
 					using (var transaction = session.BeginTransaction())
@@ -90,26 +90,26 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 						session.Flush();
 						transaction.Commit();
 					}
-					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", waybillSettings.Address);
 	
 					using (var transaction = session.BeginTransaction())
 					{
 						address.Name = "тестовый адрес доставки до изменения";
-						ws.Address = "тестовый адрес доставки до изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки до изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
-					Assert.AreEqual("тестовый адрес доставки до изменения", ws.Address);
+					Assert.AreEqual("тестовый адрес доставки до изменения", waybillSettings.Address);
 
 					using (var transaction = session.BeginTransaction())
 					{
-						ws.Address = "тестовый адрес доставки после ручного изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки после ручного изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
-					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", waybillSettings.Address);
 
 					data = new List<Tuple<string, string[]>> {
 						Tuple.Create(TempFile("Addresses.txt", address.Id.ToString() + "\tтестовый адрес доставки до изменения\t0\tЮридическое лицо\t", System.Text.Encoding.GetEncoding(1251)), new[] { "truncate", "Id", "Name", "HaveLimits", "Org"})};
@@ -123,26 +123,26 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 						session.Flush();
 						transaction.Commit();
 					}
-					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", waybillSettings.Address);
 
 					using (var transaction = session.BeginTransaction())
 					{
 						address.Name = "тестовый адрес доставки до изменения";
-						ws.Address = "тестовый адрес доставки до изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки до изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
-					Assert.AreEqual("тестовый адрес доставки до изменения", ws.Address);
+					Assert.AreEqual("тестовый адрес доставки до изменения", waybillSettings.Address);
 
 					using (var transaction = session.BeginTransaction())
 					{
-						ws.Address = "тестовый адрес доставки после ручного изменения";
-						session.Save(ws);
+						waybillSettings.Address = "тестовый адрес доставки после ручного изменения";
+						session.Save(waybillSettings);
 						transaction.Commit();
 					}
-					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", waybillSettings.Address);
 
 					data = new List<Tuple<string, string[]>> {
 						Tuple.Create(TempFile("Addresses.txt", address.Id.ToString() + "\tтестовый адрес доставки после изменения\t0\tЮридическое лицо\t", System.Text.Encoding.GetEncoding(1251)), new[] { "truncate", "Id", "Name", "HaveLimits", "Org"})};
@@ -156,8 +156,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 						session.Flush();
 						transaction.Commit();
 					}
-					ws = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
-					Assert.AreEqual("тестовый адрес доставки после ручного изменения", ws.Address);
+					waybillSettings = session.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == address.Id);
+					Assert.AreEqual("тестовый адрес доставки после ручного изменения", waybillSettings.Address);
 				}
 			}
 		}
