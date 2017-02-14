@@ -27,8 +27,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				new HelpItem("F5", "Сменить тип оплаты"),
 				new HelpItem("F6", "Поиск товара по наименованию"),
 				new HelpItem("F7", "Поиск товара по цене"),
-				new HelpItem("F10", "Внесение наличных в кассу"),
-				new HelpItem("F11", "Выплата наличных из кассы"),
 				new HelpItem("Esc", "Очистить поле количество"),
 				new HelpItem("Enter", "Закрыть"),
 				new HelpItem("* (NUM)", "Перенести содержимое поля ввода в поле количество"),

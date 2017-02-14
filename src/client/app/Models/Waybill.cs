@@ -405,7 +405,7 @@ namespace AnalitF.Net.Client.Models
 			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
 			var stockActions = new List<StockAction>();
 			foreach (var line in lines) {
-				line.Stock.Quantity -= line.Quantity.Value;
+				if (line.Stock != null) line.Stock.Quantity -= line.Quantity.Value;
 				var stock = new Stock(this, line);
 				stockActions.Add(new StockAction {
 					ActionType = ActionType.Stock,
@@ -420,7 +420,7 @@ namespace AnalitF.Net.Client.Models
 			}
 			foreach (var action in stockActions) {
 				session.Save(action.DstStock);
-				session.Update(action.SrcStock);
+				if (action.SrcStock != null) session.Update(action.SrcStock);
 				action.ClientStockId = action.DstStock.Id;
 			}
 			session.SaveEach(stockActions);
