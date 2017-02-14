@@ -993,9 +993,20 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 				RestoreOrders(request);
 			}
 
-			foreach (var dir in settings.DocumentDirs)
-				Directory.CreateDirectory(dir);
-
+			try
+			{
+				foreach (var dir in settings.DocumentDirs)
+					Directory.CreateDirectory(dir);
+			}
+			catch (Exception e)
+			{
+				if (e is PathTooLongException || e is UnauthorizedAccessException || e is IOException)
+					throw new IOException("Не удалось получить обновление. В настройках некорректно " +
+						"указана папка для сохранения накладных, отказов, отчетов\n" + e.Message);
+				else
+					throw new IOException("Не удалось получить обновление. В настройках некорректно " +
+						"указана папка для сохранения накладных, отказов, отчетов");
+			}
 			//все ошибки при файловых операциях считаются некритическими и игнорируются
 			//это сделано тк на этой фазе наиболее вероятны разнообразные ошибки
 			//но данные в базу уже импортированы и если подтверждение не произойдет они буду выгружены повторно
