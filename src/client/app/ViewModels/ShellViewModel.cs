@@ -130,6 +130,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public NotifyValue<string> UserName { get; set; }
+
 		//не верь решарперу
 		public ShellViewModel()
 			: this(new Config.Config())
@@ -259,6 +261,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => SetMenuItems());
 			User.Select(x => x?.IsStockEnabled ?? false)
 				.Subscribe(IsStockEnabled);
+			UserName.Subscribe(_ => ReinitDb());
 
 			//if (Env.Factory != null) {
 			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
@@ -328,7 +331,7 @@ namespace AnalitF.Net.Client.ViewModels
 					TryClose();
 					return Enumerable.Empty<IResult>();
 				}
-				Reload();
+				UserName.Value = (result.Model as Login).UserName;
 			}
 
 			Env.Bus.SendMessage("Startup");
@@ -498,6 +501,18 @@ namespace AnalitF.Net.Client.ViewModels
 				return false;
 			}
 			return true;
+		}
+
+		private void ReinitDb()
+		{
+			if (string.IsNullOrEmpty(UserName))
+				return;
+			var dbName = $"ldb{UserName}";
+			AppBootstrapper.NHibernate.Init(database: dbName);
+			Config.DbDir = dbName;
+			using (var sanityCheck = new SanityCheck(Config) {SwitchUser = true})
+				sanityCheck.Check();
+			Reload();
 		}
 
 		public void Reload()

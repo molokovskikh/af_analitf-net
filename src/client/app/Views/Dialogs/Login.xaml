@@ -11,5 +11,8 @@
 			<Button Name="OK" Margin="0, 0, 5, 0">ОК</Button>
 			<Button Name="TryClose">Отмена</Button>
 		</StackPanel>
+		<ProgressBar IsIndeterminate="True"
+				Height="10"
+				Visibility="{Binding IsInProgress.Value, Converter={StaticResource BoolToHidden}}" />
 	</StackPanel>
 </UserControl>

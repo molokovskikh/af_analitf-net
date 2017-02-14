@@ -23,6 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			InitFields();
 			WasCancelled = true;
+			IsInProgress.Value = false;
 		}
 
 		public string UserName { get; set; }
@@ -30,19 +31,20 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public bool WasCancelled { get; private set; }
 
-		public void OK()
+		public NotifyValue<bool> IsInProgress { get; set; }
+
+		public async void OK()
 		{
 			if (!ValidateLoginInfo())
 				return;
 
-			var checkResult = CheckCredentials();
+			var checkResult = await CheckCredentials();
 			switch (checkResult)
 			{
 				case CheckResult.UnAuthorized:
 					Manager.Error("Неверные логин и/или пароль");
 					break;
 				case CheckResult.Correct:
-					Save();
 					WasCancelled = false;
 					TryClose();
 					break;
@@ -53,14 +55,6 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 					Manager.Error("Ошибка при запросе к серверу");
 					break;
 			}
-		}
-
-		private void Save()
-		{
-			Settings.Value.UserName = UserName;
-			Settings.Value.Password = Password;
-			Session.CreateSQLQuery($"update settings set UserName = '{UserName}', Password = '{Password}' where Id = {Settings.Value.Id}")
-				.ExecuteUpdate();
 		}
 
 		private bool ValidateLoginInfo()
@@ -76,7 +70,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			return true;
 		}
 
-		private CheckResult CheckCredentials()
+		private async Task<CheckResult> CheckCredentials()
 		{
 			var result = CheckResult.NoHosts;
 			string[] urls = null;
@@ -87,6 +81,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 			if (urls != null)
 				try {
+					IsInProgress.Value = true;
+
 					HttpClientHandler handler = new HttpClientHandler();
 					handler.Credentials = new NetworkCredential(UserName, Password);
 					using (var client = new HttpClient(handler)) {
@@ -94,14 +90,16 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 						client.Timeout = TimeSpan.FromMilliseconds(10 * 1000);
 						result = CheckResult.RequestError;
 						foreach (var url in urls) {
-							var res = Check(client, url);
-							if (res is HttpStatusCode)
-							{
-								if ((HttpStatusCode) res == HttpStatusCode.OK) {
+							//var res = new Task<object>(() => { return Check(client, url); });
+							//res.Start();
+							//res.Wait();
+							var res = await Check(client, url);
+							if (res is HttpStatusCode) {
+								if ((HttpStatusCode)res == HttpStatusCode.OK) {
 									result = CheckResult.Correct;
 									break;
 								}
-								if ((HttpStatusCode) res == HttpStatusCode.Unauthorized) {
+								if ((HttpStatusCode)res == HttpStatusCode.Unauthorized) {
 									result = CheckResult.UnAuthorized;
 									break;
 								}
@@ -112,14 +110,17 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				catch {
 					result = CheckResult.RequestError;
 				}
+				finally {
+					IsInProgress.Value = false;
+				}
 
 			return result;
 		}
 
-		private object Check(HttpClient client, string url)
+		private async Task<object> Check(HttpClient client, string url)
 		{
 			try {
-				var response = client.GetAsync(url + "Status").Result;
+				var response = await client.GetAsync(url + "Status");
 				return response.StatusCode;
 			}
 			catch (Exception e) {
