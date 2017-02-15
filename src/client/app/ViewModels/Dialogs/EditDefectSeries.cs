@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class EditDefectSeries : BaseScreen2, ICancelable
 	{
+		private uint? _rejectId;
 		public bool WasCancelled { get; private set; }
 		public Stock Stock { get; set; }
 		List<Tuple<uint, uint>> Link { get; set; }
@@ -40,6 +41,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public async Task Ok()
 		{
 			Stock.RejectStatus = RejectStatus.Defective;
+			Stock.RejectId = _rejectId;
 			await Env.Query(s => s.Update(Stock));
 			WasCancelled = false;
 			TryClose();
@@ -61,7 +63,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		private IEnumerable<Reject> GetRejectsByStock(IStatelessSession session)
 		{
 			var rejectIds = Link.Where(x => x.Item1 == Stock.Id).Select(x => x.Item2).ToList();
-			return session.Query<Reject>().Where(x => rejectIds.Contains(x.Id)).ToList();
+			var result = session.Query<Reject>().Where(x => rejectIds.Contains(x.Id)).OrderByDescending(x => x.LetterDate).ToList();
+			_rejectId = result.FirstOrDefault()?.Id;
+			return result;
 		}
 	}
 }

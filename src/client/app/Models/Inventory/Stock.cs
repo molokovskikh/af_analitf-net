@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
 using AnalitF.Net.Client.Config.NHibernate;
@@ -8,6 +7,7 @@ using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Print;
+using System.Globalization;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -101,6 +101,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplierCost = line.SupplierCost.GetValueOrDefault();
 			RetailCost = line.RetailCost.GetValueOrDefault();
 			RetailMarkup = line.RetailMarkup;
+			RejectId = line.RejectId;
+			if (line.IsReject)
+				RejectStatus = RejectStatus.Defective;
 		}
 
 		public virtual uint Id { get; set; }
@@ -165,6 +168,31 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		[Ignore]
 		public virtual bool SpecialMarkup { get; set; }
+
+		[Style]
+		public virtual DateTime? ParsedPeriod
+		{
+			get
+			{
+				DateTime date;
+				if (DateTime.TryParseExact(Period, "dd.MM.yyyy", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date))
+					return date;
+				return null;
+			}
+		}
+
+		[Style("Period")]
+		public virtual bool IsOverdue => ParsedPeriod.HasValue && ParsedPeriod.Value < DateTime.Now;
+
+		public virtual string PeriodMonth
+		{
+			get
+			{
+				if (ParsedPeriod.HasValue)
+					return ParsedPeriod.Value.ToString("MMMM yyyy", CultureInfo.CreateSpecificCulture("ru-RU"));
+				return null;
+			}
+		}
 
 		public override decimal? RetailCost
 		{
@@ -320,6 +348,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string WaybillNumber { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
+		public virtual uint? RejectId { get; set; }
 
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 

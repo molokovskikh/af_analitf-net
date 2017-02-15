@@ -72,10 +72,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		private void SearchByName()
 		{
 			SearchBehavior.ActiveSearchTerm.Throttle(Consts.TextInputLoadTimeout, UiScheduler)
-				.SelectMany(_ => RxQuery(s => Stock.AvailableStocks(s, Address).Where(x => x.Product.Contains(SearchBehavior.ActiveSearchTerm.Value ?? ""))
-					.OrderBy(x => x.Product)
-					.ThenBy(x => x.RetailCost)
-					.ToList()))
+				.SelectMany(_ => RxQuery(s => {
+					if (Util.IsValidBarCode(SearchBehavior.ActiveSearchTerm.Value)) //Поиск по штрих-коду
+						return Stock.AvailableStocks(s, Address).Where(x => x.Barcode == SearchBehavior.ActiveSearchTerm.Value)
+						.OrderBy(x => x.Product)
+						.ThenBy(x => x.RetailCost)
+						.ToList();
+					else //Поиск по наименованию
+						return Stock.AvailableStocks(s, Address).Where(x => x.Product.Contains(SearchBehavior.ActiveSearchTerm.Value ?? ""))
+						.OrderBy(x => x.Product)
+						.ThenBy(x => x.RetailCost)
+						.ToList();
+					}))
 				.Subscribe(Items);
 		}
 

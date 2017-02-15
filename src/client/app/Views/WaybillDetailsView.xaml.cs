@@ -126,7 +126,6 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(13, DataGridLengthUnitType.Star),
 				Header = "Штрихкод",
 				Binding = new Binding("EAN13"),
-				Visibility = Visibility.Collapsed
 			});
 			lines.Columns.Add(new CustomDataGridColumn((c, i) => null) {
 				Header = "Сертификаты",

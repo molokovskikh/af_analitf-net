@@ -835,6 +835,11 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new CheckDefectSeries());
 		}
 
+		public void ShelfLife()
+		{
+			NavigateRoot(new ShelfLife());
+		}
+
 		public void ReceivingOrders()
 		{
 			NavigateRoot(new WaybillsViewModel());
