@@ -101,6 +101,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplierCost = line.SupplierCost.GetValueOrDefault();
 			RetailCost = line.RetailCost.GetValueOrDefault();
 			RetailMarkup = line.RetailMarkup;
+			RejectId = line.RejectId;
+			if (line.IsReject)
+				RejectStatus = RejectStatus.Defective;
 		}
 
 		public virtual uint Id { get; set; }
@@ -345,6 +348,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string WaybillNumber { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
+		public virtual uint? RejectId { get; set; }
 
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 
