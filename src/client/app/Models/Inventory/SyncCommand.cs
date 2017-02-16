@@ -75,7 +75,8 @@ where c.Timestamp > @lastSync";
 				var import = Configure(new ImportCommand(dir) {
 					Strict = false
 				});
-				import.ImportTables();
+				var ListAdresesBeforeImport = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+				import.ImportTables(ListAdresesBeforeImport);
 				Settings.LastSync = newLastSync;
 				Settings.ServerLastSync = DateTime.Parse(File.ReadAllText(Path.Combine(dir, "server-timestamp")));
 				using (var trx = Session.BeginTransaction()) {
