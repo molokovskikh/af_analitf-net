@@ -404,7 +404,10 @@ select u.Id,
 		where ua.UserId = u.Id and a.Enabled = 1
 	) as HaveLimits,
   rcs.SendRetailMarkup,
-	rcs.IsStockEnabled
+	rcs.IsStockEnabled,
+	(select count(*)
+		from Customers.Users uc
+		where uc.ClientId = u.ClientId) as UsersCount
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id

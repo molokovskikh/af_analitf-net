@@ -108,6 +108,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool SendRetailMarkup { get; set; }
 
+		public virtual int UsersCount { get; set; }
+
 		public virtual bool CanPrint<T>()
 		{
 			return HasPermission(Permission.ShortcutPrintMap, typeof(T));

@@ -267,6 +267,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsCashEnabled);
 			User.Select(x => x?.HasOrderPermission() ?? false)
 				.Subscribe(IsOrderEnabled);
+			User.Select(x => (x?.UsersCount ?? 1) > 1)
+				.Subscribe(IsShowLoginEnabled);
 			UserName.Subscribe(_ => SwitchUser());
 
 			//if (Env.Factory != null) {
@@ -293,6 +295,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsStockEnabled { get; set; }
 		public NotifyValue<bool> IsCashEnabled { get; set; }
 		public NotifyValue<bool> IsOrderEnabled { get; set; }
+		public NotifyValue<bool> IsShowLoginEnabled { get; set; }
 
 		public string Version { get; set; }
 
@@ -331,16 +334,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override IEnumerable<IResult> OnViewReady()
 		{
-			if (!Env.IsUnitTesting) {
-				var result = new DialogResult(new Login());
-				result.Execute(null);
-				if ((result.Model as Login).WasCancelled) {
+			if (!Env.IsUnitTesting && IsShowLoginEnabled) {
+				if (!ShowLogin()) {
 					windowManager.Notify("Вход в приложение отменён");
 					TryClose();
 					return Enumerable.Empty<IResult>();
 				}
-				password = (result.Model as Login).Password;
-				UserName.Value = (result.Model as Login).UserName;
 			}
 
 			Env.Bus.SendMessage("Startup");
@@ -377,6 +376,21 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 				return results;
 			}
+		}
+
+		public bool ShowLogin()
+		{
+			if (!IsShowLoginEnabled)
+				return false;
+
+			var result = new DialogResult(new Login());
+			result.Execute(null);
+			if ((result.Model as Login).WasCancelled)
+				return false;
+
+			password = (result.Model as Login).Password;
+			UserName.Value = (result.Model as Login).UserName;
+			return true;
 		}
 
 		public void CloseActive()
@@ -531,7 +545,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Settings.Value.Password = password;
 				session.Flush();
 			}
-			NavigateBackward();
+			Navigator.CloseAll();
 			ShowMain();
 		}
 
