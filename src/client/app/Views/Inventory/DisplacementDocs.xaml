@@ -5,9 +5,16 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	mc:Ignorable="d"
-	d:DesignHeight="300" d:DesignWidth="1000">
+	d:DesignHeight="300" d:DesignWidth="1000"
+	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Create" />
