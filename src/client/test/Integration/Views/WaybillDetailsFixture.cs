@@ -63,5 +63,25 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 			WpfTestHelper.CleanSafeError();
 		}
+
+		[Test]
+		public void Show_print_for_posted_waybill_without_address()
+		{
+			var waybill = new Waybill(null, session.Query<Supplier>().First());
+			waybill.IsCreatedByUser = true;
+			waybill.Status = Client.Models.Inventory.DocStatus.Posted;
+			session.Save(waybill);
+
+			WpfTestHelper.WithWindow2(async w => {
+				var model = new WaybillDetails(waybill.Id);
+				var view = (WaybillDetailsView)Bind(model);
+				w.Content = view;
+
+				await view.WaitLoaded();
+				view.Descendants<Button>().First(b => b.Name == "PrintWaybill")
+					.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+			});
+			WpfTestHelper.CleanSafeError();
+		}
 	}
 }
