@@ -119,10 +119,6 @@ where Timestamp > @lastSync");
 				import.ImportTables();
 				Settings.LastSync = newLastSync;
 				Settings.ServerLastSync = DateTime.Parse(File.ReadAllText(Path.Combine(dir, "server-timestamp")));
-				//using (var trx = Session.BeginTransaction()) {
-				//	Session.Flush();
-				//	trx.Commit();
-				//}
 			}
 			return UpdateResult.OK;
 		}

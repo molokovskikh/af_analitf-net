@@ -1800,7 +1800,7 @@ from Inventory.StockedWaybills s
 	join Logs.DocumentSendLogs l on l.DocumentId = s.DownloadId
 where s.Timestamp > ?lastSync
 	and l.UserId = ?userId";
-				Export(Result, sql, "UpdatedWaybills", truncate: false,
+				Export(Result, sql, "UpdatedWaybills", truncate: true,
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 			}
 

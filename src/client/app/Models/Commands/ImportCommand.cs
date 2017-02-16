@@ -77,6 +77,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
+
 			Session.CreateSQLQuery(@"
 drop temporary table if exists UpdatedWaybills;
 create temporary table UpdatedWaybills (
@@ -84,12 +85,12 @@ create temporary table UpdatedWaybills (
 	primary key(DownloadId)
 );")
 				.ExecuteUpdate();
-			ImportTables();
+			ImportTables(new [] { "UpdatedWaybills" });
 			Session.CreateSQLQuery(@"
 update Waybills w
 join UpdatedWaybills u on u.DownloadId = w.Id
 set w.Status = 1;
-drop temporary table UpdatedWaybills;")
+")
 				.ExecuteUpdate();
 
 			//очистка результатов автозаказа
@@ -222,14 +223,22 @@ drop temporary table ExistsCatalogs;")
 			settings.ApplyChanges(Session);
 		}
 
-		public void ImportTables()
+		public void ImportTables(string[] tmpTables = null)
 		{
 			Log.Info("Начинаю импорт");
 			var ordered =
 				data.OrderBy(d => Tuple.Create(weight.GetValueOrDefault(Path.GetFileNameWithoutExtension(d.Item1)), d.Item1));
 			foreach (var table in ordered) {
 				try {
-					var sql = BuildSql(table);
+					string sql;
+					var tableName = Path.GetFileNameWithoutExtension(table.Item1);
+					if (tmpTables?.Contains(tableName, StringComparer.InvariantCultureIgnoreCase) == true) {
+						sql = String.Format("LOAD DATA INFILE '{0}' REPLACE INTO TABLE {1}",
+							Path.GetFullPath(table.Item1).Replace("\\", "/"),
+							tableName);
+					} else {
+						sql = BuildSql(table);
+					}
 					if (String.IsNullOrEmpty(sql))
 						continue;
 
@@ -261,8 +270,14 @@ drop temporary table ExistsCatalogs;")
 			//пока сервис не имеет ни какой обратной совместимости
 			//клиент должен сам разобраться что он может обработать а что нет
 			var dbTable = Tables().FirstOrDefault(t => t.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase));
-			if (dbTable == null)
+			if (dbTable == null) {
+#if DEBUG
+				throw new Exception($"Импорт неизвестной таблицы {tableName}");
+#else
+
 				return null;
+#endif
+			}
 
 			var sql = "";
 			var exportedColumns = table.Item2;
