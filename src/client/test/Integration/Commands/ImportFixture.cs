@@ -26,8 +26,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var data = new List<Tuple<string, string[]>> {
 				Tuple.Create(TempFile("Users.txt", "5\ttest\t"), new[] { "Id", "NonExistsColumn" })
 			};
-			var cmd = InitCmd(new ImportCommand(data)
-			{
+			var cmd = InitCmd(new ImportCommand(data){
 				Strict = false
 			});
 			cmd.Execute();
