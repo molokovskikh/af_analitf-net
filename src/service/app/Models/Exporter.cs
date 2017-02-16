@@ -1790,12 +1790,19 @@ group by ol.RowId";
 
 		public void ExportDocs()
 		{
+			string sql;
 			if (clientSettings.IsStockEnabled) {
 				Stock.CreateInTransitStocks(session, user);
 				ExportStocks(data.LastUpdateAt);
-			}
 
-			string sql;
+				sql = @"select DownloadId
+from Inventory.StockedWaybills s
+	join Logs.DocumentSendLogs l on l.DocumentId = s.DownloadId
+where s.Timestamp > ?lastSync
+	and l.UserId = ?userId";
+				Export(Result, sql, "UpdatedWaybills", truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+			}
 
 			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
 				+ " where UserId = :userId;")

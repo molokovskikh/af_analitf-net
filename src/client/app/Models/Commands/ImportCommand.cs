@@ -77,7 +77,20 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
+			Session.CreateSQLQuery(@"
+drop temporary table if exists UpdatedWaybills;
+create temporary table UpdatedWaybills (
+	DownloadId int unsigned not null,
+	primary key(DownloadId)
+);")
+				.ExecuteUpdate();
 			ImportTables();
+			Session.CreateSQLQuery(@"
+update Waybills w
+join UpdatedWaybills u on u.DownloadId = w.Id
+set w.Status = 1;
+drop temporary table UpdatedWaybills;")
+				.ExecuteUpdate();
 
 			//очистка результатов автозаказа
 			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться

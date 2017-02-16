@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
@@ -210,7 +211,15 @@ namespace AnalitF.Net.Client
 					var property = Config.GetType().GetField(key);
 					if (property == null)
 						continue;
-					property.SetValue(Config, value);
+					if (property.FieldType.IsInstanceOfType(value)) {
+						property.SetValue(Config, value);
+					} else {
+						try {
+							property.SetValue(Config, Convert.ChangeType(value, property.FieldType));
+						} catch (Exception) {
+							property.SetValue(Config, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(value));
+						}
+					}
 				}
 				catch(Exception e) {
 #if DEBUG
