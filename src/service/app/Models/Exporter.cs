@@ -183,7 +183,7 @@ namespace AnalitF.Net.Service.Models
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
-			Addresses = user.AvaliableAddresses.ToArray();
+			Addresses = user.AvaliableAddresses.Where(x => x.Enabled).ToArray();
 		}
 
 		//Все даты передаются в UTC!
@@ -1799,9 +1799,308 @@ group by ol.RowId";
 from Inventory.StockedWaybills s
 	join Logs.DocumentSendLogs l on l.DocumentId = s.DownloadId
 where s.Timestamp > ?lastSync
-	and l.UserId = ?userId";
+	and l.UserId = ?userId
+	and s.UserId <> ?userId";
 				Export(Result, sql, "UpdatedWaybills", truncate: true,
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				var addressIds = Addresses.Implode(x => x.Id);
+				sql = $@"
+select Id as ServerId,
+	CheckType,
+	Date,
+	ChangeOpening,
+	Status,
+	Clerk,
+	KKM,
+	PaymentType,
+	SaleType,
+	Discont,
+	ChangeId,
+	ChangeNumber,
+	Cancelled,
+	RetailSum,
+	DiscountSum,
+	SupplySum,
+	SaleCheck,
+	DiscountCard,
+	Recipe,
+	Agent,
+	AddressId,
+	Payment,
+	Charge
+from Inventory.Checks c
+where c.Timestamp > ?lastSync
+	and c.UserId <> ?userId
+	and c.AddressId in {addressIds}";
+				Export(Result, sql, "Checks",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.CheckId as ServerCheckId,
+	l.RetailCost,
+	l.Cost,
+	l.Quantity,
+	l.DiscontSum,
+	l.l.ProductKind,
+	l.Divider,
+	l.MarkupSum,
+	l.NDSSum,
+	l.NPSum,
+	l.NDS,
+	l.NP,
+	l.PartyNumber,
+	l.Narcotic,
+	l.Toxic,
+	l.Combined,
+	l.Other,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.Producer,
+	l.ProducerId,
+	l.WaybillLineId,
+	l.CatalogId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.RetailMarkup,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity
+from Inventory.CheckLines l
+	join Inventory.Checks c on c.Id = l.CheckId
+where c.Timestamp > ?lastSync
+	and c.UserId <> ?userId
+	and c.AddressId in {addressIds}";
+				Export(Result, sql, "CheckLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select Id as ServerId,
+	Date,
+	CloseDate,
+	Status,
+	AddressId,
+	DstAddressId,
+	SupplierSum,
+	PosCount,
+	Comment,
+	Error
+from Inventory.DisplacementDocs d
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "DisplacementDocs",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.WaybillLineId,
+	l.Quantity,
+	l.Period,
+	l.SrcStockId,
+	l.DstStockId,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.RetailCost,
+	l.RetailMarkup,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity,
+	l.DisplacementDocId as ServerDocId
+from Inventory.DisplacementLines l
+	join Inventory.DisplacementDocs d on d.Id = l.DisplacementDocId
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "DisplacementLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select Id as ServerId,
+	Date,
+	AddressId,
+	Status,
+	CloseDate,
+	SupplySumWithoutNds,
+	SupplySum,
+	RetailSum,
+	LinesCount,
+	Comment
+from Inventory.InventoryDocs d
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "InventoryDocs",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.Quantity,
+	l.Period,
+	l.StockId,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.RetailCost,
+	l.RetailMarkup,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity,
+	l.InventoryDocId as ServerDocId
+from Inventory.InventoryLines l
+	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "InventoryLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select Id as ServerId,
+	Date,
+	AddressId,
+	Status,
+	CloseDate,
+	SrcRetailSum,
+	SupplySumWithoutNds,
+	SupplySum,
+	RetailSum,
+	LinesCount,
+	Comment,
+	Error
+from Inventory.ReassessmentDocs d
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "ReassessmentDocs",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.Exp,
+	l.Period,
+	l.RetailCost,
+	l.RetailMarkup,
+	l.SrcRetailMarkup,
+	l.SrcRetailCost,
+	l.Quantity,
+	l.SrcStockId,
+	l.DstStockId,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity,
+	l.ReassessmentDocId as ServerDocId
+from Inventory.ReassessmentLines
+	join Inventory.ReassessmentDocs d on d.Id = l.ReassessmentDocId
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "ReassessmentLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select Id as ServerId,
+	Date,
+	CloseDate,
+	Status,
+	AddressId,
+	SupplierId,
+	RetailSum,
+	SupplierSumWithoutNds,
+	SupplierSum,
+	PosCount,
+	Comment,
+	Error
+from Inventory.ReturnDocs d
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "ReturnDocs",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.WaybillLineId,
+	l.Quantity,
+	l.StockId,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.RetailCost,
+	l.RetailMarkup,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity,
+	l.ReturnDocId as ServerDocId
+from Inventory.ReturnLines l
+	join Inventory.ReturnDocs d on d.Id = l.ReturnDocId
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "ReturnLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
 			}
 
 			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
