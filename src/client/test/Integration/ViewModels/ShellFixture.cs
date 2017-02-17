@@ -124,6 +124,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			settings.LastUpdate = null;
 			settings.UserName = null;
 			settings.Password = null;
+			settings.WaybillDir = settings.MapPath("Waybills");
+			settings.RejectDir = settings.MapPath("Rejects");
+			settings.ReportDir = settings.MapPath("Reports");
 			session.Flush();
 			shell.Reload();
 
@@ -154,6 +157,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			settings.LastUpdate = DateTime.Now.AddDays(-1);
 			settings.UserName = "test";
 			settings.Password = "123";
+			settings.WaybillDir = settings.MapPath("Waybills");
+			settings.RejectDir = settings.MapPath("Rejects");
+			settings.ReportDir = settings.MapPath("Reports");
 			session.Flush();
 			shell.Reload();
 

@@ -353,6 +353,7 @@ limit 300";
 			var dialog = new SelectDirResult(dir);
 			yield return dialog;
 			Settings.Value.WaybillDir = dialog.Result;
+			Settings.Value.IsDirectoryValid();
 		}
 
 		public IEnumerable<IResult> SelectRejectDir()
@@ -364,6 +365,7 @@ limit 300";
 			var dialog = new SelectDirResult(dir);
 			yield return dialog;
 			Settings.Value.RejectDir = dialog.Result;
+			Settings.Value.IsDirectoryValid();
 		}
 
 		public IEnumerable<IResult> SelectReportDir()
@@ -375,6 +377,7 @@ limit 300";
 			var dialog = new SelectDirResult(dir);
 			yield return dialog;
 			Settings.Value.ReportDir = dialog.Result;
+			Settings.Value.IsDirectoryValid();
 		}
 
 		public IEnumerable<IResult> SelectDir()

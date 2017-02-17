@@ -118,6 +118,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			shell.Settings.Value.LastUpdate = DateTime.Today.AddDays(-16);
 			shell.Settings.Value.UserName = "test";
 			shell.Settings.Value.Password = "password";
+			shell.Settings.Value.WaybillDir = shell.Settings.Value.MapPath("Waybills");
+			shell.Settings.Value.RejectDir = shell.Settings.Value.MapPath("Rejects");
+			shell.Settings.Value.ReportDir = shell.Settings.Value.MapPath("Reports");
 			shell.Schedules.Value = new List<Schedule> {
 				new Schedule(new TimeSpan(20, 0, 0))
 			};
