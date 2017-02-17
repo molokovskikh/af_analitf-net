@@ -44,7 +44,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			session = IntegrationSetup.Factory.OpenSession();
 			disposable.Add(session);
-			session.Transaction.Begin();
 			stateless = IntegrationSetup.Factory.OpenStatelessSession();
 			disposable.Add(stateless);
 
@@ -60,6 +59,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				session.Save(settings);
 				transaction.Commit();
 			}
+			session.Transaction.Begin();
 		}
 
 		[TearDown]
