@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Common.Tools;
+using Dapper;
+using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Mapping;
 
@@ -54,7 +56,63 @@ namespace AnalitF.Net.Client.Models.Commands
 				{"SentOrders", new [] {
 					//локальные поля
 					"Id", "LinesCount", "Sum", "PersonalComment", "ReceivingOrderId"
-				}}
+				}},
+				{"CheckLines", new [] {
+					//локальные поля
+					"Id", "CheckId",
+				}},
+				{"Checks", new [] {
+					//локальные поля
+					"Id"
+				}},
+				{"DisplacementDocs", new [] {
+					//локальные поля
+					"Id",
+				}},
+				{"DisplacementLines", new [] {
+					//локальные поля
+					"Id", "DisplacementDocId"
+				}},
+				{"InventoryDocs", new [] {
+					//локальные поля
+					"Id"
+				}},
+				{"InventoryLines", new [] {
+					//локальные поля
+					"Id", "InventoryDocId"
+				}},
+				{"ReassessmentDocs", new [] {
+					//локальные поля
+					"Id"
+				}},
+				{"ReassessmentLines", new [] {
+					//локальные поля
+					"Id", "ReassessmentDocId"
+				}},
+				{"ReturnDocs", new [] {
+					//локальные поля
+					"Id"
+				}},
+				{"ReturnLines", new [] {
+					//локальные поля
+					"Id", "ReturnDocId"
+				}},
+				{"UnpackingDocs", new [] {
+					//локальные поля
+					"Id"
+				}},
+				{"UnpackingLines", new [] {
+					//локальные поля
+					"Id", "UnpackingDocId"
+				}},
+				{"WriteoffDocs", new [] {
+					//локальные поля
+					"Id"
+				}},
+				{"WriteoffLines", new [] {
+					//локальные поля
+					"Id", "WriteoffDocId"
+				}},
 			};
 
 		public bool Strict = true;
@@ -77,21 +135,65 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
+			ITransaction trx = null;
+			if (!Session.Transaction.IsActive)
+				trx = Session.BeginTransaction();
 
+			try {
 			Session.CreateSQLQuery(@"
 drop temporary table if exists UpdatedWaybills;
 create temporary table UpdatedWaybills (
 	DownloadId int unsigned not null,
-	primary key(DownloadId)
-);")
+	primary key(DownloadId));")
 				.ExecuteUpdate();
 			ImportTables(new [] { "UpdatedWaybills" });
 			Session.CreateSQLQuery(@"
 update Waybills w
 join UpdatedWaybills u on u.DownloadId = w.Id
 set w.Status = 1;
-")
+drop table if exists UpdatedWaybills;")
 				.ExecuteUpdate();
+				trx?.Commit();
+				trx = null;
+			} finally {
+				trx?.Rollback();
+			}
+
+			Session.Connection.Execute(@"
+update CheckLines l
+	join Checks d on l.ServerDocId = d.ServerId
+set l.CheckId = d.Id
+where l.CheckId is null;
+
+update DisplacementLines l
+	join DisplacementDocs d on l.ServerDocId = d.ServerId
+set l.DisplacementDocId = d.Id
+where l.DisplacementDocId is null;
+
+update InventoryLines l
+	join InventoryDocs d on l.ServerDocId = d.ServerId
+set l.InventoryDocId = d.Id
+where l.InventoryDocId is null;
+
+update ReassessmentLines l
+	join ReassessmentDocs d on l.ServerDocId = d.ServerId
+set l.ReassessmentDocId = d.Id
+where l.ReassessmentDocId is null;
+
+update ReturnLines l
+	join ReturnDocs d on l.ServerDocId = d.ServerId
+set l.ReturnDocId = d.Id
+where l.ReturnDocId is null;
+
+update UnpackingLines l
+	join UnpackingDocs d on l.ServerDocId = d.ServerId
+set l.UnpackingDocId = d.Id
+where l.UnpackingDocId is null;
+
+update WriteoffLines l
+	join WriteoffDocs d on l.ServerDocId = d.ServerId
+set l.WriteoffDocId = d.Id
+where l.WriteoffDocId is null;");
 
 			//очистка результатов автозаказа
 			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
@@ -242,10 +344,8 @@ drop temporary table ExistsCatalogs;")
 					if (String.IsNullOrEmpty(sql))
 						continue;
 
-					var dbCommand = Session.Connection.CreateCommand();
-					dbCommand.CommandText = sql;
-					dbCommand.ExecuteNonQuery();
-					CheckWarning(dbCommand);
+					Session.Connection.Execute(sql);
+					CheckWarning();
 					Reporter.Progress();
 				} catch (Exception e) {
 					throw new Exception($"Не могу импортировать {table.Item1}", e);
@@ -312,17 +412,11 @@ where p.IsSynced = 1 or p.PriceId is null;";
 		}
 
 		[Conditional("DEBUG")]
-		private void CheckWarning(IDbCommand cmd)
+		private void CheckWarning()
 		{
 			if (!Strict)
 				return;
-			var warnings = new List<string>();
-			cmd.CommandText = "show warnings";
-			using (var reader = cmd.ExecuteReader()) {
-				while (reader.Read()) {
-					warnings.Add(reader["Message"].ToString());
-				}
-			}
+			var warnings = Session.Connection.Query("show warnings").Select(x => (string)x.Message).ToList();
 			if (warnings.Count > 0)
 				throw new Exception(warnings.Implode());
 		}

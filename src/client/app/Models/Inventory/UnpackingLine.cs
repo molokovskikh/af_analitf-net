@@ -34,6 +34,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint Id { get; set; }
 
+		public virtual uint? ServerDocId { get; set; }
+
 		public virtual decimal Quantity { get; set; }
 
 		public override decimal? RetailCost { get; set; }

@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint Id { get; set; }
 
+		public virtual uint? ServerDocId { get; set; }
+
 		public virtual uint? WaybillLineId { get; set; }
 
 		public virtual DateTime? Exp { get; set; }

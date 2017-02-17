@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private DisplacementDocStatus _status;
 
 		public override uint Id { get; set; }
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }

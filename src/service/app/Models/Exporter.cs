@@ -1791,7 +1791,7 @@ group by ol.RowId";
 		public void ExportDocs()
 		{
 			string sql;
-			if (clientSettings.IsStockEnabled) {
+			if (clientSettings.IsStockEnabled && Addresses.Length > 0) {
 				Stock.CreateInTransitStocks(session, user);
 				ExportStocks(data.LastUpdateAt);
 
@@ -1804,7 +1804,7 @@ where s.Timestamp > ?lastSync
 				Export(Result, sql, "UpdatedWaybills", truncate: true,
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 
-				var addressIds = Addresses.Implode(x => x.Id);
+				var addressIds = "(" + Addresses.Implode(x => x.Id) + ")";
 				sql = $@"
 select Id as ServerId,
 	CheckType,
@@ -1822,10 +1822,6 @@ select Id as ServerId,
 	RetailSum,
 	DiscountSum,
 	SupplySum,
-	SaleCheck,
-	DiscountCard,
-	Recipe,
-	Agent,
 	AddressId,
 	Payment,
 	Charge
@@ -1838,12 +1834,11 @@ where c.Timestamp > ?lastSync
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 
 				sql = $@"
-select l.CheckId as ServerCheckId,
+select l.CheckId as ServerDocId,
 	l.RetailCost,
-	l.Cost,
 	l.Quantity,
 	l.DiscontSum,
-	l.l.ProductKind,
+	l.ProductKind,
 	l.Divider,
 	l.MarkupSum,
 	l.NDSSum,
@@ -2038,7 +2033,7 @@ select l.Exp,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.ReassessmentDocId as ServerDocId
-from Inventory.ReassessmentLines
+from Inventory.ReassessmentLines l
 	join Inventory.ReassessmentDocs d on d.Id = l.ReassessmentDocId
 where d.Timestamp > ?lastSync
 	and d.UserId <> ?userId
@@ -2101,6 +2096,114 @@ where d.Timestamp > ?lastSync
 					truncate: false,
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 
+				sql = $@"
+select Id as ServerId,
+	Date,
+	AddressId,
+	Status,
+	CloseDate,
+	SrcRetailSum,
+	RetailSum,
+	Comment,
+	LinesCount
+from Inventory.UnpackingDocs d
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "UnpackingDocs",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.Quantity,
+	l.RetailCost,
+	l.SrcQuantity,
+	l.SrcRetailCost,
+	l.SrcStockId,
+	l.DstStockId,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.RetailMarkup,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity,
+	l.UnpackingDocId as ServerDocId
+from Inventory.UnpackingLines l
+	join Inventory.UnpackingDocs d on d.Id = l.UnpackingDocId
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "UnpackingLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select Id as ServerId,
+	Date,
+	AddressId,
+	ReasonId,
+	Status,
+	CloseDate,
+	SupplySumWithoutNds,
+	SupplySum,
+	RetailSum,
+	LinesCount,
+	Comment,
+	Error
+from Inventory.WriteoffDocs d
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "WriteoffDocs",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
+
+				sql = $@"
+select l.WaybillLineId,
+	l.Exp,
+	l.Period,
+	l.Quantity,
+	l.StockId,
+	l.Barcode,
+	l.Product,
+	l.ProductId,
+	l.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.SerialNumber,
+	l.Certificates,
+	l.ProducerCost,
+	l.RegistryCost,
+	l.RetailCost,
+	l.RetailMarkup,
+	l.SupplierCost,
+	l.SupplierCostWithoutNds,
+	l.SupplierPriceMarkup,
+	l.ExciseTax,
+	l.BillOfEntryNumber,
+	l.VitallyImportant,
+	l.SupplyQuantity,
+	l.WriteoffDocId as ServerDocId
+from Inventory.WriteoffLines l
+	join Inventory.WriteoffDocs d on d.Id = l.WriteoffDocId
+where d.Timestamp > ?lastSync
+	and d.UserId <> ?userId
+	and d.AddressId in {addressIds}";
+				Export(Result, sql, "WriteoffLines",
+					truncate: false,
+					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 			}
 
 			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
