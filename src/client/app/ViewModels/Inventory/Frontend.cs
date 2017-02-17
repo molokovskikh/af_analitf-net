@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class Frontend : BaseScreen2
 	{
+		private const string TXT_START_STATUS = "Готов к работе (F1 для справки)";
+
 		public Frontend()
 		{
 			DisplayName = "Регистрация продаж";
@@ -27,17 +29,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines = new ReactiveCollection<CheckLine>();
 			Lines.Changed.Subscribe(_ => {
 				if (Lines.Count == 0) {
-					Status.Value = "Готов к работе";
 					Discount.Value = null;
 					Sum.Value = null;
 				} else {
+					Status.Value = StatusText();
 					Change.Value = null;
-					Status.Value = "Открыт чек продажи";
 					Sum.Value = Lines.Sum(x => x.RetailSum);
 					Discount.Value = Lines.Sum(x => x.DiscontSum);
 				}
 			});
-			Status.Value = "Готов к работе (F1 для справки)";
+			Status.Value = TXT_START_STATUS;
 			checkType = CheckType.SaleBuyer;
 			PaymentType.Value = Models.Inventory.PaymentType.Cash;
 			PaymentType.Subscribe(_ => {
@@ -60,6 +61,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private CheckType checkType { get; set; }
 		public NotifyValue<PaymentType> PaymentType { get; set; }
+
+		private string StatusText()
+		{
+			return checkType == CheckType.SaleBuyer ? "Открыт чек продажи" : "Открыт возврат по чеку";
+		}
 
 		private void Message(string text)
 		{
@@ -255,22 +261,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Trigger()
 		{
 			Reset();
-			if (checkType == CheckType.SaleBuyer)
-			{
-				checkType = CheckType.CheckReturn;
-				Status.Value = "Открыт возврат по чеку";
-			}
-			else if (checkType == CheckType.CheckReturn)
-			{
-				checkType = CheckType.SaleBuyer;
-				Status.Value = "Открыт чек продажи";
-			}
+			checkType = checkType == CheckType.SaleBuyer ? CheckType.CheckReturn : CheckType.SaleBuyer;
+			Status.Value = StatusText();
 		}
 
 		private void Reset()
 		{
 			Lines.Clear();
-			Status.Value = "Готов к работе";
+			Status.Value = TXT_START_STATUS;
 			Quantity.Value = null;
 			PaymentType.Value = Models.Inventory.PaymentType.Cash;
 		}

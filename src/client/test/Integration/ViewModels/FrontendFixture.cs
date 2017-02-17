@@ -208,5 +208,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.Trigger();
 			Assert.AreEqual(status, model.Status.Value);
 		}
+
+		[Test]
+		public void Check_status_after_adding_line()
+		{
+			model.Trigger();
+			Assert.AreEqual("Открыт возврат по чеку", model.Status.Value);
+			var line = new CheckLine(stock, 1, CheckType.CheckReturn);
+			model.Lines.Add(line);
+			Assert.AreEqual("Открыт возврат по чеку", model.Status.Value);
+		}
 	}
 }
