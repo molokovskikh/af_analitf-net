@@ -147,6 +147,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null) {
 				return;
 			}
+			Waybill.Settings = Settings;
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
