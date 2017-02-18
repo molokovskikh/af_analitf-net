@@ -26,11 +26,12 @@ using NHibernate.Proxy;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using Common.NHibernate;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	[DataContract]
-	public class OrdersViewModel : BaseOrderViewModel, IPrintable
+	public class OrdersViewModel : BaseOrderViewModel, IPrintableStock
 	{
 		private Order currentOrder;
 		private ReactiveCollection<Order> orders;
@@ -114,6 +115,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			IsCurrentSelected
 				.Select(v => v ? "Orders" : "SentOrders")
 				.Subscribe(ExcelExporter.ActiveProperty);
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public AddressSelector AddressSelector { get; set; }
@@ -591,7 +595,18 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Shell.Navigate(new OrderDetailsViewModel(CurrentSentOrder));
 		}
 
-		public bool CanPrint
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+
+		public bool CanPrintStock
 		{
 			get
 			{
@@ -603,7 +618,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public PrintResult Print()
+		public PrintResult PrintStock()
 		{
 			IEnumerable<BaseDocument> docs;
 			if (!IsSentSelected) {

@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Отказ")] Rejects,
 	}
 
-	public class WaybillsViewModel : BaseScreen, IPrintable
+	public class WaybillsViewModel : BaseScreen, IPrintableStock
 	{
 		public WaybillsViewModel()
 		{
@@ -61,9 +61,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
-    public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
 	    if (Waybills.Value == null || WaybillsTotal.Count != 1) return;
 
@@ -332,11 +335,37 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new OpenResult(commnand.Result);
 		}
 
-		public bool CanPrint => true;
-
-		public PrintResult Print()
+		public void SetMenuItems()
 		{
-			return new PrintResult(DisplayName, new WaybillsDoc(Waybills.Value.ToArray()));
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => true;
+
+		public PrintResult PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == DisplayName)
+						docs.Add(new WaybillsDoc(Waybills.Value.ToArray()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			return Preview(DisplayName, new WaybillsDoc(Waybills.Value.ToArray()));
 		}
 	}
 }

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
@@ -77,9 +79,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print()
 		{
-			Assert.That(model.CanPrint, Is.True);
-			var doc = model.Print().Paginator;
-			Assert.That(doc, Is.Not.Null);
+			var results = model.PrintPreview().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
 		[Test]

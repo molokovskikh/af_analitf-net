@@ -132,16 +132,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return Preview("Акт возврата", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
 		}
 
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
 		public IResult ExportExcel()
 		{
 			Update();

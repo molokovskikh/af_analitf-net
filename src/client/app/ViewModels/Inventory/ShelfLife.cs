@@ -149,15 +149,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return Preview("Отчет по срокам годности", new ShelfLifeDocument(Items.Value.ToArray(), GetVisibilityDic()));
 		}
 
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null) {
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Отчет по срокам годности" };

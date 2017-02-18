@@ -130,21 +130,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return ExcelExporter.Export(book);
 		}
 
-		public IEnumerable<IResult> PrintDefectStock()
-		{
-			return Preview("Товарные запасы", new DefectStockDocument(Items.Value.ToArray()));
-		}
-
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null) {
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
-
 		private List<Tuple<uint, uint>> CalcLinks(IStatelessSession session)
 		{
 			var result = Session.CreateSQLQuery(@"select s.Id as StockId, r.Id as RejectId " +
@@ -180,8 +165,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void SetMenuItems()
 		{
-			var item = new MenuItem {Header = "Товарные запасы"};
+			var item = new MenuItem {Header = DisplayName };
 			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock
+		{
+			get { return true; }
 		}
 
 		PrintResult IPrintableStock.PrintStock()
@@ -189,25 +183,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
 				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
-					if ((string) item.Header == "Чеки")
+					if ((string)item.Header == DisplayName)
 						docs.Add(new DefectStockDocument(Items.Value.ToArray()));
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
 
-			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
-				Coroutine.BeginExecute(PrintDefectStock().GetEnumerator());
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
 			return null;
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
-		public string LastOperation { get; set; }
-		public string PrinterName { get; set; }
-		public bool IsView { get; set; }
-
-		public bool CanPrintStock
+		public IEnumerable<IResult> PrintPreview()
 		{
-			get { return true; }
+			return Preview(DisplayName, new DefectStockDocument(Items.Value.ToArray()));
 		}
 	}
 }

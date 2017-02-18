@@ -16,10 +16,13 @@ using NHibernate.Linq;
 using ReactiveUI;
 using System.Windows;
 using AnalitF.Net.Client.ViewModels.Parts;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
-	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable
+	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintableStock
 	{
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
@@ -97,8 +100,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<decimal> RetailMarkup { get; set; }
 		public NotifyValue<List<object>> DisplayItems { get; set; }
 		public NotifyValue<object> CurrentDisplayItem { get; set; }
-
-		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
 
 		protected override void OnInitialize()
 		{
@@ -246,10 +247,38 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
-		public PrintResult Print()
+		public void SetMenuItems()
 		{
-			var doc = new CatalogOfferDocument(ViewHeader, GetPrintableOffers());
-			return new PrintResult(DisplayName, doc);
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => true;
+		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
+
+		public PrintResult PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == DisplayName)
+						docs.Add(new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			return Preview(DisplayName, new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
 		}
 
 		public void ShowPrice()

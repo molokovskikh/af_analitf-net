@@ -16,10 +16,11 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using Xceed.Wpf.Toolkit.Primitives;
+using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
-	public class Awaited : BaseOfferViewModel, IPrintable
+	public class Awaited : BaseOfferViewModel, IPrintableStock
 	{
 		public Awaited()
 		{
@@ -29,6 +30,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CanDelete = CurrentItem.Select(i => i != null).ToValue();
 			ActivePrint = new NotifyValue<string>();
 			ActivePrint.Subscribe(ExcelExporter.ActiveProperty);
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public NotifyValue<bool> CanDelete { get; set; }
@@ -98,35 +102,68 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Items.Value.Remove(CurrentItem.Value);
 		}
 
-		public bool CanPrint
+		public void SetMenuItems()
 		{
-			get
-			{
-				return ActivePrint.Value.Match("Offers")
-					? User.CanPrint<Awaited, Offer>()
-					: User.CanPrint<Awaited, AwaitedItem>();
-			}
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem { Header = "Сводный прайс-лист" };
+			PrintStockMenuItems.Add(item);
 		}
 
-		public PrintResult Print()
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => true;
+
+		public PrintResult PrintStock()
 		{
-			if (ActivePrint.Value.Match("Offers")) {
-				if (CurrentCatalog.Value == null)
-					return null;
-				var offers = GetPrintableOffers();
-				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, offers));
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == DisplayName) {
+						if (!User.CanPrint<Awaited, AwaitedItem>() || Address == null)
+							continue;
+						var items = GetItemsFromView<AwaitedItem>("Items") ?? Items.Value;
+						docs.Add(new AwaitedDocument(items));
+					}
+					if ((string)item.Header == "Сводный прайс-лист") {
+						if (!User.CanPrint<Awaited, Offer>() || CurrentCatalog.Value == null)
+							continue;
+						var items = GetPrintableOffers();
+						docs.Add(new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, items));
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
 			}
-			else if (Address != null) {
-				var items = GetItemsFromView<AwaitedItem>("Items") ?? Items.Value;
-				return new PrintResult(DisplayName, new AwaitedDocument(items));
-			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			if (LastOperation == "Сводный прайс-лист")
+				Coroutine.BeginExecute(PrintPreviewCatalogOffer().GetEnumerator());
 			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			if (!User.CanPrint<Awaited, AwaitedItem>() || Address == null)
+				return null;
+			var items = GetItemsFromView<AwaitedItem>("Items") ?? Items.Value;
+			return Preview(DisplayName, new AwaitedDocument(items));
+		}
+
+		public IEnumerable<IResult> PrintPreviewCatalogOffer()
+		{
+			if (!User.CanPrint<Awaited, Offer>() || CurrentCatalog.Value == null)
+				return null;
+			var items = GetPrintableOffers();
+			return Preview("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, items));
 		}
 
 		public void ActivatePrint(string name)
 		{
 			ActivePrint.Value = name;
-			NotifyOfPropertyChange(nameof(CanPrint));
 		}
 	}
 }

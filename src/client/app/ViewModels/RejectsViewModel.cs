@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -13,10 +14,11 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate.Linq;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class RejectsViewModel : BaseScreen, IPrintable
+	public class RejectsViewModel : BaseScreen, IPrintableStock
 	{
 		public RejectsViewModel()
 		{
@@ -32,6 +34,8 @@ namespace AnalitF.Net.Client.ViewModels
 				CurrentReject);
 
 			WatchForUpdate(CurrentReject);
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		[Export]
@@ -85,21 +89,54 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.Query(s => s.CreateSQLQuery("update rejects set Marked = 0").ExecuteUpdate()).LogResult();
 		}
 
-		public bool CanPrint => User.CanPrint<RejectsDocument>();
-
-		public PrintResult Print()
+		public void SetMenuItems()
 		{
-			IList<Reject> toPrint = Env
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => User.CanPrint<RejectsDocument>();
+
+		public PrintResult PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == DisplayName) {
+						var items = GetItemsForPrint();
+						docs.Add(new RejectsDocument(items, ShowCauseReason));
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			var items = GetItemsForPrint();
+			return Preview(DisplayName, new RejectsDocument(items, ShowCauseReason));
+		}
+
+		private IList<Reject> GetItemsForPrint()
+		{
+			IList<Reject> items = Env
 				.Query(s => s.Query<Reject>().Where(r => r.Marked)
 					.OrderBy(r => r.LetterDate).ToList()).Result;
-			if (toPrint.Count == 0) {
-				toPrint = GetItemsFromView<Reject>("Rejects") ?? Rejects.Value;
-			}
-			else {
-				toPrint = ApplySort("Rejects", toPrint);
-			}
-			return new PrintResult(DisplayName, new RejectsDocument(toPrint, ShowCauseReason));
+			if (items.Count == 0)
+				items = GetItemsFromView<Reject>("Rejects") ?? Rejects.Value;
+			else
+				items = ApplySort("Rejects", items);
+			return items;
 		}
+
 
 		private Reject[] ApplySort(string name, IList<Reject> items)
 		{

@@ -16,10 +16,12 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using NHibernate;
 using ReactiveUI;
 using Common.Tools;
+using System.Windows.Controls;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
-	public class OrderDetailsViewModel : BaseScreen, IPrintable
+	public class OrderDetailsViewModel : BaseScreen, IPrintableStock
 	{
 		private readonly uint orderId;
 		private readonly Type type;
@@ -52,6 +54,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsMinCost", "Позиции по мин.ценам")));
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsNotMinCost", "Позиции не по мин.ценам")));
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("OnlyWarning", "Только позиции с корректировкой")));
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public List<Selectable<Tuple<string, string>>> FilterItems { get; set; }
@@ -77,7 +82,43 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public MatchedWaybills MatchedWaybills { get; set; }
 
-		public bool CanPrint => User.CanPrint<OrderDocument>(type);
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => User.CanPrint<OrderDocument>(type);
+
+		public PrintResult PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == DisplayName) {
+						//порядок сортировки должен быть такой же как в таблице
+						var lines = GetItemsFromView<IOrderLine>("Lines") ?? Lines.Value;
+						docs.Add(new OrderDocument(Order.Value, lines));
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			//порядок сортировки должен быть такой же как в таблице
+			var lines = GetItemsFromView<IOrderLine>("Lines") ?? Lines.Value;
+			return Preview(DisplayName, new OrderDocument(Order.Value, lines));
+		}
 
 		public bool ShowPriceVisible => IsCurrentOrder;
 
@@ -173,13 +214,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Subscribe(_ => TryClose());
 
 			Lines.Recalculate();
-		}
-
-		public PrintResult Print()
-		{
-			//порядок сортировки должен быть такой же как в таблице
-			var lines = GetItemsFromView<IOrderLine>("Lines") ?? Lines.Value;
-			return new PrintResult(DisplayName, new OrderDocument(Order.Value, lines));
 		}
 
 		public void EnterLine()
