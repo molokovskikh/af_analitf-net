@@ -56,6 +56,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");
 			SessionValue(CurrentFilter, "CurrentFilter");
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		//для восстановления состояния
