@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			foreach (var address in client.Addresses) {
 				newUser.JoinAddress(address);
 			}
-			Log($"Пользователь {user.Id}");
+			Log($"Создан пользователь {user.Login}");
 		}
 	}
 }

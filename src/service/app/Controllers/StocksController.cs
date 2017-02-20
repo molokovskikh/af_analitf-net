@@ -65,7 +65,7 @@ namespace AnalitF.Net.Service.Controllers
 						table.Columns.Remove("ServerDocId");
 					if (table.Columns.Contains("ServerId"))
 						table.Columns.Remove("ServerId");
-					if (table.Columns.Contains("Timestamp"))
+					if (table.Columns.Contains("Timestamp") && !item.FileName.EndsWith("Waybills"))
 						table.Columns.Remove("Timestamp");
 
 					MySqlCommand cmd;
