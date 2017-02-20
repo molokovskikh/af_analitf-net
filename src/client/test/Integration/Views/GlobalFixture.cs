@@ -63,8 +63,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			StartWait();
 
 			//открытие окна на весь экран нужно что бы отображалось максимальное количество элементов
-			activeWindow.Dispatcher.Invoke(() =>
-			{
+			activeWindow.Dispatcher.Invoke(() => {
 				activeWindow.WindowState = WindowState.Maximized;
 			});
 
@@ -83,8 +82,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			names = (CatalogNameViewModel)catalog.ActiveItem;
 			var frameworkElement = (FrameworkElement)names.GetView();
 			Input(frameworkElement, "CatalogNames", Key.Escape);
-			frameworkElement.Dispatcher.Invoke(() =>
-			{
+			frameworkElement.Dispatcher.Invoke(() => {
 				names.CurrentCatalogName.Value = names.CatalogNames.Value.First(n => n.Name == name);
 			});
 			await OpenAndReturnOnSearch(names, term);
@@ -102,8 +100,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Click("ShowCatalog");
 
 			var catalog = await ViewLoaded<CatalogViewModel>();
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				catalog.CatalogSearch.Value = true;
 			});
 			WaitIdle();
@@ -113,16 +110,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Input(view, "SearchText", term);
 			Input(view, "SearchText", Key.Enter);
 
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				scheduler.AdvanceByMs(100);
 			});
 			catalog.WaitQueryDrain().Wait();
 
 			WaitIdle();
 
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var grid = (DataGrid)view.FindName("Items");
 				var selectMany = grid.Descendants<DataGridCell>()
 					.SelectMany(c => c.Descendants<Run>())
@@ -432,14 +427,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var catalogModel = (CatalogViewModel)shell.ActiveItem;
 			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
 			var view = (FrameworkElement)viewModel.GetView();
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var names = (DataGrid)view.FindName("CatalogNames");
 				names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(n => n.Id == catalog.Name.Id);
 			});
 			WaitIdle();
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var catalogs = (DataGrid)view.FindName("Catalogs");
 				catalogs.SelectedItem = catalogs.ItemsSource.Cast<Catalog>().First(n => n.Id == catalog.Id);
 			});
@@ -447,8 +440,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			if (viewModel.Catalogs.Value.Count > 1)
 				Input(view, "Catalogs", Key.Enter);
 			AdvanceScheduler(3000);
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var element = (FrameworkElement)((Screen)shell.ActiveItem).GetView();
 				var grid = (DataGrid)element.FindName("HistoryOrders");
 				Assert.That(grid.Items.Count, Is.GreaterThan(0));
@@ -460,15 +452,13 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			StartWait();
 			AsyncClick("ShowSettings");
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var content = (FrameworkElement)activeWindow.Content;
 				var tab = (TabItem)content.FindName("VitallyImportantMarkupsTab");
 				tab.IsSelected = true;
 			});
 			WaitIdle();
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var content = (FrameworkElement)activeWindow.Content;
 				var grid = (DataGrid)content.FindName("VitallyImportantMarkups");
 				EditCell(grid, 0, 1, "30");
@@ -560,8 +550,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Click("ShowCatalog");
 			OpenOffers();
 
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var offers = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Offers");
 
 				var supplierCost = GetCell(offers, "Цена поставщика");
@@ -586,8 +575,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			AdvanceScheduler(500);
 
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
 				Assert.IsTrue(producerPromotions.IsVisible);
 				Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
@@ -600,8 +588,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 
 			WaitWindow(fixture.ProducerPromotion.DisplayName);
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 
 				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
 
@@ -625,8 +612,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Click("ShowCatalog");
 			OpenOffers(fixture.Promotion.Catalogs[0]);
 			AdvanceScheduler(500);
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var promotions = activeWindow.Descendants<PromotionPopup>().First();
 				Assert.IsTrue(promotions.IsVisible);
 				Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
@@ -637,8 +623,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 
 			WaitWindow(fixture.Promotion.DisplayName);
-			dispatcher.Invoke(() =>
-			{
+			dispatcher.Invoke(() =>	{
 				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
 				var image = viewer.Document.Descendants<Image>().First();
 				Assert.IsNotNull(image);
