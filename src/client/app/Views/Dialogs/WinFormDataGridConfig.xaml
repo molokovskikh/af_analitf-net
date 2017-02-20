@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.WinFormDataGridConfig"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	Margin="5">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition />
+			<RowDefinition />
+			<RowDefinition />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="Auto" />
+		</Grid.ColumnDefinitions>
+
+		<TextBlock Margin="5" TextWrapping="Wrap" Grid.Row="0" Grid.ColumnSpan="2" Width="300">
+			Выберите столбцы, которые бы вы хотели видеть в данном представлении.
+			Кнопками "Вниз" и "Вверх" можно задать порядок следования столбцов.
+		</TextBlock>
+
+		<ListBox Margin="5" Grid.Row="1" Grid.Column="0" Height="140" Width="200" Name="Columns" 
+			HorizontalAlignment="Left">
+			<ItemsControl.ItemTemplate>
+				<DataTemplate>
+					<StackPanel Orientation="Horizontal">
+						<CheckBox IsChecked="{Binding BindVisible}" />
+						<TextBlock Text="{Binding HeaderText}" />
+					</StackPanel>
+				</DataTemplate>
+			</ItemsControl.ItemTemplate>
+		</ListBox>
+
+		<StackPanel Grid.Row="1" Grid.Column="1">
+			<Button Margin="5" Name="Up">Вверх</Button>
+			<Button Margin="5" Name="Down">Вниз</Button>
+			<Button Margin="5" Name="Hide">Скрыть</Button>
+			<Button Margin="5" Name="Show">Отобразить</Button>
+		</StackPanel>
+
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal">
+			<TextBlock Margin="5">Ширина выделенного столбца:</TextBlock>
+			<TextBox Margin="5" Width="70" Text="{Binding CurrentColumn.Value.BindWidth}" />
+		</StackPanel>
+
+		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
+			<Button Margin="5" Name="OK">ОК</Button>
+			<Button Margin="5" Name="TryClose">Отменить</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>
