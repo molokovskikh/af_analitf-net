@@ -163,11 +163,14 @@ where Timestamp > @lastSync");
 				try {
 					using (var sync = new SyncCommand()) {
 						sync.InitSession();
-						var settings = sync.Session.Query<Settings>().FirstOrDefault();
-						if (settings?.IsValid == true) {
-							sync.Configure(settings, config, token);
-							sync.Execute();
-							Env.Current.Bus.SendMessage("stocks", "reload");
+						using (var trx = sync.Session.BeginTransaction()) {
+							var settings = sync.Session.Query<Settings>().FirstOrDefault();
+							if (settings?.IsValid == true) {
+								sync.Configure(settings, config, token);
+								sync.Execute();
+								Env.Current.Bus.SendMessage("stocks", "reload");
+							}
+							trx.Commit();
 						}
 					}
 				} catch(Exception e) {
