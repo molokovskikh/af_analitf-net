@@ -143,9 +143,9 @@
 					<MenuItem Header="Загрузить историю накладных"
 						cal:Message.Attach="LoadWaybillHistory" />
 				</MenuItem>
-				<Separator Visibility="{Binding IsShowLoginEnabled.Value, Converter={StaticResource BoolToCollapsed}}"/>
+				<Separator Visibility="{Binding IsShowLoginEnabled, Converter={StaticResource BoolToCollapsed}}"/>
 				<MenuItem Header="Сменить пользователя" cal:Message.Attach="ShowLogin"
-					Visibility="{Binding IsShowLoginEnabled.Value, Converter={StaticResource BoolToCollapsed}}"/>
+					Visibility="{Binding IsShowLoginEnabled, Converter={StaticResource BoolToCollapsed}}"/>
 			</MenuItem>
 
       <MenuItem Header="Склад" Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">

@@ -250,6 +250,8 @@ namespace AnalitF.Net.Client
 			else {
 				Directory.CreateDirectory(Config.TmpDir);
 			}
+
+			bool.TryParse(ConfigurationManager.AppSettings["MultiUserInstallation"], out Config.MultiUser);
 		}
 
 		public void InitShell()

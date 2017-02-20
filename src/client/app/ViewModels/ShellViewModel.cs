@@ -267,8 +267,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsCashEnabled);
 			User.Select(x => x?.HasOrderPermission() ?? false)
 				.Subscribe(IsOrderEnabled);
-			User.Select(x => (x?.UsersCount ?? 1) > 1)
-				.Subscribe(IsShowLoginEnabled);
 			UserName.Subscribe(_ => SwitchUser());
 
 			//if (Env.Factory != null) {
@@ -295,7 +293,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsStockEnabled { get; set; }
 		public NotifyValue<bool> IsCashEnabled { get; set; }
 		public NotifyValue<bool> IsOrderEnabled { get; set; }
-		public NotifyValue<bool> IsShowLoginEnabled { get; set; }
+		public bool IsShowLoginEnabled => Config.MultiUser;
 
 		public string Version { get; set; }
 
