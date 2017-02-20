@@ -14,34 +14,31 @@ using AnalitF.Net.Client.ViewModels;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Reactive.Linq;
+using System.Windows.Input;
 
 namespace AnalitF.Net.Client.Controls
 {
 	public class WinFormDataGrid : WindowsFormsHost
 	{
-		ContextMenuStrip menu = new ContextMenuStrip();
-		ToolStripMenuItem ColumnsMenuItem = new ToolStripMenuItem("Столбцы");
+		private ContextMenuStrip menu = new ContextMenuStrip();
+		private ToolStripMenuItem сolumnsMenuItem = new ToolStripMenuItem("Столбцы");
+		private Dictionary<int, GroupHeader> groupHeader = new Dictionary<int, GroupHeader>();
+		private bool calculatedWidth = true;
+		private PresentationSource presentationSource;
+		private Style style;
+		private ResourceDictionary styleresources;
 
 		public DataGridView DataGrid = new DataGridView();
-		Dictionary<int, GroupHeader> _GroupHeader = new Dictionary<int, GroupHeader>();
-		bool calculatedWidth = true;
-		public bool isStyleAppled = true;
-		public Type type
-		{ get; set; }
-		public Dictionary<Keys, string> HotKey = new Dictionary<Keys, string>();
-
-		Style style;
-
-		ResourceDictionary styleresources;
-
+		public bool IsStyleAppled = true;
+		public Type Type { get; set; }
 		public ResourceDictionary StyleResources
 		{
 			get { return styleresources; }
 			set
 			{
 				styleresources = value;
-				if (type != null)
-					style = (Style)styleresources[type.Name + "Row"];
+				if (Type != null)
+					style = (Style)styleresources[Type.Name + "Row"];
 			}
 		}
 
@@ -51,14 +48,14 @@ namespace AnalitF.Net.Client.Controls
 				var winFormDataGrid = d as WinFormDataGrid;
 				if (winFormDataGrid != null && winFormDataGrid.DataGrid != null)
 				{
-					winFormDataGrid._GroupHeader.Clear();
+					winFormDataGrid.groupHeader.Clear();
 					if ((winFormDataGrid.GetValue(e.Property) is List<object>))
 					{
 						for (int i = 0; i < (winFormDataGrid.GetValue(e.Property) as List<object>).Count - 1; i++)
 							if ((winFormDataGrid.GetValue(e.Property) as List<object>)[i] is GroupHeader && i + 1 <= (winFormDataGrid.GetValue(e.Property) as List<object>).Count - 1
 									&& !((winFormDataGrid.GetValue(e.Property) as List<object>)[i+1] is GroupHeader))
 							{
-								winFormDataGrid._GroupHeader.Add(i, ((winFormDataGrid.GetValue(e.Property) as List<object>)[i] as GroupHeader));
+								winFormDataGrid.groupHeader.Add(i, ((winFormDataGrid.GetValue(e.Property) as List<object>)[i] as GroupHeader));
 								(winFormDataGrid.GetValue(e.Property) as List<object>)[i] = (winFormDataGrid.GetValue(e.Property) as List<object>)[i + 1];
 							}
 						
@@ -119,6 +116,7 @@ namespace AnalitF.Net.Client.Controls
 
 		public WinFormDataGrid() : base()
 		{
+			presentationSource = Keyboard.PrimaryDevice.ActiveSource;
 			DataGrid.AutoGenerateColumns = false;
 			SetDoubleBuffered(DataGrid);
 			DataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
@@ -134,45 +132,48 @@ namespace AnalitF.Net.Client.Controls
 			this.DataGrid.DataBindingComplete += DataGrid_DataBindingComplete;
 			this.DataGrid.Paint += DataGrid_Paint;
 			this.DataGrid.KeyPress += DataGrid_KeyPress;
-			this.DataGrid.KeyDown += DataGrid_KeyDown;
 			this.DataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
-			menu.Items.Add(ColumnsMenuItem);
+			menu.Items.Add(сolumnsMenuItem);
 			this.DataGrid.ContextMenuStrip = menu;
-			this.ColumnsMenuItem.Click += ColumnsMenuItem_Click;
+			this.сolumnsMenuItem.Click += ColumnsMenuItem_Click;
 			this.DataGrid.CellFormatting += DataGrid_CellFormatting;
 			this.DataGrid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+			this.DataGrid.PreviewKeyDown += DataGrid_PreviewKeyDown;
+		}
+
+		private void DataGrid_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			if (e.KeyData == Keys.Delete)
+				this.RaiseEvent(new System.Windows.Input.KeyEventArgs(
+					Keyboard.PrimaryDevice, presentationSource, 0, Key.Delete)
+						{ RoutedEvent = Keyboard.KeyDownEvent });
+			if (e.KeyData == Keys.F2)
+				this.RaiseEvent(new System.Windows.Input.KeyEventArgs(
+					Keyboard.PrimaryDevice, presentationSource, 0, Key.F2)
+						{ RoutedEvent = Keyboard.KeyDownEvent });
 		}
 
 		private void DataGrid_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
 		{
 			ApplyStyle();
-
 		}
 
 		private void DataGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
 		{
-			if (_GroupHeader.Keys.Contains(e.RowIndex) && e.ColumnIndex == 0)
+			if (groupHeader.Keys.Contains(e.RowIndex) && e.ColumnIndex == 0)
 			{
-				e.Value = _GroupHeader[e.RowIndex].Name;
+				e.Value = groupHeader[e.RowIndex].Name;
 				e.FormattingApplied = true;
 			}
-			if (_GroupHeader.Keys.Contains(e.RowIndex) && e.ColumnIndex > 0 && e.ColumnIndex < DataGrid.ColumnCount)
+			if (groupHeader.Keys.Contains(e.RowIndex) && e.ColumnIndex > 0 && e.ColumnIndex < DataGrid.ColumnCount)
 			{
 				e.Value = string.Empty;
 				e.FormattingApplied = true;
 			}
 		}
 
-		private void DataGrid_KeyDown(object sender, KeyEventArgs e)
-		{
-			foreach(var k in HotKey)
-			if (e.KeyData == k.Key)
-				ViewModelHelper.InvokeDataContext(this, k.Value);
-		}
-
 		private void ColumnsMenuItem_Click(object sender, EventArgs e)
 		{
-			int a = 0;
 			var screen = (BaseScreen)this.DataContext;
 			if (screen != null)
 				ViewModelHelper.ProcessResult(screen.ConfigureGrid(this));
@@ -186,20 +187,23 @@ namespace AnalitF.Net.Client.Controls
 
 		private void DataGrid_KeyPress(object sender, KeyPressEventArgs e)
 		{
-			if ((sender as DataGridView).CurrentCell != null &&!_GroupHeader.Keys.Contains((sender as DataGridView).CurrentCell.RowIndex))
-				GenerateInputUIntEvent(this, new InputUInEventArgs(e.KeyChar.ToString()));
+			if ((sender as DataGridView).CurrentCell != null && !groupHeader.Keys.Contains((sender as DataGridView).CurrentCell.RowIndex))
+				GenerateMyTextInputEvent(this, new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+							new TextComposition(InputManager.Current, this, e.KeyChar.ToString())));
 			e.Handled = true;
 		}
 
-		#region событие ввода UInt
-		public delegate void InputUIntHandler(object sender, InputUInEventArgs a);
+		#region событие ввода MyTextInputEvent
+		public delegate void MyTextInputHandler(object sender, TextCompositionEventArgs a);
 
-		public event InputUIntHandler InputUIntEvent;
+		public event MyTextInputHandler MyTextInputEvent;
 
-		public void GenerateInputUIntEvent(object Sender, InputUInEventArgs a)
+		public void GenerateMyTextInputEvent(object Sender, TextCompositionEventArgs a)
 		{
-			if (InputUIntEvent != null)
-				InputUIntEvent(this, a);
+			if (MyTextInputEvent != null)
+			{
+				MyTextInputEvent(this, a);
+			}
 		}
 		#endregion
 
@@ -213,7 +217,7 @@ namespace AnalitF.Net.Client.Controls
 
 		private void DataGrid_Paint(object sender, PaintEventArgs e)
 		{
-			if (isStyleAppled)
+			if (IsStyleAppled)
 			{
 				ApplyStyle();
 
@@ -232,7 +236,7 @@ namespace AnalitF.Net.Client.Controls
 		{
 			this.DataGrid.CurrentCellChanged += new EventHandler((sender, e) =>
 			{
-				if (this.DataGrid.CurrentRow != null && !_GroupHeader.Keys.Contains(DataGrid.CurrentRow.Index))
+				if (this.DataGrid.CurrentRow != null && !groupHeader.Keys.Contains(DataGrid.CurrentRow.Index))
 					this.SetValue(SelectedItemProperty, this.DataGrid.CurrentRow.DataBoundItem);
 			});
 		}
@@ -300,15 +304,102 @@ namespace AnalitF.Net.Client.Controls
 			CalcColumnWidth();
 		}
 
+		private void ApplySetter(SetterBase setter, bool isSelected, bool onlyRow, int rowIndex, int columnIndex)
+		{
+			{
+				if (onlyRow)
+				{
+					#region Строки
+					if (isSelected)
+					{
+						if (((Setter)setter).Property.Name == "Background")
+						{
+							DataGrid.Rows[rowIndex].DefaultCellStyle.SelectionBackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+						if (((Setter)setter).Property.Name == "Foreground")
+						{
+							DataGrid.Rows[rowIndex].DefaultCellStyle.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+					}
+					else
+					{
+						if (((Setter)setter).Property.Name == "Background")
+						{
+							DataGrid.Rows[rowIndex].DefaultCellStyle.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+						if (((Setter)setter).Property.Name == "Foreground")
+						{
+							DataGrid.Rows[rowIndex].DefaultCellStyle.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+					}
+					#endregion
+				}
+				else
+				{
+					#region Ячейки
+					if (isSelected)
+					{
+						if (((Setter)setter).Property.Name == "Background")
+						{
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionBackColor =
+								Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+							if (DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionBackColor != Color.Black)
+								DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionForeColor = Color.Black;
+						}
+						if (((Setter)setter).Property.Name == "Foreground")
+						{
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+					}
+					else
+					{
+						if (((Setter)setter).Property.Name == "Background")
+						{
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+						if (((Setter)setter).Property.Name == "Foreground")
+						{
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
+								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
+						}
+					}
+					#endregion
+				}
+			}
+		}
+
 		public void ApplyStyle()
 		{
-			if (type != null)
-				style = (Style)styleresources[type.Name + "Row"];
-			foreach (KeyValuePair<int, GroupHeader> k in _GroupHeader)
+			if (Type != null)
+				style = (Style)styleresources[Type.Name + "Row"];
+			foreach (KeyValuePair<int, GroupHeader> k in groupHeader)
 				((DataGridViewTextBoxCellEx)DataGrid[0, k.Key]).ColumnSpan = DataGrid.ColumnCount;
 			foreach (DataGridViewRow e in DataGrid.Rows)
 			{
-				if (_GroupHeader.Keys.Contains(e.Index))
+				if (groupHeader.Keys.Contains(e.Index))
 				{
 					DataGrid.Rows[e.Index].DefaultCellStyle.Font = new System.Drawing.Font(DataGrid.DefaultCellStyle.Font, System.Drawing.FontStyle.Bold);
 					DataGrid.Rows[e.Index].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 226, 231, 234);
@@ -327,7 +418,7 @@ namespace AnalitF.Net.Client.Controls
 							key = column.DataPropertyName;
 						if (String.IsNullOrEmpty(key))
 							continue;
-						styleCell = StyleResources[type.Name + key + "Cell"] as Style;
+						styleCell = StyleResources[Type.Name + key + "Cell"] as Style;
 						if (styleCell == null)
 							continue;
 
@@ -350,8 +441,8 @@ namespace AnalitF.Net.Client.Controls
 										flag = false;
 									if (!((System.Windows.Data.Binding)c.Binding).Path.Path.StartsWith("(Is"))
 									{
-										if (type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path) != null && DataGrid.Rows[e.Index].DataBoundItem != null
-											&& !type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
+										if (Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path) != null && DataGrid.Rows[e.Index].DataBoundItem != null
+											&& !Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
 										{
 											flag = false;
 										}
@@ -365,43 +456,14 @@ namespace AnalitF.Net.Client.Controls
 										foreach (SetterBase setter in (tr as MultiDataTrigger).Setters)
 										{
 
-											if (((Setter)setter).Property.Name == "Background")
-											{
-												DataGrid.Rows[e.Index].Cells[column.Index].Style.SelectionBackColor =
-													Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-												if (DataGrid.Rows[e.Index].Cells[column.Index].Style.SelectionBackColor != Color.Black)
-													DataGrid.Rows[e.Index].Cells[column.Index].Style.SelectionForeColor = Color.Black;
-											}
-											if (((Setter)setter).Property.Name == "Foreground")
-											{
-												DataGrid.Rows[e.Index].Cells[column.Index].Style.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-											}
+											ApplySetter(setter, IsSelected, false, e.Index, column.Index);
 										}
 									}
 									else
 									{
 										foreach (SetterBase setter in (tr as MultiDataTrigger).Setters)
 										{
-											if (((Setter)setter).Property.Name == "Background")
-											{
-												DataGrid.Rows[e.Index].Cells[column.Index].Style.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-											}
-											if (((Setter)setter).Property.Name == "Foreground")
-											{
-												DataGrid.Rows[e.Index].Cells[column.Index].Style.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-											}
+											ApplySetter(setter, IsSelected, false, e.Index, column.Index);
 										}
 									}
 								}
@@ -411,33 +473,12 @@ namespace AnalitF.Net.Client.Controls
 							#region DataTrigger
 							else if (tr is DataTrigger && DataGrid.Rows[e.Index].DataBoundItem != null)
 							{
-								if (type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
+								if (Type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
 								{
 									foreach (SetterBase setter in (tr as DataTrigger).Setters)
 									{
-										if (((Setter)setter).Property.Name == "Background")
-										{
-											DataGrid.Rows[e.Index].Cells[column.Index].Style.SelectionBackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-											DataGrid.Rows[e.Index].Cells[column.Index].Style.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-										}
-										if (((Setter)setter).Property.Name == "Foreground")
-										{
-											DataGrid.Rows[e.Index].Cells[column.Index].Style.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-											DataGrid.Rows[e.Index].Cells[column.Index].Style.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-													((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-
-										}
+										ApplySetter(setter, true, false, e.Index, column.Index);
+										ApplySetter(setter, false, false, e.Index, column.Index);
 									}
 								}
 							}
@@ -464,7 +505,7 @@ namespace AnalitF.Net.Client.Controls
 								//соотвествие свойства условия
 								if (((System.Windows.Data.Binding)c.Binding).Path.Path != "(IsSelected)" && ((System.Windows.Data.Binding)c.Binding).Path.Path != "(Selector.IsSelectionActive)")
 								{
-									if (DataGrid.Rows[e.Index].DataBoundItem != null && !type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
+									if (DataGrid.Rows[e.Index].DataBoundItem != null && !Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
 									{
 										flag = false;
 									}
@@ -477,40 +518,14 @@ namespace AnalitF.Net.Client.Controls
 								{
 									foreach (SetterBase setter in (tr as MultiDataTrigger).Setters)
 									{
-										if (((Setter)setter).Property.Name == "Background")
-										{
-											DataGrid.Rows[e.Index].DefaultCellStyle.SelectionBackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-										}
-										if (((Setter)setter).Property.Name == "Foreground")
-										{
-											DataGrid.Rows[e.Index].DefaultCellStyle.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-										}
+										ApplySetter(setter, IsSelected, true, e.Index, 0);
 									}
 								}
 								else
 								{
 									foreach (SetterBase setter in (tr as MultiDataTrigger).Setters)
 									{
-										if (((Setter)setter).Property.Name == "Background")
-										{
-											DataGrid.Rows[e.Index].DefaultCellStyle.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-										}
-										if (((Setter)setter).Property.Name == "Foreground")
-										{
-											DataGrid.Rows[e.Index].DefaultCellStyle.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-												((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-										}
+										ApplySetter(setter, IsSelected, true, e.Index, 0);
 									}
 								}
 							}
@@ -519,33 +534,12 @@ namespace AnalitF.Net.Client.Controls
 						#region DataTrigger
 						else if (tr is DataTrigger && DataGrid.Rows[e.Index].DataBoundItem != null)
 						{
-							if (type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
+							if (Type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
 							{
 								foreach (SetterBase setter in (tr as DataTrigger).Setters)
 								{
-									if (((Setter)setter).Property.Name == "Background")
-									{
-										DataGrid.Rows[e.Index].DefaultCellStyle.SelectionBackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-
-										DataGrid.Rows[e.Index].DefaultCellStyle.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-									}
-									if (((Setter)setter).Property.Name == "Foreground")
-									{
-										DataGrid.Rows[e.Index].DefaultCellStyle.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-										DataGrid.Rows[e.Index].DefaultCellStyle.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
-											((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-									}
+									ApplySetter(setter, true, true, e.Index, 0);
+									ApplySetter(setter, false, true, e.Index, 0);
 								}
 
 							}
@@ -555,7 +549,7 @@ namespace AnalitF.Net.Client.Controls
 					#endregion
 				}
 			}
-			isStyleAppled = false;
+			IsStyleAppled = false;
 		}
 
 		public static void SetDoubleBuffered(Control control)
@@ -1279,16 +1273,5 @@ namespace AnalitF.Net.Client.Controls
 			get; set;
 		}
 	}
-
-	public class InputUInEventArgs : EventArgs
-	{
-		public string Str { get; set; }
-
-		public bool Handled { get; set; }
-
-		public InputUInEventArgs(string s)
-		{
-			Str = s;
-		}
-	}
+	
 }

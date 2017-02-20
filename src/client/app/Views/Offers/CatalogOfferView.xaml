@@ -14,45 +14,6 @@
 	<UserControl.Resources>
 		<helpers:GroupConverter x:Key="GroupConverter" />
 		<helpers:GroupNameConverter x:Key="GroupNameConverter" />
-		<!--
-		реализация группировки для datagrid
-		штатная группировка работает из рук вон плохо тк в .net 4 не реализована виртуализация в режиме группировки
-		по этому здесь собственная реализация группировки суть в том что заголовок группировки это обычная строка
-		для которой переопеределн внешний вид GroupConverter проверят должны ли мы переопределять вид
-		GroupNameConverter извлекает имя группы, биндинг не используется тк это приводит к ошибкам
-		связанным с кешированием строк в таблице
-		так же в таблицы реализована своя навигация тк штатная перестает работать из-за переопределения структуры строки
-		включается она свойством GroupNav=true
-		-->
-		<!--<Style x:Key="groupHeader" TargetType="DataGridRow">
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding ., Converter={StaticResource GroupConverter}}" Value="True">
-					<Setter Property="Template">
-						<Setter.Value>
-							<ControlTemplate>
-								<DataGridCellsPresenter>
-									<DataGridCellsPresenter.Style>
-										<Style TargetType="DataGridCellsPresenter">
-											<Setter Property="Template">
-												<Setter.Value>
-													<ControlTemplate>
-														<DataGridCell>
-															<StackPanel Background="#d8f1ff">
-																<TextBlock Text="{Binding Path=., Converter={StaticResource GroupNameConverter}}" FontWeight="Bold" />
-															</StackPanel>
-														</DataGridCell>
-													</ControlTemplate>
-												</Setter.Value>
-											</Setter>
-										</Style>
-									</DataGridCellsPresenter.Style>
-								</DataGridCellsPresenter>
-							</ControlTemplate>
-						</Setter.Value>
-					</Setter>
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>-->
 	</UserControl.Resources>
 
 	<i:Interaction.Behaviors>
@@ -131,73 +92,7 @@
 
 		<c:WinFormDataGrid x:Name="Offers" Grid.Row="1" 
 			MyDataSource="{Binding DisplayItems.Value, Mode=TwoWay}"
-			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"
-						  />
-		<!--<c:DataGrid2 x:Name="Offers" Grid.Row="1"
-			CanUserSortColumns="False"
-			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"
-			ItemsSource="{Binding DisplayItems.Value}"
-			SelectedItem="{Binding CurrentDisplayItem.Value}"
-			RowStyle="{StaticResource groupHeader}"
-			GroupNav="True">
-			<c:DataGrid2.Columns>
-				<c:DataGridTextColumnEx Width="177*"
-					Header="Название"
-					Binding="{Binding ProductSynonym}" />
-				<c:DataGridTextColumnEx Width="89*"
-					Header="Производитель"
-					Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
-					Header="Кат.производитель" Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
-					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="56*"
-					Header="Срок годн."
-					Binding="{Binding Period}" TextAlignment="Center" />
-				<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
-					Binding="{Binding Price.Name}" />
-				<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
-					Binding="{Binding Price.RegionName}" />
-				<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
-					Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
-				<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
-					Binding="{Binding RequestRatio}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
-					Header="Мин.сумма" Binding="{Binding MinOrderSum}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
-					Header="Мин.кол-во" Binding="{Binding MinOrderCount}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="26*" Visibility="Collapsed" Header="Разница, %"
-					Binding="{Binding Diff}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена"
-					Binding="{Binding RegistryCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
-					Binding="{Binding MaxProducerCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
-					Binding="{Binding ProducerCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
-					Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<c:DataGridTextColumnEx Width="59*"
-					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="39*" Header="Остаток"
-					Binding="{Binding Quantity}" SortMemberPath="SortQuantity" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
-					Binding="{Binding RetailCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
-					Binding="{Binding OrderLine.Comment}" />
-				<c:DataGridTextColumnEx Width="34*"
-					Header="Заказ"
-					Binding="{Binding OrderCount}" />
-				<c:DataGridTextColumnEx Width="51*"
-					Header="Сумма"
-					Binding="{Binding OrderLine.ResultSum}" />
-			</c:DataGrid2.Columns>
-		</c:DataGrid2>-->
+			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"/>
 
 		<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Grid.RowDefinitions>

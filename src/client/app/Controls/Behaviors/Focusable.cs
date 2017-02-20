@@ -62,13 +62,11 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 				var defaultFocus = GetDefaultFocus(AssociatedObject) ?? FromContent(AssociatedObject);
 				if (defaultFocus == null)
 					return;
-				if (defaultFocus is DataGrid)
-				{
+				if (defaultFocus is DataGrid) {
 					//иногда visual tree data grid оказывается не построенным хотя он и говорит что
 					//все загружено, если фокус не удалось установить всего скорее visual tree не создан
 					//нужно повторить операцию после того как все будет загружено
-					if (!DataGridHelper.Focus((DataGrid)defaultFocus))
-					{
+					if (!DataGridHelper.Focus((DataGrid)defaultFocus)) {
 						Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
 						{
 							DataGridHelper.Focus((DataGrid)defaultFocus);

@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Views.Offers
 		{
 		
 			InitializeComponent();
-			Offers.type = typeof(Offer);
+			Offers.Type = typeof(Offer);
 			Offers.StyleResources = Application.Current.Resources;
 			Offers.DataGrid.Columns.Add(new DataGridViewTextBoxColumnEx() { Name = "ProductSynonym", DataPropertyName = "ProductSynonym", HeaderText = "Название", WidthWPF = 177 });
 			Offers.DataGrid.Columns.Add(new DataGridViewTextBoxColumnEx() { Name = "ProducerSynonym", DataPropertyName = "ProducerSynonym", HeaderText = "Производитель", WidthWPF = 89 });
@@ -61,28 +61,10 @@ namespace AnalitF.Net.Client.Views.Offers
 			Offers.DataGrid.Columns.Add(new DataGridViewTextBoxColumnEx() { Name = "RetailCost", DataPropertyName = "RetailCost", HeaderText = "Розн.цена", WidthWPF = 48 });
 			Offers.DataGrid.Columns["RetailCost"].DefaultCellStyle.Alignment = WinForms.DataGridViewContentAlignment.MiddleRight;
 			Offers.DataGrid.Columns.Add(new DataGridViewTextBoxColumnEx() { Name = "OrderLineComment", DataPropertyName = "OrderLineComment", PropertyPath = "OrderLine.Comment", HeaderText = "Комментарий", WidthWPF = 48 });
-
-
 			Offers.DataGrid.Columns.Add(new DataGridViewTextBoxColumnEx() { Name = "OrderCount", DataPropertyName = "OrderCount", HeaderText = "Заказ", WidthWPF = 51 });
 			Offers.DataGrid.Columns.Add(new DataGridViewTextBoxColumnEx() { Name = "OrderLineResultSum", DataPropertyName = "OrderLineResultSum", PropertyPath= "OrderLine.ResultSum", HeaderText = "Сумма", WidthWPF = 51 });
-			Offers.HotKey.Add(WinForms.Keys.F2, "ShowPrice");
 			new Editable().Attach(Offers);
-			//			var grid = Offers;
-
-			//grid.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
-			//Commands.DoInvokeViewModel,
-			//Commands.CanInvokeViewModel));
-
-			//Conventions.ConfigureDataGrid(grid, typeof(Offer));
-
-			//DataGridHelper.CalculateColumnWidths(Offers);
 			ApplyStyles();
-			//BindingOperations.SetBinding(OfferOverlayPanel, Grid.MaxHeightProperty,
-			//	new Binding("ActualHeight") {
-			//		Source = Offers,
-			//		Converter = new LambdaConverter<double>(v => v * 0.7)
-			//	});
-			//this.DataContextChanged += CatalogOfferView_DataContextChanged;
 		}
 
 
