@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
-			settings.Waybills.Add(new WaybillSettings());
+			settings.Waybills.Add(new WaybillSettings(user, address));
 			session.DeleteEach<Stock>();
 			model = Open(new Frontend());
 			stock = new Stock()
