@@ -18,7 +18,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class RejectsViewModel : BaseScreen, IPrintableStock
+	public class RejectsViewModel : BaseScreen, IPrintable
 	{
 		public RejectsViewModel()
 		{
@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels
 				CurrentReject);
 
 			WatchForUpdate(CurrentReject);
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -92,20 +92,20 @@ namespace AnalitF.Net.Client.ViewModels
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => User.CanPrint<RejectsDocument>();
+		public bool CanPrint => User.CanPrint<RejectsDocument>();
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == DisplayName) {
 						var items = GetItemsForPrint();
 						docs.Add(new RejectsDocument(items, ShowCauseReason));

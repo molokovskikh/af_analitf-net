@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Отказ")] Rejects,
 	}
 
-	public class WaybillsViewModel : BaseScreen, IPrintableStock
+	public class WaybillsViewModel : BaseScreen, IPrintable
 	{
 		public WaybillsViewModel()
 		{
@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -338,20 +338,20 @@ namespace AnalitF.Net.Client.ViewModels
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => true;
+		public bool CanPrint => true;
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == DisplayName)
 						docs.Add(new WaybillsDoc(Waybills.Value.ToArray()));
 				}

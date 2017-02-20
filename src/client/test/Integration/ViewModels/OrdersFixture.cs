@@ -79,8 +79,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			MakeOrder(session.Query<Offer>().First());
 
 			model.CurrentOrder = model.Orders.First();
-			Assert.That(model.CanPrintStock, Is.True);
-			var doc = model.PrintStock().Paginator;
+			Assert.That(model.CanPrint, Is.True);
+			var doc = model.Print().Paginator;
 			Assert.That(doc, Is.Not.Null);
 		}
 
@@ -92,9 +92,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			MakeSentOrder(offers);
 			model.IsSentSelected.Value = true;
 			model.IsCurrentSelected.Value = false;
-			Assert.That(model.CanPrintStock, Is.True);
+			Assert.That(model.CanPrint, Is.True);
 			scheduler.Start();
-			var result = model.PrintStock();
+			var result = model.Print();
 
 			var paginator = result.Paginator;
 			Assert.That(paginator, Is.Not.Null);

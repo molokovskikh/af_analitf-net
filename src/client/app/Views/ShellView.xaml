@@ -9,6 +9,8 @@
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	MinHeight="600" MinWidth="800" Name="Shell">
 	<Window.InputBindings>
+		<KeyBinding Gesture="CTRL+P" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="Print" />
 		<KeyBinding Gesture="CTRL+S" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="SendOrders" />
 		<KeyBinding Gesture="CTRL+SHIFT+S" Command="caliburn:Commands.InvokeViewModel"
@@ -100,7 +102,6 @@
 					cal:Message.Attach="CleanSync" />
 				<Separator />
 				<MenuItem Header="Сохранить" InputGestureText="Ctrl+T" cal:Message.Attach="Export" />
-				<MenuItem Header="Предварительный просмотр..." cal:Message.Attach="PrintPreview" />
 				<MenuItem Header="Печать" InputGestureText="Ctrl+P" cal:Message.Attach="Print" />
 				<Separator />
 				<MenuItem Header="Выход" InputGestureText="Alt+F4" cal:Message.Attach="TryClose" />
@@ -200,15 +201,11 @@
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
-			<Button x:Name="Print" ToolTip="Печать (Ctrl+P)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
-				<Image Source="/assets/images/Printer 2_32.ico"
-						Style="{StaticResource ButtonImage}" />
-			</Button>
-      <xctk:SplitButton x:Name="PrintStock" ToolTip="Печать склад" Background="Transparent">
+			<xctk:SplitButton x:Name="Print" ToolTip="Печать (Ctrl+P)" Background="Transparent">
         <Image Source="/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
         <xctk:SplitButton.DropDownContent>
-          <ItemsControl ItemsSource ="{Binding Path=PrintStockMenuItems.Value}"/>
+          <ItemsControl ItemsSource ="{Binding Path=PrintMenuItems.Value}"/>
         </xctk:SplitButton.DropDownContent>
       </xctk:SplitButton>
 

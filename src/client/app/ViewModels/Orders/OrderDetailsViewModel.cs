@@ -21,7 +21,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
-	public class OrderDetailsViewModel : BaseScreen, IPrintableStock
+	public class OrderDetailsViewModel : BaseScreen, IPrintable
 	{
 		private readonly uint orderId;
 		private readonly Type type;
@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsNotMinCost", "Позиции не по мин.ценам")));
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("OnlyWarning", "Только позиции с корректировкой")));
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -85,20 +85,20 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => User.CanPrint<OrderDocument>(type);
+		public bool CanPrint => User.CanPrint<OrderDocument>(type);
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == DisplayName) {
 						//порядок сортировки должен быть такой же как в таблице
 						var lines = GetItemsFromView<IOrderLine>("Lines") ?? Lines.Value;

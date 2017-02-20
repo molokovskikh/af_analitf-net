@@ -29,7 +29,7 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Stocks : BaseScreen2, IPrintableStock
+	public class Stocks : BaseScreen2, IPrintable
 	{
 		private string Name;
 
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				CurrentItem);
 			TrackDb(typeof(Stock));
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 			CurrentItem.Select(x => x?.WaybillId != null).Subscribe(CanOpenWaybill);
 		}
@@ -178,7 +178,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return row;
 		}
 
-		public IEnumerable<IResult> PrintStock()
+		public IEnumerable<IResult> Print()
 		{
 			return Preview("Товарные запасы", new StockDocument(Items.Value.ToArray()));
 		}
@@ -265,24 +265,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Ярлыки"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товарные запасы"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности менее 1 месяца"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == "Товарные запасы")
 						docs.Add(new StockDocument(Items.Value.ToArray()));
 					if ((string) item.Header == "Ярлыки")
@@ -300,7 +300,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 
 			if(string.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
-				Coroutine.BeginExecute(PrintStock().GetEnumerator());
+				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Ярлыки")
 				Tags();
 			if(LastOperation == "Товары со сроком годности")
@@ -320,12 +320,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else if (dialog.ShowDialog() == true)
 				dialog.PrintDocument(doc, name);
 		}
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

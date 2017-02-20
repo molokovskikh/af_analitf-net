@@ -22,7 +22,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
-	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintableStock
+	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable
 	{
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			SessionValue(CurrentRegion, "CurrentRegion");
 			SessionValue(CurrentFilter, "CurrentFilter");
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -253,20 +253,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => User.CanPrint<CatalogOfferDocument>();
+		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == DisplayName)
 						docs.Add(new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
 				}

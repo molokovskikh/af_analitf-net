@@ -31,7 +31,7 @@ using System.Collections.ObjectModel;
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	[DataContract]
-	public class OrdersViewModel : BaseOrderViewModel, IPrintableStock
+	public class OrdersViewModel : BaseOrderViewModel, IPrintable
 	{
 		private Order currentOrder;
 		private ReactiveCollection<Order> orders;
@@ -116,7 +116,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(v => v ? "Orders" : "SentOrders")
 				.Subscribe(ExcelExporter.ActiveProperty);
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -598,15 +598,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get
 			{
@@ -618,7 +618,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			IEnumerable<BaseDocument> docs;
 			if (!IsSentSelected) {

@@ -20,14 +20,14 @@ using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditWriteoffDoc : BaseScreen2, IPrintableStock
+	public class EditWriteoffDoc : BaseScreen2, IPrintable
 	{
 		private EditWriteoffDoc()
 		{
 			Lines = new ReactiveCollection<WriteoffLine>();
 			Session.FlushMode = FlushMode.Never;
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -199,17 +199,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Списание"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Акт списания"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == "Списание")
 						docs.Add(new WriteoffDocument(Lines.ToArray()));
 					if ((string)item.Header == "Акт списания")
@@ -225,12 +225,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

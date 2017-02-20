@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 	}
 
-	public class Checks : BaseScreen2, IPrintableStock
+	public class Checks : BaseScreen2, IPrintable
 	{
 		public Checks()
 		{
@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			DisplayName = "Чеки";
 			TrackDb(typeof(Check));
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 			var stat = new ChecksStat();
 			Stat = new List<ChecksStat> {
@@ -171,18 +171,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Чеки"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Акт возврата"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == "Чеки")
 						docs.Add(new CheckDocument(Items.Value.ToArray()));
 					if ((string) item.Header == "Акт возврата")
@@ -198,12 +198,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

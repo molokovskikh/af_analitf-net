@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 {
 //todo при удалении строки в предложениях должна удаляться строка и в заказах
 	[DataContract]
-	public class OrderLinesViewModel : BaseOfferViewModel, IPrintableStock
+	public class OrderLinesViewModel : BaseOfferViewModel, IPrintable
 	{
 		public OrderLinesViewModel()
 		{
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			BeginEnabled = IsSentSelected.ToValue();
 			EndEnabled = IsSentSelected.ToValue();
 
-			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange(nameof(CanPrintStock)));
+			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange(nameof(CanPrint)));
 			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange(nameof(CanExport)));
 
 			Sum = new NotifyValue<decimal>(() => {
@@ -105,7 +105,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			SessionValue(IsSentSelected, GetType().Name + ".IsSentSelected");
 			Persist(IsExpanded, "IsExpanded");
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -151,14 +151,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get
 			{
@@ -168,11 +168,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == DisplayName)
 						docs.Add(new OrderLinesDocument(this));
 				}

@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_stock()
 		{
-			var results = model.PrintStock().GetEnumerator();
+			var results = model.Print().GetEnumerator();
 			var preview = Next<DialogResult>(results);
 
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);

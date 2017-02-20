@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 	}
 
 	[DataContract]
-	public class Batch : BaseOfferViewModel, IPrintableStock
+	public class Batch : BaseOfferViewModel, IPrintable
 	{
 		private string lastUsedDir;
 
@@ -135,7 +135,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			CurrentFilter.Subscribe(_ => SearchBehavior.ActiveSearchTerm.Value = "");
 			ReportEditor = new ReportEditor(this);
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -172,23 +172,23 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem { Header = "Сводный прайс-лист" };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => true;
+		public bool CanPrint => true;
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == DisplayName) {
 						if (!User.CanPrint<Batch, BatchLine>() || Address == null)
 							continue;

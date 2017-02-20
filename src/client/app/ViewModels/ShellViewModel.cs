@@ -55,16 +55,9 @@ namespace AnalitF.Net.Client.ViewModels
 	public interface IPrintable
 	{
 		bool CanPrint { get; }
-
-		PrintResult Print();
-	}
-
-	public interface IPrintableStock
-	{
-		bool CanPrintStock { get; }
 		bool IsView { get; set; }
-		ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
-		PrintResult PrintStock();
+		ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		PrintResult Print();
 		string LastOperation { get; set; }
 		string PrinterName { get; set; }
 		void SetMenuItems();
@@ -230,6 +223,7 @@ namespace AnalitF.Net.Client.ViewModels
 					: Observable.Return(false))
 				.Switch()
 				.ToValue(CancelDisposable);
+
 			CanPrint = this.ObservableForProperty(m => m.ActiveItem)
 				.Select(e => e.Value is IPrintable
 					? ((IPrintable)e.Value).ObservableForProperty(m => m.CanPrint, skipInitial: false)
@@ -237,20 +231,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
-				CanPrintPreview = CanPrint.ToValue();
 
-			CanPrintStock = this.ObservableForProperty(m => m.ActiveItem)
-				.Select(e => e.Value is IPrintableStock
-					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.CanPrintStock, skipInitial: false)
-					: Observable.Return(new ObservedChange<IPrintableStock, bool>()))
-				.Switch()
-				.Select(e => e.Value)
-				.ToValue(CancelDisposable);
-
-			PrintStockMenuItems = this.ObservableForProperty(m => m.ActiveItem)
-				.Select(e => e.Value is IPrintableStock
-					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.PrintStockMenuItems, skipInitial: false, beforeChange: true)
-					: Observable.Return(new ObservedChange<IPrintableStock, ObservableCollection<MenuItem>>()))
+			PrintMenuItems = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintable
+					? ((IPrintable)e.Value).ObservableForProperty(m => m.PrintMenuItems, skipInitial: false, beforeChange: true)
+					: Observable.Return(new ObservedChange<IPrintable, ObservableCollection<MenuItem>>()))
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
@@ -551,58 +536,48 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<bool> CanPrint { get; set; }
+		public NotifyValue<ObservableCollection<MenuItem>> PrintMenuItems { get; set;}
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public static RoutedCommand PrintStockRoutedCommand = new RoutedCommand();
 
 		public IResult Print()
 		{
 			if (!CanPrint.Value)
 				return null;
-
-			return ((IPrintable)ActiveItem).Print();
-		}
-
-		public NotifyValue<bool> CanPrintStock { get; set; }
-		public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems { get; set;}
-		public string PrinterName { get; set; }
-		public bool IsView { get; set; }
-		public static RoutedCommand PrintStockRoutedCommand = new RoutedCommand();
-
-		public IResult PrintStock()
-		{
-			if (!CanPrintStock.Value)
-				return null;
-			return ((IPrintableStock) ActiveItem).PrintStock();
+			return ((IPrintable) ActiveItem).Print();
 		}
 
 		private void ExecutedPrintStockCommand(object sender, ExecutedRoutedEventArgs e)
 		{
 			var item = (MenuItem) sender;
-			var printableStock = (IPrintableStock) ActiveItem;
+			var printableStock = (IPrintable) ActiveItem;
 			printableStock.IsView = IsView;
 			printableStock.LastOperation = item.Header.ToString();
 			if (IsView)
-				printableStock.PrintStock();
+				printableStock.Print();
 		}
 
 		private void CanExecutePrintStocCommand(object sender, CanExecuteRoutedEventArgs e)
 		{
-			e.CanExecute = CanPrintStock;
+			e.CanExecute = CanPrint;
 		}
 
 		public void SetMenuItems()
 		{
-			if (!CanPrintStock)
+			if (!CanPrint)
 				return;
-			PrintStockMenuItems.Value.Clear();
-			((IPrintableStock) ActiveItem).SetMenuItems();
+			PrintMenuItems.Value.Clear();
+			((IPrintable) ActiveItem).SetMenuItems();
 			CommandBinding commandBinding = new CommandBinding(PrintStockRoutedCommand, ExecutedPrintStockCommand,
 				CanExecutePrintStocCommand);
-			foreach (var it in PrintStockMenuItems.Value) {
+			foreach (var it in PrintMenuItems.Value) {
 				it.CommandBindings.Add(commandBinding);
 				it.Command = PrintStockRoutedCommand;
 			}
 			var item = new MenuItem {Header = "Настройки"};
 			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
-			PrintStockMenuItems.Value.Add(item);
+			PrintMenuItems.Value.Add(item);
 		}
 
 		public IEnumerable<IResult> ReportSetting()
@@ -612,32 +587,15 @@ namespace AnalitF.Net.Client.ViewModels
 			PrinterName = req.PrinterName;
 			if (req.IsView) {
 				IsView = true;
-				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = false);
-				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsChecked = false);
+				PrintMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = false);
+				PrintMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsChecked = false);
 			}
 
 			if (req.IsPrint) {
 				IsView = false;
-				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = true);
+				PrintMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = true);
 			}
 
-		}
-
-
-		public NotifyValue<bool> CanPrintPreview { get; set; }
-
-		public void PrintPreview()
-		{
-			if (!CanPrintPreview)
-				return;
-
-			var printResult = ((IPrintable)ActiveItem).Print();
-			windowManager.ShowDialog(
-				new PrintPreviewViewModel(printResult),
-				null,
-				new Dictionary<string, object> {
-					{"WindowState", WindowState.Maximized}
-				});
 		}
 
 		public void ShowAbout()

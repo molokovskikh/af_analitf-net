@@ -48,11 +48,11 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		}
 	}
 
-	public class DocModel<T> : BaseScreen, IPrintableStock where T : class, IDocModel
+	public class DocModel<T> : BaseScreen, IPrintable where T : class, IDocModel
 	{
 		public DocModel()
 		{
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -73,14 +73,14 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => Document != null;
+		public bool CanPrint => Document != null;
 
 		public bool CanSave => Document != null;
 
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			}
 		}
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			//мы не можем использовать существующий документ, тк это приведет к тому что визуализация в FlowDocumentScrollViewer "исчезнет"
 			//и что бы увидеть данные пользователю нужно будет вызвать перерисовку документа, например с помощью полосы прокрутки

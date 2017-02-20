@@ -18,7 +18,7 @@ using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
-	public class PriceOfferViewModel : BaseOfferViewModel, IPrintableStock
+	public class PriceOfferViewModel : BaseOfferViewModel, IPrintable
 	{
 		private string[] filters = {
 			"Прайс-лист (F4)",
@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<object>())
 				.Subscribe(_ => Filter());
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -75,20 +75,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = DisplayName };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => User.CanPrint<PriceOfferDocument>();
+		public bool CanPrint => User.CanPrint<PriceOfferDocument>();
 
-		public PrintResult PrintStock()
+		public PrintResult Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == DisplayName) {
 						var items = GetPrintableOffers();
 						docs.Add(new PriceOfferDocument(items, Price, Address));
