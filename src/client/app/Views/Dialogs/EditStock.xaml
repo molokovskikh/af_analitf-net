@@ -1,0 +1,203 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.EditStock"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<UserControl.Resources>
+		<Style TargetType="TextBox">
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="VerticalAlignment" Value="Top" />
+			<Style.Triggers>
+				<Trigger Property="IsReadOnly" Value="True">
+					<Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+			<Grid Margin="4" >
+				<Grid Margin="0 0 0 40">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<StackPanel Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Штрих-код" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_Barcode" Width="120" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Код товара" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_ProductId" Width="120" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Код аналога" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_AnalogCode" Width="120" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Штрих-код произ-ля" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_ProducerBarcode" Width="120" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Альтернат. штрих-код" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_AltBarcode" Width="120" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="1" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Название товара" HorizontalAlignment="Left" VerticalAlignment="Top" Width="370" FontSize="10"/>
+							<TextBox Name="Stock_Product" Width="370" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Фирма-производитель" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_Producer" Width="245" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="2" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Группа аналогов" HorizontalAlignment="Left" VerticalAlignment="Top" Width="370" FontSize="10"/>
+							<TextBox Name="Stock_AnalogGroup" Width="370" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Страна" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
+							<TextBox Name="Stock_Country" Width="180" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Ед. изм." HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" FontSize="10"/>
+							<TextBox Name="Stock_Unit" Width="60" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="3" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Вид товара" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_ProductKind" Width="182.5" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Фарм. группа" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_FarmGroup" Width="182.5" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="МНН" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Mnn" Width="245" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="4" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Брэнд" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Brand" Width="205" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Потребительская категория" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_UserCategory" Width="185" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Региональный сертификат" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
+							<TextBox Name="Stock_RegionCert" Width="165" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="5" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Цена произ-ля" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_ProducerCost" Width="100" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Цена закупки" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+					<TextBox Name="Stock_SupplierCostWithoutNds" Width="100" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="НДС поставщика" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+						<TextBox Name="Stock_NdsAmountResidue" Width="100" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Акциз" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Excise" Width="80" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Цена закупки с НДС" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Padding="5,5,3,5"/>
+						<TextBox Name="Stock_SupplierCost" Width="100" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="НДС %" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+					<TextBox x:Name="Stock_Nds" Width="60" />
+				</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="НП %" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
+							<TextBox Name="Stock_NpPers" Width="50" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="6" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Наценка % розн." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_RetailMarkup" Width="100" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Цена розничная" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_RetailCost" Width="100" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Категория" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
+							<TextBox Name="Stock_Category" Width="120" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Сертификат" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Certificate" Width="165" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="ВМН" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Vmn" Width="60" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="7" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Наценка % льгот." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_LowMarkup" Width="100" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Цена льготная" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_LowCost" Width="100" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Серия" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
+							<TextBox Name="Stock_Seria" Width="120" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Срок годности" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Period" Height="18" Padding="0" Width="100" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="8" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Наценка % опт." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_OptMarkup" Width="100" IsReadOnly="True" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Цена оптовая" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_OptCost" Width="100" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="ГТД" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
+							<TextBox Name="Stock_Gtd" Width="120" />
+						</StackPanel>
+						<StackPanel Margin="5 0 0 0">
+							<Label Content="Дата прихода" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_DocumentDate" Width="100" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Row="9" Orientation="Horizontal">
+						<StackPanel>
+							<Label Content="Количество" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Quantity" Width="100" IsReadOnly="True" />
+						</StackPanel>
+					</StackPanel>
+				</Grid>
+				<StackPanel Orientation="Horizontal" Margin="0 0 0 10" VerticalAlignment="Bottom">
+					<Button Name="OK" Margin="0 0 5 0">ОК</Button>
+					<Button Name="Close">Отмена</Button>
+				</StackPanel>
+			</Grid>
+</UserControl>

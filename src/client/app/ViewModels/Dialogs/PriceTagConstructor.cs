@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
+using Dapper.Contrib.Extensions;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
@@ -46,10 +47,6 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				Items.Clear();
 				Items.AddEach(Tag.Value?.Items ?? Enumerable.Empty<PriceTagItem>());
 			});
-
-			Tag.Value =
-				Session.Query<PriceTag>()
-					.FirstOrDefault(r => r.TagType == tagType && (tagType == TagType.RackingMap || r.Address == address));
 		}
 
 		protected override void OnInitialize()
@@ -341,31 +338,33 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			Query(s => {
 				// Tag.Value.Id = 0 не только у впервые вставляемого тега, но и при сбросе настроек на дефолтные
-				var priceTag = s.Query<PriceTag>().SingleOrDefault(x => x.TagType == Tag.Value.TagType && x.Address == Tag.Value.Address);
-				if (priceTag == null) {
-					s.Insert(Tag.Value);
-					priceTag = Tag.Value;
+				var exist = s.Query<PriceTag>().FirstOrDefault(x => x.TagType == Tag.Value.TagType && ((x.AddressId ?? 0) == (Tag.Value.AddressId ?? 0)));
+				uint priceTagId = 0;
+				if (exist == null) {
+					s.Connection.Insert(Tag.Value);
+					priceTagId = Tag.Value.Id;
 				}
 				else {
-					priceTag.Width = Tag.Value.Width;
-					priceTag.Height = Tag.Value.Height;
-					priceTag.BorderThickness = Tag.Value.BorderThickness;
-					s.Update(priceTag);
+					priceTagId = exist.Id;
+					exist.Width = Tag.Value.Width;
+					exist.Height = Tag.Value.Height;
+					exist.BorderThickness = Tag.Value.BorderThickness;
+					s.Connection.Update(exist);
 				}
-				var dbItems = s.Query<PriceTagItem>().Where(x => x.PriceTag == priceTag).ToArray();
+				var dbItems = s.Query<PriceTagItem>().Where(x => x.PriceTagId == priceTagId).ToArray();
 				for (var i = 0; i < Items.Count; i++) {
 					var item = Items[i];
-					item.PriceTag = priceTag;
+					item.PriceTagId = priceTagId;
 					item.Position = i;
 					if (item.Id == 0) {
-						s.Insert(item);
+						s.Connection.Insert(item);
 					}
 					else {
-						s.Update(item);
+						s.Connection.Update(item);
 					}
 				}
 				foreach (var item in dbItems.Where(x => Items.All(y => x.Id != y.Id)))
-					s.Delete(item);
+					s.Connection.Delete(item);
 			}).Wait();
 			TryClose();
 		}

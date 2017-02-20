@@ -1,0 +1,75 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.StockGroupSearch"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	mc:Ignorable="d"
+	d:DesignHeight="300" d:DesignWidth="300"
+	Width="600"
+	Height="600"
+	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="/Assets/styles/Watermark.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="0" >
+			<GroupBox Header="Дата прихода" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label>с</Label>
+					<DatePicker Name="DateBegin" VerticalAlignment="Center"/>
+					<Label>по</Label>
+					<DatePicker Name="DateEnd" VerticalAlignment="Center"/>
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Header="Оптовая цена" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label>с</Label>
+					<TextBox Name="SupplierCostBegin" Width="50" Style="{StaticResource SearchText}"/>
+					<Label>по</Label>
+					<TextBox Name="SupplierCostEnd" Width="50" Style="{StaticResource SearchText}"/>
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Header="Розничная цена" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label>с</Label>
+					<TextBox Name="RetailCostBegin" Width="50" Style="{StaticResource SearchText}"/>
+					<Label>по</Label>
+					<TextBox Name="RetailCostEnd" Width="50" Style="{StaticResource SearchText}"/>
+				</StackPanel>
+			</GroupBox>
+		</WrapPanel>
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Код" Binding="{Binding ProductId}" Width="*" />
+				<controls:SearchableDataGridColumn HighlightStyle="{StaticResource DataGridHighlight}" Header="Наименование" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<StackPanel Orientation="Horizontal" Margin="0 10 0 10" VerticalAlignment="Bottom" Grid.Row="2">
+			<Button Name="OK" Margin="0 0 5 0">Добавить в документ</Button>
+			<Button Name="Close">Отмена</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

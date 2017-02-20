@@ -71,7 +71,18 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				//для отчета по жизененно важным
 				EAN13 = "4606915000379",
 			});
-			for (var i = 0; i < 30; i++)
+			waybill.Lines.Add(new TestWaybillLine(waybill) {
+				Product = "Лопедиум капсулы 2 мг",
+				CatalogProduct = products[1],
+				Period = "01.05.2018",
+				Producer = "Салютас Фарма",
+				SupplierCostWithoutNDS = 23.5m,
+				SupplierCost = 25.86m,
+				Quantity = 2,
+				SerialNumber = "DR5963",
+				EAN13 = "4030855000890",
+			});
+			for (var i = 0; i < 29; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
 					Product = products[i + 1].FullName,
 					CatalogProduct = products[i + 1],

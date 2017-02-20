@@ -6,7 +6,9 @@ using System.Linq;
 using System.Runtime.Serialization;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 using Common.Tools;
+using AnalitF.Net.Client.Models.Print;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -36,6 +38,9 @@ namespace AnalitF.Net.Client.Models
 		private bool _print;
 		private Waybill _waybill;
 		private bool isCertificateNotFound;
+		private bool _isReadyForStock;
+		private int _quantityToReceive;
+		private Stock _stock;
 
 		public WaybillLine()
 		{
@@ -123,6 +128,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _maxRetailMarkup; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				_maxRetailMarkup = value;
 				OnPropertyChanged();
 			}
@@ -133,7 +140,9 @@ namespace AnalitF.Net.Client.Models
 			get { return _retailMarkup; }
 			set
 			{
-				if (_realRetailMarkup == value)
+				if (Waybill.Status == DocStatus.Posted)
+					return;
+				if (_retailMarkup == value)
 					return;
 
 				Edited = true;
@@ -148,6 +157,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _realRetailMarkup; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				if (_realRetailMarkup == value)
 					return;
 
@@ -161,8 +172,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? RetailMarkupInRubles
 		{
 				get {
-						if(RetailCost != null && SupplierCost != null)
-						return RetailCost - SupplierCost;
+						if(RetailCost.HasValue && SupplierCost.HasValue)
+							return RetailCost - SupplierCost;
 						return null;
 				}
 		}
@@ -172,6 +183,8 @@ namespace AnalitF.Net.Client.Models
 			get { return _retailCost; }
 			set
 			{
+				if (Waybill.Status == DocStatus.Posted)
+					return;
 				if (_retailCost == value)
 					return;
 
@@ -184,10 +197,23 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual decimal? RetailCostWithoutNds
+		{
+			get
+			{
+				if (RetailCost.HasValue && Nds.HasValue)
+					return Math.Round(RetailCost.Value*100/(100 + Nds.Value), 2);
+				return null;
+			}
+		}
+
 		public virtual decimal? ServerRetailCost { get; set; }
 		public virtual decimal? ServerRetailMarkup { get; set; }
 
 		public virtual uint? RejectId { get; set; }
+
+		public virtual ulong? StockId { get; set; }
+		public virtual int? StockVersion { get; set; }
 
 		[Style(Description = "Сертификат не был найден", Columns = new[] { "CertificateLink" })]
 		public virtual bool IsCertificateNotFound
@@ -237,6 +263,18 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual bool IsMigration { get; set; }
 
+		[Ignore]
+		public virtual Stock Stock
+		{
+			get { return _stock; }
+			set
+			{
+				if (_stock != value) {
+					_stock = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
 		private decimal TaxFactor
@@ -313,6 +351,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateMarkups(decimal? rawRetailCost)
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			UpdateMarkups(rawRetailCost);
 			OnPropertyChanged("RealRetailMarkup");
 			OnPropertyChanged("RetailMarkup");
@@ -322,6 +362,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRetailMarkup()
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			decimal? rawCost;
 			_retailCost = CalculateRetailCost(RetailMarkup, out rawCost);
 			RecalculateMarkups(rawCost);
@@ -331,6 +373,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRealRetailMarkup()
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			_retailCost = CalculateFromRealMarkup(RealRetailMarkup);
 			RecalculateMarkups(RetailCost);
 			OnPropertyChanged("RetailCost");
@@ -355,6 +399,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings)
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return;
 			if (ServerRetailCost != null) {
 				RetailCost = ServerRetailCost;
 				if (ServerRetailMarkup != null) {
@@ -461,6 +507,8 @@ namespace AnalitF.Net.Client.Models
 
 		private bool IsCalculable()
 		{
+			if (Waybill.Status == DocStatus.Posted)
+				return false;
 			if (SupplierCost.GetValueOrDefault() == 0)
 				return false;
 			if (GetMarkupType() == MarkupType.VitallyImportant && ProducerCost.GetValueOrDefault() == 0)

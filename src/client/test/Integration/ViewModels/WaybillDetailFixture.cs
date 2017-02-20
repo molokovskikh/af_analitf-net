@@ -14,6 +14,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
+using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -86,7 +87,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			decimal? RetailMarkupInRubles = Convert.ToDecimal(ValueCell);
 			Assert.AreEqual(4m, RetailMarkupInRubles);
 
-
 			tableCellCollection = listTableCellCollection[3];
 			ValueCell = new TextRange(tableCellCollection[14].ContentStart, tableCellCollection[14].ContentEnd).Text;
 			Assert.AreEqual(string.Empty, ValueCell);
@@ -139,19 +139,49 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Print_racking_map()
+		public void Print_PrintAct()
 		{
-			var result = (DialogResult) model.PrintRackingMap();
-			var preview = (PrintPreviewViewModel) result.Model;
-			Assert.IsNotNull(preview);
+			var results = model.PrintAct().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
+			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
 		[Test]
-		public void Print_price_tags()
+		public void Print_PrintProtocol()
 		{
-			var result = (DialogResult) model.PrintPriceTags();
-			var preview = (PrintPreviewViewModel) result.Model;
-			Assert.IsNotNull(preview);
+			var results = model.PrintProtocol().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
+			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Consumption_report()
+		{
+			var stock = new Stock(waybill, waybill.Lines[10]);
+			session.Save(stock);
+
+			var check = new Check();
+			check.Status = Status.Closed;
+			session.Save(check);
+
+			var checkLine = new CheckLine(stock, 1, CheckType.SaleBuyer);
+			checkLine.CheckId = check.Id;
+			session.Save(checkLine);
+			session.Flush();
+
+			var result = model.ConsumptionReport().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Does.Contain("Расход по документу"));
 		}
 
 		[Test]
@@ -263,6 +293,28 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Close(model);
 			model = Open(new WaybillDetails(id));
 			Assert.IsTrue(!model.Waybill.IsNew);
+		}
+
+		[Test]
+		public void Waybill_to_editable()
+		{
+			model.Waybill.IsCreatedByUser = false;
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+			model.ToEditable();
+			Assert.IsFalse(model.Waybill.IsReadOnly);
+		}
+
+		[Test]
+		public void Waybill_posted_to_editable()
+		{
+			model.Waybill.IsCreatedByUser = false;
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+			model.ToEditable();
+			Assert.IsFalse(model.Waybill.IsReadOnly);
+			model.Waybill.Status = DocStatus.Posted;
+			Assert.IsTrue(model.Waybill.IsReadOnly);
+			model.ToEditable();
+			Assert.IsTrue(model.Waybill.IsReadOnly);
 		}
 	}
 }

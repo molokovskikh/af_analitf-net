@@ -21,6 +21,8 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.Collections.Specialized;
 using System.Reactive;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -52,7 +54,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
-			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
+			CanDelete = CurrentWaybill.Select(v => v != null && v.Status != Models.Inventory.DocStatus.Posted).ToValue();
 			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
 			};
@@ -144,30 +146,44 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult AltExport()
 		{
-			var columns = new[] {
-				"Адрес заказа",
-				"Дата",
-				"Номер накладной",
-				"Поставщик",
-				"Сумма Опт без НДС",
-				"Сумма Опт",
-				"Сумма Розница",
-				"Наценка,руб",
-				"Наценка,%",
-				"Сумма НДС",
-				"Срок оплаты"};
-			Func<Waybill, object[]> toRow = x => new object[] {
-				x.AddressName,
-				x.DocumentDate.ToShortDateString(),
-				x.ProviderDocumentId,
-				x.SupplierName,
-				x.SumWithoutTax,
-				x.Sum,
-				x.RetailSum,
-				x.MarkupSum,
-				x.Markup,
-				x.TaxSum
+			var visibilityDic = new Dictionary<string, bool>();
+			var grid = GetControls(GetView()).SingleOrDefault(x => x.Name == "Waybills");
+			if (grid != null)
+				visibilityDic = grid.Columns.ToDictionary(x => x.SortMemberPath, x => x.Visibility == Visibility.Visible);
+
+			var colObj = new[]
+			{
+				Tuple.Create("AddressName", (object)"Адрес заказа"),
+				Tuple.Create("Id", (object)"№"),
+				Tuple.Create("ProviderDocumentId", (object)"№ поставщика"),
+				Tuple.Create("DocumentDate", (object)"Дата документа"),
+				Tuple.Create("WriteTime", (object)"Дата получения документа"),
+				Tuple.Create("Type", (object)"Тип документа"),
+				Tuple.Create("SupplierName", (object)"Поставщик"),
+				Tuple.Create("Sum", (object)"Сумма опт"),
+				Tuple.Create("DisplayedSum", (object)"Сумма по документу"),
+				Tuple.Create("RetailSum", (object)"Сумма розница"),
 			};
+			var columns = Remap(colObj, visibilityDic);
+
+			Func<Waybill, object[]> toRow = x =>
+			{
+				var obj = new []
+				{
+					Tuple.Create("AddressName", (object)x.AddressName),
+					Tuple.Create("Id", (object)x.Id),
+					Tuple.Create("ProviderDocumentId", (object)x.ProviderDocumentId),
+					Tuple.Create("DocumentDate", (object)x.DocumentDate.ToShortDateString()),
+					Tuple.Create("WriteTime", (object)x.WriteTime.ToShortDateString()),
+					Tuple.Create("Type", (object)x.Type),
+					Tuple.Create("SupplierName", (object)x.SupplierName),
+					Tuple.Create("Sum", (object)x.Sum),
+					Tuple.Create("DisplayedSum", (object)x.DisplayedSum),
+					Tuple.Create("RetailSum", (object)x.RetailSum),
+				};
+				return Remap(obj, visibilityDic);
+			};
+
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Экспорт");
 			var items = Waybills.Value;
@@ -177,27 +193,36 @@ namespace AnalitF.Net.Client.ViewModels
 			row += 2;
 			foreach (var group in groups) {
 				row = ExcelExporter.WriteRows(sheet, group.OrderByDescending(x => x.WriteTime).Select(toRow), row);
-				row = WriteStatRow(sheet, row, @group, "Всего");
+				row = WriteStatRow(sheet, row, @group, "Всего", visibilityDic);
 			}
 
-			WriteStatRow(sheet, row, items, "Итого");
+			WriteStatRow(sheet, row, items, "Итого", visibilityDic);
 
 			return ExcelExporter.Export(book);
 		}
 
-		private static int WriteStatRow(ISheet sheet, int row, IEnumerable<Waybill> items, string label)
+		private static object[] Remap(Tuple<string, object>[] objects, Dictionary<string, bool> dic)
 		{
-			var statRow = sheet.CreateRow(row++);
-			ExcelExporter.SetCellValue(statRow, 0, label);
-			ExcelExporter.SetCellValue(statRow, 3, items.Sum(x => x.SumWithoutTax));
-			var total = items.Sum(x => x.Sum);
-			ExcelExporter.SetCellValue(statRow, 4, total);
-			var retailTotal = items.Sum(x => x.RetailSum);
-			ExcelExporter.SetCellValue(statRow, 5, retailTotal);
-			ExcelExporter.SetCellValue(statRow, 6, retailTotal - total);
-			if (total > 0)
-				ExcelExporter.SetCellValue(statRow, 7, Math.Round((retailTotal / total - 1) * 100m, 2));
-			ExcelExporter.SetCellValue(statRow, 8, items.Sum(x => x.TaxSum));
+			return objects.Where(x => dic.ContainsKey(x.Item1) ? dic[x.Item1] : true).Select(x => x.Item2).ToArray();
+		}
+
+		private static int WriteStatRow(ISheet sheet, int row, IEnumerable<Waybill> items, string label, Dictionary<string, bool> dic)
+		{
+			var obj = new [] {
+				Tuple.Create("AddressName", (object)label),
+				Tuple.Create("Id", (object)null),
+				Tuple.Create("ProviderDocumentId", (object)null),
+				Tuple.Create("DocumentDate", (object)null),
+				Tuple.Create("WriteTime", (object)null),
+				Tuple.Create("Type", (object)null),
+				Tuple.Create("SupplierName", (object)null),
+				Tuple.Create("Sum", (object)items.Sum(x => x.Sum)),
+				Tuple.Create("DisplayedSum", (object)items.Sum(x => x.DisplayedSum)),
+				Tuple.Create("RetailSum", (object)items.Sum(x => x.RetailSum)),
+			};
+			var result = Remap(obj, dic);
+			ExcelExporter.WriteRow(sheet, result, row++);
+
 			row += 2;
 			return row;
 		}

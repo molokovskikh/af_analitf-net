@@ -38,7 +38,10 @@ namespace AnalitF.Net.Service.Test
 		{
 			config = FixtureSetup.Config;
 			client = TestClient.CreateNaked(session);
+			client.Settings.IsStockEnabled = true;
+			session.Save(client.Settings);
 			session.Save(client);
+			session.Flush();
 
 			if (config.RegulatorRegistryPriceId == 0) {
 				var supplier = TestSupplier.CreateNaked(session);
@@ -203,45 +206,10 @@ namespace AnalitF.Net.Service.Test
 
 			exporter.ExportDocs();
 			var files = ListResult();
-			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
-				+ " WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt,"
-				+ " OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt,"
-				+ " LoadedDocuments.meta.txt, LoadedDocuments.txt",
-				Path.GetFileName(waybillFile)));
-		}
-
-		[Test]
-		public void Export_ProducerPromotions()
-		{
-			var testUser = session.Load<TestUser>(user.Id);
-
-			var testProducerUser = new TestProducerUser()
-			{
-				Login = "Тестовый пользователь производителя",
-				TypeUser = 0
-			};
-
-			session.Save(testProducerUser);
-
-			var testProducerPromotion = DataMother.CreateProducerPromotion(session, testUser);
-			testProducerPromotion.ProducerUserId = testProducerUser.Id;
-			session.Save(testProducerPromotion);
-
-			exporter.ExportProducerPromotions();
-
-			var files = ListResult();
-
-			string filesSuccess = "ProducerPromotions.meta.txt,";
-			filesSuccess += " ProducerPromotions.txt,";
-			filesSuccess += " ProducerPromotionCatalogs.meta.txt,";
-			filesSuccess += " ProducerPromotionCatalogs.txt,";
-			filesSuccess += " ProducerPromotionSuppliers.meta.txt,";
-			filesSuccess += " ProducerPromotionSuppliers.txt";
-
-			Assert.AreEqual(filesSuccess, files.Substring(0, 187));
-
-			session.Delete(testProducerPromotion);
-			session.Delete(testProducerUser);
+			Assert.AreEqual($"stocks.meta.txt, stocks.txt, Waybills/{Path.GetFileName(waybillFile)}, Waybills.meta.txt, Waybills.txt," +
+					" WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt," +
+					" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
+					" LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
 		}
 
 		[Test]
@@ -251,7 +219,8 @@ namespace AnalitF.Net.Service.Test
 			CreateWaybillWithFile();
 			exporter.ExportDocs();
 			var files = ListResult();
-			Assert.AreEqual("Waybills.meta.txt, Waybills.txt," +
+			Assert.AreEqual("stocks.meta.txt, stocks.txt," +
+				" Waybills.meta.txt, Waybills.txt," +
 				" WaybillLines.meta.txt, WaybillLines.txt," +
 				" WaybillOrders.meta.txt, WaybillOrders.txt," +
 				" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +

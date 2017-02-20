@@ -1,4 +1,4 @@
-import Boo.Lang.PatternMatching
+﻿import Boo.Lang.PatternMatching
 import System
 import System.Collections
 import System.Reflection
@@ -16,8 +16,7 @@ import Mono.Cecil
 import Newtonsoft.Json
 
 def SignFileLocal(file as string):
-	return
-	SignFile(file, "assets/cs.pfx", "password")
+	SignFile(file, "assets/cs.pfx", "")
 
 def SignDir(dir as string):
 	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
@@ -84,8 +83,8 @@ Global(
 			@ProxyUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
 		},
 		@Production : {
-			@FtpRoot: """\\adc.analit.net\Inforoom\FTP\anonymous\""",
-			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
+			@FtpRoot: """\\adc.analit.net\inforoom\firstQueue\FTP\anonymous""",
+			@UpdateDeployRoot: """\\adc.analit.net\inforoom\secondQueue\WebApps\var\update\""",
 			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
@@ -185,7 +184,7 @@ task "deploy:proxy", ["build:proxy"]:
 			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
 		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
-task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "post:deploy"]
+task @deploy, ["env", "version:generate", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "post:deploy"]
 
 task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
@@ -228,6 +227,10 @@ task "build:client:package", ["build:client:merged", "build:setup"]:
 task "deploy:update", ["build:update"]:
 	channel = Configuration.Maybe.channel or Globals.DefaultUpdateChannel
 	CopyUpdateBin(channel, "output/updater/")
+	channels = Globals.Maybe.TargetChannels
+	if channels:
+		for channel in channels:
+			CopyUpdateBin(channel, "output/updater")
 
 task "build:client", ["build:client:bin", "build:setup", "build:client:package", "build:update"]
 
@@ -352,6 +355,18 @@ task "build:update", ["build:client:merged"]:
 	Cp(FileSet("**.*", BaseDirectory: updaterOutput), output)
 	Rm(FileSet("AnalitF.Net.Client.*", BaseDirectory: output))
 	Cp(FileSet("AnalitF.*", BaseDirectory: "output/migration"), output)
+
+task "version:generate":
+	return if Globals.Environment == @Production
+	version = ReadGlobalConfig(Globals, "asembly:info:generate", "version")
+	return if version
+
+	versionFile = Path.Combine(Globals.UpdateDeployRoot, Globals.DefaultUpdateChannel, "version.txt")
+	unless Exist(versionFile):
+		return
+	version = Version.Parse(File.ReadAllText(versionFile))
+	Globals.Version = Version(version.Major, version.Minor, version.Build, version.Revision + 1)
+	print "Новая версия ${Globals.Version} на основе $versionFile"
 
 task "git:push:tags":
 	return unless Globals.Environment == @Production
@@ -480,7 +495,7 @@ task "deploy:announce":
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	client.UploadString("$url/issues.json", content)
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
-	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\""", true)
+	Cp(setupBin, Globals.FtpRoot, true)
 
 desc """
 делает текущий релиз релизом по умолчанию - отправляет обновление всем клиента

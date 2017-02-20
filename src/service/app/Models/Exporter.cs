@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AnalitF.Net.Service.Models.Inventory;
 using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
@@ -401,7 +402,9 @@ select u.Id,
 			join OrderSendRules.SmartOrderLimits l on l.AddressId = a.Id
 			join Usersettings.Prices p on p.FirmCode = l.SupplierId
 		where ua.UserId = u.Id and a.Enabled = 1
-	) as HaveLimits
+	) as HaveLimits,
+  rcs.SendRetailMarkup,
+	rcs.IsStockEnabled
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
@@ -645,7 +648,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"BarCode",
 				"Properties",
 				"Nds",
-				"OriginalJunk"
+				"OriginalJunk",
+				"RetailMarkup",
+				"RetailPrice"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -683,6 +688,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.Properties,
 				o.Nds,
 				o.Junk,
+				0,
+				0
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -704,7 +711,24 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	rd.OperativeInfo,
 	rd.ContactInfo,
 	rd.SupportPhone as Phone,
-	rd.AdminMail as Email,
+	(select group_concat(
+			case
+				when c.Id is not null and c.`Type` = 0 then c.ContactText
+				else cp.ContactText
+			end)
+		from Contacts.contact_groups cg
+			left join Contacts.contacts c on cg.Id = c.ContactOwnerId
+			left join Contacts.persons p on cg.Id = p.ContactGroupId
+			left join Contacts.contacts cp on p.Id = cp.ContactOwnerId
+		where cg.ContactGroupOwnerId = s.ContactGroupOwnerId
+			and cg.`Type` = 1
+			and (
+				(c.Id is not null and c.`Type` = 0)
+				or
+				(cp.Id is not null and cp.`Type` = 0)
+			)
+		group by cg.ContactGroupOwnerId
+	) as Email,
 	p.FirmCategory as Category,
 	p.DisabledByClient,
 	ifnull(ap.Fresh, 1) IsSynced,
@@ -716,7 +740,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	pc.CostName
 from (Usersettings.Prices p, Customers.Users u)
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
-		join Customers.Suppliers s on s.Id = pd.FirmCode
+	join Customers.Suppliers s on s.Id = pd.FirmCode
 	join Farm.Regions r on r.RegionCode = p.RegionCode
 	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
 	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
@@ -1161,7 +1185,7 @@ create temporary table Usersettings.MaxProducerCosts(
 	ProducerId int unsigned,
 	Producer varchar(255),
 	Product varchar(255),
-	Cost decimal not null,
+	Cost decimal(11, 2) not null,
 	primary key(id),
 	key(ProductId, ProducerId)
 ) engine=memory;
@@ -1264,13 +1288,13 @@ where sp.Status = 1";
 
 				// Экспортируем файлы из БД если ранее они не скачивались
 
-				if (!System.IO.File.Exists(local))
+				if (!File.Exists(local))
 				{
 					var Query = session.CreateSQLQuery("select ImageFile from ProducerInterface.MediaFiles Where Id=:FileId");
 					Query.SetParameter("FileId", FileId);
 					byte[] FileBytes = (byte[])Query.UniqueResult();
 
-					using (System.IO.FileStream SW = new FileStream(local, FileMode.OpenOrCreate))
+					using (FileStream SW = new FileStream(local, FileMode.OpenOrCreate))
 					{
 						SW.Write(FileBytes, 0, FileBytes.Length);
 					}
@@ -1478,6 +1502,8 @@ where a.MailId in ({ids.Implode()})";
 						"Junk",
 						"BarCode",
 						"OriginalJunk",
+						"RetailMarkup",
+						"RetailPrice"
 					},
 					items
 						.Select(i => new object[] {
@@ -1519,6 +1545,8 @@ where a.MailId in ({ids.Implode()})";
 							i.EAN13,
 							//оригинальная уценка
 							i.Junk,
+							0,
+							0
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1650,7 +1678,9 @@ select l.ExportId as ExportOrderId,
 	ol.Cost,
 	oh.RegionCode as RegionId,
 	ol.CoreId as OfferId,
-	ol.Junk as OriginalJunk
+	ol.Junk as OriginalJunk,
+	cast(0 as decimal(8,2)) as RetailMarkup,
+	cast(0 as decimal(8,2)) as RetailPrice
 from Logs.PendingOrderLogs l
 	join Orders.OrdersList ol on ol.OrderId = l.OrderId
 		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
@@ -1742,7 +1772,9 @@ select ol.RowId as ServerId,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
 	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
-	ol.Junk as OriginalJunk
+	ol.Junk as OriginalJunk,
+	cast(0 as decimal(8, 2)) as RetailMarkup,
+	cast(0 as decimal(8, 2)) as RetailPrice
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
@@ -1758,6 +1790,11 @@ group by ol.RowId";
 
 		public void ExportDocs()
 		{
+			if (clientSettings.IsStockEnabled) {
+				Stock.CreateInTransitStocks(session, user);
+				ExportStocks(data.LastUpdateAt);
+			}
+
 			string sql;
 
 			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
@@ -1918,11 +1955,14 @@ select db.Id,
 	db.EAN13,
 	db.CountryCode,
 	db.RetailCost as ServerRetailCost,
-	db.RetailCostMarkup as ServerRetailMarkup
+	db.RetailCostMarkup as ServerRetailMarkup,
+	s.Id as StockId,
+	s.Version as StockVersion
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 				left join Catalogs.Products p on p.Id = db.ProductId
+				left join Inventory.Stocks s on s.WaybillLineId = db.Id
 where d.RowId in ({ids})
 group by dh.Id, db.Id";
 			Export(Result, sql, "WaybillLines", truncate: false, parameters: new { userId = user.Id });
@@ -2344,6 +2384,53 @@ where UserId = :userId;")
 				.SetParameter("MessageShowCount", messageShowCount)
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
+		}
+
+		public void ExportStocks(DateTime lastSync)
+		{
+			var sql = @"
+select if(s.CreatedByUserId = ?userId, s.ClientPrimaryKey, null) as Id,
+	s.Id as ServerId,
+	s.Version as ServerVersion,
+	s.AddressId,
+	s.ProductId,
+	s.CatalogId,
+	s.Product,
+	s.ProducerId,
+	s.Producer,
+	s.Country,
+	s.Period,
+	s.Exp,
+	s.SerialNumber,
+	s.Certificates,
+	s.Unit,
+	s.ExciseTax,
+	s.BillOfEntryNumber,
+	s.VitallyImportant,
+	s.ProducerCost,
+	s.RegistryCost,
+	s.SupplierPriceMarkup,
+	s.SupplierCostWithoutNds,
+	s.SupplierCost,
+	s.Nds,
+	s.NdsAmount,
+	s.Barcode,
+	s.Status,
+	s.Quantity,
+	s.SupplyQuantity,
+	s.RetailCost,
+	s.RetailMarkup,
+	dh.DownloadId as WaybillId
+from Inventory.Stocks s
+	join Customers.Addresses a on a.Id = s.AddressId
+		join Customers.UserAddresses ua on ua.Addressid = a.Id
+			join Customers.Users u on u.Id = ua.UserId
+	left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
+		left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
+where a.Enabled = 1
+	and u.Id = ?userId
+	and s.Timestamp > ?lastSync";
+			Export(Result, sql, "stocks", false, new {userId = user.Id, lastSync});
 		}
 	}
 

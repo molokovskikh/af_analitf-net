@@ -5,29 +5,26 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
-using Common.Tools;
 using NHibernate;
 using ReactiveUI;
-using NHibernate.Linq;
-using NPOI.HSSF.Record.Chart;
-using AnalitF.Net.Client.Controls;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public class OrderDetailsViewModel : BaseScreen, IPrintable
 	{
-		private uint orderId;
-		private Type type;
+		private readonly uint orderId;
+		private readonly Type type;
 		private Editor editor;
-		private List<uint> frozenProducts;
+		private readonly List<uint> frozenProducts;
 
 		public OrderDetailsViewModel(IOrder order, List<uint> fProducts = null)
 		{
@@ -43,14 +40,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder));
 			if (User.CanExport(this, type.Name))
-				ExcelExporter.Properties = new []{ "Lines" };
+				ExcelExporter.Properties = new[] {"Lines"};
 			else
 				ExcelExporter.Properties = new string[0];
 			ExcelExporter.ActiveProperty.Refresh();
 			frozenProducts = fProducts ?? new List<uint>();
 
 			FilterItems = new List<Selectable<Tuple<string, string>>>();
-			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("InFrozenOrders", "Позиции присутствуют в замороженных заказах")));
+			FilterItems.Add(
+				new Selectable<Tuple<string, string>>(Tuple.Create("InFrozenOrders", "Позиции присутствуют в замороженных заказах")));
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsMinCost", "Позиции по мин.ценам")));
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("IsNotMinCost", "Позиции не по мин.ценам")));
 			FilterItems.Add(new Selectable<Tuple<string, string>>(Tuple.Create("OnlyWarning", "Только позиции с корректировкой")));
@@ -61,7 +59,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		// все строки заказа
 		public IList<IOrderLine> Source { get; set; }
 
-		public bool IsCurrentOrder => type == typeof(Order);
+		public bool IsCurrentOrder => type == typeof (Order);
 
 		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 
@@ -97,7 +95,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			//если это отправленный заказ редактор не должен работать
 			var currentOrderLine = new NotifyValue<OrderLine>();
 			if (IsCurrentOrder) {
-				currentOrderLine = CurrentLine.Select(v => (OrderLine)v).ToValue();
+				currentOrderLine = CurrentLine.Select(v => (OrderLine) v).ToValue();
 				currentOrderLine.Subscribe(v => CurrentLine.Value = v);
 			}
 			editor = new Editor(OrderWarning, Manager, currentOrderLine, Lines.Cast<IList>().ToValue());
@@ -109,8 +107,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Subscribe(HistoryOrders, CloseCancellation.Token);
 
 			FilterItems.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
-			.Select(_ => Filter())
-			.Subscribe(Lines, CloseCancellation.Token);
+				.Select(_ => Filter())
+				.Subscribe(Lines, CloseCancellation.Token);
 		}
 
 		protected override void OnViewAttached(object view, object context)
@@ -122,8 +120,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		private IList<IOrderLine> Filter()
 		{
 			var selected = FilterItems.Where(p => p.IsSelected).Select(p => p.Item.Item1).ToArray();
-			if (selected.Count() != FilterItems.Count())
-			{
+			if (selected.Count() != FilterItems.Count()) {
 				var ids = new List<uint>();
 				var lines = Source.OfType<OrderLine>();
 				if (selected.Contains("InFrozenOrders"))
@@ -146,21 +143,20 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			//мы вернулись на текущую форму с другой формы где были отредактированы данные
 			if (Order.Value != null)
 				Session.Evict(Order.Value);
-			Order.Value = (IOrder)Session.Get(type, orderId);
+			Order.Value = (IOrder) Session.Get(type, orderId);
 			//если заказ был удален
 			if (Order.Value == null) {
 				IsSuccessfulActivated = false;
 				return;
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
-				var sentLines =  (IList<SentOrderLine>)Order.Value.Lines;
+				var sentLines = (IList<SentOrderLine>) Order.Value.Lines;
 				sentLines.Each(l => l.Configure(User));
 				Env.RxQuery(s => MatchedWaybills.GetLookUp(s, sentLines))
 					.Subscribe(x => sentLines.Each(y => y.Configure(x)));
 			}
 			// Текущие заказы
-			else
-			{
+			else {
 				Order.Value.Lines.Each(l => l.Configure(User));
 				Order.Value.Lines
 					.Cast<OrderLine>()
@@ -198,7 +194,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			var offerViewModel = new PriceOfferViewModel(Order.Value.Price.Id,
 				false,
-				CurrentLine.Value == null ? null : ((OrderLine)CurrentLine).OfferId);
+				CurrentLine.Value == null ? null : ((OrderLine) CurrentLine).OfferId);
 			Shell.Navigate(offerViewModel);
 		}
 

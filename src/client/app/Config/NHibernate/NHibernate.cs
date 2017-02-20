@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Reports;
 using Common.MySql;
 using Common.Tools;
@@ -199,6 +200,13 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
 				});
 			});
+			mapper.Class<Check>(m => {
+				m.Version(p => p.Timestamp, c => {
+					c.Type(new TimestampType());
+					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
+			});
+
 			mapper.Class<Mail>(m => {
 				m.Property(p => p.Subject, c => c.Length(10000));
 				m.Property(p => p.Body, c => c.Length(10000));
@@ -234,6 +242,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				m.Property(l => l.RetailCost, p => p.Access(Accessor.Field));
 				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
 				m.Property(l => l.RealRetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.MaxRetailMarkup, p => p.Access(Accessor.Field));
 				m.Bag(l => l.CertificateFiles, c => {
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
@@ -242,7 +251,29 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				c.Inverse(true);
 			}));
+			mapper.Class<InventoryDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<UnpackingDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<UnpackingDocLine>(m => {
+				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
+				m.ManyToOne(x => x.SrcStock, p => p.Cascade(Cascade.All));
+			});
+
+			mapper.Class<WriteoffDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<ReturnToSupplier>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<DisplacementDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
 			mapper.Class<Offer>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
 				m.ManyToOne(o => o.Price, c => {
 					c.Insert(false);
 					c.Update(false);
@@ -251,6 +282,10 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c => c.Columns(cm => cm.Name("LeaderPriceId"),
 					cm => cm.Name("LeaderRegionId")));
 			});
+			mapper.Class<OrderLine>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
+			});
 			mapper.Class<SentOrder>(m => {
 				m.Bag(o => o.Lines, c => {
 					c.Key(k => k.Column("OrderId"));
@@ -258,12 +293,20 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Inverse(true);
 				});
 			});
+			mapper.Class<SentOrderLine>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
+			});
 			mapper.Class<DeletedOrder>(m => {
 				m.Bag(o => o.Lines, c => {
 					c.Key(k => k.Column("OrderId"));
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
 				});
+			});
+			mapper.Class<DeletedOrderLine>(m => {
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
 			});
 			mapper.Class<Mail>(m => {
 				m.Bag(o => o.Attachments, c => {
@@ -278,6 +321,24 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
+
+			mapper.Class<ReassessmentDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<ReassessmentLine>(m => m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All)));
+
+			mapper.Class<Stock>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Property(x => x.RetailCost, p => p.Access(Accessor.Field));
+				m.Property(x => x.RetailMarkup, p => p.Access(Accessor.Field));
+			});
+			mapper.Class<StockAction>(m => {
+				m.Version(p => p.Timestamp, c => {
+					c.Type(new TimestampType());
+					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
+			});
+
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 				if (type == typeof(RegulatorRegistry)) {

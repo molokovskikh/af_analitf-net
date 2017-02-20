@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public Settings Settings;
 		public HttpClientHandler Handler;
 		public HttpClient Client;
+		protected FileCleaner Cleaner = new FileCleaner();
 
 		static RemoteCommand()
 		{
@@ -62,6 +63,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected RemoteCommand()
 		{
 			Log = LogManager.GetLogger(GetType());
+			Disposable.Add(Cleaner);
 
 			Formatter = new JsonMediaTypeFormatter {
 				SerializerSettings = JsonHelper.SerializerSettings()
@@ -127,6 +129,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Config = config;
 			Token = token;
 			Settings = value;
+			Cleaner.DefaultRandomFileDir = config.TmpDir;
 			if (errorMap.Count == 0) {
 				if (!String.IsNullOrEmpty(Config.AltUri)) {
 					Config.AltUri.Split(',').Each(x => {

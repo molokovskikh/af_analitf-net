@@ -90,6 +90,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsDelayOfPaymentEnabled { get; set; }
 
+		public virtual bool IsStockEnabled { get; set; }
+
 		public virtual bool SaveOrders { get; set; }
 
 		public virtual string SupportPhone { get; set; }
@@ -103,6 +105,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual IList<Permission> Permissions { get; set; }
 
 		public virtual string Message { get; set; }
+
+		public virtual bool SendRetailMarkup { get; set; }
 
 		public virtual bool CanPrint<T>()
 		{

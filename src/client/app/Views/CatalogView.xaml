@@ -48,6 +48,7 @@
 			<StackPanel HorizontalAlignment="Right" Grid.Column="1" Style="{StaticResource FilterPanel}">
 				<Button Style="{StaticResource FilterElement}" x:Name="AddToAwaited">Добавить в ожидаемые</Button>
 				<Button Style="{StaticResource FilterElement}" x:Name="ShowAwaited">Ожидаемые позиции</Button>
+				<Button Style="{StaticResource FilterElement}" x:Name="CatalogSelector">Выбрать</Button>
 			</StackPanel>
 		</Grid>
 

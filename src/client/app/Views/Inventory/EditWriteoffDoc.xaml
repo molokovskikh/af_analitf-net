@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.EditWriteoffDoc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+             xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+             xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+						 xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="1000"
+						behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Add" />
+		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Post" />
+		<KeyBinding Gesture="F3" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ExportExcel" />
+		<KeyBinding Gesture="Ctrl+P" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Print" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
+			<Button Name="Add" Style="{StaticResource FilterElement}" ToolTip="Добавить (Ctrl+N)">Добавить</Button>
+			<Button Name="EditLine" Style="{StaticResource FilterElement}" ToolTip="Редактировать">Редактировать</Button>
+			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
+			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
+      <Button Name="ExportExcel" Style="{StaticResource FilterElement}" ToolTip="Список в Excel (F3)">Список в Excel</Button>
+    </WrapPanel>
+
+		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<Label Grid.Row="0" Grid.Column="0" FontWeight="Bold">Номер документа</Label>
+			<Label Grid.Row="0" Grid.Column="1" Name="Doc_Id" />
+			<Label Grid.Row="0" Grid.Column="2" FontWeight="Bold">Дата документа</Label>
+			<Label Grid.Row="0" Grid.Column="3" Name="Doc_Date"/>
+			<Label Grid.Row="0" Grid.Column="4" FontWeight="Bold">Адрес</Label>
+			<Label Grid.Row="0" Grid.Column="5" Name="Doc_Address_Name"/>
+			<Label Grid.Row="0" Grid.Column="6" FontWeight="Bold">Причина</Label>
+			<Label Grid.Row="0" Grid.Column="7" Name="Doc_Reason_Name"/>
+			<Label Grid.Row="0" Grid.Column="8" FontWeight="Bold">Статус</Label>
+			<Label Grid.Row="0" Grid.Column="9" Name="Doc_Status" />
+			<Label Grid.Row="1" Grid.Column="0" FontWeight="Bold">Комментарий</Label>
+			<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Name="Doc_Comment" HorizontalAlignment="Right" Margin="0, 5, 5, 0" Width="300" />
+		</Grid>
+
+		<controls:DataGrid2 Grid.Row="2" x:Name="Lines">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Наименование товара" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена закупки" Binding="{Binding SupplierCostWithoutNds}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена розничная" Binding="{Binding RetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplierSumWithoutNds}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+	</Grid>
+</UserControl>

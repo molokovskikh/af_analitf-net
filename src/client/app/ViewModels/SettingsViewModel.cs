@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -79,6 +80,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(SpecialMarkups);
 			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
 				.Subscribe(PriceTagSettings);
+			MarkupAddress.Select(x => Settings.Value.PriceTags.FirstOrDefault(r => r.Address == x))
+				.Subscribe(_ => LoadPriceTagPreview());
 
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
@@ -106,8 +109,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 
 			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
+			Printers = PrintHelper.GetPrinters().Select(x => x.Name).ToArray();
+			if (Session != null)
+				WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
 		}
 
+		public string[] Printers { get; set; }
+		public PersistentList<WriteoffReason> WriteoffReasons { get; set; }
 		public bool HaveAddresses { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }
 
@@ -241,8 +249,33 @@ limit 300";
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+		public bool OverwritePriceTags { get; set; }
 		public NotifyValue<PriceTagSettings> PriceTagSettings { get; set; }
 		public NotifyValue<FrameworkElement> PriceTagPreview { get; set; }
+
+		public void UpdatePriceTags()
+		{
+			if (!OverwritePriceTags)
+				return;
+
+			var dstAddresses = Addresses.Where(x => x != MarkupAddress.Value).ToArray();
+
+			var items = Settings.Value.PriceTags.ToArray();
+			var src = items.Where(x => x.Address == MarkupAddress.Value).ToArray();
+			Settings.Value.PriceTags.RemoveEach(items.Except(src));
+			Settings.Value.PriceTags.AddEach(dstAddresses.SelectMany(x => src.Select(y => new PriceTagSettings(y, x))));
+
+			var priceTags = Session.Query<PriceTag>().ToArray();
+			var priceTagSrc = priceTags.Where(r => r.AddressId == MarkupAddress.Value.Id).ToArray();
+			var tagItems = Session.Query<PriceTagItem>().ToArray();
+			var tagItemSrc = tagItems.Where(r => priceTagSrc.FirstOrDefault(x => x.Id == r.PriceTagId) != null).ToArray();
+			Session.DeleteEach(tagItems.Except(tagItemSrc));
+			Session.DeleteEach(priceTags.Except(priceTagSrc));
+			Session.SaveEach(dstAddresses.SelectMany(a => priceTagSrc.Select(t => new PriceTag(t, a))));
+			var newPriceTags = Session.Query<PriceTag>().Where(r => !priceTags.Contains(r)).ToArray();
+			Session.SaveEach(newPriceTags.SelectMany(t => tagItemSrc.Select(i => new PriceTagItem(i, t))));
+		}
+
 		public NotifyValue<FrameworkElement> RackingMapPreview { get; set; }
 
 		protected override void OnInitialize()
@@ -257,6 +290,8 @@ limit 300";
 
 		private void LoadPriceTagPreview()
 		{
+			if (!MarkupAddress.HasValue)
+				return;
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection, TagType.PriceTag, MarkupAddress.Value))
 				.Subscribe(x => PriceTagPreview.Value = x.Preview());
 		}
@@ -385,9 +420,11 @@ limit 300";
 		protected void GoToErrorTab(string errorKey)
 		{
 			switch (errorKey) {
-				case "JunkPeriod": SelectedTab.Value = "ViewSettingsTab";
+				case "JunkPeriod":
+					SelectedTab.Value = "ViewSettingsTab";
 					break;
-				default:	SelectedTab.Value = errorKey + "MarkupsTab";
+				default:
+					SelectedTab.Value = errorKey + "MarkupsTab";
 					break;
 			}
 		}
@@ -395,16 +432,15 @@ limit 300";
 		public IEnumerable<IResult> Save()
 		{
 			UpdateMarkups();
+			UpdatePriceTags();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
-			if(error != null){
-				if (error.Count > 0) {
-					if (Session != null)
-						Session.FlushMode = FlushMode.Never;
-					GoToErrorTab(error.First()[0]);
-					yield return MessageResult.Warn(error.First()[1]);
-					yield break;
-				}
+			if(error?.Count > 0){
+				if (Session != null)
+					Session.FlushMode = FlushMode.Never;
+				GoToErrorTab(error.First()[0]);
+				yield return MessageResult.Warn(error.First()[1]);
+				yield break;
 			}
 
 			if (passwordUpdated)
@@ -463,6 +499,14 @@ limit 300";
 		public IEnumerable<IResult> EditColor(CustomStyle style)
 		{
 			return CustomStyle.Edit(style);
+		}
+
+		public IEnumerable<IResult> ScannerConfig()
+		{
+			var model = new ScannerConfig();
+			yield return new DialogResult(model);
+			Settings.Value.BarCodePrefix = model.Prefix;
+			Settings.Value.BarCodeSufix = model.Sufix;
 		}
 	}
 }

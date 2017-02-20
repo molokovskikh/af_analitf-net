@@ -13,6 +13,7 @@
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="Ctrl+L" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Tags" />
 	</UserControl.InputBindings>
 
 	<Grid Name="MainGrid">
@@ -43,14 +44,15 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Taxes" DisplayMemberPath="Name" />
 				</StackPanel>
 			</StackPanel>
-			<Grid Margin="4, 0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
+      <Grid Margin="4, 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition></ColumnDefinition>
+          <ColumnDefinition></ColumnDefinition>
+          <ColumnDefinition></ColumnDefinition>
           <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
@@ -58,31 +60,55 @@
 				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
 					Печать ценников
 				</Button>
-				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
-					Печать реестра
-				</Button>
-				<Button Grid.Column="0" Grid.Row="2" Name="EditSum" Style="{StaticResource FilterElement}">
-					Коррекция сумм
-				</Button>
 				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">
 					Печать накладной
-				</Button>
-				<Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}">
-					Печать счет-фактуры
 				</Button>
 				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">
 					Стеллажная карта
 				</Button>
+				<Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
+					Накладная на внутреннее перемещение
+				</Button>
+
+				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
+					Печать реестра
+				</Button>
+				<Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}">
+					Печать счет-фактуры
+				</Button>
 				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">
 					Реестр в Excel
 				</Button>
-                <Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
-									Накладная на внутреннее перемещение
-                </Button>
-        <Button Grid.Column="3" Grid.Row="1" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
-          Накладная в Excel
-        </Button>
-      </Grid>
+				<Button Grid.Column="3" Grid.Row="1" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
+					Накладная в Excel
+				</Button>
+
+				<Button Grid.Column="0" Grid.Row="2" Name="PrintAct" Style="{StaticResource FilterElement}">
+					Печать акта прихода
+				</Button>
+				<Button Grid.Column="1" Grid.Row="2" Name="PrintProtocol" Style="{StaticResource FilterElement}">
+					Печать протокола согласования цен
+				</Button>
+				<Button Grid.Column="2" Grid.Row="2" Name="ToEditable" Style="{StaticResource FilterElement}">
+					В редактируемые
+				</Button>
+				<Button Grid.Column="3" Grid.Row="2" Name="EditSum" Style="{StaticResource FilterElement}">
+					Коррекция сумм
+				</Button>
+
+				<Button Grid.Column="0" Grid.Row="3" Name="ConsumptionReport" Style="{StaticResource FilterElement}">
+					Расход по документу
+				</Button>
+				<Button Grid.Column="1" Grid.Row="3" Name="Stock" Style="{StaticResource FilterElement}"
+					Visibility="{Binding User.IsStockEnabled, Converter={StaticResource BoolToCollapsed}}">
+					Оприходовать
+				</Button>
+				<Button Grid.Column="2" Grid.Row="3" Name="Tags" ToolTip="Печать ярлыков (Ctrl+L)"
+					Style="{StaticResource FilterElement}"
+					Visibility="{Binding User.IsStockEnabled, Converter={StaticResource BoolToCollapsed}}">
+					Печать ярлыков
+				</Button>
+			</Grid>
 		</StackPanel>
 
 		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
@@ -100,20 +126,20 @@
 					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
-				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Накладная №:</Label>
+				<Label Grid.Row="0" Grid.Column="0" Style="{StaticResource DetailsLabel}">Накладная №:</Label>
 				<Label Grid.Row="0" Grid.Column="1" Name="Waybill_Id" FontWeight="Bold" />
 
-				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">№ поставщика:</Label>
+				<Label Grid.Row="1" Grid.Column="0" Style="{StaticResource DetailsLabel}">№ поставщика:</Label>
 				<Label Grid.Row="1" Grid.Column="1" Name="Waybill_ProviderDocumentId" FontWeight="Bold" />
 
-				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="2" Style="{StaticResource DetailsLabel}">от:</Label>
 				<Label Grid.Row="0" Grid.Column="3" Name="Waybill_DocumentDate" FontWeight="Bold" />
 
-				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="2" Style="{StaticResource DetailsLabel}">Позиций:</Label>
 				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Value_Count" FontWeight="Bold" />
 
-				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
-        <Label Grid.Row="0" Grid.Column="5" Name="Waybill_UserSupplierName" FontWeight="Bold" />
+				<Label Grid.Row="0" Grid.Column="4" Style="{StaticResource DetailsLabel}">поставщик:</Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_UserSupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
 

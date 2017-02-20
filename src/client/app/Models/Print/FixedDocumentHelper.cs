@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -11,7 +13,7 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		private static Size pageSize = new Size(816.0, 1056.0);
 
-		public static FixedDocument BuildFixedDoc(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
+		public static FixedDocument BuildFixedDoc(IList<TagPrintable> lines, Func<TagPrintable, FrameworkElement> map, double borderThickness)
 		{
 			var document = new FixedDocument();
 			var left = lines.Count;
@@ -19,7 +21,7 @@ namespace AnalitF.Net.Client.Models.Print
 				var panel = new StackPanel();
 				var label = new Label {
 					Padding = new Thickness(0, 5, 0, 5),
-					Content = $"{waybill.ProviderDocumentId} {settings.FullName}",
+					Content = $"{lines[0].ProviderDocumentId} {lines[0].ClientName}",
 					FontFamily = new FontFamily("Arial"),
 				};
 				panel.Children.Add(label);

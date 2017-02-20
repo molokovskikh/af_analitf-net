@@ -21,9 +21,7 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			if (!IsNotifying)
 				return;
-			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, new PropertyChangedEventArgs(propertyName));
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

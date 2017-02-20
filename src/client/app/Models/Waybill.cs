@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Print;
+using Common.NHibernate;
 using Common.Tools;
 using log4net;
+using NHibernate;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -48,6 +51,8 @@ namespace AnalitF.Net.Client.Models
 
 		private bool _vitallyImportant;
 		private Rounding? _rounding;
+		private DocStatus _status;
+		private bool _isCreatedByUser;
 
 		public Waybill()
 		{
@@ -84,6 +89,18 @@ namespace AnalitF.Net.Client.Models
 		public virtual Supplier Supplier { get; set; }
 		public virtual DocType? DocType { get; set; }
 
+		public virtual DocStatus Status
+		{
+			get { return _status; }
+			set
+			{
+				if (_status == value)
+					return;
+				_status = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public virtual decimal Sum { get; set; }
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal TaxSum { get; set; }
@@ -119,10 +136,22 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Filename { get; set; }
 
 		//для биндинга
-		public virtual bool IsReadOnly => !IsCreatedByUser;
+		public virtual bool IsReadOnly => !IsCreatedByUser || Status == DocStatus.Posted;
 
 		[Style(Description = "Накладная, созданная пользователем")]
-		public virtual bool IsCreatedByUser { get; set; }
+		public virtual bool IsCreatedByUser
+		{
+			get { return _isCreatedByUser; }
+			set
+			{
+				if (Status != DocStatus.Posted && _isCreatedByUser != value)
+				{
+					_isCreatedByUser = value;
+					Recalculate();
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		[Style(Description = "Накладная с забраковкой")]
 		public virtual bool IsRejectChanged { get; set; }
@@ -140,7 +169,7 @@ namespace AnalitF.Net.Client.Models
 			get { return _rounding; }
 			set
 			{
-				if (_rounding != value) {
+				if (Status != DocStatus.Posted && _rounding != value) {
 					_rounding = value;
 					Recalculate();
 					OnPropertyChanged();
@@ -154,7 +183,7 @@ namespace AnalitF.Net.Client.Models
 			get { return _vitallyImportant; }
 			set
 			{
-				if (!CanBeVitallyImportant)
+				if (Status == DocStatus.Posted || !CanBeVitallyImportant)
 					return;
 				if (_vitallyImportant == value)
 					return;
@@ -220,6 +249,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			if (UserSupplierName == null)
 				UserSupplierName = SupplierName;
 			Settings = settings;
@@ -238,6 +269,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Recalculate()
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			if (Settings == null)
 				return;
 			var isMigrated = IsMigrated && Sum == 0;
@@ -254,6 +287,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateRetailSum()
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			RetailSum = Lines.Sum(l => l.RetailCost * l.Quantity).GetValueOrDefault();
 			if (IsCreatedByUser) {
 				TaxSum = Lines.Sum(l => l.NdsAmount).GetValueOrDefault();
@@ -263,7 +298,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void DeleteFiles(Settings settings)
 		{
-			try {
+			if (Status == DocStatus.Posted)
+				return;
+			try
+			{
 				if (String.IsNullOrEmpty(Filename)) {
 					var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
 					files.Each(f => File.Delete(f));
@@ -279,6 +317,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void RemoveLine(WaybillLine line)
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			line.Waybill = null;
 			Lines.Remove(line);
 			Recalculate();
@@ -286,6 +326,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void AddLine(WaybillLine line)
 		{
+			if (Status == DocStatus.Posted)
+				return;
 			line.Waybill = this;
 			Lines.Add(line);
 			Recalculate();
@@ -322,6 +364,20 @@ namespace AnalitF.Net.Client.Models
 			return Settings.WaybillDoc.Setup(this);
 		}
 
+		public virtual WaybillActDocumentSettings GetWaybillActDocSettings()
+		{
+			if (Settings.WaybillActDoc == null)
+				Settings.WaybillActDoc = new WaybillActDocumentSettings();
+			return Settings.WaybillActDoc.Setup(this);
+		}
+
+		public virtual WaybillProtocolDocumentSettings GetWaybillProtocolDocSettings()
+		{
+			if (Settings.WaybillProtocolDoc == null)
+				Settings.WaybillProtocolDoc = new WaybillProtocolDocumentSettings();
+			return Settings.WaybillProtocolDoc.Setup(this);
+		}
+
 		public virtual RegistryDocumentSettings GetRegistryDocSettings()
 		{
 			if (Settings.RegistryDoc == null)
@@ -341,6 +397,34 @@ namespace AnalitF.Net.Client.Models
 				return null;
 			return new DirectoryInfo(path).GetFiles($"{Id}_*")
 				.Select(x => x.FullName).FirstOrDefault();
+		}
+
+		public virtual bool Stock(ISession session)
+		{
+			Status = DocStatus.Posted;
+			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
+			var stockActions = new List<StockAction>();
+			foreach (var line in lines) {
+				if (line.Stock != null) line.Stock.Quantity -= line.Quantity.Value;
+				var stock = new Stock(this, line);
+				stockActions.Add(new StockAction {
+					ActionType = ActionType.Stock,
+					SourceStockId = line.StockId,
+					SourceStockVersion = line.StockVersion,
+					Quantity = line.Quantity.GetValueOrDefault(),
+					RetailCost = line.RetailCost,
+					RetailMarkup = line.RetailMarkup,
+					DstStock = stock,
+					SrcStock = line.Stock,
+				});
+			}
+			foreach (var action in stockActions) {
+				session.Save(action.DstStock);
+				if (action.SrcStock != null) session.Update(action.SrcStock);
+				action.ClientStockId = action.DstStock.Id;
+			}
+			session.SaveEach(stockActions);
+			return true;
 		}
 	}
 }

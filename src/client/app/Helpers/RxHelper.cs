@@ -11,6 +11,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;

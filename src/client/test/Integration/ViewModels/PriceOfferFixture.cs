@@ -66,47 +66,39 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Filter_by_producer_SavingState()
 		{
-			//проверяем наличие флагов после сохранения фильтра
+			//проверяем отсутствие флагов до сохранения фильтра
 			Assert.That(model.CanSaveFilterProducer.Value, Is.EqualTo(false));
 			Assert.That(model.CurrentProducer.Value.Id, Is.EqualTo(0));
+
 			//выставляем флаг "сохранения фильтра"
 			model.CanSaveFilterProducer.Value = true;
-			model.Filter();
-			//проверяем количемтво выводимых записей при не заполненном фильтре
+			model.Filter(false);
+			//проверяем количество выводимых записей при не заполненном фильтре
 			var maxCount = model.Offers.Value.Count;
 			Assert.That(model.Offers.Value.Count, Is.EqualTo(maxCount));
 
 			//устанавливаем фильтрацию по одному поставщику
 			model.CurrentProducer.Value = model.Producers.Value[1];
-			Assert.That(model.Offers.Value.Count, Is.LessThan(maxCount));
-			//закрываем форму
-			model.TryClose();
-			//проверяем наличие флагов после сохранения фильтра
-			Assert.That(model.CanSaveFilterProducer.Value, Is.EqualTo(true));
-			Assert.That(model.CurrentProducer.Value.Id, Is.Not.EqualTo(0));
+			if (model.Producers.Value.Count > 2) Assert.That(model.Offers.Value.Count, Is.LessThan(maxCount));
 			//закрываем форму
 			model.TryClose();
 			Close(model);
+
 			var modelNew = Open(new PriceOfferViewModel(price.Id, false));
-
-			modelNew.Filter();
-			//проверяем количемтво выводимых записей при заполненном фильтре на новой форме
-			Assert.That(modelNew.Offers.Value.Count, Is.LessThan(maxCount));
-			modelNew.Filter();
-
+			modelNew.Filter(false);
 			//проверяем наличие флагов после сохранения фильтра
 			Assert.That(modelNew.CanSaveFilterProducer.Value, Is.EqualTo(true));
 			Assert.That(modelNew.CurrentProducer.Value.Id, Is.Not.EqualTo(0));
+			if (model.Producers.Value.Count > 2) Assert.That(modelNew.Offers.Value.Count, Is.LessThan(maxCount));
 
 			//убираем флаг "сохранения фильтра"
 			modelNew.CanSaveFilterProducer.Value = false;
 			modelNew.CurrentProducer.Value = modelNew.Producers.Value.FirstOrDefault(s => s.Id == 0);
-			modelNew.Filter();
-			//проверяем количемтво выводимых записей при заполненном фильтре на новой форме
+			modelNew.Filter(false);
+			//проверяем количество выводимых записей при заполненном фильтре на новой форме
 			Assert.That(modelNew.Offers.Value.Count, Is.EqualTo(maxCount));
 			//закрываем форму
 			modelNew.TryClose();
-
 			//проверяем наличие флагов после сохранения фильтра
 			Assert.That(modelNew.CanSaveFilterProducer.Value, Is.EqualTo(false));
 			Assert.That(modelNew.CurrentProducer.Value.Id, Is.EqualTo(0));

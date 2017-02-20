@@ -35,6 +35,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		protected Address CurrentElementAddress;
 		protected OfferComposedId initOfferId;
 
+		//Пропустить ли Filter()
+		protected bool skipFilter = false;
+
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
 			Readonly = true;
@@ -249,26 +252,27 @@ where c.Id = ?";
 			});
 		}
 
+		/// <summary>
+		/// Реализация опции "Не сбрасывать фильтр"
+		/// </summary>
+		/// <param name="offerList"></param>
 		public void ProducerFilterStateGet(List<Offer> offerList)
 		{
 			var currentFilterProducerId = CurrentFilterProducer.HasValue ? CurrentFilterProducer.Value.Id : 0;
-			if (!ProducerFilterIsUsed && CanSaveFilterProducer.Value &&
-			    offerList.Any(d => d.ProducerId.HasValue && d.ProducerId.Value == currentFilterProducerId)) {
+			if (CanSaveFilterProducer.Value && currentFilterProducerId > 0 &&
+					offerList.Any(d => d.ProducerId.HasValue && d.ProducerId.Value == currentFilterProducerId)) {
+				skipFilter = true; //Пропускаем Filter(), чтобы не было зацикливания
 				CurrentProducer.Value = CurrentFilterProducer.Value;
-				ProducerFilterIsUsed = true;
-			}
-			if (CanSaveFilterProducer.Value &&
-			    ((offerList.Count > 0 &&
-			      offerList.Any(d => d.ProducerId.HasValue && d.ProducerId.Value == currentFilterProducerId)) ||
-			     (offerList.Count == 0 && currentFilterProducerId == 0))
-				) {
-				ProducerFilterIsUsed = true;
+				skipFilter = false;
 			}
 		}
 
+		/// <summary>
+		/// Реализация опции "Не сбрасывать фильтр"
+		/// </summary>
 		public void ProducerFilterStateSet()
 		{
-			if (CanSaveFilterProducer.Value && (CurrentProducer.Value.Id != 0 || CurrentProducer.Value.Id == 0 && ProducerFilterIsUsed))
+			if (CanSaveFilterProducer.Value && CurrentProducer.Value.Id != 0)
 				CurrentFilterProducer.Value = CurrentProducer.Value;
 		}
 

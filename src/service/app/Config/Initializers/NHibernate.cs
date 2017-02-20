@@ -2,10 +2,12 @@
 using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Service.Models;
+using AnalitF.Net.Service.Models.Inventory;
 using Common.Models;
 using Common.NHibernate;
 using NHibernate.Mapping.Attributes;
 using NHibernate.Mapping.ByCode;
+using NHibernate.Type;
 using SmartOrderFactory.Domain;
 
 namespace AnalitF.Net.Service.Config.Initializers
@@ -16,10 +18,19 @@ namespace AnalitF.Net.Service.Config.Initializers
 		{
 			Excludes.Add(typeof(ClientOrderItem));
 			Excludes.Add(typeof(ClientOrder));
+			Excludes.Add(typeof(ProducerPromotion));
 
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(typeof(SmartOrderRule).Assembly));
 
+			Mapper.Class<Stock>(m => {
+				m.Schema("Inventory");
+				m.Version(x => x.Version, _ => {});
+				m.Property(x => x.Timestamp, p => {
+					p.Insert(false);
+					p.Update(false);
+				});
+			});
 			Mapper.Class<AnalitfNetData>(m => {
 				m.Schema("Customers");
 				m.Id(p => p.Id, c => {

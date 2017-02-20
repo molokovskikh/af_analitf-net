@@ -14,6 +14,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 using AnalitF.Net.Client.Models.Commands;
+using System.Collections.Generic;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -298,6 +299,45 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(newDisplayId, model.Orders[0].DisplayId);
 		}
 
+		[Test(Description = "Тест на список адресов для перемещения заказа на другой адрес")]
+		public void Check_Display_AddressesToMove()
+		{
+			session.DeleteEach<Order>();
+			restore = true;
+
+			//Создаем 3 тестовых адреса
+			List<Address> testAddressList = new List<Address>();
+			for (int i = 1; i <= 3; i++) {
+				var testAddress = new Address($"Тестовый адрес доставки{i}");
+				testAddressList.Add(testAddress);
+				session.Save(testAddress);
+			}
+
+			//2 тестовых заказа
+			var offer = session.Query<Offer>().First(x => !x.Junk);
+			var order1 = MakeOrder(offer, testAddressList[0]);
+			var order2 = MakeOrder(offer, testAddressList[1]);
+
+			model.AddressSelector.All.Value = true;
+
+			//Проверяем, текущий заказ можно перенести на другие адреса, в списке которых нет адреса текущего заказа
+			model.CurrentOrder = order1;
+			//Проверка, что адреса текущего заказа нет в списке для переноса
+			Assert.IsFalse(model.AddressesToMove.Any(a => a.Id == model.CurrentOrder.Address.Id));
+			//Список адресов, которые должны быть
+			var adrListCheck = testAddressList.Where(a => a.Id != model.CurrentOrder.Address.Id).ToList();
+			//Проверка на содержание должного списка в писке для переноса
+			Assert.IsTrue(adrListCheck.Any(a => model.AddressesToMove.Any(m => m.Id == a.Id)));
+
+			//Тоже самое проверяем для 2го заказа
+			model.CurrentOrder = order2;
+			Assert.IsFalse(model.AddressesToMove.Any(a => a.Id == model.CurrentOrder.Address.Id));
+			adrListCheck = testAddressList.Where(a => a.Id != model.CurrentOrder.Address.Id).ToList();
+			Assert.IsTrue(adrListCheck.Any(a => model.AddressesToMove.Any(m => m.Id == a.Id)));
+
+			testAddressList.ForEach(a => session.Delete(a));
+		}
+
 		[Test]
 		public void Update_stat_after_delete_in_full_view_move()
 		{
@@ -483,5 +523,28 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var displayAfter = model.Orders.First().DisplayId;
 			Assert.AreEqual(displayId, displayAfter);
 		}
+
+		[Test(Description = "Тест на выделение жирным шрифтом заказы по текущему адресу при действующей галочке 'Все заказы'")]
+		public void Check_bold_orders()
+		{
+			session.DeleteEach<Order>();
+
+			restore = true;
+			var newAddress = new Address { Name = "Тестовый адрес доставки" };
+			session.Save(newAddress);
+
+			var offer = session.Query<Offer>().First(x => !x.Junk);
+			MakeOrder(offer, newAddress);
+
+			model.AddressSelector.All.Value = true;
+			shell.CurrentAddress.Value = newAddress;
+			Assert.IsTrue(model.Orders.First().IsCurrentAddress);
+
+			shell.CurrentAddress.Value = null;
+			Assert.IsFalse(model.Orders.First().IsCurrentAddress);
+
+			session.Delete(newAddress);
+		}
+
 	}
 }

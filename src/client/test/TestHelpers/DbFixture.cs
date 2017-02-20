@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			config = IntegrationSetup.clientConfig;
 			user = session.Query<User>().FirstOrDefault();
-			address = session.Query<Address>().FirstOrDefault();
+			address = session.Query<Address>().OrderBy(x => x.Name).FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
 		}
 
@@ -80,7 +80,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected T InitCmd<T>(T cmd) where T : BaseCommand
 		{
 			cmd.Config = config;
-			cmd.Token = new CancellationTokenSource().Token;
 			cmd.Session = session;
 			cmd.StatelessSession = stateless;
 			return cmd;
@@ -95,7 +94,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
-			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null);
+			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null && !x.Junk);
 			var order = new Order(offer.Price, toAddress ?? address);
 			order.TryOrder(offer, offer.RequestRatio ?? 1);
 			offer.OrderLine = order.Lines[0];

@@ -49,6 +49,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			MaxProducerCosts = CreateMaxProduceCosts(session, supplier);
 			Client = CreateUser(session, DebugLogin());
+			session.CreateSQLQuery("update Usersettings.RetClientsSet set IsStockEnabled = 1 where ClientCode = :id")
+				.SetParameter("id", Client.Id)
+				.ExecuteUpdate();
 
 			var user = Client.Users.First();
 			session.Query<TestAddressIntersection>()

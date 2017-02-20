@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
@@ -75,8 +76,14 @@ namespace AnalitF.Net.Client.ViewModels
 							.ThenFetch(c => c.Mnn)
 							.Where(c => c.Name.Id == nameId);
 
-						if (!ParentModel.ShowWithoutOffers)
-							queryable = queryable.Where(c => c.HaveOffers);
+						if (!ParentModel.ShowWithoutOffers) {
+							if (ParentModel.Mode == CatalogViewMode.Basic)
+								queryable = queryable.Where(c => c.HaveOffers);
+							else if (ParentModel.Mode == CatalogViewMode.CatalogSelector) {
+								var catalogIds = s.Query<WaybillLine>().Where(x => x.Waybill.Status == DocStatus.Posted).Select(x => x.CatalogId).Distinct().ToList();
+								queryable = queryable.Where(c => catalogIds.Contains(c.Id));
+							}
+						}
 
 						if (ParentModel.CurrentFilter == ParentModel.Filters[1])
 							queryable = queryable.Where(c => c.VitallyImportant);
@@ -199,28 +206,57 @@ namespace AnalitF.Net.Client.ViewModels
 				if (filterType == FilterType.PKUOther)
 					queryable = queryable.Where(c => c.Other);
 			} else {
-				queryable = queryable.Where(c => c.HaveOffers);
-				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.VitallyImportant));
+				if (ParentModel.Mode == CatalogViewMode.Basic) {
+					queryable = queryable.Where(c => c.HaveOffers);
+					if (ParentModel.CurrentFilter == ParentModel.Filters[1])
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.VitallyImportant));
 
-				if (ParentModel.CurrentFilter == ParentModel.Filters[2])
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.MandatoryList));
+					if (ParentModel.CurrentFilter == ParentModel.Filters[2])
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.MandatoryList));
 
-				if (ParentModel.CurrentFilter == ParentModel.Filters[3])
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers
-						&& session.Query<AwaitedItem>().Any(i => i.Catalog == c)));
+					if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers
+							&& session.Query<AwaitedItem>().Any(i => i.Catalog == c)));
 
-				if (filterType == FilterType.PKU)
-					queryable = queryable.Where(n => session.Query<Catalog>()
-					.Any(c => c.Name == n && c.HaveOffers && (c.Narcotic || c.Toxic || c.Combined || c.Other)));
-				if (filterType == FilterType.PKUNarcotic)
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Narcotic));
-				if (filterType == FilterType.PKUToxic)
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Toxic));
-				if (filterType == FilterType.PKUCombined)
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Combined));
-				if (filterType == FilterType.PKUOther)
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Other));
+					if (filterType == FilterType.PKU)
+						queryable = queryable.Where(n => session.Query<Catalog>()
+						.Any(c => c.Name == n && c.HaveOffers && (c.Narcotic || c.Toxic || c.Combined || c.Other)));
+					if (filterType == FilterType.PKUNarcotic)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Narcotic));
+					if (filterType == FilterType.PKUToxic)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Toxic));
+					if (filterType == FilterType.PKUCombined)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Combined));
+					if (filterType == FilterType.PKUOther)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Other));
+				}
+				else if (ParentModel.Mode == CatalogViewMode.CatalogSelector)
+				{
+					var catalogIds = session.Query<WaybillLine>().Where(x => x.Waybill.Status == DocStatus.Posted).Select(x => x.CatalogId).Distinct().ToList();
+					var catalogNameIds = session.Query<Catalog>().Where(x => catalogIds.Contains(x.Id)).Select(x => x.Name.Id).Distinct().ToList();
+					queryable = queryable.Where(c => catalogNameIds.Contains(c.Id));
+					if (ParentModel.CurrentFilter == ParentModel.Filters[1])
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.VitallyImportant));
+
+					if (ParentModel.CurrentFilter == ParentModel.Filters[2])
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.MandatoryList));
+
+					if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id)
+							&& session.Query<AwaitedItem>().Any(i => i.Catalog == c)));
+
+					if (filterType == FilterType.PKU)
+						queryable = queryable.Where(n => session.Query<Catalog>()
+						.Any(c => c.Name == n && catalogIds.Contains(c.Id) && (c.Narcotic || c.Toxic || c.Combined || c.Other)));
+					if (filterType == FilterType.PKUNarcotic)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.Narcotic));
+					if (filterType == FilterType.PKUToxic)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.Toxic));
+					if (filterType == FilterType.PKUCombined)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.Combined));
+					if (filterType == FilterType.PKUOther)
+						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.Other));
+				}
 			}
 
 			if (ParentModel.FiltredMnn != null) {
@@ -261,10 +297,15 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentCatalog == null)
 				return null;
 
-			if (!CurrentCatalog.HaveOffers)
-				return new ShowPopupResult(() => ParentModel.ShowOrderHistory());
+			if (ParentModel.Mode == CatalogViewMode.Basic) {
+				if (!CurrentCatalog.HaveOffers)
+					return new ShowPopupResult(() => ParentModel.ShowOrderHistory());
 
-			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+				Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+			}
+			else if (ParentModel.Mode == CatalogViewMode.CatalogSelector)
+				ParentModel.CatalogSelector(CurrentCatalog);
+
 			return null;
 		}
 

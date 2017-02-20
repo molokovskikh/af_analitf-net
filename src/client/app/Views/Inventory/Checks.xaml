@@ -1,0 +1,142 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.Checks"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	mc:Ignorable="d"
+	d:DesignHeight="300" d:DesignWidth="300"
+	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+			<RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="0" Grid.Column="1">
+        <Button Name="PrintChecks" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать чеков</Button>
+        <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Экспорт</Button>
+        <Button Name="PrintReturnAct" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Акт возврата</Button>
+      </WrapPanel>
+      <StackPanel Grid.Row="0" Grid.Column="0" Style="{StaticResource FilterPanel}">
+        <GroupBox Header="За период" Style="{StaticResource FilterElement}">
+          <StackPanel Orientation="Horizontal">
+            <Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+            <DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+            <Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+            <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
+          </StackPanel>
+        </GroupBox>
+				<!--это код потребуется когда доведем до ума работу с ккм-->
+        <!--<controls:PopupSelector x:Name="KKMFilter" ButtonContent="ККМ"
+					Member="Item" />-->
+        <ContentControl x:Name="AddressSelector" />
+      </StackPanel>
+    </Grid>
+    <controls:DataGrid2 Grid.Row="1" x:Name="Items"
+			ShowAddressColumn="{Binding AddressSelector.All.Value}" AddressColumn="{x:Reference Name=AddressColumn}">
+      <DataGrid.Columns>
+				<controls:DataGridTextColumnEx x:Name="AddressColumn" Width="*" Header="Адрес" Binding="{Binding Address.Name}"
+					Visibility="Collapsed"
+					IsReadOnly="True" />
+        <controls:DataGridTextColumnEx x:Name="IdColumn" Header="Номер" Binding="{Binding Id}" Width="*" />
+        <controls:DataGridTextColumnEx x:Name="DateColumn" Header="Дата" Binding="{Binding Date}" Width="*" />
+				<!--это код потребуется когда доведем до ума работу с ккм-->
+        <!--<controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />-->
+        <controls:DataGridTextColumnEx x:Name="TypeColumn" Header="Тип чека" Binding="{Binding CheckType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="ShiftDateColumn" Header="Открытие смены" Binding="{Binding ChangeOpening}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="StatusColumn" Header="Статус" Binding="{Binding Status}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="OperatorColumn" Header="Кассир" Binding="{Binding Clerk}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="PayTypeColumn"  Header="Тип оплаты" Binding="{Binding PaymentType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="SaleTypeColumn" Header="Тип продажи" Binding="{Binding SaleType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="DiscountColumn" Header="Скидка" Binding="{Binding Discont}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="ChangeIdColumn" Header="ИД смены" Binding="{Binding ChangeId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="ChangeNumberColumn" Header="Номер смены" Binding="{Binding ChangeNumber}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="CancelledColumn" Header="Аннулирован" Binding="{Binding Cancelled}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx x:Name="RetailSumColumn" Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
+        <controls:DataGridTextColumnEx x:Name="SumColumn" Header="Сумма с учетом скидки" Binding="{Binding Sum}" Width="*" />
+        <controls:DataGridTextColumnEx x:Name="SupplySumColumn" Header="Сумма закупки" Binding="{Binding SupplySum}" Width="*" />
+      </DataGrid.Columns>
+    </controls:DataGrid2>
+		<controls:DataGrid2 ItemsSource="{Binding Stat}" Grid.Row="2" HeadersVisibility="Row" Margin="0 5 0 0"
+			HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx
+					Width="{Binding Source={x:Reference AddressColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference AddressColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference IdColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference IdColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference DateColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference DateColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference TypeColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference TypeColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ShiftDateColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference ShiftDateColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference StatusColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference StatusColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference OperatorColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference OperatorColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference PayTypeColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference PayTypeColumn}, Path=Visibility}"/>
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference SaleTypeColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference SaleTypeColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference DiscountColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference DiscountColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ChangeIdColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference ChangeIdColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ChangeNumberColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference ChangeNumberColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference CancelledColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference CancelledColumn}, Path=Visibility}" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference RetailSumColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference RetailSumColumn}, Path=Visibility}"
+					Binding="{Binding RetailSum}"
+					FontWeight="Bold"
+					TextAlignment="Right" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference SumColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference SumColumn}, Path=Visibility}"
+					Binding="{Binding Sum}"
+					FontWeight="Bold"
+					TextAlignment="Right" />
+
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference SupplySumColumn}, Path=ActualWidth}"
+					Visibility="{Binding Source={x:Reference SupplySumColumn}, Path=Visibility}" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+
+  </Grid>
+</UserControl>

@@ -10,6 +10,7 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Iesi.Collections;
@@ -187,6 +188,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsMinCost", Background("#ACFF97") },
 				{ "ExistsInFreezed", Background("#C0C0C0") },
 				{ "IsCreatedByUser", Background("#C0DCC0") },
+				{ "IsNotPosted", Background(Colors.PaleTurquoise) },
 				{ "IsCertificateNotFound", Background(Colors.Gray) },
 				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF)) },
 				{ "IsUnmatchedByWaybill", Background(Color.FromRgb(248, 238, 141)) },
@@ -210,7 +212,17 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsFullyStocked", Background("#25BC37") },
+				{ "IsPartialyStocked", Background("#94BA99") },
 				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
+				{ "IsOverdue", new DataTrigger {
+						Binding = new Binding("IsOverdue"),
+						Value = true,
+						Setters = {
+							new Setter(Control.ForegroundProperty, new SolidColorBrush(Colors.Red)),
+						}
+					}
+				},
 				{ "InFrozenOrders", Background(Colors.Gray) },
 			};
 		}

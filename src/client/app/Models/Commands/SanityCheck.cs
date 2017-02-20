@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.Models.Inventory;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Helpers;
@@ -120,6 +121,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						PriceTagSettings.Defaults(address).Each(settings.AddPriceTag);
 				}
 
+				settings.PriceTags.RemoveEach(settings.PriceTags.Where(x => x.Address == null || !addresses.Contains(x.Address)));
+
 				var addressConfigs = session.Query<AddressConfig>().ToArray();
 				session.DeleteEach(addressConfigs.Where(x => x.Address == null));
 				session.SaveEach(addresses.Except(addressConfigs.Select(x => x.Address)).Select(x => new AddressConfig(x)));
@@ -132,6 +135,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				settings.Waybills.AddEach(addresses
 					.Except(settings.Waybills.Select(w => w.BelongsToAddress))
 					.Select(a => new WaybillSettings(user, a)));
+
+				if (!session.Query<WriteoffReason>().Any()) {
+					session.SaveEach(WriteoffReason.Default());
+				}
 
 				var suppliers = session.Query<Supplier>().ToList();
 				var dirMaps = session.Query<DirMap>().ToList();
@@ -160,6 +167,11 @@ namespace AnalitF.Net.Client.Models.Commands
 						last.End = 1000000;
 					}
 				}
+
+				if (!session.Query<WriteoffReason>().Any()) {
+					session.SaveEach(WriteoffReason.Default());
+				}
+
 				transaction.Commit();
 			}
 		}
@@ -179,6 +191,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var tables = Tables().Where(t => t.IsPhysicalTable && Configuration.IncludeAction(t.SchemaActions, SchemaAction.Update));
 				var meta = new DatabaseMetadata(connection, dialect);
 				var mapping = (IMapping)Configuration.GetType().GetField("mapping", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(Configuration);
+				var schema = new DevartMySqlSchema(connection);
 				foreach (var table in tables) {
 					var tableMeta = meta.GetTableMetadata(table.Name,
 						table.Schema ?? defaultSchema,
@@ -233,9 +246,24 @@ namespace AnalitF.Net.Client.Models.Commands
 						}
 					}
 
+					if (table.UniqueKeyIterator.Any()) {
+						var indexes = schema.GetIndexInfo(tableMeta.Catalog, null, tableMeta.Name).AsEnumerable()
+							.Select(x => new DevartMySQLIndexMetadata(x))
+							.Where(x => x.IsUnique)
+							.ToArray();
+
+
+						foreach (var uniqueKey in table.UniqueKeyIterator) {
+							if (!indexes.Any(x => x.Name.Match(uniqueKey.Name))) {
+								var sql = uniqueKey.SqlConstraintString(dialect, uniqueKey.Name, defaultCatalog, defaultSchema);
+								alters.Add($"alter table {table.Name} {sql};");
+							}
+						}
+					}
+
 					// #56897 привязали элементы, чтоб сохранить настройки конструктора, удалили теги без элементов
 					if (table.Name.Match("PriceTags")) {
-						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where PriceTagId is null;");
+						alters.Add("update PriceTagItems set PriceTagId = (select Id from PriceTags where TagType = 0 order by Id limit 1) where ifnull(PriceTagId, 0) = 0;");
 						alters.Add("delete t from PriceTags t left join PriceTagItems i on i.PriceTagId = t.Id where i.PriceTagId is null;");
 					}
 
@@ -248,7 +276,6 @@ namespace AnalitF.Net.Client.Models.Commands
 							alters.Add("alter table Offers add fulltext (ProductSynonym);");
 						}
 						//из-за ошибки в 0.15.0, были созданы дублирующие индексы чистим их
-						var schema = new DevartMySqlSchema(connection);
 						var indexes = schema.GetIndexInfo(tableMeta.Catalog, null, tableMeta.Name).AsEnumerable()
 							.Select(x => new DevartMySQLIndexMetadata(x))
 							.Where(x => Regex.IsMatch(x.Name, @"ProductSynonym_\d+", RegexOptions.IgnoreCase))

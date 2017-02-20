@@ -18,6 +18,19 @@ namespace AnalitF.Net.Client.Views.Orders
 
 			Loaded += (sender, args) => {
 				ApplyStyles();
+				var context = (OrderDetailsViewModel)DataContext;
+				if (!context.User.SendRetailMarkup)
+				{
+					var col = DataGridHelper.FindColumn(Lines, "Розничная наценка");
+					Lines.Columns.Remove(col);
+					col = DataGridHelper.FindColumn(Lines, "Розничная цена");
+					Lines.Columns.Remove(col);
+					DataGridHelper.CalculateColumnWidths(Lines);
+				}
+				else
+				{
+					Lines.IsReadOnly = !context.IsCurrentOrder;
+				}
 			};
 
 			DataContextChanged += (sender, args) => {

@@ -64,8 +64,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Load_attachment()
 		{
-			var attachment = Download();
-			WaitDownloaded(attachment);
+			WaitDownloaded(Download());
 			WaitIdle();
 			dispatcher.Invoke(() => {
 				var attachments = ByName<ItemsControl>("CurrentItem_Value_Attachments");
@@ -136,10 +135,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => scheduler.AdvanceByMs(100));
 			Click("ShowMain");
 			ShowMails();
-			var localAttachment = SelectByAttachmentId(attachment.Id);
-			//что бы избежать конкуренции
-			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
-			WaitDownloaded(localAttachment);
+			WaitDownloaded(SelectByAttachmentId(attachment.Id));
 			WaitIdle();
 			dispatcher.Invoke(() => {
 				var attachments = ByName<ItemsControl>("CurrentItem_Value_Attachments");
@@ -201,11 +197,17 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			return result;
 		}
 
-		private static void WaitDownloaded(Attachment attachment)
+		private void WaitDownloaded(Attachment attachment)
 		{
-			Assert.IsTrue(attachment.IsDownloading, attachment.ToString());
-			Assert.IsFalse(attachment.IsDownloaded, attachment.ToString());
-			attachment.Changed().Timeout(10.Second()).First(c => c.EventArgs.PropertyName == "IsDownloading");
+			var events = attachment.Changed().Where(c => c.EventArgs.PropertyName == "IsDownloading").Take(1).PublishLast();
+			using (events.Connect()) {
+				Assert.IsTrue(attachment.IsDownloading, attachment.ToString());
+				//что бы избежать конкуренции
+				if (Env.Barrier != null)
+					Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
+				Assert.IsFalse(attachment.IsDownloaded, attachment.ToString());
+				events.Timeout(10.Second()).First();
+			}
 			Assert.IsNull(attachment.Exception);
 			Assert.IsFalse(attachment.IsError, attachment.ToString());
 			Assert.IsTrue(attachment.IsDownloaded, attachment.ToString());

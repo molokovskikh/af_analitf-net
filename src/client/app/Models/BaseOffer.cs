@@ -138,6 +138,32 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		private decimal? _retailMarkup;
+
+		public virtual decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				if (_retailMarkup == value)
+					return;
+				_retailMarkup = value;
+				OnPropertyChanged();
+			}
+		}
+
+		private decimal? _retailPrice;
+		public virtual decimal? RetailPrice {
+			get { return _retailPrice; }
+			set
+			{
+				if (_retailPrice == value)
+					return;
+				_retailPrice = value;
+				OnPropertyChanged();
+			}
+		}
+
 		//поля для сортировки
 		[IgnoreDataMember]
 		public virtual uint? SortQuantity => NullableConvert.ToUInt32(Quantity);
@@ -164,9 +190,10 @@ namespace AnalitF.Net.Client.Models
 		{
 			Configure(user);
 			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
+			RetailMarkup = MarkupConfig.Calculate(markups, this, user, address);
 			var cost =  HideCost ? GetResultCost() : Cost;
-			var markup = MarkupConfig.Calculate(markups, this, user, address);
-			RetailCost = Math.Round(cost * (1 + markup / 100), 2);
+			RetailCost = Math.Round(cost * (1 + (RetailMarkup ?? 0) / 100), 2);
+			RetailPrice = RetailCost;
 		}
 
 		public virtual void Configure(User user)

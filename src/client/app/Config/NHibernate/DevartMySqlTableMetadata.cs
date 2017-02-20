@@ -50,10 +50,13 @@ namespace AnalitF.Net.Client.Config.NHibernate
 
 	public class DevartMySQLIndexMetadata : AbstractIndexMetadata
 	{
+		public bool IsUnique;
+
 		public DevartMySQLIndexMetadata(DataRow rs)
 			: base(rs)
 		{
 			Name = Convert.ToString(rs["Index"]);
+			IsUnique = Convert.ToBoolean(rs["IsUnique"]);
 		}
 	}
 

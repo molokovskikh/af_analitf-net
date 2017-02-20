@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.CreateWriteoffDoc"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	MinWidth="200">
+	<StackPanel Margin="4">
+		<Label>Адрес</Label>
+		<ComboBox Name="Addresses"
+			ItemsSource="{Binding Addresses}"
+			Text="{Binding Path=Doc.AddressName, Mode=OneWay}"
+			SelectedItem="{Binding Doc.Address}" DisplayMemberPath="Name" IsEditable="True" />
+		<Label>Дата документа</Label>
+		<DatePicker Name="Doc_Date" HorizontalAlignment="Left" />
+		<Label>Причина:</Label>
+		<ComboBox Name="Reason"
+			ItemsSource="{Binding Reasons}"
+			SelectedItem="{Binding Doc.Reason}" DisplayMemberPath="Name" IsEditable="True" />
+		<StackPanel Orientation="Horizontal" Margin="0, 10, 0, 10">
+			<Button Name="OK" Margin="0, 0, 5, 0">ОК</Button>
+			<Button Name="TryClose">Отмена</Button>
+		</StackPanel>
+	</StackPanel>
+</UserControl>

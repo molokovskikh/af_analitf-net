@@ -8,7 +8,7 @@
              xmlns:conv="clr-namespace:AnalitF.Net.Client.Helpers"
 	behaviors:Focusable.DefaultFocus="{x:Reference Waybills}">
 
-    <i:Interaction.Behaviors>
+	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
 	</i:Interaction.Behaviors>
 
@@ -85,8 +85,7 @@
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
             <DataGrid.Columns>
                 <c:DataGridTextColumnEx x:Name="clmnAddressName" Width="65*" Header="Адрес заказа"
-					Binding="{Binding AddressName}"
-					Visibility="Collapsed" />
+					Binding="{Binding AddressName}" Visibility="Collapsed"/>
                 <c:DataGridTextColumnEx x:Name="clmnId" Width="64*" Header="№"
 					Binding="{Binding Id}"
 					TextAlignment="Right" />
@@ -98,6 +97,8 @@
 					Binding="{Binding WriteTime}" />
                 <c:DataGridTextColumnEx x:Name="clmnType" Width="100*" Header="Тип документа"
 					Binding="{Binding Type}" />
+                <c:DataGridTextColumnEx x:Name="Status" Width="100*" Header="Статус"
+					Binding="{Binding Status, Converter={StaticResource EnumConverter}}" />
                 <c:DataGridTextColumnEx x:Name="clmnSupplierName" Width="64*" Header="Поставщик"
 					Binding="{Binding SupplierName}" />
                 <c:DataGridTextColumnEx x:Name="clmnSum" Width="64*" Header="Сумма опт"
@@ -119,6 +120,7 @@
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnDocumentDate}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnWriteTime}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnType}, Path=ActualWidth}"/>
+							<c:DataGridTextColumnEx Width="{Binding Source={x:Reference Status}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSupplierName}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
                                         Binding="{Binding TotalSum}"/>

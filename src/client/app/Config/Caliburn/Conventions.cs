@@ -23,8 +23,11 @@ namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class Conventions
 	{
+		public static EnumConverter EnumConverterInstance = new EnumConverter();
+
 		public static void Register()
 		{
+			ConventionManager.ApplyValueConverter = ApplyValueConverter;
 			ConventionManager.AddElementConvention<SplitButton>(ContentControl.ContentProperty, "DataContext", "Click");
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			ConventionManager.AddElementConvention<IntegerUpDown>(UpDownBase<int?>.ValueProperty, "Value", "ValueChanged");
@@ -97,7 +100,24 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					}
 					return false;
 				};
+			ConventionManager.AddElementConvention<Label>(ContentControl.ContentProperty, "Content", "DataContextChanged")
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					return ConventionManager.SetBindingWithoutBindingOverwrite(viewModelType, path, property, element, convention, convention.GetBindableProperty(element));
+				};
 		}
+
+		private static void ApplyValueConverter(Binding binding, DependencyProperty targetProperty, PropertyInfo sourceProperty)
+		{
+			if (targetProperty == UIElement.VisibilityProperty && typeof (bool).IsAssignableFrom(sourceProperty.PropertyType)) {
+				binding.Converter = ConventionManager.BooleanToVisibilityConverter;
+				return;
+			}
+
+			if (targetProperty == ContentControl.ContentProperty && sourceProperty.PropertyType.IsEnum) {
+				binding.Converter = EnumConverterInstance;
+			}
+		}
+
 
 		public static void ConfigureDataGrid(DataGrid dataGrid, Type type)
 		{
@@ -120,6 +140,8 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					if (boundColumn.Binding.StringFormat == null)
 					if (columnType == typeof(decimal) || columnType == typeof(decimal?)) {
 						boundColumn.Binding.StringFormat = "0.00";
+					} else if (columnType.IsEnum) {
+						((Binding)boundColumn.Binding).Converter = EnumConverterInstance;
 					}
 
 					var exColumn = column as DataGridTextColumnEx;

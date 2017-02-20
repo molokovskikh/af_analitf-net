@@ -340,7 +340,7 @@
 		</Grid.RowDefinitions>
 
 		<ToolBar Grid.Row="0" Grid.ColumnSpan="3">
-			<TextBox Width="400" Name="Term" Style="{StaticResource SearchTerm}">
+			<TextBox Name="Term" Style="{StaticResource SearchTerm}">
 				<i:Interaction.Behaviors>
 					<behaviors:Watermark Text="Поиск сообщений" />
 				</i:Interaction.Behaviors>

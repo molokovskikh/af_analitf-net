@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Views.Dialogs;
 using Common.Tools;
 using Dapper;
@@ -29,6 +31,15 @@ namespace AnalitF.Net.Client.Models
 		public PriceTag()
 		{
 			Items = new List<PriceTagItem>();
+		}
+
+		public PriceTag(PriceTag source, Address address) : this()
+		{
+			AddressId = address.Id;
+			BorderThickness = source.BorderThickness;
+			Height = source.Height;
+			TagType = source.TagType;
+			Width = source.Width;
 		}
 
 		public virtual uint Id { get; set; }
@@ -59,7 +70,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual TagType TagType { get; set; }
 
-		public virtual Address Address { get; set; }
+		public virtual uint? AddressId { get; set; }
 
 		public virtual double BorderThickness
 		{
@@ -73,6 +84,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Write(false)]
 		public virtual IList<PriceTagItem> Items { get; set; }
 
 		public static Border Preview(double width, double height, double borderThickness, IList<PriceTagItem> items)
@@ -95,10 +107,11 @@ namespace AnalitF.Net.Client.Models
 		{
 			var sql = tagType == TagType.RackingMap
 				? $"select * from PriceTags where TagType = {(int) tagType}"
-				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address.Id}";
+				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address?.Id ?? 0}";
 			var tag = connection.Query<PriceTag>(sql).FirstOrDefault();
-			if (tag != null)
+			if (tag != null) {
 				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
+			}
 			else
 				tag = Default(tagType, address);
 			return tag;
@@ -108,7 +121,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			var tag = new PriceTag {
 				TagType = tagType,
-				Address = tagType == TagType.PriceTag ? address : null,
+				AddressId = (tagType == TagType.PriceTag && address != null) ? address.Id : (uint?)null,
 				Height = 5,
 				Width = 5,
 				BorderThickness = 0.5d,
@@ -249,7 +262,7 @@ namespace AnalitF.Net.Client.Models
 			return tag;
 		}
 
-		public virtual FrameworkElement ToElement(WaybillLine line)
+		public virtual FrameworkElement ToElement(TagPrintable line)
 		{
 			return PriceTagItem.ToElement(Width, Height, Items, PriceTagItem.Map(line));
 		}
@@ -262,7 +275,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public static Dictionary<string, string> DemoData = new Dictionary<string, string> {
-			{"Цена", "221,03"},
+			{"Цена", "221-03"},
 			{"Наименование клиента", "Здоровая Аптека"},
 			{"Наименование", "Доксазозин 4мг таб. Х30 (R)"},
 			{"Страна", "РОССИЯ"},
@@ -296,6 +309,34 @@ namespace AnalitF.Net.Client.Models
 			IsNewLine = true;
 			FontSize = 14;
 			TextAlignment = TextAlignment.Left;
+		}
+
+		public PriceTagItem(PriceTagItem source, PriceTag priceTag)
+		{
+			Bold = source.Bold;
+			BorderThickness = source.BorderThickness;
+			BottomBorder = source.BottomBorder;
+			BottomMargin = source.BottomMargin;
+			FontSize = source.FontSize;
+			Height = source.Height;
+			IsAutoHeight = source.IsAutoHeight;
+			IsAutoWidth = source.IsAutoWidth;
+			IsNewLine = source.IsNewLine;
+			Italic = source.Italic;
+			LeftBorder = source.LeftBorder;
+			LeftMargin = source.LeftMargin;
+			Name = source.Name;
+			Position = source.Position;
+			PriceTagId = priceTag.Id;
+			RightBorder = source.RightBorder;
+			RightMargin = source.RightMargin;
+			Text = source.Text;
+			TextAlignment = source.TextAlignment;
+			TopBorder = source.TopBorder;
+			TopMargin = source.TopMargin;
+			Underline = source.Underline;
+			Width = source.Width;
+			Wrap = source.Wrap;
 		}
 
 		public virtual uint Id { get; set; }
@@ -334,7 +375,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool TopBorder { get; set; }
 		public virtual bool RightBorder { get; set; }
 		public virtual bool BottomBorder { get; set; }
-		public virtual PriceTag PriceTag { get; set; }
+		public virtual uint PriceTagId { get; set; }
 		public virtual bool IsAutoWidth { get; set; }
 		public virtual double? Width { get; set; }
 		public virtual bool IsAutoHeight { get; set; }
@@ -418,19 +459,26 @@ namespace AnalitF.Net.Client.Models
 			return value * 10 * 2.54 / 96d;
 		}
 
-		public static Dictionary<string, string> Map(WaybillLine line)
+		private static NumberFormatInfo GetFormat()
+		{
+			var format = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
+			format.NumberDecimalSeparator = "-";
+			return format;
+		}
+
+		public static Dictionary<string, string> Map(TagPrintable line)
 		{
 			return new Dictionary<string, string> {
-				{"Цена", line.RetailCost.ToString()},
-				{"Наименование клиента", line.Waybill.WaybillSettings.FullName},
+				{"Цена", String.Format(GetFormat(), "{0:0.00}", line.RetailCost)},
+				{"Наименование клиента", line.ClientName},
 				{"Наименование", line.Product},
 				{"Страна", line.Country},
 				{"Производитель", line.Producer},
 				{"Срок годности", line.Period},
-				{"Номер накладной", line.Waybill.ProviderDocumentId},
-				{"Поставщик", line.Waybill.SupplierName},
+				{"Номер накладной", line.ProviderDocumentId},
+				{"Поставщик", line.SupplierName},
 				{"Серия товара", line.SerialNumber},
-				{"Дата накладной", line.Waybill.DocumentDate.ToShortDateString() },
+				{"Дата накладной", line.DocumentDate.ToShortDateString() },
 				{"Количество", line.Quantity.ToString() },
 				{"Номер сертификата", line.Certificates },
 			};

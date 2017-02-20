@@ -99,6 +99,8 @@ namespace AnalitF.Net.Client.Models
 		private string _proxyUserName;
 		private string _proxyPassword;
 		private string _proxyHost;
+		private int? _barCodePrefix;
+		private int? _barCodeSufix;
 
 		public Settings(int token = 0, params Address[] addresses)
 			: this(addresses)
@@ -181,6 +183,11 @@ namespace AnalitF.Net.Client.Models
 			set { _password = value?.Trim(); }
 		}
 
+		//в жизни часы клиента и сервера не будут совпадать
+		//обновления по часам клиента
+		public virtual DateTime LastSync { get; set; }
+		//обновление по часам сервера
+		public virtual DateTime ServerLastSync { get; set; }
 		public virtual DateTime? LastUpdate { get; set; }
 
 		//дата вычисления лидеров если включена опция отсрочка платежа
@@ -261,6 +268,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsValid => !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName);
 
 		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
+		public virtual WaybillActDocumentSettings WaybillActDoc { get; set; }
+		public virtual WaybillProtocolDocumentSettings WaybillProtocolDoc { get; set; }
 		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
 		//вторая версия токена приложения, хеш guid и путь, первая версия просто guid
 		public virtual string ClientTokenV2 { get; set; }
@@ -394,6 +403,32 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual Rounding Rounding { get; set; }
 
+		public virtual int? BarCodePrefix
+		{
+			get { return _barCodePrefix; }
+			set
+			{
+				if (_barCodePrefix != value) {
+					_barCodePrefix = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public virtual int? BarCodeSufix
+		{
+			get { return _barCodeSufix; }
+			set
+			{
+				if (_barCodeSufix != value) {
+					_barCodeSufix = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public virtual string CheckPrinter { get; set; }
+
 		public virtual IWebProxy GetProxy()
 		{
 			if (!UseProxy)
@@ -405,7 +440,6 @@ namespace AnalitF.Net.Client.Models
 				proxy.Credentials = new NetworkCredential(ProxyUserName?.Trim(), ProxyPassword?.Trim());
 			return proxy;
 		}
-
 
 		/// <param name="name">
 		/// доступные значения - Waybills, Docs, Rejects, Orders, Reports

@@ -250,7 +250,6 @@ namespace AnalitF.Net.Client.Views
 						RootGrid.Children.Add(content);
 					}
 				});
-
 				model.Settings.Where(x => x != null).Subscribe(x => {
 					//если шаблон задан не нужно его переопределять это приведет к ошибкам
 					if (x.EditAddresses) {
@@ -347,6 +346,7 @@ namespace AnalitF.Net.Client.Views
 
 					return false;
 			}));
+			if (index == -1 && addressesProxy.Count > 0) index = 0;
 
 			Addresses.SelectedIndex = index;
 		}

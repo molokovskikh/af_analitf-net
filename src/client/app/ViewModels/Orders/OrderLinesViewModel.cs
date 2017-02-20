@@ -208,10 +208,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Where(_ => IsCurrentSelected && Session != null)
 				.Select(_ =>
 				{
-					var orders = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
+					var orders = AddressSelector.GetActiveFilter().SelectMany(o => o.Orders)
 						.Where(x => Prices.Where(y => y.IsSelected).Select(y => y.Item.Id).Contains(x.Price.Id)).ToList();
+					var activeOrders = orders.Where(x => !x.Frozen).ToList();
 
-					var lines = orders.SelectMany(o => o.Lines)
+					var lines = activeOrders.SelectMany(o => o.Lines)
 						.OrderBy(l => l.Id)
 						.ToObservableCollection();
 					lines.Each(l => {

@@ -103,45 +103,42 @@ namespace AnalitF.Net.Client.Test.Unit
 		public void Print_price_tag()
 		{
 			var address = new Address("Тестовый");
-			var settings = new Settings(address);
-			var waybill = new Waybill(address, new Supplier());
-			var line = new WaybillLine(waybill) {
+			var lines = new List<TagPrintable>();
+			var line = new TagPrintable() {
 				Nds = 10,
-				SupplierCost = 251.20m,
-				SupplierCostWithoutNds = 228.36m,
+				RetailCost = 251.20m,
+				Product = "Диклофенак",
 				Quantity = 1
 			};
-			waybill.AddLine(line);
+			lines.Add(line);
 
-			waybill.Calculate(settings, new List<uint>());
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+			var priceTagSettings = new PriceTagSettings() {Type = PriceTagType.Normal};
+			var doc = new PriceTagDocument(lines, priceTagSettings, null).Build();
 			Assert.IsNotNull(doc);
 
 			var priceTag = PriceTag.Default(TagType.RackingMap, null);
+			var settings = new Settings(address);
 			settings.RackingMap.Size = RackingMapSize.Custom;
-			var doc2 = new RackingMapDocument(waybill, waybill.Lines, settings, priceTag).Build();
+			var doc2 = new RackingMapDocument(lines, settings, priceTag).Build();
 			Assert.IsNotNull(doc2);
 		}
 
 		[Test]
 		public void Build_all_tags()
 		{
-			var address = new Address("Тестовый");
-			var settings = new Settings(address);
-			settings.PriceTags.First(r => r.Address == address).Type = PriceTagType.Normal;
-			var waybill = new Waybill(address, new Supplier());
+			var lines = new List<TagPrintable>();
 			for(var i = 0; i < 25; i++) {
-				var line = new WaybillLine(waybill) {
+				var line = new TagPrintable() {
 					Nds = 10,
-					SupplierCost = 251.20m,
-					SupplierCostWithoutNds = 228.36m,
+					RetailCost = 251.20m,
+					Product = "Диклофенак",
 					Quantity = 1
 				};
-				waybill.AddLine(line);
+				lines.Add(line);
 			}
 
-			waybill.Calculate(settings, new List<uint>());
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+			var priceTagSettings = new PriceTagSettings() { Type = PriceTagType.Normal };
+			var doc = new PriceTagDocument(lines, priceTagSettings, null).Build();
 
 			Assert.IsNotNull(doc);
 			Assert.AreEqual(2, doc.Pages.Count);
@@ -150,7 +147,6 @@ namespace AnalitF.Net.Client.Test.Unit
 			Assert.AreEqual(24, page1.Descendants<Grid>().First().Children.Count);
 			var page2 = doc.Pages[1].Child;
 			Assert.AreEqual(1, page2.Descendants<Grid>().First().Children.Count);
-
 		}
 
 		private static List<Offer> Offers()

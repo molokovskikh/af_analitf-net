@@ -5,17 +5,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Interactivity;
-using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
-using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -83,7 +80,8 @@ namespace AnalitF.Net.Client.Views
 
 		private void Init()
 		{
-			EditSum.Visibility = model.Waybill.SupplierSum.HasValue ? Visibility.Collapsed : Visibility.Visible;
+			if (model?.Waybill == null)
+				return;
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
 			//что негативно отражается на производительности
@@ -95,25 +93,6 @@ namespace AnalitF.Net.Client.Views
 			};
 			lines.IsReadOnly = false;
 			lines.Name = "Lines";
-			var check = new CheckBox {
-				IsChecked = true,
-				Focusable = false,
-				VerticalAlignment = VerticalAlignment.Center,
-				Name = "CheckAllPrint"
-			};
-			var textBlock = new TextBlock {
-				Text = "Печатать"
-			};
-			var header = new StackPanel {
-				Orientation = Orientation.Horizontal,
-				Children = { check, textBlock }
-			};
-			check.Checked += (sender, args) => {
-				lines.Items.OfType<WaybillLine>().Each(l => l.Print = check.IsChecked.GetValueOrDefault());
-			};
-			check.Unchecked += (sender, args) => {
-				lines.Items.OfType<WaybillLine>().Each(l => l.Print = check.IsChecked.GetValueOrDefault());
-			};
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Наименование",
 				Binding = new Binding("Product"),
@@ -130,23 +109,8 @@ namespace AnalitF.Net.Client.Views
 				Binding = new Binding("Country"),
 				Width = new DataGridLength(100, DataGridLengthUnitType.Star),
 			});
-			var printColumn = new CustomDataGridColumn {
-				Header = header,
-				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
-				SortMemberPath = "Print",
-				Generator = (c, i) => {
-					var el = new CheckBox {
-						VerticalAlignment = VerticalAlignment.Center,
-						HorizontalAlignment = HorizontalAlignment.Center
-					};
-					BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding("Print") {
-						UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-					});
-					return el;
-				}
-			};
-			DataGridHelper.SetColumnDisplayName(printColumn, "Печатать");
-			lines.Columns.Add(printColumn);
+			lines.Columns.Add(DataGridHelper.CheckBoxColumn("Печатать", "Print",
+				x => lines.Items.OfType<WaybillLine>().Each(l => l.Print = x), true));
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Срок годности",
 				Binding = new Binding("Period"),
@@ -162,7 +126,6 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(13, DataGridLengthUnitType.Star),
 				Header = "Штрихкод",
 				Binding = new Binding("EAN13"),
-				Visibility = Visibility.Collapsed
 			});
 			lines.Columns.Add(new CustomDataGridColumn((c, i) => null) {
 				Header = "Сертификаты",
@@ -170,7 +133,7 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
 				Generator = (c, i) => new ContentControl { Style = (Style)FindResource("DownloadLink") }
 			});
-			if (model?.Waybill.IsCreatedByUser == true) {
+			if (model.Waybill.IsCreatedByUser == true) {
 				lines.CanUserAddRows = true;
 				lines.CanUserDeleteRows = true;
 				lines.Columns.Add(new CustomDataGridColumn {
@@ -274,6 +237,7 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Реальная наценка");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная цена");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Заказ");
+			DataGridHelper.CalculateColumnWidth(grid, "00000", "Оприходовано");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная сумма");
 			DataGridHelper.CalculateColumnWidth(grid, "0000000000000", "Штрихкод");
 
@@ -292,6 +256,18 @@ namespace AnalitF.Net.Client.Views
 						gridColumn.IsReadOnly = model.Waybill.IsReadOnly;
 					}
 				}
+				model.Waybill.PropertyChanged += (sender, args) => {
+					if (args.PropertyName == "IsCreatedByUser") {
+						MainGrid.Children.Remove(lines);
+						Init();
+						lines.ItemsSource = model.Lines.Value;
+					}
+					else if (args.PropertyName == "Status") {
+						lines.IsReadOnly = model.Waybill.Status == DocStatus.Posted;
+					}
+				};
+
+				lines.IsReadOnly = model.Waybill.Status == DocStatus.Posted;
 			}
 			grid.BeginningEdit += (sender, args) => {
 				var line = args.Row.DataContext as WaybillLine;
@@ -299,6 +275,11 @@ namespace AnalitF.Net.Client.Views
 					return;
 				if (line.ServerRetailCost != null) {
 					MessageBox.Show(Application.Current.MainWindow, "Редактирование розничной цены запрещено поставщиком",
+						Consts.WarningTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+					args.Cancel = true;
+				}
+				else if (model.Waybill.Status == DocStatus.Posted) {
+					MessageBox.Show(Application.Current.MainWindow, "Накладная оприходована, редактирование запрещено",
 						Consts.WarningTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
 					args.Cancel = true;
 				}
