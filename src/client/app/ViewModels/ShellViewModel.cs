@@ -378,9 +378,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool ShowLogin()
 		{
-			if (!IsShowLoginEnabled)
-				return false;
-
 			var result = new DialogResult(new Login());
 			result.Execute(null);
 			if ((result.Model as Login).WasCancelled)
