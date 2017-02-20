@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public List<Offer> CatalogOffers = new List<Offer>();
 
+
 		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
 			: base(initOfferId)
 		{
@@ -96,7 +97,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<decimal?> RetailCost { get; set; }
 		public NotifyValue<decimal> RetailMarkup { get; set; }
 		public NotifyValue<List<object>> DisplayItems { get; set; }
-		public NotifyValue<object> CurrentDisplayItem { get; set; }
+		NotifyValue<object> currentDisplayItem;
+		public NotifyValue<object> CurrentDisplayItem
+		{ get
+			{
+				return currentDisplayItem; } 
+			
+			set
+			{
+				currentDisplayItem =value;
+			}
+		}
+
+	
 
 		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
 
@@ -171,6 +184,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
 				?? Offers.Value.FirstOrDefault();
 		}
+
+		
 
 		private void UpdateMaxProducers()
 		{

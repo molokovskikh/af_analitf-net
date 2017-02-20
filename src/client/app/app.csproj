@@ -195,6 +195,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
     <Reference Include="WpfAnimatedGif">
       <HintPath>..\..\..\packages\WpfAnimatedGif.1.4.13\lib\net\WpfAnimatedGif.dll</HintPath>
       <Private>True</Private>
@@ -244,6 +245,7 @@
     <Compile Include="Controls\Preview.cs" />
     <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
+    <Compile Include="Controls\WinFormDataGrid.cs" />
     <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
@@ -466,6 +468,7 @@
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
     <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
+    <Compile Include="ViewModels\Dialogs\WinFormDataGridConfig.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
@@ -594,6 +597,9 @@
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\WinFormDataGridConfig.xaml.cs">
+      <DependentUpon>WinFormDataGridConfig.xaml</DependentUpon>
+	</Compile>
     <Compile Include="Views\Dialogs\EditDefectSeries.xaml.cs">
       <DependentUpon>EditDefectSeries.xaml</DependentUpon>
     </Compile>
@@ -923,6 +929,10 @@
     <Page Include="Views\Dialogs\DocModel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\WinFormDataGridConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Dialogs\EditDefectSeries.xaml">
       <Generator>MSBuild:Compile</Generator>
