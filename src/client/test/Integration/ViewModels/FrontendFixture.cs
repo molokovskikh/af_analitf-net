@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
+			settings.Waybills.Add(new WaybillSettings());
 			session.DeleteEach<Stock>();
 			model = Open(new Frontend());
 			stock = new Stock()
