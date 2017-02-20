@@ -260,8 +260,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock => true;
-		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
+		public bool CanPrintStock => User.CanPrint<CatalogOfferDocument>();
 
 		public PrintResult PrintStock()
 		{

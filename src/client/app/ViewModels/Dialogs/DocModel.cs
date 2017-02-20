@@ -9,6 +9,8 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
@@ -46,14 +48,20 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		}
 	}
 
-	public class DocModel<T> : BaseScreen, IPrintable where T : class, IDocModel
+	public class DocModel<T> : BaseScreen, IPrintableStock where T : class, IDocModel
 	{
-		public DocModel(IDocModel docModel)
+		public DocModel()
+		{
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
+		}
+
+		public DocModel(IDocModel docModel) : this()
 		{
 			Model = docModel;
 		}
 
-		public DocModel(uint id)
+		public DocModel(uint id) : this()
 		{
 			Model = Session.Get<T>(id);
 		}
@@ -62,7 +70,17 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public FlowDocument Document { get; set; }
 
-		public bool CanPrint => Document != null;
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => Document != null;
 
 		public bool CanSave => Document != null;
 
@@ -77,7 +95,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			}
 		}
 
-		public PrintResult Print()
+		public PrintResult PrintStock()
 		{
 			//мы не можем использовать существующий документ, тк это приведет к тому что визуализация в FlowDocumentScrollViewer "исчезнет"
 			//и что бы увидеть данные пользователю нужно будет вызвать перерисовку документа, например с помощью полосы прокрутки

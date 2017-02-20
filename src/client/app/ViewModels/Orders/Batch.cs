@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 	}
 
 	[DataContract]
-	public class Batch : BaseOfferViewModel, IPrintable
+	public class Batch : BaseOfferViewModel, IPrintableStock
 	{
 		private string lastUsedDir;
 
@@ -134,6 +134,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			ActivePrint.Subscribe(ExcelExporter.ActiveProperty);
 			CurrentFilter.Subscribe(_ => SearchBehavior.ActiveSearchTerm.Value = "");
 			ReportEditor = new ReportEditor(this);
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		[DataMember]
@@ -166,14 +169,63 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public bool CanUpload => Address != null;
 
-		public bool CanPrint
+		public void SetMenuItems()
 		{
-			get
-			{
-				return ActivePrint.Value.Match("Offers")
-					? User.CanPrint<Batch, Offer>()
-					: User.CanPrint<Batch, BatchLine>();
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+
+			item = new MenuItem { Header = "Сводный прайс-лист" };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => true;
+
+		public PrintResult PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == DisplayName) {
+						if (!User.CanPrint<Batch, BatchLine>() || Address == null)
+							continue;
+						var items = GetItemsFromView<BatchLineView>("ReportLines") ?? ReportLines.Value;
+						docs.Add(new BatchReport(items, Address));
+					}
+					if ((string)item.Header == "Сводный прайс-лист") {
+						if (!User.CanPrint<Batch, Offer>() || CurrentCatalog.Value == null)
+							continue;
+						var items = GetPrintableOffers();
+						docs.Add(new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, items));
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
 			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			if (LastOperation == "Сводный прайс-лист")
+				Coroutine.BeginExecute(PrintPreviewCatalogOffer().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			if (!User.CanPrint<Batch, BatchLine>() || Address == null)
+				return null;
+			var items = GetItemsFromView<BatchLineView>("ReportLines") ?? ReportLines.Value;
+			return Preview(DisplayName, new BatchReport(items, Address));
+		}
+
+		public IEnumerable<IResult> PrintPreviewCatalogOffer()
+		{
+			if (!User.CanPrint<Batch, Offer>() || CurrentCatalog.Value == null)
+				return null;
+			var items = GetPrintableOffers();
+			return Preview("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, items));
 		}
 
 		public IEditor ReportEditor { get; set; }
@@ -528,25 +580,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			book.Write(stream);
 		}
 
-		public PrintResult Print()
-		{
-			if (ActivePrint.Value.Match("Offers")) {
-				if (CurrentCatalog.Value == null)
-					return null;
-				var offers = GetPrintableOffers();
-				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, offers));
-			}
-			else if (Address != null) {
-				var lines = GetItemsFromView<BatchLineView>("ReportLines") ?? ReportLines.Value;
-				return new PrintResult(DisplayName, new BatchReport(lines, Address));
-			}
-			return null;
-		}
-
 		public void ActivatePrint(string name)
 		{
 			ActivePrint.Value = name;
-			NotifyOfPropertyChange(nameof(CanPrint));
 		}
 
 		public void EnterReportLine()

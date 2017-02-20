@@ -13,10 +13,12 @@ using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
-	public class PriceOfferViewModel : BaseOfferViewModel, IPrintable
+	public class PriceOfferViewModel : BaseOfferViewModel, IPrintableStock
 	{
 		private string[] filters = {
 			"Прайс-лист (F4)",
@@ -55,6 +57,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(CurrentFilter.Cast<object>())
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<object>())
 				.Subscribe(_ => Filter());
+
+			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -67,7 +72,41 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public bool CanShowHistoryOrders => CurrentCatalog.Value != null;
 
-		public bool CanPrint => User.CanPrint<PriceOfferDocument>();
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintStockMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrintStock => User.CanPrint<PriceOfferDocument>();
+
+		public PrintResult PrintStock()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+					if ((string) item.Header == DisplayName) {
+						var items = GetPrintableOffers();
+						docs.Add(new PriceOfferDocument(items, Price, Address));
+					}
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			var items = GetPrintableOffers();
+			return Preview(DisplayName, new PriceOfferDocument(items, Price, Address));
+		}
 
 		protected override void OnInitialize()
 		{
@@ -159,13 +198,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public void FilterLeader()
 		{
 			CurrentFilter.Value = Filters[2];
-		}
-
-		public PrintResult Print()
-		{
-			var offers = GetPrintableOffers();
-			var doc = new PriceOfferDocument(offers, Price, Address);
-			return new PrintResult(DisplayName, doc);
 		}
 
 		public IResult ShowHistoryOrders()
