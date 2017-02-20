@@ -60,6 +60,7 @@ namespace AnalitF.Net.Service.Controllers
 
 					var table = new DataTable();
 					table.ReadXml(item.OpenReader());
+					table.Constraints.Clear();
 					if (table.Columns.Contains("ServerDocId"))
 						table.Columns.Remove("ServerDocId");
 					if (table.Columns.Contains("ServerId"))

@@ -39,6 +39,9 @@ namespace AnalitF.Net.Service.Filters
 			var session = (ISession)((dynamic)controller).Session;
 			var login = Thread.CurrentPrincipal.Identity.Name;
 #if DEBUG
+			if (!String.IsNullOrEmpty(ConfigurationManager.AppSettings["DebugUser"])) {
+				login = ConfigurationManager.AppSettings["DebugUser"];
+			}
 			if (String.IsNullOrEmpty(login)) {
 				IEnumerable<string> values;
 				if (actionContext.Request.Headers.TryGetValues("Debug-UserName", out values))
@@ -47,9 +50,6 @@ namespace AnalitF.Net.Service.Filters
 			if (String.IsNullOrEmpty(login)) {
 				if (!Thread.CurrentPrincipal.Identity.IsAuthenticated) {
 					login = Environment.UserName;
-				}
-				if (ConfigurationManager.AppSettings["DebugUser"] != null) {
-					login = ConfigurationManager.AppSettings["DebugUser"];
 				}
 			}
 #endif

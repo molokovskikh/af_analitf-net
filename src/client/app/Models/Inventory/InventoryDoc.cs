@@ -67,7 +67,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual void Post()
 		{
-			CloseDate = DateTime.Now;
+			CloseDate = SystemTime.Now();
+			Timestamp = SystemTime.Now();
 			Status = DocStatus.Posted;
 			// с поставки на склад
 			foreach (var line in Lines)

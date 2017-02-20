@@ -59,6 +59,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines){
 				line.SrcStock.ReservedQuantity -= line.SrcQuantity;
 				line.DstStock.Incoming(line.Quantity);

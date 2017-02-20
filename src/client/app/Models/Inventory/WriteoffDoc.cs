@@ -4,6 +4,7 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 using AnalitF.Net.Client.Config.NHibernate;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -75,8 +76,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual void Post(ISession session)
 		{
-			CloseDate = DateTime.Now;
+			CloseDate = SystemTime.Now();
 			Status = DocStatus.Posted;
+			Timestamp = SystemTime.Now();
 			foreach (var line in Lines)
 				session.Save(line.Stock.ApplyReserved(line.Quantity));
 		}

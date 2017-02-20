@@ -46,6 +46,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			//для этого тесты должны иметь общий генератор случайных чисел
 			random = new Random();
 			begin = DateTime.Now;
+			SystemTime.Reset();
 
 			cleaner = new FileCleaner();
 			disposable = new CompositeDisposable();

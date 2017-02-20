@@ -11,7 +11,6 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using Common.Tools;
 using Dapper;
-using Diadoc.Api.Proto;
 using Ionic.Zip;
 using log4net;
 using Newtonsoft.Json;
@@ -25,13 +24,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		protected override UpdateResult Execute()
 		{
-			var newLastSync = DateTime.Now;
+			var newLastSync = SystemTime.Now();
 			using (var disposable = new CompositeDisposable())
 			using (var zipStream = File.Open(Cleaner.TmpFile(), FileMode.Open))
 			using (var checkStream = File.Open(Cleaner.TmpFile(), FileMode.Open))
 			using (var lineStream = File.Open(Cleaner.TmpFile(), FileMode.Open)) {
+				var lastSync = Settings.LastSync.ToUniversalTime();
+
 				using (var reader = Session.Connection.ExecuteReader("select * from Checks where Timestamp > @lastSync",
-						new { lastSync = Settings.LastSync }))
+						new { lastSync }))
 					WriteTable(reader, checkStream);
 
 				var sql = @"
@@ -39,12 +40,12 @@ select l.*
 from CheckLines l
 	join Checks c on c.Id = l.CheckId
 where c.Timestamp > @lastSync";
-				using (var reader = Session.Connection.ExecuteReader(sql, new {lastSync = Settings.LastSync }))
+				using (var reader = Session.Connection.ExecuteReader(sql, new { lastSync }))
 					WriteTable(reader, lineStream);
 
 				var actions = Session.Connection
 					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
-						new { lastSync = Settings.LastSync })
+						new { lastSync })
 					.ToArray();
 
 				using (var zip = new ZipFile()) {
@@ -134,7 +135,7 @@ where Timestamp > @lastSync");
 		{
 			var stream = File.Open(Cleaner.TmpFile(), FileMode.Open);
 			disposable.Add(stream);
-			using (var reader = Session.Connection.ExecuteReader(sql, new { lastSync = Settings.LastSync }))
+			using (var reader = Session.Connection.ExecuteReader(sql, new { lastSync = Settings.LastSync.ToUniversalTime() }))
 				WriteTable(reader, stream);
 			zip.AddEntry(name, stream);
 		}

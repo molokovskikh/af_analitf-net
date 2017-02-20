@@ -94,6 +94,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DisplacementDocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.DisplacementTo(line.Quantity));
 				session.Save(line.DstStock.DisplacementFrom(line.Quantity));

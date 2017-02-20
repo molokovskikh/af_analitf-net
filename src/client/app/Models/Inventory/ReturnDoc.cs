@@ -84,6 +84,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines)
 				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
 		}
