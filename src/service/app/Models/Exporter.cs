@@ -1808,8 +1808,8 @@ where s.Timestamp > ?lastSync
 				sql = $@"
 select Id as ServerId,
 	CheckType,
-	Date,
-	ChangeOpening,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(ChangeOpening, @@session.time_zone,'+00:00') as ChangeOpening,
 	Status,
 	Clerk,
 	KKM,
@@ -1880,8 +1880,8 @@ where c.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	Date,
-	CloseDate,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
 	AddressId,
 	DstAddressId,
@@ -1934,10 +1934,10 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	Date,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
 	Status,
-	CloseDate,
 	SupplySumWithoutNds,
 	SupplySum,
 	RetailSum,
@@ -1986,10 +1986,10 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	Date,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
 	Status,
-	CloseDate,
 	SrcRetailSum,
 	SupplySumWithoutNds,
 	SupplySum,
@@ -2044,8 +2044,8 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	Date,
-	CloseDate,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
 	AddressId,
 	SupplierId,
@@ -2098,10 +2098,10 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	Date,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
 	Status,
-	CloseDate,
 	SrcRetailSum,
 	RetailSum,
 	Comment,
@@ -2151,11 +2151,11 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	Date,
+	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
+	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
 	ReasonId,
 	Status,
-	CloseDate,
 	SupplySumWithoutNds,
 	SupplySum,
 	RetailSum,

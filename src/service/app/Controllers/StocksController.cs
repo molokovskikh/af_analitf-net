@@ -64,6 +64,8 @@ namespace AnalitF.Net.Service.Controllers
 						table.Columns.Remove("ServerDocId");
 					if (table.Columns.Contains("ServerId"))
 						table.Columns.Remove("ServerId");
+					if (table.Columns.Contains("Timestamp"))
+						table.Columns.Remove("Timestamp");
 
 					MySqlCommand cmd;
 					var columnMap = new Dictionary<string ,string>(StringComparer.InvariantCultureIgnoreCase) {
@@ -121,7 +123,11 @@ where l.{name}DocId is null
 
 					foreach (var row in table.AsEnumerable()) {
 						foreach (DataColumn column in table.Columns) {
-							cmd.Parameters[columnMap[column.ColumnName]].Value = row[column];
+							var value = row[column];
+							if (value is DateTime) {
+								value = ((DateTime)value).ToLocalTime();
+							}
+							cmd.Parameters[columnMap[column.ColumnName]].Value = value;
 						}
 						try {
 							cmd.ExecuteNonQuery();

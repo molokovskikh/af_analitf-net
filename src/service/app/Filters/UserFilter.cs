@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -38,11 +39,18 @@ namespace AnalitF.Net.Service.Filters
 			var session = (ISession)((dynamic)controller).Session;
 			var login = Thread.CurrentPrincipal.Identity.Name;
 #if DEBUG
-			if (!Thread.CurrentPrincipal.Identity.IsAuthenticated) {
-				login = Environment.UserName;
+			if (String.IsNullOrEmpty(login)) {
+				IEnumerable<string> values;
+				if (actionContext.Request.Headers.TryGetValues("Debug-UserName", out values))
+					login = values.First();
 			}
-			if (ConfigurationManager.AppSettings["DebugUser"] != null) {
-				login = ConfigurationManager.AppSettings["DebugUser"];
+			if (String.IsNullOrEmpty(login)) {
+				if (!Thread.CurrentPrincipal.Identity.IsAuthenticated) {
+					login = Environment.UserName;
+				}
+				if (ConfigurationManager.AppSettings["DebugUser"] != null) {
+					login = ConfigurationManager.AppSettings["DebugUser"];
+				}
 			}
 #endif
 			if (login.Contains("\\"))
