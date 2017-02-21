@@ -206,10 +206,18 @@ namespace AnalitF.Net.Service.Test
 
 			exporter.ExportDocs();
 			var files = ListResult();
-			Assert.AreEqual($"stocks.meta.txt, stocks.txt, Waybills/{Path.GetFileName(waybillFile)}, Waybills.meta.txt, Waybills.txt," +
-					" WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt," +
-					" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
-					" LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
+			Assert.AreEqual($"stocks.meta.txt, stocks.txt, UpdatedWaybills.meta.txt, UpdatedWaybills.txt," +
+				" Checks.meta.txt, Checks.txt, CheckLines.meta.txt, CheckLines.txt, DisplacementDocs.meta.txt," +
+				" DisplacementDocs.txt, DisplacementLines.meta.txt, DisplacementLines.txt, InventoryDocs.meta.txt," +
+				" InventoryDocs.txt, InventoryLines.meta.txt, InventoryLines.txt, ReassessmentDocs.meta.txt," +
+				" ReassessmentDocs.txt, ReassessmentLines.meta.txt, ReassessmentLines.txt, ReturnDocs.meta.txt," +
+				" ReturnDocs.txt, ReturnLines.meta.txt, ReturnLines.txt, UnpackingDocs.meta.txt, UnpackingDocs.txt," +
+				" UnpackingLines.meta.txt, UnpackingLines.txt, WriteoffDocs.meta.txt, WriteoffDocs.txt," +
+				" WriteoffLines.meta.txt, WriteoffLines.txt," +
+				$" Waybills/{Path.GetFileName(waybillFile)}, Waybills.meta.txt, Waybills.txt," +
+				" WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt," +
+				" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
+				" LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
 		}
 
 		[Test]
@@ -220,6 +228,14 @@ namespace AnalitF.Net.Service.Test
 			exporter.ExportDocs();
 			var files = ListResult();
 			Assert.AreEqual("stocks.meta.txt, stocks.txt," +
+				" UpdatedWaybills.meta.txt, UpdatedWaybills.txt," +
+				" Checks.meta.txt, Checks.txt, CheckLines.meta.txt, CheckLines.txt, DisplacementDocs.meta.txt," +
+				" DisplacementDocs.txt, DisplacementLines.meta.txt, DisplacementLines.txt, InventoryDocs.meta.txt," +
+				" InventoryDocs.txt, InventoryLines.meta.txt, InventoryLines.txt, ReassessmentDocs.meta.txt," +
+				" ReassessmentDocs.txt, ReassessmentLines.meta.txt, ReassessmentLines.txt, ReturnDocs.meta.txt," +
+				" ReturnDocs.txt, ReturnLines.meta.txt, ReturnLines.txt, UnpackingDocs.meta.txt, UnpackingDocs.txt," +
+				" UnpackingLines.meta.txt, UnpackingLines.txt, WriteoffDocs.meta.txt, WriteoffDocs.txt," +
+				" WriteoffLines.meta.txt, WriteoffLines.txt," +
 				" Waybills.meta.txt, Waybills.txt," +
 				" WaybillLines.meta.txt, WaybillLines.txt," +
 				" WaybillOrders.meta.txt, WaybillOrders.txt," +
