@@ -37,5 +37,11 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			fixture.Verbose = Verbose;
 			fixture.Execute(session);
 		}
+
+		protected void Log(string message)
+		{
+			if (Verbose)
+				Console.WriteLine(message);
+		}
 	}
 }

@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint Id { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
+		public virtual uint? ServerDocId { get; set; }
 
 		public virtual decimal Quantity
 		{
@@ -54,7 +55,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal RetailSum => Quantity * RetailCost.GetValueOrDefault();
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal DiscontSum  { get; set; }
-		public virtual uint CheckId { get; set; }
+		public virtual uint? CheckId { get; set; }
 		public virtual uint? ProductKind { get; set; }
 		public virtual string PKU
 		{

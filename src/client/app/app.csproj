@@ -302,13 +302,13 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\Inventory\DisplacementDoc.cs" />
-    <Compile Include="Models\Inventory\InventoryDocLine.cs" />
+    <Compile Include="Models\Inventory\InventoryLine.cs" />
     <Compile Include="Models\Inventory\ReassessmentLine.cs" />
     <Compile Include="Models\Inventory\UnpackingDoc.cs" />
-    <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
+    <Compile Include="Models\Inventory\ReturnDoc.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
     <Compile Include="Models\Inventory\DisplacementLine.cs" />
-    <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
+    <Compile Include="Models\Inventory\ReturnLine.cs" />
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
     <Compile Include="Models\Inventory\ReassessmentDoc.cs" />
@@ -316,6 +316,7 @@
     <Compile Include="Models\Inventory\StockAction.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
     <Compile Include="Models\Inventory\SyncCommand.cs" />
+    <Compile Include="Models\Inventory\UnpackingLine.cs" />
     <Compile Include="Models\Inventory\WriteoffDoc.cs" />
     <Compile Include="Models\Inventory\WriteoffLine.cs" />
     <Compile Include="Models\Inventory\WriteoffReason.cs" />

@@ -82,6 +82,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public override uint Id { get; set; }
+		public virtual DateTime Timestamp { get; set; }
 		public virtual string ProviderDocumentId { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
 		public virtual DateTime WriteTime { get; set; }
@@ -402,6 +403,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool Stock(ISession session)
 		{
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
 			var stockActions = new List<StockAction>();
 			foreach (var line in lines) {

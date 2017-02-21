@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -707,6 +708,33 @@ update Addresses set Id =  2575 where Id = :addressId")
 			cmd.SyncData = "Waybills";
 			Run(cmd);
 			Assert.AreEqual(0, cmd.Results.Count);
+		}
+
+		[Test]
+		public void Sync_command()
+		{
+			settings.LastSync = DateTime.MinValue;
+			var stock = new Stock {
+				Product = "Папаверин",
+				Status = StockStatus.Available,
+				Address = address,
+				Quantity = 5,
+				ReservedQuantity = 0,
+				SupplyQuantity = 5
+			};
+			localSession.Save(stock);
+
+			var doc = new InventoryDoc(address);
+			doc.Lines.Add(new InventoryLine(stock, 1, localSession));
+			doc.UpdateStat();
+			doc.Post();
+			localSession.Save(doc);
+			Run(new SyncCommand());
+
+			TimeMachine.ToFuture(TimeSpan.FromMinutes(10));
+			doc.UnPost();
+			doc.Post();
+			Run(new SyncCommand());
 		}
 	}
 }

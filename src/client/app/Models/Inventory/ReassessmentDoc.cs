@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 		public virtual uint Id { get; set; }
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
@@ -61,6 +62,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.ApplyReserved(line.Quantity));
 

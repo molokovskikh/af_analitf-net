@@ -22,14 +22,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		private ReturnToSupplierDetails()
 		{
-			Lines = new ReactiveCollection<ReturnToSupplierLine>();
+			Lines = new ReactiveCollection<ReturnLine>();
 			Session.FlushMode = FlushMode.Never;
 
 			PrintStockMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
-		public ReturnToSupplierDetails(ReturnToSupplier doc)
+		public ReturnToSupplierDetails(ReturnDoc doc)
 			: this()
 		{
 			DisplayName = "Новый возврат поставщику";
@@ -41,14 +41,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			: this()
 		{
 			DisplayName = "Редактирование возврата поставщику " + id;
-			InitDoc(Session.Load<ReturnToSupplier>(id));
+			InitDoc(Session.Load<ReturnDoc>(id));
 			Lines.AddRange(Doc.Lines);
 		}
 
-		public ReturnToSupplier Doc { get; set; }
+		public ReturnDoc Doc { get; set; }
 
-		public ReactiveCollection<ReturnToSupplierLine> Lines { get; set; }
-		public NotifyValue<ReturnToSupplierLine> CurrentLine { get; set; }
+		public ReactiveCollection<ReturnLine> Lines { get; set; }
+		public NotifyValue<ReturnLine> CurrentLine { get; set; }
 		public Supplier[] Suppliers { get; set; }
 
 		public NotifyValue<bool> CanAdd { get; set; }
@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnDeactivate(close);
 		}
 
-		private void InitDoc(ReturnToSupplier doc)
+		private void InitDoc(ReturnDoc doc)
 		{
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
+				var line = new ReturnLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -158,7 +158,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else
 				Session.Update(Doc);
 			Session.Flush();
-			Bus.SendMessage(nameof(ReturnToSupplier), "db");
+			Bus.SendMessage(nameof(ReturnDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
 		}
 

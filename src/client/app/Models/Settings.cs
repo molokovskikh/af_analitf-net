@@ -632,10 +632,13 @@ namespace AnalitF.Net.Client.Models
 			try {
 				client.DefaultRequestHeaders.Add("OS-Version", Environment.OSVersion.VersionString);
 			} catch (Exception) { }
+#if DEBUG
+			client.DefaultRequestHeaders.Add("Debug-UserName", UserName);
 			if (DebugTimeout > 0)
 				client.DefaultRequestHeaders.Add("debug-timeout", DebugTimeout.ToString());
 			if (DebugFault)
 				client.DefaultRequestHeaders.Add("debug-fault", "true");
+#endif
 			client.BaseAddress = config.BaseUrl;
 			return client;
 		}

@@ -112,7 +112,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			var logs = PackLogs(Cleaner.RandomFile());
 			var sendLogsTask = PostFile("Logs", logs);
 			var errorCount = 0;
-			var maxErrorCount = 5;
 			string[] files;
 			while (true) {
 				try {
@@ -121,7 +120,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						var resend = sendLogsTask.IsFaulted || sendLogsTask.IsCanceled
 							|| (sendLogsTask.IsCompleted && sendLogsTask.Result?.IsSuccessStatusCode == false);
 						if (resend) {
-							Log.Warn($"Отправка логов завершился ошибкой, повторяю операцию, попытка {errorCount}/{maxErrorCount}", sendLogsTask.Exception);
+							Log.Warn($"Отправка логов завершился ошибкой, повторяю операцию, попытка {errorCount}/{Config.MaxErrorCount}", sendLogsTask.Exception);
 							sendLogsTask = PostFile("Logs", logs);
 						}
 					}
@@ -203,9 +202,9 @@ namespace AnalitF.Net.Client.Models.Commands
 					if (Token.IsCancellationRequested)
 						throw;
 					errorCount++;
-					if (errorCount > maxErrorCount)
+					if (errorCount >= Config.MaxErrorCount)
 						throw;
-					Log.Error($"Запрос обновления завершился ошибкой, повторяю операцию, попытка {errorCount}/{maxErrorCount}", e);
+					Log.Error($"Запрос обновления завершился ошибкой, повторяю операцию, попытка {errorCount}/{Config.MaxErrorCount}", e);
 				}
 			}//while(true)
 
