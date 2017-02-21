@@ -51,10 +51,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			using (var session = Setup.SessionFactory.OpenSession())
 			using (session.BeginTransaction()) {
-				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == Environment.UserName);
+				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == ServerFixture.DebugLogin());
 				if (user != null)
 					return;
-				SampleData.CreateUser(session, Environment.UserName);
+				SampleData.CreateUser(session, ServerFixture.DebugLogin());
 				session.Transaction.Commit();
 			}
 		}

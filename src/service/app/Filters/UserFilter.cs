@@ -47,11 +47,6 @@ namespace AnalitF.Net.Service.Filters
 				if (actionContext.Request.Headers.TryGetValues("Debug-UserName", out values))
 					login = values.First();
 			}
-			if (String.IsNullOrEmpty(login)) {
-				if (!Thread.CurrentPrincipal.Identity.IsAuthenticated) {
-					login = Environment.UserName;
-				}
-			}
 #endif
 			if (login.Contains("\\"))
 				login = new Regex(@"\\(?<login>.+)").Match(login).Groups["login"].Value;

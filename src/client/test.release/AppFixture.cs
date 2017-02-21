@@ -19,7 +19,7 @@ namespace test.release
 	public class AppFixture : BaseFixture
 	{
 		//для отладки
-		//string testUserName = Environment.UserName;
+		//string testUserName = "test";
 		//string testPassword = "123";
 		//string prevSetupBin = @"..\\..\\..\\..\\..\\output\\setup\\setup.exe";
 

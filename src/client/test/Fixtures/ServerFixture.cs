@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public static string DebugLogin()
 		{
-			return ConfigurationManager.AppSettings["DebugUser"] ?? Environment.UserName;
+			return ConfigurationManager.AppSettings["DebugUser"] ?? "test";
 		}
 
 		protected void ExecuteFixture(ServerFixture fixture, ISession session)
