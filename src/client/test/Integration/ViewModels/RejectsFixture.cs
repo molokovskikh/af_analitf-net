@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -40,11 +42,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print()
 		{
-			ForceInit();
-
-			Assert.IsTrue(model.CanPrint);
-			var doc = model.Print().Paginator;
-			Assert.That(doc, Is.Not.Null);
+			var results = model.PrintPreview().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 	}
 }

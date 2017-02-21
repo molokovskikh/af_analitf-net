@@ -26,6 +26,7 @@ using NHibernate.Proxy;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using Common.NHibernate;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -114,6 +115,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			IsCurrentSelected
 				.Select(v => v ? "Orders" : "SentOrders")
 				.Subscribe(ExcelExporter.ActiveProperty);
+
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public AddressSelector AddressSelector { get; set; }
@@ -590,6 +594,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			Shell.Navigate(new OrderDetailsViewModel(CurrentSentOrder));
 		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
 
 		public bool CanPrint
 		{

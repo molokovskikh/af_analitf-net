@@ -19,16 +19,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Export_export()
 		{
 			var result = (OpenResult)model.ExportExcel();
-
 			Assert.IsTrue(File.Exists(result.Filename));
 		}
 
 		[Test]
-		public void Print_defect_stock()
+		public void Print()
 		{
-			var results = model.PrintDefectStock().GetEnumerator();
+			var results = model.PrintPreview().GetEnumerator();
 			var preview = Next<DialogResult>(results);
-
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 

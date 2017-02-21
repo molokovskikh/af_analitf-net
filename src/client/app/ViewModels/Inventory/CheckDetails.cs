@@ -17,7 +17,7 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class CheckDetails : BaseScreen2, IPrintableStock
+	public class CheckDetails : BaseScreen2, IPrintable
 	{
 		private uint id;
 
@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			DisplayName = "Чек";
 			Lines = new NotifyValue<IList<CheckLine>>(new List<CheckLine>());
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -59,16 +59,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			LastOperation = "Чеки";
 			return Preview("Чеки", new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
-		}
-
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
 		public IResult ExportExcel()
@@ -109,14 +99,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Чеки"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string) item.Header == "Чеки")
 						docs.Add(new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
 				}
@@ -128,12 +118,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}
