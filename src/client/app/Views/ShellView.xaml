@@ -161,7 +161,7 @@
 					</MenuItem>
 					<MenuItem Header="Отчеты">
 						<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
-						<MenuItem Header="Чеки" Name="Checks" />
+						<MenuItem Header="Чеки" Name="Checks" Visibility="{Binding IsCashEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
 					</MenuItem>
         </MenuItem>
         <MenuItem Header="Товарные запасы" cal:Message.Attach="ShowInventory" />
