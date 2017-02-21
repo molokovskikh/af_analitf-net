@@ -352,8 +352,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			//Если пришли из Мнн или другого места, то разрешается переходить назад
-			if (Shell.Navigator.NavigationStack.Count() > 0) base.NavigateBackward();
+			base.NavigateBackward();
 		}
 
 		public void SwitchMnnFilter()
