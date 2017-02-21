@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		private static Size pageSize = new Size(816.0, 1056.0);
 
-		public static FixedDocument BuildFixedDoc(IList<TagPrintable> lines, Func<TagPrintable, FrameworkElement> map, double borderThickness)
+		public static FixedDocument BuildFixedDoc(IList<TagPrintable> lines, Func<TagPrintable, FrameworkElement> map, double borderThickness, Address address = null)
 		{
 			var document = new FixedDocument();
 			var left = lines.Count;
@@ -21,7 +21,9 @@ namespace AnalitF.Net.Client.Models.Print
 				var panel = new StackPanel();
 				var label = new Label {
 					Padding = new Thickness(0, 5, 0, 5),
-					Content = $"{lines[0].ProviderDocumentId} {lines[0].ClientName}",
+					Content = address == null
+						? $"{lines[0].ProviderDocumentId} {lines[0].ClientName}"
+						: $"{lines[0].ProviderDocumentId} {lines[0].ClientName}, {address?.Name}",
 					FontFamily = new FontFamily("Arial"),
 				};
 				panel.Children.Add(label);
