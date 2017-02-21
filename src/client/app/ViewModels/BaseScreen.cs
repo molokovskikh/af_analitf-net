@@ -752,5 +752,12 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			return true;
 		}
+
+		/// <summary>
+		/// Обновление представления столбцов пользователем
+		/// </summary>
+		public virtual void UpdateColumns()
+		{
+		}
 	}
 }

@@ -24,8 +24,10 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			};
 			item.Click += (sender, args) => {
 				var screen = AssociatedObject.DataContext as BaseScreen;
-				if (screen != null)
+				if (screen != null) {
 					ViewModelHelper.ProcessResult(screen.ConfigureGrid(AssociatedObject));
+					screen.UpdateColumns();
+				}
 			};
 			var copy = new MenuItem {
 				Header = "Копировать"

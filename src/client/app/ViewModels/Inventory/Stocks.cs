@@ -335,5 +335,34 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			get { return true; }
 		}
 
+		protected override void OnViewLoaded(object view)
+		{
+			base.OnViewLoaded(view);
+
+			SetColumnsForGrid();
+		}
+
+		/// <summary>
+		/// Обновление представления столбцов пользователем.
+		/// Синхронизируем гриды
+		/// </summary>
+		public override void UpdateColumns()
+		{
+			SetColumnsForGrid();
+		}
+
+		/// <summary>
+		/// Синхронизируем нижний грид с верхним
+		/// </summary>
+		private void SetColumnsForGrid()
+		{
+			var view = (Views.Inventory.Stocks)GetView();
+			for (int i = 0; i < view.Items.Columns.Count; i++)
+			{
+				view.DgItemsTotal.Columns[i].Visibility = view.Items.Columns[i].Visibility;
+				view.DgItemsTotal.Columns[i].DisplayIndex = view.Items.Columns[i].DisplayIndex;
+			}
+		}
+
 	}
 }
