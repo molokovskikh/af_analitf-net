@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.AddStockFromCatalog"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	behaviors:Focusable.DefaultFocus="{x:Reference CatalogProducts}"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
+	<Grid Margin="5">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Label Grid.Row="0">Наименование</Label>
+		<c:ComboBox2 Grid.Row="1"
+			Text="{Binding CatalogTerm.Value, UpdateSourceTrigger=PropertyChanged}"
+			ItemsSource="{Binding Catalogs.Value, UpdateSourceTrigger=PropertyChanged}"
+			SelectedItem="{Binding CurrentCatalog.Value, UpdateSourceTrigger=PropertyChanged}"
+			IsTextSearchEnabled="False"
+			StaysOpenOnEdit="True"
+			IsEditable="True"
+			x:Name="CatalogProducts"
+			Width="300"
+			DisplayMemberPath="FullName">
+			<ComboBox.ItemsPanel>
+				<ItemsPanelTemplate>
+					<VirtualizingStackPanel />
+				</ItemsPanelTemplate>
+			</ComboBox.ItemsPanel>
+		</c:ComboBox2>
+		<Label Grid.Row="2">Производитель</Label>
+		<c:ComboBox2 Grid.Row="3"
+			Text="{Binding ProducerTerm.Value, UpdateSourceTrigger=PropertyChanged}"
+			ItemsSource="{Binding Producers.Value, UpdateSourceTrigger=PropertyChanged}"
+			SelectedItem="{Binding CurrentProducer.Value, UpdateSourceTrigger=PropertyChanged}"
+			x:Name="Producers"
+			IsTextSearchEnabled="False"
+			StaysOpenOnEdit="True"
+			IsEditable="True"
+			Width="300"
+			DisplayMemberPath="Name">
+			<ComboBox.ItemsPanel>
+				<ItemsPanelTemplate>
+					<VirtualizingStackPanel />
+				</ItemsPanelTemplate>
+			</ComboBox.ItemsPanel>
+		</c:ComboBox2>
+		<StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0, 10, 0, 10">
+			<Button Name="OK" Margin="0, 0, 5, 0">ОК</Button>
+			<Button Name="TryClose">Отмена</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

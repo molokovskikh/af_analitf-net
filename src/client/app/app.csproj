@@ -444,6 +444,7 @@
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\ShelfLife.cs" />
+    <Compile Include="ViewModels\Inventory\AddStockFromCatalog.cs" />
     <Compile Include="ViewModels\Inventory\CreateDisplacementDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateInventoryDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
@@ -642,6 +643,9 @@
     </Compile>
     <Compile Include="Views\Inventory\ShelfLife.xaml.cs">
       <DependentUpon>ShelfLife.xaml</DependentUpon>
+		</Compile>
+    <Compile Include="Views\Inventory\AddStockFromCatalog.xaml.cs">
+      <DependentUpon>AddStockFromCatalog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\CreateDisplacementDoc.xaml.cs">
       <DependentUpon>CreateDisplacementDoc.xaml</DependentUpon>
@@ -1006,6 +1010,10 @@
     <Page Include="Views\Inventory\ShelfLife.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+		</Page>
+    <Page Include="Views\Inventory\AddStockFromCatalog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\CreateDisplacementDoc.xaml">
       <SubType>Designer</SubType>
