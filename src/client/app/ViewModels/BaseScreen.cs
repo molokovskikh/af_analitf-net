@@ -427,7 +427,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public virtual void NavigateBackward()
 		{
-			Shell?.Navigator?.NavigateBack();
+			//Разрешается переходить назад только из дочерних окон
+			if (Shell?.Navigator?.NavigationStack.Count() > 0) Shell.Navigator.NavigateBack();
 		}
 
 		//todo мы не должны пытаться сериализовать\десериализовать объекты из базы тк это не имеет смысла
