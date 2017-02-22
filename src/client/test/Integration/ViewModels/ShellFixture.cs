@@ -147,6 +147,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Check_Settings_Directory()
+		{
+			restore = true;
+			settings.WaybillDir = "в:\\123";
+			session.Flush();
+			shell.Reload();
+
+			shell.StartCheck();
+			Assert.That(manager.MessageBoxes[0], Does.Contain("В настройках некорректно указана папка для сохранения накладных, отказов, отчетов."));
+		}
+
+		[Test]
 		public void Check_last_update_time()
 		{
 			restore = true;

@@ -405,7 +405,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Settings.Value.IsValid)
 				CheckSettings();
-
+			if (!Settings.Value.IsDirectoryValid())
+				CheckSettingsDir();
 			if (!Settings.Value.IsValid)
 				return Enumerable.Empty<IResult>();
 
@@ -474,6 +475,17 @@ namespace AnalitF.Net.Client.ViewModels
 			return true;
 		}
 
+		private bool CheckSettingsDir()
+		{
+			if (!Settings.Value.IsDirectoryValid())
+			{
+				windowManager.Warning("В настройках некорректно указана папка для " +
+					"сохранения накладных, отказов, отчетов.");
+				ShowSettings("AdditionSettingsTab");
+				return false;
+			}
+			return true;
+		}
 		public void Reload()
 		{
 			if (session == null)

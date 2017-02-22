@@ -44,7 +44,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			session = IntegrationSetup.Factory.OpenSession();
 			disposable.Add(session);
-			session.Transaction.Begin();
 			stateless = IntegrationSetup.Factory.OpenStatelessSession();
 			disposable.Add(stateless);
 
@@ -52,6 +51,15 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			user = session.Query<User>().FirstOrDefault();
 			address = session.Query<Address>().OrderBy(x => x.Name).FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
+			using (var transaction = session.BeginTransaction())
+			{
+				settings.WaybillDir = settings.MapPath("Waybills");
+				settings.RejectDir = settings.MapPath("Rejects");
+				settings.ReportDir = settings.MapPath("Reports");
+				session.Save(settings);
+				transaction.Commit();
+			}
+			session.Transaction.Begin();
 		}
 
 		[TearDown]
