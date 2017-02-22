@@ -125,6 +125,40 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnDeactivate(close);
 		}
 
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+			var view = GetView();
+			HideStatus(view);
+		}
+
+		protected override void OnViewLoaded(object view)
+		{
+			base.OnViewLoaded(view);
+			HideStatus(view);
+		}
+
+		// #60345 скрыть колонку Статус, если клиенту не включена опция складского учета
+		private void HideStatus(object view)
+		{
+			if (User.IsStockEnabled)
+				return;
+			foreach (var grid in GetDataGrids(view)) {
+				var column = DataGridHelper.FindColumn(grid.Columns, "Статус");
+				if (column != null)
+					column.Visibility = Visibility.Collapsed;
+			}
+		}
+
+		public override IResult ConfigureGrid(DataGrid grid)
+		{
+			var gridConfig = new GridConfig(grid);
+			var column = gridConfig.Columns.Value.SingleOrDefault(x => x.Name == "Статус");
+			if (!User.IsStockEnabled && column != null)
+				gridConfig.Columns.Value.Remove(column);
+			return new DialogResult(gridConfig);
+		}
+
 		public void Delete()
 		{
 			if (!CanDelete)
