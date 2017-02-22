@@ -343,6 +343,15 @@ namespace AnalitF.Net.Client.ViewModels
 			return dependencyObject.LogicalDescendants().OfType<DataGrid>()
 				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
 		}
+
+		protected IEnumerable<DataGrid> GetDataGrids(object view)
+		{
+			var dependencyObject = view as DependencyObject;
+			if (dependencyObject == null)
+				return Enumerable.Empty<DataGrid>();
+			return dependencyObject.LogicalDescendants().OfType<DataGrid>();
+		}
+
 		private IEnumerable<WinFormDataGrid> GetWinFormDataGrids(object view)
 		{
 			var dependencyObject = view as DependencyObject;
@@ -713,7 +722,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 #endif
 
-		public IResult ConfigureGrid(DataGrid grid)
+		public virtual IResult ConfigureGrid(DataGrid grid)
 		{
 			return new DialogResult(new GridConfig(grid));
 		}
