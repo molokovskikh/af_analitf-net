@@ -97,7 +97,7 @@ namespace AnalitF.Net.Client.Models.Print
 				borderThickness = priceTag.BorderThickness;
 			}
 
-			return FixedDocumentHelper.BuildFixedDoc(lines, l => Border(map(l), borderThickness), borderThickness);
+			return FixedDocumentHelper.BuildFixedDoc(lines, l => Border(map(l), borderThickness), borderThickness, priceTagSettings.Address);
 		}
 
 		private string FormatCost(TagPrintable line)
@@ -251,7 +251,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Height = 106,
 			};
 			var nameAndAddressLabel = new TextBlock {
-				Text = line.ClientName,
+				Text = $"{line.ClientName}, {priceTagSettings.Address?.Name}",
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
 				FontSize = 8,
@@ -331,7 +331,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 
 			var nameAndAddressLabel = new TextBlock {
-				Text = line.ClientName,
+				Text = $"{line.ClientName}, {priceTagSettings.Address?.Name}",
 				TextAlignment = TextAlignment.Center,
 				FontSize = 6,
 				Width = 162,
@@ -457,7 +457,7 @@ namespace AnalitF.Net.Client.Models.Print
 							},
 							new TextBlock {
 								Height = 20,
-								Text = priceTagSettings.PrintFullName ? line.ClientName : "",
+								Text = priceTagSettings.PrintFullName ? $"{line.ClientName}, {priceTagSettings.Address?.Name}" : "",
 								FontSize = 8,
 								TextAlignment = TextAlignment.Center,
 								VerticalAlignment = VerticalAlignment.Center,
