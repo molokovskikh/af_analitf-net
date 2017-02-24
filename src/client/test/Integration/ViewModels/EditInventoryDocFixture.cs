@@ -34,7 +34,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			//Переходим к модели редактирования излишков.
 			shell.Navigate(model);
-			model.Create();
+			model.Address = address;
+			var seq = model.Create().GetEnumerator();
+			seq.MoveNext();
+			seq.MoveNext();
 			editModel = shell.ActiveItem as EditInventoryDoc;
 		}
 
