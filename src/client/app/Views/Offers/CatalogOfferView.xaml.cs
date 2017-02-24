@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Caliburn;
@@ -32,6 +33,17 @@ namespace AnalitF.Net.Client.Views.Offers
 					Source = Offers,
 					Converter = new LambdaConverter<double>(v => v * 0.7)
 				});
+
+			var element = Rounding;
+			var items = DescriptionHelper.GetDescriptions(typeof(Rounding));
+			element.ItemsSource = items;
+			element.DisplayMemberPath = "Name";
+
+			var binding = new Binding("Rounding.Value") {
+				Converter = new ComboBoxSelectedItemConverter(),
+				ConverterParameter = items
+			};
+			BindingOperations.SetBinding(element, Selector.SelectedItemProperty, binding);
 		}
 
 		public void ApplyStyles()

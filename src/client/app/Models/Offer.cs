@@ -6,6 +6,7 @@ using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using log4net;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
@@ -84,7 +85,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			Id = new OfferComposedId();
 			Id.RegionId = price.Id.RegionId;
-			Id.OfferId = (ulong)base.GetHashCode();
+			Id.OfferId = (ulong) base.GetHashCode();
 			PriceId = price.Id.PriceId;
 			Price = price;
 			Cost = cost;
@@ -155,10 +156,7 @@ namespace AnalitF.Net.Client.Models
 		[Style("OrderCount", "OrderLine.ResultSum")]
 		public virtual bool OrderMark
 		{
-			get
-			{
-				return true;
-			}
+			get { return true; }
 		}
 
 		[Ignore]
@@ -224,10 +222,7 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual decimal? PrevOrderAvgCost
 		{
-			get
-			{
-				return prevOrderAvgCost;
-			}
+			get { return prevOrderAvgCost; }
 			set
 			{
 				prevOrderAvgCost = value;
@@ -273,7 +268,8 @@ namespace AnalitF.Net.Client.Models
 					OrderLine = new OrderLine(order, this, orderCount.Value);
 					orderLine.Comment = comment;
 					order.AddLine(OrderLine);
-				} else {
+				}
+				else {
 					OrderLine.Count = OrderCount.Value;
 					OrderLine.Comment = comment;
 					order.UpdateStat();
@@ -282,7 +278,8 @@ namespace AnalitF.Net.Client.Models
 				if (edit) {
 					result.AddRange(OrderLine.EditValidate());
 					result.AddRange(EditValidate(address, settings));
-				} else {
+				}
+				else {
 					result = OrderLine.SaveValidate(confirmCallback: confirm);
 				}
 				OrderCount = OrderLine.Count;
@@ -305,14 +302,15 @@ namespace AnalitF.Net.Client.Models
 				return result;
 
 			if (Junk)
-				result.Add(Message.Warning("Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки."));
+				result.Add(
+					Message.Warning("Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки."));
 
 			if (address.Orders.Where(o => o.Frozen).SelectMany(o => o.Lines).Any(l => l.ProductId == ProductId)) {
 				result.Add(Message.Warning("Товар присутствует в замороженных заказах."));
 			}
 
 			if (settings.WarnIfOrderedYesterday && address.YesterdayOrderedProductIds != null
-				&& address.YesterdayOrderedProductIds.Contains(ProductId)) {
+			    && address.YesterdayOrderedProductIds.Contains(ProductId)) {
 
 				result.Add(Message.Warning(Util.HumanizeDaysAgo(settings.CountDayForWarnOrdered)));
 			}
@@ -334,7 +332,8 @@ namespace AnalitF.Net.Client.Models
 			return result;
 		}
 
-		public virtual List<Message> SaveOrderLine(Address address, Settings settings, Func<string, bool> confirm = null, string comment = null)
+		public virtual List<Message> SaveOrderLine(Address address, Settings settings, Func<string, bool> confirm = null,
+			string comment = null)
 		{
 			return UpdateOrderLine(address, settings, confirm, comment, false);
 		}
@@ -351,9 +350,7 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual decimal ResultCost
 		{
-			get {
-				return GetResultCost(Price);
-			}
+			get { return GetResultCost(Price); }
 		}
 
 		public override decimal GetResultCost()
@@ -381,5 +378,6 @@ namespace AnalitF.Net.Client.Models
 		{
 			return query.Where(o => o.BuyingMatrixType != BuyingMatrixStatus.Denied && !o.Price.IsOrderDisabled);
 		}
+
 	}
 }

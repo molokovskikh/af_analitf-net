@@ -44,11 +44,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
 				Settings);
 
-			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
-				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
+			RetailCost = CurrentOffer.CombineLatest(RetailMarkup, Rounding,
+				(o, m, r) => Round(o?.ResultCost * (1 + m / 100), r))
 				.ToValue();
 
 			CurrentOffer.Subscribe(_ => RetailMarkup.Recalculate());
+
 			Persist(HideJunk, "HideJunk");
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");
@@ -246,6 +247,30 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
+		/// <summary>
+		/// Округление денежного значения.
+		/// </summary>
+		/// <param name="value">Исходное денежное значение.</param>
+		/// <param name="roundingValue">Тип округления.</param>
+		/// <returns>Округленное денежное значение.</returns>
+		private decimal? Round(decimal? value, Models.Rounding? roundingValue)
+		{
+			var rounding = roundingValue ?? Models.Rounding.None;
+			if (rounding != Models.Rounding.None) {
+				var @base = 10;
+				var factor = 1;
+				if (rounding == Models.Rounding.To1_00) {
+					@base = 1;
+				}
+				else if (rounding == Models.Rounding.To0_50) {
+					@factor = 5;
+				}
+				var normalized = (int?) (value * @base);
+				return (normalized - normalized % factor) / (decimal) @base;
+			}
+			return value;
+		}
+
 		public PrintResult Print()
 		{
 			var doc = new CatalogOfferDocument(ViewHeader, GetPrintableOffers());
@@ -309,5 +334,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			};
 		}
 #endif
+
+
+		/// <summary>
+		/// Задает или возвращает тип округления стоимости.
+		/// </summary>
+		public NotifyValue<Rounding?> Rounding { get; set; }
 	}
 }
