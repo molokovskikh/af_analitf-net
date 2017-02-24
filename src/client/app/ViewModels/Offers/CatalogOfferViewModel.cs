@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				Settings);
 
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup, Rounding,
-				(o, m, r) => Round(o?.ResultCost * (1 + m / 100), r))
+				(o, m, r) => Round(NullableHelper.Round(o?.ResultCost * (1 + m / 100),2), r))
 				.ToValue();
 
 			CurrentOffer.Subscribe(_ => RetailMarkup.Recalculate());
