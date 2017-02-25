@@ -15,7 +15,7 @@ using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Tags : BaseScreen2, IPrintableStock
+	public class Tags : BaseScreen2, IPrintable
 	{
 		private PriceTag priceTag;
 		private PriceTag rackingMap;
@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Lines = new ReactiveCollection<TagPrintable>();
 			Session.FlushMode = FlushMode.Never;
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -85,21 +85,21 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void SetMenuItems()
 		{
 			var item = new MenuItem { Header = "Ценники" };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem { Header = "Постеллажная карта" };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem { Header = "Штрихкоды" };
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == "Ценники")
 						PrintFixedDoc(new PriceTagDocument(PrintableLines(), priceTagSettings, priceTag).Build().DocumentPaginator, "Ценники");
 					if ((string)item.Header == "Постеллажная карта")
@@ -130,12 +130,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else if (dialog.ShowDialog() == true)
 				dialog.PrintDocument(doc, name);
 		}
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

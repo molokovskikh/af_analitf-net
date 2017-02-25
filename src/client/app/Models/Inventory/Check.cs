@@ -58,6 +58,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 		public virtual uint Id { get; set; }
+		public virtual uint? ServerId { get; set; }
 		public virtual CheckType CheckType { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime ChangeOpening { get; set; }

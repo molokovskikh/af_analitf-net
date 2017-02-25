@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			var sql = tagType == TagType.RackingMap
 				? $"select * from PriceTags where TagType = {(int) tagType}"
-				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address.Id}";
+				: $"select * from PriceTags where TagType = {(int) tagType} and AddressId = {address?.Id ?? 0}";
 			var tag = connection.Query<PriceTag>(sql).FirstOrDefault();
 			if (tag != null) {
 				tag.Items = connection.Query<PriceTagItem>($"select * from PriceTagItems where PriceTagId = {tag.Id} order by Position").ToArray();
@@ -121,7 +121,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			var tag = new PriceTag {
 				TagType = tagType,
-				AddressId = tagType == TagType.PriceTag ? address.Id : (uint?)null,
+				AddressId = (tagType == TagType.PriceTag && address != null) ? address.Id : (uint?)null,
 				Height = 5,
 				Width = 5,
 				BorderThickness = 0.5d,

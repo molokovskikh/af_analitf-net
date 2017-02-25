@@ -8,14 +8,14 @@ using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class ReturnToSupplier : BaseStatelessObject, IDataErrorInfo2
+	public class ReturnDoc : BaseStatelessObject, IDataErrorInfo2
 	{
-		public ReturnToSupplier()
+		public ReturnDoc()
 		{
-			Lines = new List<ReturnToSupplierLine>();
+			Lines = new List<ReturnLine>();
 		}
 
-		public ReturnToSupplier(Address address)
+		public ReturnDoc(Address address)
 			: this()
 		{
 			Address = address;
@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private DocStatus _status;
 
 		public override uint Id { get; set; }
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
@@ -61,7 +62,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string Comment { get; set; }
 
-		public virtual IList<ReturnToSupplierLine> Lines { get; set; }
+		public virtual IList<ReturnLine> Lines { get; set; }
 
 		public virtual string this[string columnName]
 		{
@@ -83,6 +84,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines)
 				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
 		}

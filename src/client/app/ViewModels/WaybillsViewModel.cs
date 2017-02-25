@@ -61,9 +61,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
+
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
-    public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
 	    if (Waybills.Value == null || WaybillsTotal.Count != 1) return;
 
@@ -111,6 +114,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(TypeFilter.Changed())
 				.Merge(Suppliers.Where(x => x != null).Cast<object>())
 				.Merge(Bus.Listen<Waybill>())
+				.Merge(DbReloadToken)
 				.Throttle(TimeSpan.FromMilliseconds(50), Scheduler)
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
@@ -119,6 +123,40 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			AddressSelector.OnDeactivate();
 			base.OnDeactivate(close);
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+			var view = GetView();
+			HideStatus(view);
+		}
+
+		protected override void OnViewLoaded(object view)
+		{
+			base.OnViewLoaded(view);
+			HideStatus(view);
+		}
+
+		// #60345 скрыть колонку Статус, если клиенту не включена опция складского учета
+		private void HideStatus(object view)
+		{
+			if (User.IsStockEnabled)
+				return;
+			foreach (var grid in GetDataGrids(view)) {
+				var column = DataGridHelper.FindColumn(grid.Columns, "Статус");
+				if (column != null)
+					column.Visibility = Visibility.Collapsed;
+			}
+		}
+
+		public override IResult ConfigureGrid(DataGrid grid)
+		{
+			var gridConfig = new GridConfig(grid);
+			var column = gridConfig.Columns.Value.SingleOrDefault(x => x.Name == "Статус");
+			if (!User.IsStockEnabled && column != null)
+				gridConfig.Columns.Value.Remove(column);
+			return new DialogResult(gridConfig);
 		}
 
 		public void Delete()
@@ -332,11 +370,37 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new OpenResult(commnand.Result);
 		}
 
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
 		public bool CanPrint => true;
 
 		public PrintResult Print()
 		{
-			return new PrintResult(DisplayName, new WaybillsDoc(Waybills.Value.ToArray()));
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == DisplayName)
+						docs.Add(new WaybillsDoc(Waybills.Value.ToArray()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			return Preview(DisplayName, new WaybillsDoc(Waybills.Value.ToArray()));
 		}
 	}
 }

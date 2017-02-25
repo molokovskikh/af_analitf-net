@@ -15,10 +15,10 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	class InventoryActDocument : BaseDocument
 	{
-		private InventoryDocLine[] _items;
+		private InventoryLine[] _items;
 		private BlockUIContainer headerBlock;
 
-		public InventoryActDocument(InventoryDocLine[] items)
+		public InventoryActDocument(InventoryLine[] items)
 		{
 			_items = items;
 		}

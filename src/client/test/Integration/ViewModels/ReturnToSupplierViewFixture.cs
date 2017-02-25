@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	[TestFixture]
 	public class ReturnToSupplierViewFixture : ViewModelFixture
 	{
-		private ReturnToSupplier doc;
+		private ReturnDoc doc;
 
 		private ReturnToSuppliers model;
 
@@ -42,9 +42,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			};
 			session.Save(stock);
 
-			session.DeleteEach<ReturnToSupplier>();
+			session.DeleteEach<ReturnDoc>();
 
-			doc = new ReturnToSupplier
+			doc = new ReturnDoc
 			{
 				Date = DateTime.Now,
 				Supplier = supplier,
@@ -129,7 +129,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			//Мы создаем документ списание на 3 упаковки, после того как строка папаверина
 			//добавлена и документ сохранен, на складе у нас будет - Папаверин 2шт, 3шт в резерве
-			var line = new ReturnToSupplierLine(stock, 3);
+			var line = new ReturnLine(stock, 3);
 			doc.Lines.Add(line);
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);

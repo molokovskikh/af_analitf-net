@@ -16,6 +16,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using NUnit.Framework;
 
@@ -28,17 +29,14 @@ namespace AnalitF.Net.Client.Test.Unit
 		public void Print()
 		{
 			var catalog = new Catalog("Папаверин");
-			var view = new CatalogOfferViewModel(catalog);
-			view.CurrentCatalog.Value = catalog;
-			view.Offers.Value = Offers();
-			var result = view.Print();
-			Assert.That(result.Paginator, Is.Not.Null);
-			var doc = (FlowDocument)result.Paginator.Source;
-			var asText = WpfTestHelper.FlowDocumentToText(doc);
-			Assert.AreEqual("Папаверин\r\n" +
-				"|Наименование|Производитель|Прайс-лист|Срок год.|Дата пр.|Разн.|Цена\r\n" +
-				"|Папаверин|ВоронежФарм|||01.01.0001 0:00:00||0\r\n" +
-				"Общее количество предложений: 1", asText);
+			var model = new CatalogOfferViewModel(catalog);
+			model.CurrentCatalog.Value = catalog;
+			model.Offers.Value = Offers();
+
+			var result = model.PrintPreview().GetEnumerator();
+			result.MoveNext();
+			var preview = (DialogResult)result.Current;
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
 		[Test]
@@ -121,6 +119,41 @@ namespace AnalitF.Net.Client.Test.Unit
 			settings.RackingMap.Size = RackingMapSize.Custom;
 			var doc2 = new RackingMapDocument(lines, settings, priceTag).Build();
 			Assert.IsNotNull(doc2);
+		}
+
+		[Test]
+		public void Check_price_tag_address()
+		{
+			var address = new Address("Тестовый адрес");
+			var lines = new List<TagPrintable>();
+			var line = new TagPrintable()
+			{
+				ClientName = "Тестовый клиент",
+				Nds = 10,
+				RetailCost = 251.20m,
+				Product = "Диклофенак",
+				Quantity = 1
+			};
+			lines.Add(line);
+
+			var priceTagSettings = new PriceTagSettings()
+			{
+				Type = PriceTagType.Normal,
+				Address = address
+			};
+			var priceTag = PriceTag.Default(TagType.PriceTag, address);
+			var doc = new PriceTagDocument(lines, priceTagSettings, priceTag).Build();
+			Assert.IsNotNull(doc);
+
+			var text = doc.Descendants<StackPanel>()
+				.First()
+				.Descendants<StackPanel>()
+				.First()
+				.Children[0]
+				.Descendants<TextBlock>()
+				.First()
+				.Text;
+			Assert.AreEqual($"{line.ClientName}, {address.Name}", text);
 		}
 
 		[Test]

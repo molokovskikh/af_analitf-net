@@ -13,9 +13,9 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class ReturnLabel : BaseDocument
 	{
-		private ReturnToSupplier returnToSupplier;
+		private ReturnDoc returnToSupplier;
 		private WaybillSettings waybillSettings;
-		public ReturnLabel(ReturnToSupplier _returnToSupplier, WaybillSettings _waybillSettings)
+		public ReturnLabel(ReturnDoc _returnToSupplier, WaybillSettings _waybillSettings)
 		{
 			returnToSupplier = _returnToSupplier;
 			waybillSettings = _waybillSettings;

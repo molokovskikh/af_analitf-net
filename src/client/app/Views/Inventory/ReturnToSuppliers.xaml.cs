@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 
 		public void ApplyStyles()
 		{
-			StyleHelper.ApplyStyles(typeof(ReturnToSupplier), Items, Application.Current.Resources, Legend);
+			StyleHelper.ApplyStyles(typeof(ReturnDoc), Items, Application.Current.Resources, Legend);
 		}
 	}
 }

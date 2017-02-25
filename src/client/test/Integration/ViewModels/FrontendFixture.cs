@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
+			settings.Waybills.Add(new WaybillSettings(user, address));
 			session.DeleteEach<Stock>();
 			model = Open(new Frontend());
 			stock = new Stock()
@@ -207,6 +209,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var status = model.Status.Value == "Открыт чек продажи" ? "Открыт возврат по чеку" : "Открыт чек продажи";
 			model.Trigger();
 			Assert.AreEqual(status, model.Status.Value);
+		}
+
+		[Test]
+		public void Check_status_after_adding_line()
+		{
+			model.Trigger();
+			Assert.AreEqual("Открыт возврат по чеку", model.Status.Value);
+			var line = new CheckLine(stock, 1, CheckType.CheckReturn);
+			model.Lines.Add(line);
+			Assert.AreEqual("Открыт возврат по чеку", model.Status.Value);
 		}
 	}
 }

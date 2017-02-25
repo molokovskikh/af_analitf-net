@@ -147,6 +147,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null) {
 				return;
 			}
+			Waybill.Settings = Settings;
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
@@ -318,15 +319,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.Update(Waybill);
 			Session.Flush();
 			Env.Bus.SendMessage("Changed", "db");
-		}
-
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null) {
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
 		public IEnumerable<IResult> ConsumptionReport()

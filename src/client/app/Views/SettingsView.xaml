@@ -4,6 +4,34 @@
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
              Height="550" Width="700">
+	
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<Style x:Key="WaybillDir">
+				<Style.Triggers>
+					<DataTrigger  Binding="{Binding Settings.Value.IsWaybillDirValid}" Value="false">
+						<Setter  Property="Control.Foreground" Value="Red" />
+					</DataTrigger>
+
+				</Style.Triggers>
+			</Style>
+			<Style x:Key="RejectDir">
+				<Style.Triggers>
+					<DataTrigger  Binding="{Binding Settings.Value.IsRejectDirValid}" Value="false">
+						<Setter  Property="Control.Foreground" Value="Red" />
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+			<Style x:Key="ReportDir">
+				<Style.Triggers>
+					<DataTrigger  Binding="{Binding Settings.Value.IsReportDirValid}" Value="false">
+						<Setter  Property="Control.Foreground" Value="Red" />
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*" />
@@ -488,7 +516,7 @@
 							<ColumnDefinition />
 							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
-						<TextBox Grid.Column="0" Name="Settings_WaybillDir" />
+						<TextBox Grid.Column="0" Name="Settings_WaybillDir" Style ="{StaticResource WaybillDir}"/>
 						<Button Grid.Column="1" Name="SelectWaybillDir">...</Button>
 					</Grid>
 
@@ -498,7 +526,7 @@
 							<ColumnDefinition />
 							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
-						<TextBox Name="Settings_RejectDir" />
+						<TextBox Name="Settings_RejectDir" Style ="{StaticResource RejectDir}"/>
 						<Button Grid.Column="1" Name="SelectRejectDir">...</Button>
 					</Grid>
 
@@ -508,7 +536,7 @@
 							<ColumnDefinition />
 							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
-						<TextBox Name="Settings_ReportDir" />
+						<TextBox Name="Settings_ReportDir" Style ="{StaticResource ReportDir}"/>
 						<Button Grid.Column="1" Name="SelectReportDir">...</Button>
 					</Grid>
 				</StackPanel>

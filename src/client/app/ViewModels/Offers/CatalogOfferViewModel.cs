@@ -16,6 +16,9 @@ using NHibernate.Linq;
 using ReactiveUI;
 using System.Windows;
 using AnalitF.Net.Client.ViewModels.Parts;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
@@ -25,6 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		private Catalog filterCatalog;
 
 		public List<Offer> CatalogOffers = new List<Offer>();
+
 
 		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
 			: base(initOfferId)
@@ -54,6 +58,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");
 			SessionValue(CurrentFilter, "CurrentFilter");
+
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		//для восстановления состояния
@@ -97,9 +104,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<decimal?> RetailCost { get; set; }
 		public NotifyValue<decimal> RetailMarkup { get; set; }
 		public NotifyValue<List<object>> DisplayItems { get; set; }
-		public NotifyValue<object> CurrentDisplayItem { get; set; }
+		NotifyValue<object> currentDisplayItem;
+		public NotifyValue<object> CurrentDisplayItem
+		{ get
+			{
+				return currentDisplayItem; }
 
-		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
+			set
+			{
+				currentDisplayItem =value;
+			}
+		}
+
+
 
 		protected override void OnInitialize()
 		{
@@ -172,6 +189,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
 				?? Offers.Value.FirstOrDefault();
 		}
+
+
 
 		private void UpdateMaxProducers()
 		{
@@ -271,10 +290,37 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			return value;
 		}
 
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
+
 		public PrintResult Print()
 		{
-			var doc = new CatalogOfferDocument(ViewHeader, GetPrintableOffers());
-			return new PrintResult(DisplayName, doc);
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
+					if ((string)item.Header == DisplayName)
+						docs.Add(new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			return Preview(DisplayName, new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
 		}
 
 		public void ShowPrice()

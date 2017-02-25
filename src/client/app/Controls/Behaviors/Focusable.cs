@@ -67,12 +67,22 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 					//все загружено, если фокус не удалось установить всего скорее visual tree не создан
 					//нужно повторить операцию после того как все будет загружено
 					if (!DataGridHelper.Focus((DataGrid)defaultFocus)) {
-						Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => {
+						Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+						{
 							DataGridHelper.Focus((DataGrid)defaultFocus);
 						}));
 					}
 				}
-				else {
+				else if (defaultFocus is WinFormDataGrid)
+				{
+					if (!(defaultFocus as WinFormDataGrid).Child.Focus())
+						Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+						{
+							(defaultFocus as WinFormDataGrid).Child.Focus();
+						}));
+				}
+				else
+				{
 					Keyboard.Focus(defaultFocus);
 				}
 			}

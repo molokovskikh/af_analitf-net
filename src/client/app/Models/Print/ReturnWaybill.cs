@@ -14,10 +14,10 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class ReturnWaybill : BaseDocument
 	{
-		private ReturnToSupplier _returnToSupplier;
+		private ReturnDoc _returnToSupplier;
 		private WaybillSettings _waybillSettings;
 		private User _user;
-		public ReturnWaybill(ReturnToSupplier returnToSupplier, WaybillSettings waybillSettings, User user)
+		public ReturnWaybill(ReturnDoc returnToSupplier, WaybillSettings waybillSettings, User user)
 		{
 			_returnToSupplier = returnToSupplier;
 			_waybillSettings = waybillSettings;

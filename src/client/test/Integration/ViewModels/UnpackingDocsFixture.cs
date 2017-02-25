@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 5);
 
 			// кратность 10
-			var line = new UnpackingDocLine(stock, 10);
+			var line = new UnpackingLine(stock, 10);
 			doc.Lines.Add(line);
 			session.Save(doc);
 			session.Flush();

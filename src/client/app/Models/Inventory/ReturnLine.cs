@@ -6,9 +6,11 @@ using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class ReturnToSupplierLine : BaseStock
+	public class ReturnLine : BaseStock
 	{
 		public virtual uint Id { get; set; }
+
+		public virtual uint? ServerDocId { get; set; }
 
 		public virtual uint? WaybillLineId { get; set; }
 
@@ -22,12 +24,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock Stock { get; set; }
 
-		public ReturnToSupplierLine()
+		public ReturnLine()
 		{
 
 		}
 
-		public ReturnToSupplierLine(Stock stock, decimal quantity)
+		public ReturnLine(Stock stock, decimal quantity)
 		{
 			Stock.Copy(stock, this);
 			Id = 0;

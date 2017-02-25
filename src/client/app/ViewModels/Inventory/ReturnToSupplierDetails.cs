@@ -18,18 +18,18 @@ using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class ReturnToSupplierDetails : BaseScreen2, IPrintableStock
+	public class ReturnToSupplierDetails : BaseScreen2, IPrintable
 	{
 		private ReturnToSupplierDetails()
 		{
-			Lines = new ReactiveCollection<ReturnToSupplierLine>();
+			Lines = new ReactiveCollection<ReturnLine>();
 			Session.FlushMode = FlushMode.Never;
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
-		public ReturnToSupplierDetails(ReturnToSupplier doc)
+		public ReturnToSupplierDetails(ReturnDoc doc)
 			: this()
 		{
 			DisplayName = "Новый возврат поставщику";
@@ -41,14 +41,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			: this()
 		{
 			DisplayName = "Редактирование возврата поставщику " + id;
-			InitDoc(Session.Load<ReturnToSupplier>(id));
+			InitDoc(Session.Load<ReturnDoc>(id));
 			Lines.AddRange(Doc.Lines);
 		}
 
-		public ReturnToSupplier Doc { get; set; }
+		public ReturnDoc Doc { get; set; }
 
-		public ReactiveCollection<ReturnToSupplierLine> Lines { get; set; }
-		public NotifyValue<ReturnToSupplierLine> CurrentLine { get; set; }
+		public ReactiveCollection<ReturnLine> Lines { get; set; }
+		public NotifyValue<ReturnLine> CurrentLine { get; set; }
 		public Supplier[] Suppliers { get; set; }
 
 		public NotifyValue<bool> CanAdd { get; set; }
@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnDeactivate(close);
 		}
 
-		private void InitDoc(ReturnToSupplier doc)
+		private void InitDoc(ReturnDoc doc)
 		{
 			Doc = doc;
 			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
+				var line = new ReturnLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -158,7 +158,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else
 				Session.Update(Doc);
 			Session.Flush();
-			Bus.SendMessage(nameof(ReturnToSupplier), "db");
+			Bus.SendMessage(nameof(ReturnDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
 		}
 
@@ -229,41 +229,31 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			 var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Возврат товара"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Возврат ярлык"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Возврат счет-фактура"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Возврат товарная накладная ТОРГ-12"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Акт о расхождении ТОРГ-2"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
 
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
 					if ((string)item.Header == "Возврат товара")
 						docs.Add(new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
 					if ((string)item.Header == "Возврат ярлык")
@@ -291,12 +281,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return null;
 		}
 
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

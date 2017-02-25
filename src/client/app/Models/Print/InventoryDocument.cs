@@ -5,9 +5,9 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	class InventoryDocument : BaseDocument
 	{
-		private InventoryDocLine[] _items;
+		private InventoryLine[] _items;
 
-		public InventoryDocument(InventoryDocLine[] items)
+		public InventoryDocument(InventoryLine[] items)
 		{
 			_items = items;
 		}
