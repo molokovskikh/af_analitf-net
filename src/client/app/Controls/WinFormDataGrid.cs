@@ -70,7 +70,6 @@ namespace AnalitF.Net.Client.Controls
 			set
 			{
 				this.SetValue(MyDataSourceProperty, value);
-				((DataGridViewTextBoxCellEx)DataGrid[0, 0]).ColumnSpan = 5;
 			}
 		}
 
@@ -78,7 +77,7 @@ namespace AnalitF.Net.Client.Controls
 			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
 			{
 				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null && winFormDataGrid.DataGrid != null && winFormDataGrid.DataGrid.CurrentCell != null )
+				if (winFormDataGrid != null && winFormDataGrid.DataGrid != null)
 				{
 					winFormDataGrid.SelectedItem = winFormDataGrid.GetValue(e.Property);
 				}
@@ -116,6 +115,11 @@ namespace AnalitF.Net.Client.Controls
 
 		public WinFormDataGrid() : base()
 		{
+			DataGrid.BackgroundColor = Color.FromArgb(255, 240, 240, 240);
+			DataGrid.Font = new Font("Arial", 12);
+			DataGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
+			DataGrid.ColumnHeadersHeight = DataGrid.RowTemplate.Height + 20;
+			DataGrid.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
 			presentationSource = Keyboard.PrimaryDevice.ActiveSource;
 			DataGrid.AutoGenerateColumns = false;
 			SetDoubleBuffered(DataGrid);
