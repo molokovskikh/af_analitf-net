@@ -244,6 +244,9 @@ where c.Id = ?";
 
 		public void ShowCatalogWithMnnFilter()
 		{
+			if (!Shell?.IsOrderEnabled)
+				return;
+
 			if (!CanShowCatalogWithMnnFilter)
 				return;
 
@@ -278,6 +281,9 @@ where c.Id = ?";
 
 		public void ShowCatalog()
 		{
+			if (!Shell?.IsOrderEnabled)
+				return;
+
 			if (CurrentCatalog.Value == null)
 				return;
 

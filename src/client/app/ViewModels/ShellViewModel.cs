@@ -123,6 +123,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public NotifyValue<string> UserName { get; set; }
+		private string password;
+
 		//не верь решарперу
 		public ShellViewModel()
 			: this(new Config.Config())
@@ -158,6 +161,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => UpdateDisplayName());
 
 			Stat.CombineLatest(CurrentAddress, (x, y) => x?.ReadyForSendOrdersCount > 0 && y != null)
+				.CombineLatest(User, (x, y) => x && (y?.HasOrderPermission() ?? false))
 				.Subscribe(CanSendOrders);
 
 			CurrentAddress.Subscribe(_ => {
@@ -242,8 +246,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => SetMenuItems());
-			User.Select(x => x?.IsStockEnabled ?? false)
+			User.Select(x => (x?.IsStockEnabled ?? false) && (x?.HasStockPermission() ?? false))
 				.Subscribe(IsStockEnabled);
+			User.Select(x => (x?.IsStockEnabled ?? false) && (x?.HasCashPermission() ?? false))
+				.Subscribe(IsCashEnabled);
+			User.Select(x => x?.HasOrderPermission() ?? false)
+				.Subscribe(IsOrderEnabled);
+			UserName.Subscribe(_ => SwitchUser());
 
 			if (Env.Factory != null) {
 				var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token, User).Wait());
@@ -267,6 +276,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<int> NewDocsCount { get; set; }
 		public NotifyValue<string[]> Instances { get; set; }
 		public NotifyValue<bool> IsStockEnabled { get; set; }
+		public NotifyValue<bool> IsCashEnabled { get; set; }
+		public NotifyValue<bool> IsOrderEnabled { get; set; }
+		public bool IsShowLoginEnabled => Config.MultiUser;
 
 		public string Version { get; set; }
 
@@ -305,6 +317,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override IEnumerable<IResult> OnViewReady()
 		{
+			if (!Env.IsUnitTesting && IsShowLoginEnabled) {
+				if (!ShowLogin()) {
+					windowManager.Notify("Вход в приложение отменён");
+					TryClose();
+					return Enumerable.Empty<IResult>();
+				}
+			}
+
 			Env.Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
 				//если в папке с обновлением есть данные то мы должны их импортировать
@@ -339,6 +359,18 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 				return results;
 			}
+		}
+
+		public bool ShowLogin()
+		{
+			var result = new DialogResult(new Login());
+			result.Execute(null);
+			if ((result.Model as Login).WasCancelled)
+				return false;
+
+			password = (result.Model as Login).Password;
+			UserName.Value = (result.Model as Login).UserName;
+			return true;
 		}
 
 		public void CloseActive()
@@ -486,6 +518,29 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			return true;
 		}
+		private void SwitchUser()
+		{
+			if (string.IsNullOrEmpty(UserName))
+				return;
+			session.Close();
+			var dbName = $"ldb{UserName}";
+			AppBootstrapper.NHibernate.Init(database: dbName);
+			Config.DbDir = dbName;
+			using (var sanityCheck = new SanityCheck(Config) {SwitchUser = true})
+				sanityCheck.Check();
+			Env.Current = new Env();
+			Env = Env.Current;
+			session = Env.Factory.OpenSession();
+			Reload();
+			if (Settings.Value.UserName != UserName) {
+				Settings.Value.UserName = UserName;
+				Settings.Value.Password = password;
+				session.Flush();
+			}
+			Navigator.CloseAll();
+			ShowMain();
+		}
+
 		public void Reload()
 		{
 			if (session == null)

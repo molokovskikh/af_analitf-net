@@ -30,20 +30,28 @@
 		</Grid.RowDefinitions>
 		<Menu Grid.Row="0">
 			<MenuItem Header="Приходные документы">
-				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
-				<MenuItem Header="Излишки" Name="InventoryDocs" />
+				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders"
+					Visibility="{Binding Shell.IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Излишки" Name="InventoryDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
 			</MenuItem>
 			<MenuItem Header="Расходные документы">
-				<MenuItem Header="Переоценка" Name="ReassessmentDocs" />
-				<MenuItem Header="Списание" Name="WriteoffDocs" />
-				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
-				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
+				<MenuItem Header="Переоценка" Name="ReassessmentDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Списание" Name="WriteoffDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
 				<MenuItem Header="Распаковка" Name="UnpackingDocs" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
-				<MenuItem Header="Чеки" Name="Checks" />
-				<MenuItem Header="Движение товара по накладным" Name="GoodsMovement" />
+				<MenuItem Header="Чеки" Name="Checks"
+					Visibility="{Binding Shell.IsCashEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Движение товара по накладным" Name="GoodsMovement"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
 				<MenuItem Header="Отчет по срокам годности" Name="ShelfLife" />
 			</MenuItem>
 		</Menu>
