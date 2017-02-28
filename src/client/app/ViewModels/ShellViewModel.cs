@@ -317,7 +317,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override IEnumerable<IResult> OnViewReady()
 		{
+#if DEBUG
 			if (!Env.IsUnitTesting && IsShowLoginEnabled) {
+#else
+			if (IsShowLoginEnabled) {
+#endif
 				if (!ShowLogin()) {
 					windowManager.Notify("Вход в приложение отменён");
 					TryClose();
