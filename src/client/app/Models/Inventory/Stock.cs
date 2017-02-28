@@ -77,6 +77,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 			Product = line.Product;
 			ProductId = line.ProductId;
+			CatalogId = line.CatalogId;
 			Producer = line.Producer;
 			ProducerId = line.ProductId;
 			Country = line.Country;
@@ -113,6 +114,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Address Address { get; set; }
 		public virtual StockStatus Status { get; set; }
+		public virtual Catalog Catalog { get; set; }
+		public virtual string DisplayProduct => Catalog?.FullName ?? Product;
 
 		public virtual uint? WaybillId { get; set; }
 		public virtual uint? WaybillLineId { get; set; }

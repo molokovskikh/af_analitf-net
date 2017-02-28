@@ -60,7 +60,7 @@
 					Visibility="Collapsed"
 					IsReadOnly="True" />
 				<controls:DataGridTextColumnEx x:Name="ClmnBarcode" Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
-				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding DisplayProduct}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnStatus" Header="Статус" Binding="{Binding StatusName}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnWaybill" Header="Накладная" Binding="{Binding WaybillId}" Width="*" />
