@@ -55,7 +55,8 @@
       <Button Name="SearchLine" Style="{StaticResource FilterElement}" ToolTip="Поиск товара">Поиск товара</Button>
       <Button Name="OpenFolders" Style="{StaticResource FilterElement}" ToolTip="Открыть папки">Открыть папки</Button>
       <Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить">Удалить</Button>
-      <Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать накладную">Создать</Button>
+      <Button Name="Create" Style="{StaticResource FilterElement}" ToolTip="Создать накладную"
+				Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">Создать</Button>
 			<c:PopupButton VerticalAlignment="Center">
 				<c:PopupButton.ButtonContent>
 					Отчеты

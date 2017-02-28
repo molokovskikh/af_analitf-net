@@ -15,13 +15,11 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			InitFields();
 			Waybill = waybill;
 			DisplayName = "Создание накладной";
-			RxQuery(x => x.Query<Supplier>().OrderBy(s => s.Name).ToArray()).Subscribe(Suppliers);
 			WasCancelled = true;
 		}
 
 		public bool WasCancelled { get; private set; }
 		public Waybill Waybill { get; set; }
-		public NotifyValue<Supplier[]> Suppliers { get; set; }
 
 		public void OK()
 		{
