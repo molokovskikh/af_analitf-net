@@ -114,6 +114,7 @@ namespace AnalitF.Net.Client.Config
 		public string DiadokApiKey;
 		public string DiadokUrl;
 		public SimpleMRUCache Cache = new SimpleMRUCache(10);
+		public bool MultiUser;
 
 		public string TmpDir
 		{

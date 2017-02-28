@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.Models.Commands
 	public class SanityCheck : BaseCommand
 	{
 		public bool Debug;
+		public bool SwitchUser;
 
 		public SanityCheck()
 		{
@@ -316,8 +317,11 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void InitDb()
 		{
+			var session = AppBootstrapper.NHibernate.Factory.OpenStatelessSession();
+			session.CreateSQLQuery($"create database if not exists `{session.Connection.Database}`;").ExecuteUpdate();
 			var export = new SchemaExport(Configuration);
-			export.Drop(Debug, true);
+			if (!SwitchUser)
+				export.Drop(Debug, true);
 			export.Create(Debug, true);
 			using (var connectionProvider = ConnectionProviderFactory.NewConnectionProvider(Configuration.Properties))
 			using (var connection = (DbConnection) connectionProvider.GetConnection()) {
