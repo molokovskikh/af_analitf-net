@@ -36,7 +36,6 @@ using log4net.Config;
 using ILog = log4net.ILog;
 using LogManager = Caliburn.Micro.LogManager;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
-using System.Text.RegularExpressions;
 
 namespace AnalitF.Net.Client
 {
@@ -179,16 +178,6 @@ namespace AnalitF.Net.Client
 			Util.SetValue(instance, "Env", Shell.Env);
 		}
 
-		private int CountDb()
-		{
-			var root = Path.GetDirectoryName(Config.RootDir);
-			var data = Path.Combine(root, "data");
-			var reg = new Regex(@"\\ldb\d{1,9}$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			var dir = new DirectoryInfo(root);
-			var files = dir.GetFiles("users.frm", SearchOption.AllDirectories);
-			return files.Count(r => Equals(r.DirectoryName, data) || reg.IsMatch(r.DirectoryName));
-		}
-
 		private void InitLog()
 		{
 			if (FailFast) {
@@ -270,8 +259,6 @@ namespace AnalitF.Net.Client
 			else {
 				Directory.CreateDirectory(Config.TmpDir);
 			}
-
-			Config.MultiUser = CountDb() > 1;
 		}
 
 		public void InitShell()

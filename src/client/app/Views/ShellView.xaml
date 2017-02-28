@@ -93,10 +93,8 @@
 				<MenuItem Header="Получить данные" InputGestureText="Ctrl+R"
 					cal:Message.Attach="Update" />
 				<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
-					Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}"
 					cal:Message.Attach="SendOrders" />
 				<MenuItem Header="Синхронизировать остатки" InputGestureText="CTRL+SHIFT+S"
-					Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}"
 					cal:Message.Attach="SyncInventory" />
 				<MenuItem Header="Загрузить и получить накладные, сертификаты"
 					cal:Message.Attach="MicroUpdate" />
@@ -109,7 +107,7 @@
 				<MenuItem Header="Выход" InputGestureText="Alt+F4" cal:Message.Attach="TryClose" />
 			</MenuItem>
 
-			<MenuItem Header="Заказ" Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<MenuItem Header="Заказ">
 				<MenuItem Header="Список препаратов" InputGestureText="F8"
 					cal:Message.Attach="ShowCatalog" />
 				<MenuItem Header="Уцененные препараты" cal:Message.Attach="ShowJunkOffers" />
@@ -144,8 +142,6 @@
 					<MenuItem Header="Загрузить историю накладных"
 						cal:Message.Attach="LoadWaybillHistory" />
 				</MenuItem>
-				<Separator />
-				<MenuItem Header="Сменить пользователя" cal:Message.Attach="ShowLogin" />
 			</MenuItem>
 
 			<MenuItem Header="Склад" Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
@@ -162,7 +158,7 @@
 					</MenuItem>
 					<MenuItem Header="Отчеты">
 						<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
-						<MenuItem Header="Чеки" Name="Checks" Visibility="{Binding IsCashEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+						<MenuItem Header="Чеки" Name="Checks" />
 						<MenuItem Header="Отчет по срокам годности" Name="ShelfLife" />
 					</MenuItem>
         </MenuItem>
@@ -183,7 +179,6 @@
 						<MenuItem Header="Получить данные" InputGestureText="Ctrl+R"
 								cal:Message.Attach="Update" />
 						<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
-								Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}"
 								cal:Message.Attach="SendOrders" />
 						<MenuItem Header="Загрузить и получить накладные, сертификаты"
 								cal:Message.Attach="MicroUpdate" />
@@ -194,8 +189,7 @@
 				</xctk:SplitButton.DropDownContent>
 			</xctk:SplitButton>
 
-			<Button x:Name="SendOrders" ToolTip="Отправить заказы (Ctrl+S)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="SendOrders" ToolTip="Отправить заказы (Ctrl+S)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Email 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
@@ -217,58 +211,47 @@
 
       <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге (F8)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге (F8)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Folder Green_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="SearchOffers" ToolTip="Поиск в прайс-листах" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="SearchOffers" ToolTip="Поиск в прайс-листах" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/View Doc_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowMnn" ToolTip="Поиск по МНН (Ctrl+M)"  Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowMnn" ToolTip="Поиск по МНН (Ctrl+M)"  Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Address Book_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм (F9)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм (F9)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Document Blank_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Folder Yellow_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowAwaited" ToolTip="Ожидаемые позиции" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowAwaited" ToolTip="Ожидаемые позиции" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Favourites_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
-			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-			<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ (F10)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ (F10)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Clipboard_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowOrders" ToolTip="Заказы (F12)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowOrders" ToolTip="Заказы (F12)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Work_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowBatch" ToolTip="АвтоЗаказ" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Button x:Name="ShowBatch" ToolTip="АвтоЗаказ" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Document_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
-			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32"
-				Visibility="{Binding IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<Button x:Name="ShowJunkOffers" ToolTip="Уцененные препараты" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Notepad_32.ico"
@@ -304,7 +287,7 @@
 			</Button>
 
 			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-				Visibility="{Binding IsCashEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
+				Visibility="{Binding IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}">
 				<Image Source="/assets/images/cash.png"
 						Style="{StaticResource ButtonImage}" />
 			</Button>

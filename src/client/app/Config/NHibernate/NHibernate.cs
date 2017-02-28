@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 		public int MappingHash;
 		public bool UseRelativePath;
 
-		public void Init(string connectionStringName = "local", bool debug = false, string database = "")
+		public void Init(string connectionStringName = "local", bool debug = false)
 		{
 			//ilmerge
 			//если сборки объединены то логика определения системы протоколирование не работает
@@ -435,7 +435,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			var dialect = typeof(DevartMySqlDialect).AssemblyQualifiedName;
 
 			if (connectionString.Contains("Embedded=True")) {
-				connectionString = FixRelativePaths(connectionString, database);
+				connectionString = FixRelativePaths(connectionString);
 				driver = typeof(DevartDriver).AssemblyQualifiedName;
 			}
 
@@ -497,14 +497,12 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			throw new Exception(propertyInfo.PropertyType.ToString());
 		}
 
-		public string FixRelativePaths(string connectionString, string database = "")
+		public string FixRelativePaths(string connectionString)
 		{
 			var builder = new MySqlConnectionStringBuilder(connectionString);
-			if (!string.IsNullOrEmpty(database))
-				builder.Database = database;
 			var parameters = builder.ServerParameters;
 			if (String.IsNullOrEmpty(parameters))
-				return string.IsNullOrEmpty(database) ? connectionString : builder.ToString();
+				return connectionString;
 			var dictionary = parameters
 				.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Split('='))
 				.ToDictionary(p => p[0], p => p[1]);

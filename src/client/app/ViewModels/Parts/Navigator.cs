@@ -12,7 +12,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		void NavigateRoot(IScreen screen);
 		void NavigateBack();
 		void Release(IScreen screen);
-		void CloseAll();
 	}
 
 	public class Navigator : INavigator
@@ -103,12 +102,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (conductor.Items.Count > 1) {
 				conductor.DeactivateItem(conductor.ActiveItem, true);
 			}
-		}
-
-		public void CloseAll()
-		{
-			for (var i = conductor.Items.Count - 1; i >= 0; i--)
-				CloseAndDispose(conductor.Items[i]);
 		}
 	}
 }

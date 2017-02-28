@@ -496,20 +496,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(3, shell.PrintMenuItems.Value.Count);
 		}
 
-		[Test]
-		public void Check_access_rights()
-		{
-			Assert.IsTrue(shell.IsStockEnabled);
-			Assert.IsTrue(shell.IsCashEnabled);
-			Assert.IsTrue(shell.IsOrderEnabled);
-			var localUser = session.Query<User>().First();
-			localUser.Permissions.RemoveEach(r => r.Name == "ORDR" || r.Name == "CASH" || r.Name == "STCK");
-			shell.User.Value = localUser;
-			Assert.IsFalse(shell.IsStockEnabled);
-			Assert.IsFalse(shell.IsCashEnabled);
-			Assert.IsFalse(shell.IsOrderEnabled);
-		}
-
 		private void Collect(IEnumerable<IResult> results)
 		{
 			dialogs.AddRange(results.OfType<DialogResult>().Select(d => d.Model));
