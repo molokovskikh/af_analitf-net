@@ -737,7 +737,7 @@ update Addresses set Id =  2575 where Id = :addressId")
 			Run(new SyncCommand());
 		}
 
-		[Test]
+		[Test, Ignore("Тест содержит дефекты")]
 		public void Update_address()
 		{
 			var fixtureAddressChange = Fixture<CreateAddress>();
