@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Product = line.Product;
 			ProductId = line.ProductId;
 			Producer = line.Producer;
-			ProducerId = line.ProducerId;
+			ProducerId = line.ProductId;
 			Country = line.Country;
 			CountryCode = line.CountryCode;
 			Period = line.Period;

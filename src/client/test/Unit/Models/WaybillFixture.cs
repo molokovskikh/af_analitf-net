@@ -519,22 +519,6 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(10, line.RetailMarkup);
 		}
 
-		[Test(Description = "Тест накладной, созданной пользователем")]
-		public void Waybill_CreatedByUser()
-		{
-			waybill.IsCreatedByUser = true;
-			var line = new WaybillLine(waybill)
-			{
-				Product = "Тестовый продукт",
-				SupplierCostWithoutNds = 1298.18m,
-				Nds = 10,
-				SupplierCost = 1428,
-				Quantity = 5
-			};
-			Calculate(line);
-			Assert.AreEqual(1, waybill.Lines.Count);
-		}
-
 		private WaybillLine Line()
 		{
 			settings.Markups.First(x => x.Type == MarkupType.Nds18).Markup = 30;

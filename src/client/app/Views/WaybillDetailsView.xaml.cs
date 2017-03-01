@@ -264,7 +264,6 @@ namespace AnalitF.Net.Client.Views
 						lines.ItemsSource = model.Lines.Value;
 					}
 					else if (args.PropertyName == "Status") {
-						lines.CommitEdit();//Завершаем редактирование, чтобы не исчезла текущая строка
 						lines.IsReadOnly = model.Waybill.Status == DocStatus.Posted;
 					}
 				};
