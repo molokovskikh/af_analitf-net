@@ -192,8 +192,23 @@
 			</TabControl>
 
 			<StackPanel Grid.Column="2">
-				<Label Padding="5, 2, 5, 2">Наценка</Label>
-				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left" />
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Margin="0, 5, 5, 5" ToolTip="Округлить розничную цену путем уменьшения до цены кратной">
+						Округлить:
+					</TextBlock>
+					<ComboBox Grid.Column="1" Grid.Row="0" ToolTip="Округлить цену путем уменьшения до цены кратной"
+						Style="{StaticResource Select}" x:Name="Rounding" />
+					<Label Grid.Column="0" Grid.Row="1" Padding="5, 2, 5, 2">Наценка</Label>
+					<xctk:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="RetailMarkup" TextAlignment="Left" />
+				</Grid>
 				<Label Padding="5, 2, 5, 2" Name="RetailCost" />
 				<Label Padding="5, 2, 5, 2">Сумма</Label>
 				<Label Padding="5, 2, 5, 2" Name="CurrentOffer_Price_Order_Sum">
