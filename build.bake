@@ -165,8 +165,9 @@ task "deploy:service", ["build:service"]:
 	#создаем маршрут в прокси
 	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
 	proxyConfig = Path.Combine(deployTo, @config)
-	using writer = StreamWriter(proxyConfig, true):
-		writer.WriteLine("$version " + Globals.ProxyUrlRoot + "-$version")
+	ImpersonateIfNeeded(Globals):
+		using writer = StreamWriter(proxyConfig, true):
+			writer.WriteLine("$version " + Globals.ProxyUrlRoot + "-$version")
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
