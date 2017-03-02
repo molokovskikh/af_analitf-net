@@ -42,9 +42,14 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	script = Path.GetFullPath("scripts/iis.ps1")
 	hostsArg = join(hosts, ",")
 	psArgs = ""
-	if Globals.Environment == @Production:
+	user = ""
+	password = ""
+	if Globals.Maybe.impersonate:
+		user = 'deployer'
+		password = '$sdfsd887!'
+	else:
 		user, password = AskCredentials("user for $hostsArg:")
-		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
+	psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
 	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string, src as string):
