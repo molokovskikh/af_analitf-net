@@ -193,14 +193,15 @@ task @deploy, ["env", "version:generate", "git:tag", "prepare", "check", "build"
 task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
 task "deploy:client", ["build:setup"]:
-	if Globals.Maybe.SetupDeployRoot:
+	return unless Globals.Maybe.SetupDeployRoot
+	version = File.ReadAllText("output/setup/version.txt")
+	ImpersonateIfNeeded(Globals):
 		root = Globals.Maybe.SetupDeployRoot
 		MkDir(root)
-		version = File.ReadAllText("output/setup/version.txt")
 		dst = Path.Combine(root, "AnalitF.Net-$version.exe")
+
 		Cp("output/setup/setup.exe", dst, true)
-	if Globals.Maybe.PackageRoot:
-		ImpersonateIfNeeded(Globals):
+		if Globals.Maybe.PackageRoot:
 			root = Globals.PackageRoot
 			Cp("output/package/*.nupkg", "$root/packages", true)
 
