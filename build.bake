@@ -102,7 +102,6 @@ Global(
 		},
 	},
 	JenkinsProject: "AnalitF.Net",
-	Retarget: true,
 	TargetFramework: "net40",
 	AdditionalAssemblies: ("src/service/app/bin/AnalitF.Net.Service.dll", ),
 	Config: {
@@ -452,7 +451,12 @@ task "test:binary":
 				print e.Message
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
-		Sh("nunit3-console --labels=all --stoponerror --verbose --full --test test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
+
+		target = Path.GetFullPath("./src/client/test.release/test.release.csproj")
+		projectFile = GetProjects("assets/full.sln").First({x| String.Equals(x, target, StringComparison.OrdinalIgnoreCase)})
+		BuildCore(Globals, projectFile, {})
+		TestProject(projectFile, CheckExitCode: true).Test("--stoponerror --verbose --full --test test.release.AppFixture")
+
 		targetChannel = Configuration.Maybe.targetChannel or "beta"
 		CopyUpdateBin(targetChannel, "output/updater/")
 		CopyUpdateBin("migration-$targetChannel", "output/migration-update/")
