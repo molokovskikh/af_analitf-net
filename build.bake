@@ -44,7 +44,7 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	psArgs = ""
 	user = ""
 	password = ""
-	if Globals.Maybe.impersonate:
+	if Configuration.Maybe.impersonate:
 		user = 'deployer'
 		password = '$sdfsd887!'
 	else:
