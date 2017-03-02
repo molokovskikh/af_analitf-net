@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			DocumentDate = DateTime.Now;
 		}
 
-		public Stock(Waybill waybill, WaybillLine line)
+		public Stock(Waybill waybill, WaybillLine line, ISession session)
 		{
 			WaybillId = waybill.Id;
 			WaybillLineId = line.Id;
@@ -75,8 +75,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplierFullName = waybill.Supplier?.FullName;
 			WaybillNumber = waybill.ProviderDocumentId;
 
-			Product = line.Product;
+			Product = line.CatalogId.HasValue ? session.Load<Catalog>(line.CatalogId).FullName : line.Product;
 			ProductId = line.ProductId;
+			CatalogId = line.CatalogId;
 			Producer = line.Producer;
 			ProducerId = line.ProductId;
 			Country = line.Country;
