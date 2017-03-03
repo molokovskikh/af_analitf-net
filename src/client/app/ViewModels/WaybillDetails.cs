@@ -607,12 +607,27 @@ namespace AnalitF.Net.Client.ViewModels
 			IsRejectVisible.Value = false;
 		}
 
+		/// <summary>
+		/// Проверка накладной на правильность заполнения
+		/// </summary>
+		/// <returns>true - правильно заполнена, false - неправильно</returns>
+		private bool CheckWaybill()	{
+			if (Lines.Value.OfType<WaybillLine>().Any(l => !l.Quantity.HasValue || (l.Quantity.HasValue && l.Quantity == 0))) {
+				Manager.Notify("Пожалуйста, введите количество в поле 'Заказ'");
+				return false;
+			}
+
+			return true;
+		}
+
 		public void Stock()
 		{
 			if (!CanStock.Value)
 				return;
-			Waybill.Stock(Session);
-			Manager.Notify("Накладная оприходована");
+			if (CheckWaybill()) {
+				Waybill.Stock(Session);
+				Manager.Notify("Накладная оприходована");
+			}
 		}
 
 		public void ToEditable()
