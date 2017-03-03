@@ -15,6 +15,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 using AnalitF.Net.Client.Models.Inventory;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -161,10 +162,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Set_productname_from_catalog()
+		{
+			var catalog = session.Query<Catalog>().First();
+			var line = waybill.Lines[10];
+			line.CatalogId = catalog.Id;
+			var stock = new Stock(waybill, line, session);
+			session.Save(stock);
+			Assert.AreEqual(stock.Product, catalog.FullName);
+		}
+
+		[Test]
 		public void Consumption_report()
 		{
-			var stock = new Stock(waybill, waybill.Lines[10]);
+			var line = waybill.Lines[10];
+			line.CatalogId = null;
+			var stock = new Stock(waybill, line, session);
 			session.Save(stock);
+			Assert.AreEqual(stock.Product, line.Product);
 
 			var check = new Check();
 			check.Status = Status.Closed;

@@ -408,7 +408,7 @@ namespace AnalitF.Net.Client.Models
 			var stockActions = new List<StockAction>();
 			foreach (var line in lines) {
 				if (line.Stock != null) line.Stock.Quantity -= line.Quantity.Value;
-				var stock = new Stock(this, line);
+				var stock = new Stock(this, line, session);
 				stockActions.Add(new StockAction {
 					ActionType = ActionType.Stock,
 					SourceStockId = line.StockId,
