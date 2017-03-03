@@ -92,9 +92,13 @@
 
 		<c:WinFormDataGrid x:Name="Offers" Grid.Row="1" 
 			MyDataSource="{Binding DisplayItems.Value, Mode=TwoWay}"
-			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"/>
+			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"
+			ProducerPromotionsItems ="{Binding ProducerPromotions.ProducerPromotions.Value}"
+			PromotionsItems ="{Binding Promotions.Promotions.Value}"
+			PromotionsVisible="{Binding Promotions.Visible.Value}"
+			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value}"/>
 
-		<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+		<!--<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="*" />
@@ -104,7 +108,7 @@
 				<ContentControl x:Name="Promotions" />
 				<ContentControl x:Name="ProducerPromotions" />
 			</StackPanel>
-		</Grid>
+		</Grid>-->
 
 		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" />
 

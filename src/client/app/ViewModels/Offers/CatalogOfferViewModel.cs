@@ -109,7 +109,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
-	
 
 		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
 

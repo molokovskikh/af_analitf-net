@@ -113,6 +113,82 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
+		public static readonly DependencyProperty ProducerPromotionsVisibleProperty = DependencyProperty.Register("ProducerPromotionsVisible", typeof(Object), typeof(WinFormDataGrid),
+			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
+			{
+				var winFormDataGrid = d as WinFormDataGrid;
+				if (winFormDataGrid != null)
+				{
+					winFormDataGrid.DataGrid.ProducerPromotions.Visible = (bool)winFormDataGrid.GetValue(e.Property);
+				}
+			}), null));
+
+		public object ProducerPromotionsVisible
+		{
+			get { return this.GetValue(ProducerPromotionsVisibleProperty); }
+			set
+			{
+				this.SetValue(ProducerPromotionsVisibleProperty, value);
+			}
+		}
+
+		public static readonly DependencyProperty ProducerPromotionsItemsProperty = DependencyProperty.Register("ProducerPromotionsItems", typeof(Object), typeof(WinFormDataGrid),
+			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
+			{
+				var winFormDataGrid = d as WinFormDataGrid;
+				if (winFormDataGrid != null)
+				{
+					winFormDataGrid.DataGrid.ProducerPromotionsItems = winFormDataGrid.GetValue(e.Property);
+				}
+			}), null));
+
+		public object ProducerPromotionsItems
+		{
+			get { return this.GetValue(ProducerPromotionsItemsProperty); }
+			set
+			{
+				this.SetValue(ProducerPromotionsItemsProperty, value);
+			}
+		}
+
+		public static readonly DependencyProperty PromotionsVisibleProperty = DependencyProperty.Register("PromotionsVisible", typeof(Object), typeof(WinFormDataGrid),
+			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
+			{
+				var winFormDataGrid = d as WinFormDataGrid;
+				if (winFormDataGrid != null)
+				{
+					winFormDataGrid.DataGrid.Promotions.Visible = (bool)winFormDataGrid.GetValue(e.Property);
+				}
+			}), null));
+
+		public object PromotionsVisible
+		{
+			get { return this.GetValue(PromotionsVisibleProperty); }
+			set
+			{
+				this.SetValue(PromotionsVisibleProperty, value);
+			}
+		}
+
+		public static readonly DependencyProperty PromotionsItemsProperty = DependencyProperty.Register("PromotionsItems", typeof(Object), typeof(WinFormDataGrid),
+			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
+			{
+				var winFormDataGrid = d as WinFormDataGrid;
+				if (winFormDataGrid != null)
+				{
+					winFormDataGrid.DataGrid.PromotionsItems = winFormDataGrid.GetValue(e.Property);
+				}
+			}), null));
+
+		public object PromotionsItems
+		{
+			get { return this.GetValue(PromotionsItemsProperty); }
+			set
+			{
+				this.SetValue(PromotionsItemsProperty, value);
+			}
+		}
+
 		public WinFormDataGrid() : base()
 		{
 			DataGrid.Grid.BackgroundColor = Color.FromArgb(255, 240, 240, 240);
@@ -244,6 +320,22 @@ namespace AnalitF.Net.Client.Controls
 					this.SetValue(SelectedItemProperty, this.DataGrid.Grid.CurrentRow.DataBoundItem);
 			});
 		}
+
+		//private void InitProducerPromotionsVisibleProperty()
+		//{
+		//	this.DataGrid.ProducerPromotions.VisibleChanged += new EventHandler((sender, e) =>
+		//	{
+		//		this.SetValue(ProducerPromotionsVisibleProperty, this.DataGrid.ProducerPromotions.Visible);
+		//	});
+		//}
+
+		//private void InitPromotionsVisibleProperty()
+		//{
+		//	this.DataGrid.Promotions.VisibleChanged += new EventHandler((sender, e) =>
+		//	{
+		//		this.SetValue(PromotionsVisibleProperty, this.DataGrid.Promotions.Visible);
+		//	});
+		//}
 
 		private void CalcColumnWidthWPF()
 		{
