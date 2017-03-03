@@ -195,7 +195,7 @@
 			</c:DataGrid2.Columns>
 		</c:DataGrid2>
 
-		<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+		<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="528,12,527,0">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="*" />
