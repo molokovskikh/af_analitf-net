@@ -193,7 +193,7 @@ namespace AnalitF.Net.Client.Controls
 		public WinFormDataGrid() : base()
 		{
 			DataGrid.Grid.BackgroundColor = Color.FromArgb(255, 240, 240, 240);
-			DataGrid.Grid.Font = new Font("Arial", 12);
+			DataGrid.Grid.Font = new Font("Segoe UI", 12);
 			DataGrid.Grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
 			DataGrid.Grid.ColumnHeadersHeight = DataGrid.Grid.RowTemplate.Height + 20;
 			DataGrid.Grid.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
