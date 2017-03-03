@@ -447,7 +447,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test]
+		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
 		public void Dynamic_recalculate_markup_validation()
 		{
 			StartWait();
@@ -532,7 +532,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.AreEqual(hitTestResult.VisualHit, el);
 		}
 
-		[Test]
+		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
 		public void Delay_of_payment()
 		{
 			//нужно что бы отработала логика в StartCheck
