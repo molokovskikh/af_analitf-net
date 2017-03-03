@@ -96,7 +96,8 @@
 			ProducerPromotionsItems ="{Binding ProducerPromotions.ProducerPromotions.Value}"
 			PromotionsItems ="{Binding Promotions.Promotions.Value}"
 			PromotionsVisible="{Binding Promotions.Visible.Value}"
-			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value}"/>
+			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value}"
+			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"/>
 
 		<!--<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Grid.RowDefinitions>

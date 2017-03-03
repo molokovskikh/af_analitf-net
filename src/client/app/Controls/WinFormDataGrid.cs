@@ -41,6 +41,7 @@ namespace AnalitF.Net.Client.Controls
 					style = (Style)styleresources[Type.Name + "Row"];
 			}
 		}
+		public string WinFormDataGridName { get { return (this as FrameworkElement).Name; } }
 
 		public static readonly DependencyProperty MyDataSourceProperty = DependencyProperty.Register("MyDataSource", typeof(Object), typeof(WinFormDataGrid),
 			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
@@ -219,6 +220,7 @@ namespace AnalitF.Net.Client.Controls
 			this.DataGrid.Grid.CellFormatting += DataGrid_CellFormatting;
 			this.DataGrid.Grid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 			this.DataGrid.Grid.PreviewKeyDown += DataGrid_PreviewKeyDown;
+			DataGrid.Grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.Disable;
 		}
 
 		private void DataGrid_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -267,9 +269,9 @@ namespace AnalitF.Net.Client.Controls
 
 		private void DataGrid_KeyPress(object sender, KeyPressEventArgs e)
 		{
-			if ((sender as DataGridView).CurrentCell != null && !groupHeader.Keys.Contains((sender as DataGridView).CurrentCell.RowIndex))
-				GenerateMyTextInputEvent(this, new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
-							new TextComposition(InputManager.Current, this, e.KeyChar.ToString())));
+			RaiseEvent(new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+				new TextComposition(InputManager.Current, this, e.KeyChar.ToString()))
+					{ RoutedEvent = UIElement.TextInputEvent });
 			e.Handled = true;
 		}
 
