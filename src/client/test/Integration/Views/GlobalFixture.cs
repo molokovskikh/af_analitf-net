@@ -588,8 +588,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 
 			WaitWindow(fixture.ProducerPromotion.DisplayName);
-
-			Thread.Sleep(50000);
 			dispatcher.Invoke(() =>	{
 
 				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
@@ -626,7 +624,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 
 			WaitWindow(fixture.Promotion.DisplayName);
-			Thread.Sleep(50000);
 			dispatcher.Invoke(() =>	{
 				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
 				var image = viewer.Document.Descendants<Image>().First();
