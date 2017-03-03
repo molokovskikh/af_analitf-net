@@ -914,6 +914,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			//будь бдителен ImportCommand очистит сессию
 			RunCommand(new ImportCommand(data));
 			var settings = Session.Query<Settings>().First();
+			var user = Session.Query<User>().First();
 
 			Log.Info("Пересчет заявок");
 			SyncOrders();
@@ -953,6 +954,10 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			var postUpdate = new PostUpdate();
 			Log.Info("Вычисление забраковки");
 			postUpdate.IsRejected = CalculateRejects(settings);
+			if (user.IsStockEnabled) {
+				Log.Info("Вычисление забраковки на складе");
+				postUpdate.IsRejectedOnStock = CalculateRejectsOnStock(settings);
+			}
 			Log.Info("Вычисление ожидаемых");
 			postUpdate.IsAwaited = offersImported && CalculateAwaited();
 				//в режиме получения документов мы не должны предлагать а должны просто открывать
@@ -1137,6 +1142,25 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
 				.ExecuteUpdate();
+
+			return exists;
+		}
+
+		public bool CalculateRejectsOnStock(Settings settings)
+		{
+			Session.CreateSQLQuery("update Stocks s " +
+				"join WaybillLines l on s.WaybillLineId = l.Id " +
+				"join Rejects r on l.RejectId = r.Id " +
+				"set s.RejectStatus = 2, s.RejectId = r.Id " +
+				"where s.RejectStatus <> 2 " +
+				"and r.Canceled = 0")
+				.ExecuteUpdate();
+			var exists = Session.CreateSQLQuery(
+				"select count(*) " +
+				"from Stocks s " +
+				"where s.Quantity > 0 " +
+				"and s.RejectStatus <> 3")
+				.UniqueResult<long?>() > 0;
 
 			return exists;
 		}

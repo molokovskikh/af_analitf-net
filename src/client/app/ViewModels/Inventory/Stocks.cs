@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public AddressSelector AddressSelector { get; set; }
 		public NotifyValue<IList<Selectable<StockStatus>>> StatusFilter { get; set; }
 		public NotifyValue<bool> CanOpenWaybill { get; set; }
+		public NotifyValue<bool> OnlyRejected { get; set; }
 
 		private void Items_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
@@ -90,12 +91,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(DbReloadToken)
 				.Merge(StatusFilter.FilterChanged())
 				.Merge(AddressSelector.FilterChanged.Cast<object>())
+				.Merge(OnlyRejected.Changed())
 				.SelectMany(_ => RxQuery(x => {
 					var query = x.Query<Stock>().Where(y => y.Quantity != 0 || y.ReservedQuantity != 0);
 					if (StatusFilter.IsFiltred()) {
 						var values = StatusFilter.GetValues();
 						query = query.Where(y => values.Contains(y.Status));
 					}
+					if (OnlyRejected.Value)
+						query = query.Where(r => r.RejectStatus != RejectStatus.NotDefective);
 					var addresses = AddressSelector.GetActiveFilter().Select(y => y.Id);
 					query = query.Where(y => addresses.Contains(y.Address.Id));
 					return query.Fetch(y => y.Address).OrderBy(y => y.Product).ToList();
