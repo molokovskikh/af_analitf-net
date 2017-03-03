@@ -38,6 +38,7 @@
 			this.ProducerPromotionsPanel = new System.Windows.Forms.Panel();
 			this.ProducerPromotionsContentPanel = new System.Windows.Forms.Panel();
 			this.OverlayPanel = new System.Windows.Forms.Panel();
+			this.OrderWarningLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.GridEx)).BeginInit();
 			this.PromotionsPanel.SuspendLayout();
 			this.ProducerPromotionsPanel.SuspendLayout();
@@ -50,7 +51,7 @@
 			this.GridEx.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.GridEx.Location = new System.Drawing.Point(0, 0);
 			this.GridEx.Name = "GridEx";
-			this.GridEx.Size = new System.Drawing.Size(624, 444);
+			this.GridEx.Size = new System.Drawing.Size(1145, 673);
 			this.GridEx.TabIndex = 0;
 			this.GridEx.ClientSizeChanged += new System.EventHandler(this.GridEx_ClientSizeChanged);
 			// 
@@ -63,7 +64,7 @@
 			this.PromotionsPanel.Controls.Add(this.label1);
 			this.PromotionsPanel.Controls.Add(this.PromotionsContentPanel);
 			this.PromotionsPanel.Dock = System.Windows.Forms.DockStyle.Top;
-			this.PromotionsPanel.Location = new System.Drawing.Point(0, 100);
+			this.PromotionsPanel.Location = new System.Drawing.Point(0, 121);
 			this.PromotionsPanel.Name = "PromotionsPanel";
 			this.PromotionsPanel.Size = new System.Drawing.Size(550, 100);
 			this.PromotionsPanel.TabIndex = 3;
@@ -133,7 +134,7 @@
 			this.ProducerPromotionsPanel.Controls.Add(this.label2);
 			this.ProducerPromotionsPanel.Controls.Add(this.ProducerPromotionsCloseButton);
 			this.ProducerPromotionsPanel.Dock = System.Windows.Forms.DockStyle.Top;
-			this.ProducerPromotionsPanel.Location = new System.Drawing.Point(0, 0);
+			this.ProducerPromotionsPanel.Location = new System.Drawing.Point(0, 21);
 			this.ProducerPromotionsPanel.Name = "ProducerPromotionsPanel";
 			this.ProducerPromotionsPanel.Size = new System.Drawing.Size(550, 100);
 			this.ProducerPromotionsPanel.TabIndex = 0;
@@ -152,10 +153,22 @@
 			this.OverlayPanel.AutoScroll = true;
 			this.OverlayPanel.Controls.Add(this.PromotionsPanel);
 			this.OverlayPanel.Controls.Add(this.ProducerPromotionsPanel);
+			this.OverlayPanel.Controls.Add(this.OrderWarningLabel);
 			this.OverlayPanel.Location = new System.Drawing.Point(24, 20);
 			this.OverlayPanel.Name = "OverlayPanel";
-			this.OverlayPanel.Size = new System.Drawing.Size(550, 229);
+			this.OverlayPanel.Size = new System.Drawing.Size(550, 254);
 			this.OverlayPanel.TabIndex = 0;
+			// 
+			// OrderWarningLabel
+			// 
+			this.OrderWarningLabel.AutoSize = true;
+			this.OrderWarningLabel.Dock = System.Windows.Forms.DockStyle.Top;
+			this.OrderWarningLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.OrderWarningLabel.ForeColor = System.Drawing.Color.Red;
+			this.OrderWarningLabel.Location = new System.Drawing.Point(0, 0);
+			this.OrderWarningLabel.Name = "OrderWarningLabel";
+			this.OrderWarningLabel.Size = new System.Drawing.Size(0, 21);
+			this.OrderWarningLabel.TabIndex = 4;
 			// 
 			// WinFormGrid
 			// 
@@ -164,13 +177,14 @@
 			this.Controls.Add(this.OverlayPanel);
 			this.Controls.Add(this.GridEx);
 			this.Name = "WinFormGrid";
-			this.Size = new System.Drawing.Size(624, 444);
+			this.Size = new System.Drawing.Size(1145, 673);
 			((System.ComponentModel.ISupportInitialize)(this.GridEx)).EndInit();
 			this.PromotionsPanel.ResumeLayout(false);
 			this.PromotionsPanel.PerformLayout();
 			this.ProducerPromotionsPanel.ResumeLayout(false);
 			this.ProducerPromotionsPanel.PerformLayout();
 			this.OverlayPanel.ResumeLayout(false);
+			this.OverlayPanel.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -187,5 +201,6 @@
 		private System.Windows.Forms.Panel ProducerPromotionsPanel;
 		private System.Windows.Forms.Panel ProducerPromotionsContentPanel;
 		private System.Windows.Forms.Panel OverlayPanel;
+		private System.Windows.Forms.Label OrderWarningLabel;
 	}
 }

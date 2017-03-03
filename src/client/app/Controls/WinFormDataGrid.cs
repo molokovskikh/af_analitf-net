@@ -190,6 +190,25 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
+		public static readonly DependencyProperty OrderWarningProperty = DependencyProperty.Register("OrderWarning", typeof(Object), typeof(WinFormDataGrid),
+			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
+			{
+				var winFormDataGrid = d as WinFormDataGrid;
+				if (winFormDataGrid != null)
+				{
+					winFormDataGrid.DataGrid.OrderWarning = winFormDataGrid.GetValue(e.Property);
+				}
+			}), null));
+
+		public object OrderWarning
+		{
+			get { return this.GetValue(OrderWarningProperty); }
+			set
+			{
+				this.SetValue(OrderWarningProperty, value);
+			}
+		}
+
 		public WinFormDataGrid() : base()
 		{
 			DataGrid.Grid.BackgroundColor = Color.FromArgb(255, 240, 240, 240);

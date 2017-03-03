@@ -97,6 +97,7 @@
 			PromotionsItems ="{Binding Promotions.Promotions.Value, Mode=TwoWay}"
 			PromotionsVisible="{Binding Promotions.Visible.Value, Mode=TwoWay}"
 			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value, Mode=TwoWay}"
+			OrderWarning="{Binding MessagesForWinFormGrid.Value,  Mode=TwoWay}"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"/>
 
 		<!--<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
