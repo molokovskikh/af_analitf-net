@@ -193,7 +193,7 @@ namespace AnalitF.Net.Client.Controls
 		public WinFormDataGrid() : base()
 		{
 			DataGrid.Grid.BackgroundColor = Color.FromArgb(255, 240, 240, 240);
-			DataGrid.Grid.Font = new Font("Segoe UI", 12);
+			DataGrid.Grid.Font = new Font("Segoe UI", 10);
 			DataGrid.Grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
 			DataGrid.Grid.ColumnHeadersHeight = DataGrid.Grid.RowTemplate.Height + 20;
 			DataGrid.Grid.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
@@ -207,6 +207,8 @@ namespace AnalitF.Net.Client.Controls
 			DataGrid.Grid.RowHeadersWidth = 10;
 			this.Child = DataGrid;
 			InitDataSourceProperty();
+			InitSelectedItemProperty();
+			InitPromotionsVisibleProperty();
 			InitSelectedItemProperty();
 			this.DataGrid.SizeChanged += DataGrid_SizeChanged;
 			this.DataGrid.Grid.ColumnWidthChanged += DataGrid_ColumnWidthChanged;
@@ -323,21 +325,21 @@ namespace AnalitF.Net.Client.Controls
 			});
 		}
 
-		//private void InitProducerPromotionsVisibleProperty()
-		//{
-		//	this.DataGrid.ProducerPromotions.VisibleChanged += new EventHandler((sender, e) =>
-		//	{
-		//		this.SetValue(ProducerPromotionsVisibleProperty, this.DataGrid.ProducerPromotions.Visible);
-		//	});
-		//}
+		private void InitProducerPromotionsVisibleProperty()
+		{
+			this.DataGrid.ProducerPromotions.VisibleChanged += new EventHandler((sender, e) =>
+			{
+				this.SetValue(ProducerPromotionsVisibleProperty, this.DataGrid.ProducerPromotions.Visible);
+			});
+		}
 
-		//private void InitPromotionsVisibleProperty()
-		//{
-		//	this.DataGrid.Promotions.VisibleChanged += new EventHandler((sender, e) =>
-		//	{
-		//		this.SetValue(PromotionsVisibleProperty, this.DataGrid.Promotions.Visible);
-		//	});
-		//}
+		private void InitPromotionsVisibleProperty()
+		{
+			this.DataGrid.Promotions.VisibleChanged += new EventHandler((sender, e) =>
+			{
+				this.SetValue(PromotionsVisibleProperty, this.DataGrid.Promotions.Visible);
+			});
+		}
 
 		private void CalcColumnWidthWPF()
 		{

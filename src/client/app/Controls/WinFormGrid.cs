@@ -154,14 +154,14 @@ namespace AnalitF.Net.Client.Controls
 					Name.Parent = parent;
 					Name.Location = new Point(15, y);
 					Name.MaximumSize = new Size(parent.Width / 2 - 5, 0);
-					Name.Font = new Font("Segoe UI", 12);
+					Name.Font = new Font("Segoe UI", 10);
 					Name.AutoSize = true;
 
 					LinkLabel Open = new LinkLabel();
 					Open.Parent = parent;
 					Open.Location = new Point(parent.Size.Width / 2 + 15, y);
 					Open.MaximumSize = new Size(parent.Width / 2 - 5, 0);
-					Open.Font = new Font("Segoe UI", 12);
+					Open.Font = new Font("Segoe UI", 10);
 					Open.AutoSize = true;
 					Open.Click += (s1, e1) =>
 					{
@@ -179,7 +179,7 @@ namespace AnalitF.Net.Client.Controls
 					Annotation.AutoSize = true;
 					Annotation.Parent = parent;
 					Annotation.Location = new Point(15, y);
-					Annotation.Font = new Font("Segoe UI", 12);
+					Annotation.Font = new Font("Segoe UI", 10);
 					if (item is Models.Promotion)
 					{
 						Name.Text = (item as Models.Promotion).Supplier.Name;

@@ -93,10 +93,10 @@
 		<c:WinFormDataGrid x:Name="Offers" Grid.Row="1" 
 			MyDataSource="{Binding DisplayItems.Value, Mode=TwoWay}"
 			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"
-			ProducerPromotionsItems ="{Binding ProducerPromotions.ProducerPromotions.Value}"
-			PromotionsItems ="{Binding Promotions.Promotions.Value}"
-			PromotionsVisible="{Binding Promotions.Visible.Value}"
-			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value}"
+			ProducerPromotionsItems ="{Binding ProducerPromotions.ProducerPromotions.Value, Mode=TwoWay}"
+			PromotionsItems ="{Binding Promotions.Promotions.Value, Mode=TwoWay}"
+			PromotionsVisible="{Binding Promotions.Visible.Value, Mode=TwoWay}"
+			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value, Mode=TwoWay}"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"/>
 
 		<!--<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
