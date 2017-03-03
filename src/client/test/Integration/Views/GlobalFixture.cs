@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		//вернуться в каталог "нажав букву" и если это повторная попытка поиска
 		//и в предыдущую попытку был выбран элементы который отображается на одном экране с выбранным
 		//в текущую попытку элементом то это приведет к эффекту похожему на "съедание" введенной буквы
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public async Task Open_catalog_on_quick_search()
 		{
 			StartWait();
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			AssertQuickSearch(catalog, term);
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public async Task Open_catalog_offers()
 		{
 			var term = session.Query<CatalogName>()
@@ -131,7 +131,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public async Task Open_catalog()
 		{
 			session.DeleteEach<Order>();
@@ -415,7 +415,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Load_order_history()
 		{
 			var order = MakeSentOrder();
@@ -447,7 +447,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Dynamic_recalculate_markup_validation()
 		{
 			StartWait();
@@ -532,7 +532,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.AreEqual(hitTestResult.VisualHit, el);
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Delay_of_payment()
 		{
 			//нужно что бы отработала логика в StartCheck
@@ -554,11 +554,11 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var offers = activeWindow.Descendants<AnalitFContlos.WinFormDataGrid>().First(g => g.WinFormDataGridName == "Offers");
 				var supplierCost = GetCell(offers, "Цена поставщика");
 				var cost = GetCell(offers, "Цена");
-				Assert.AreNotEqual(supplierCost.AsText(), cost.AsText());
+				Assert.AreNotEqual(supplierCost.Value.ToString(), cost.Value.ToString());
 			});
 		}
 
-		[Test]
+		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
 		public void ProducerPromotion()
 		{
 			session.DeleteEach<ProducerPromotion>();
@@ -574,19 +574,20 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			AdvanceScheduler(500);
 
-			//dispatcher.Invoke(() =>	{
-			//	var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
-			//	Assert.IsTrue(producerPromotions.IsVisible);
-			//	Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
+			dispatcher.Invoke(() =>
+			{
+				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
+				Assert.IsTrue(producerPromotions.IsVisible);
+				Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
 
-			//	var presenter = producerPromotions.Descendants<ContentPresenter>()
-			//		.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
+				var presenter = producerPromotions.Descendants<ContentPresenter>()
+					.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
 
-			//	var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
-			//	dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
-			//});
+				var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
+				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
+			});
 
-			//WaitWindow(fixture.ProducerPromotion.DisplayName);
+			WaitWindow(fixture.ProducerPromotion.DisplayName);
 
 			Thread.Sleep(50000);
 			dispatcher.Invoke(() =>	{
@@ -602,7 +603,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test]
+		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
 		public void Promotion()
 		{
 			session.DeleteEach<Promotion>();
@@ -613,17 +614,18 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Click("ShowCatalog");
 			OpenOffers(fixture.Promotion.Catalogs[0]);
 			AdvanceScheduler(500);
-			//dispatcher.Invoke(() =>	{
-			//	var promotions = activeWindow.Descendants<PromotionPopup>().First();
-			//	Assert.IsTrue(promotions.IsVisible);
-			//	Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
-			//	var presenter = promotions.Descendants<ContentPresenter>()
-			//		.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
-			//	var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
-			//	dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
-			//});
+			dispatcher.Invoke(() =>
+			{
+				var promotions = activeWindow.Descendants<PromotionPopup>().First();
+				Assert.IsTrue(promotions.IsVisible);
+				Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
+				var presenter = promotions.Descendants<ContentPresenter>()
+					.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
+				var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
+				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
+			});
 
-			//WaitWindow(fixture.Promotion.DisplayName);
+			WaitWindow(fixture.Promotion.DisplayName);
 			Thread.Sleep(50000);
 			dispatcher.Invoke(() =>	{
 				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
@@ -833,7 +835,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitIdle();
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public async Task Create_waybill()
 		{
 			await Start();

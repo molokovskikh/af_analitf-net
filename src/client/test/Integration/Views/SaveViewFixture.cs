@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Collapsed));
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Restore_display_index()
 		{
 			var grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
