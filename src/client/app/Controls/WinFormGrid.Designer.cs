@@ -65,7 +65,7 @@
 			this.PromotionsPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.PromotionsPanel.Location = new System.Drawing.Point(0, 94);
 			this.PromotionsPanel.Name = "PromotionsPanel";
-			this.PromotionsPanel.Size = new System.Drawing.Size(533, 95);
+			this.PromotionsPanel.Size = new System.Drawing.Size(550, 95);
 			this.PromotionsPanel.TabIndex = 3;
 			// 
 			// PromotionsCloseButton
@@ -96,9 +96,9 @@
 			// 
 			this.PromotionsContentPanel.AutoScroll = true;
 			this.PromotionsContentPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.PromotionsContentPanel.Location = new System.Drawing.Point(0, 36);
+			this.PromotionsContentPanel.Location = new System.Drawing.Point(0, 35);
 			this.PromotionsContentPanel.Name = "PromotionsContentPanel";
-			this.PromotionsContentPanel.Size = new System.Drawing.Size(531, 57);
+			this.PromotionsContentPanel.Size = new System.Drawing.Size(548, 58);
 			this.PromotionsContentPanel.TabIndex = 4;
 			// 
 			// ProducerPromotionsCloseButton
@@ -135,16 +135,16 @@
 			this.ProducerPromotionsPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.ProducerPromotionsPanel.Location = new System.Drawing.Point(0, 0);
 			this.ProducerPromotionsPanel.Name = "ProducerPromotionsPanel";
-			this.ProducerPromotionsPanel.Size = new System.Drawing.Size(533, 94);
+			this.ProducerPromotionsPanel.Size = new System.Drawing.Size(550, 94);
 			this.ProducerPromotionsPanel.TabIndex = 0;
 			// 
 			// ProducerPromotionsContentPanel
 			// 
 			this.ProducerPromotionsContentPanel.AutoScroll = true;
 			this.ProducerPromotionsContentPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.ProducerPromotionsContentPanel.Location = new System.Drawing.Point(0, 32);
+			this.ProducerPromotionsContentPanel.Location = new System.Drawing.Point(0, 34);
 			this.ProducerPromotionsContentPanel.Name = "ProducerPromotionsContentPanel";
-			this.ProducerPromotionsContentPanel.Size = new System.Drawing.Size(531, 60);
+			this.ProducerPromotionsContentPanel.Size = new System.Drawing.Size(548, 58);
 			this.ProducerPromotionsContentPanel.TabIndex = 3;
 			// 
 			// OverlayPanel
@@ -154,7 +154,7 @@
 			this.OverlayPanel.Controls.Add(this.ProducerPromotionsPanel);
 			this.OverlayPanel.Location = new System.Drawing.Point(24, 20);
 			this.OverlayPanel.Name = "OverlayPanel";
-			this.OverlayPanel.Size = new System.Drawing.Size(550, 161);
+			this.OverlayPanel.Size = new System.Drawing.Size(550, 229);
 			this.OverlayPanel.TabIndex = 0;
 			// 
 			// WinFormGrid

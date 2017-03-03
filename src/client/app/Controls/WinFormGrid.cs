@@ -75,82 +75,12 @@ namespace AnalitF.Net.Client.Controls
 
 		private void WinFormGrid_ProducerPromotionsItemsChangeEvent(object sender)
 		{
-			if (producerPromotionsItems != null)
-			{
-				int y = 0;
-				foreach (var item in producerPromotionsItems)
-				{
-					Label ProducerName = new Label();
-					ProducerName.Font = new Font(Font, FontStyle.Bold);
-					ProducerName.Parent = ProducerPromotionsContentPanel;
-					ProducerName.Location = new Point(15, y);
-					ProducerName.MaximumSize = new Size(ProducerPromotionsContentPanel.Width / 2 - 5, 0);
-					ProducerName.AutoSize = true;
-					ProducerName.Text = item.Producer.Name;
-
-
-					LinkLabel Open = new LinkLabel();
-					Open.Parent = ProducerPromotionsContentPanel;
-					Open.Location = new Point(ProducerPromotionsContentPanel.Size.Width / 2 + 15, y);
-					Open.MaximumSize = new Size(ProducerPromotionsContentPanel.Width / 2 - 5, 0);
-					Open.AutoSize = true;
-					Open.Text = item.Name;
-					Open.Click += (s1, e1) =>
-					{
-						new Models.Results.DialogResult(new ViewModels.Dialogs.DocModel<Models.ProducerPromotion>(item.Id), resizable: true).Execute(new ActionExecutionContext());
-					};
-
-					y += (ProducerName.Height > Open.Height ? ProducerName.Height : Open.Height);
-
-					Label Annotation = new Label();
-					Annotation.AutoSize = true;
-					Annotation.Parent = ProducerPromotionsContentPanel;
-					Annotation.Location = new Point(15, y);
-					Annotation.Text = item.Annotation;
-
-					y += Annotation.Height;
-				}
-			}
+			AddControl<Models.ProducerPromotion>(producerPromotionsItems, ProducerPromotionsContentPanel);
 		}
 
 		private void WinFormGrid_PromotionsItemsChangeEvent(object sender)
 		{
-			if (promotionsItems != null)
-			{
-				int y = 0;
-				foreach (var item in promotionsItems)
-				{
-					Label SupplierName = new Label();
-					SupplierName.Font = new Font(Font, FontStyle.Bold);
-					SupplierName.Parent = PromotionsContentPanel;
-					SupplierName.Location = new Point(15, y);
-					SupplierName.MaximumSize = new Size(PromotionsContentPanel.Width / 2 - 5, 0);
-					SupplierName.AutoSize = true;
-					SupplierName.Text = item.Supplier.Name;
-
-
-					LinkLabel Open = new LinkLabel();
-					Open.Parent = PromotionsContentPanel;
-					Open.Location = new Point(PromotionsContentPanel.Size.Width / 2 + 15, y);
-					Open.MaximumSize = new Size(PromotionsContentPanel.Width / 2 - 5, 0);
-					Open.AutoSize = true;
-					Open.Text = item.Name;
-					Open.Click += (s1, e1) =>
-					{
-						new Models.Results.DialogResult(new ViewModels.Dialogs.DocModel<Models.Promotion>(item.Id), resizable: true).Execute(new ActionExecutionContext());
-					};
-
-					y += (SupplierName.Height > Open.Height ? SupplierName.Height : Open.Height);
-
-					Label Annotation = new Label();
-					Annotation.AutoSize = true;
-					Annotation.Parent = PromotionsContentPanel;
-					Annotation.Location = new Point(15, y);
-					Annotation.Text = item.Annotation;
-
-					y += Annotation.Height;
-				}
-			}
+			AddControl<Models.Promotion>(promotionsItems, PromotionsContentPanel);
 		}
 
 		private void CalcLocation()
@@ -210,7 +140,59 @@ namespace AnalitF.Net.Client.Controls
 				PromotionsItemsChangeEvent(this);
 			}
 		}
-
 		#endregion
+
+		private void AddControl<T>(object items, Panel parent)
+		{
+			if (items != null)
+			{
+				int y = 0;
+				foreach (var item in items as List<T>)
+				{
+					Label Name = new Label();
+					Name.Font = new Font(Font, FontStyle.Bold);
+					Name.Parent = parent;
+					Name.Location = new Point(15, y);
+					Name.MaximumSize = new Size(parent.Width / 2 - 5, 0);
+					Name.AutoSize = true;
+
+					LinkLabel Open = new LinkLabel();
+					Open.Parent = parent;
+					Open.Location = new Point(parent.Size.Width / 2 + 15, y);
+					Open.MaximumSize = new Size(parent.Width / 2 - 5, 0);
+					Open.AutoSize = true;
+					Open.Click += (s1, e1) =>
+					{
+						if (item is Models.Promotion)
+							new Models.Results.DialogResult(new ViewModels.Dialogs.DocModel<Models.Promotion>((item as Models.Promotion).Id)
+								, resizable: true).Execute(new ActionExecutionContext());
+						else if (item is Models.ProducerPromotion)
+							new Models.Results.DialogResult(new ViewModels.Dialogs.DocModel<Models.ProducerPromotion>((item as Models.ProducerPromotion).Id)
+								, resizable: true).Execute(new ActionExecutionContext());
+					};
+
+					y += (Name.Height > Open.Height ? Name.Height : Open.Height);
+
+					Label Annotation = new Label();
+					Annotation.AutoSize = true;
+					Annotation.Parent = parent;
+					Annotation.Location = new Point(15, y);
+					if (item is Models.Promotion)
+					{
+						Name.Text = (item as Models.Promotion).Supplier.Name;
+						Open.Text = (item as Models.Promotion).Name;
+						Annotation.Text = (item as Models.Promotion).Annotation;
+					}
+					else if (item is Models.ProducerPromotion)
+					{
+						Name.Text = (item as Models.ProducerPromotion).Producer.Name;
+						Open.Text = (item as Models.ProducerPromotion).Name;
+						Annotation.Text = (item as Models.ProducerPromotion).Annotation;
+					}
+
+					y += Annotation.Height;
+				}
+			}
+		}
 	}
 }
