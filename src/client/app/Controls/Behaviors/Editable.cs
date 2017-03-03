@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			var lastEdit = DateTime.MinValue;
 			var edit = textInput
 				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Text) != null)
-				.Do(e => { if (grid is DataGrid) e.EventArgs.Handled = true; })
+				.Do(e => {e.EventArgs.Handled = true; })
 				.Select(e => new Func<string, string>(v => {
 					var text = e.EventArgs.Text;
 					var now = DateTime.Now;
