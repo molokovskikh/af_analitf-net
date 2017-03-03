@@ -167,8 +167,6 @@ where l.{name}DocId is null
 			Stock source;
 			if (action.SourceStockId != null) {
 				source = Session.Load<Stock>(action.SourceStockId);
-				if (source.Version != action.SourceStockVersion)
-					throw new Exception($"Конкурентная операция над строкой {action.SourceStockId}");
 			} else {
 				source = Session.Query<Stock>().OrderByDescending(x => x.Id)
 					.FirstOrDefault(x => x.CreatedByUser == CurrentUser && x.ClientPrimaryKey == action.ClientStockId);
