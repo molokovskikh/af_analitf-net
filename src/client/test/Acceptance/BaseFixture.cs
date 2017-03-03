@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
@@ -8,12 +10,14 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using NUnit.Framework;
 using TestStack.White.InputDevices;
+using Point = System.Windows.Point;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
@@ -64,12 +68,32 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[TearDown]
 		public void BaseFixtureTeardown()
 		{
+			if (DbHelper.IsTestFail() && DbHelper.IsCI()) {
+				Screenshot(DbHelper.FailDir("screen.png"));
+			}
 			Opened.OnCompleted();
 			Opened.Dispose();
 
 			MainWindow = null;
 			Close(Process);
 			Automation.RemoveAllEventHandlers();
+		}
+
+		public static void Screenshot(string file)
+		{
+			using (var bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
+																									Screen.PrimaryScreen.Bounds.Height))
+			{
+				using (var g = Graphics.FromImage(bmpScreenCapture))
+				{
+					g.CopyFromScreen(Screen.PrimaryScreen.Bounds.X,
+													 Screen.PrimaryScreen.Bounds.Y,
+													 0, 0,
+													 bmpScreenCapture.Size,
+													 CopyPixelOperation.SourceCopy);
+				}
+				bmpScreenCapture.Save(file, ImageFormat.Png);
+			}
 		}
 
 		protected void Close(Process process)

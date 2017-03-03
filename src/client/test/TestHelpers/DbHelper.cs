@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -85,7 +86,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static void SaveFailData()
 		{
-			if (IsTestFail() && DispatcherFixture.IsCI()) {
+			if (IsTestFail() && IsCI()) {
 				var root = "fail-test-data";
 				var dir = Directory.CreateDirectory(root);
 				if (dir.GetDirectories().Length > 10) {
@@ -111,6 +112,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public static void Drop()
 		{
 			new SchemaExport(AppBootstrapper.NHibernate.Configuration).Drop(false, true);
+		}
+
+		public static bool IsCI()
+		{
+			return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"));
 		}
 	}
 }

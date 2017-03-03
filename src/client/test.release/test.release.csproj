@@ -50,6 +50,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Reactive.Core">
       <HintPath>..\..\..\packages\Rx-Core.2.1.30214.0\lib\Net40\System.Reactive.Core.dll</HintPath>
     </Reference>
@@ -59,6 +60,7 @@
     <Reference Include="System.Reactive.Linq">
       <HintPath>..\..\..\packages\Rx-Linq.2.1.30214.0\lib\Net40\System.Reactive.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -76,8 +78,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppFixture.cs" />
-    <Compile Include="..\test\TestHelpers\AutomationHelper.cs" />
-    <Compile Include="..\test\Acceptance\BaseFixture.cs" />
     <Compile Include="GlobalSetup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +91,10 @@
     <ProjectReference Include="..\app\app.csproj">
       <Project>{5878740b-360a-4942-8902-926907209616}</Project>
       <Name>app</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\test\test.csproj">
+      <Project>{f4e5bf74-fd5d-4a1c-ab92-a54a7b79ec42}</Project>
+      <Name>test</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

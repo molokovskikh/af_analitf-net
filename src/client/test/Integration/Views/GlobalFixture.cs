@@ -939,7 +939,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		private void WaitMessageBox(string message)
 		{
 			var timeout = 30.Second();
-			if (IsCI())
+			if (DbHelper.IsCI())
 				timeout = 60.Second();
 
 			try {
