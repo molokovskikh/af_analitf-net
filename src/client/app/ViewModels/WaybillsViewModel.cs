@@ -91,10 +91,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<DocumentTypeFilter> TypeFilter { get; set; }
 		public AddressSelector AddressSelector { get; set; }
 
-		public bool IsStockEnabled
-		{
-			get { return Shell?.IsStockEnabled.Value ?? false; }
-		}
+		public bool IsStockEnabled => Shell?.IsStockEnabled.Value ?? false;
 
 		protected override void OnInitialize()
 		{

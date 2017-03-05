@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -95,9 +96,10 @@ namespace AnalitF.Net.Client.Views
 			lines.Name = "Lines";
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Наименование",
-				Binding = new Binding("Product"),
+				Binding = new Binding("Product") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
-				SortDirection = ListSortDirection.Ascending
+				SortDirection = ListSortDirection.Ascending,
+				IsReadOnly = false
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Производитель",
@@ -184,8 +186,9 @@ namespace AnalitF.Net.Client.Views
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Цена поставщика с НДС",
-				Binding = new Binding("SupplierCost"),
+				Binding = new Binding("SupplierCost") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Макс. розничная наценка",
@@ -215,8 +218,9 @@ namespace AnalitF.Net.Client.Views
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Заказ",
-				Binding = new Binding("Quantity"),
+				Binding = new Binding("Quantity") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Розничная сумма",
