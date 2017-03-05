@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						query = query.Where(y => values.Contains(y.Status));
 					}
 					if (OnlyRejected.Value)
-						query = query.Where(r => r.RejectStatus != RejectStatus.NotDefective);
+						query = query.Where(r => r.RejectStatus == RejectStatus.Defective || r.RejectStatus == RejectStatus.Perhaps);
 					var addresses = AddressSelector.GetActiveFilter().Select(y => y.Id);
 					query = query.Where(y => addresses.Contains(y.Address.Id));
 					return query.Fetch(y => y.Address).OrderBy(y => y.Product).ToList();

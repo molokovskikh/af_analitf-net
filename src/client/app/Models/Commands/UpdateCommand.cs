@@ -1159,7 +1159,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				"select count(*) " +
 				"from Stocks s " +
 				"where s.Quantity > 0 " +
-				"and s.RejectStatus <> 3")
+				"and s.RejectStatus in (1, 2)")
 				.UniqueResult<long?>() > 0;
 
 			return exists;
