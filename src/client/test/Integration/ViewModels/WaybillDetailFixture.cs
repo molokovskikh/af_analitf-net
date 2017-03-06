@@ -298,19 +298,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Waybill_to_editable()
 		{
+			model.User.IsStockEnabled = true;
 			model.Waybill.IsCreatedByUser = false;
 			Assert.IsTrue(model.Waybill.IsReadOnly);
 			model.ToEditable();
-			Assert.IsFalse(model.Waybill.IsReadOnly);
+			Assert.IsTrue(model.Waybill.IsReadOnly);
 		}
 
 		[Test]
 		public void Waybill_posted_to_editable()
 		{
+			model.User.IsStockEnabled = true;
 			model.Waybill.IsCreatedByUser = false;
 			Assert.IsTrue(model.Waybill.IsReadOnly);
 			model.ToEditable();
-			Assert.IsFalse(model.Waybill.IsReadOnly);
+			Assert.IsTrue(model.Waybill.IsReadOnly);
 			model.Waybill.Status = DocStatus.Posted;
 			Assert.IsTrue(model.Waybill.IsReadOnly);
 			model.ToEditable();
