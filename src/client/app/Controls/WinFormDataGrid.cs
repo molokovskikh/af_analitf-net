@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Controls
 		private Style style;
 		private ResourceDictionary styleresources;
 
-		public WinFormGrid DataGrid = new WinFormGrid();
+		public DataGridView DataGrid = new DataGridView();
 		public bool IsStyleAppled = true;
 		public Type Type { get; set; }
 		public ResourceDictionary StyleResources
@@ -41,13 +41,12 @@ namespace AnalitF.Net.Client.Controls
 					style = (Style)styleresources[Type.Name + "Row"];
 			}
 		}
-		public string WinFormDataGridName { get { return (this as FrameworkElement).Name; } }
 
 		public static readonly DependencyProperty MyDataSourceProperty = DependencyProperty.Register("MyDataSource", typeof(Object), typeof(WinFormDataGrid),
 			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
 			{
 				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null && winFormDataGrid.DataGrid.Grid != null)
+				if (winFormDataGrid != null && winFormDataGrid.DataGrid != null)
 				{
 					winFormDataGrid.groupHeader.Clear();
 					if ((winFormDataGrid.GetValue(e.Property) is List<object>))
@@ -61,7 +60,7 @@ namespace AnalitF.Net.Client.Controls
 							}
 						
 					}
-					winFormDataGrid.DataGrid.Grid.DataSource = winFormDataGrid.GetValue(e.Property);
+					winFormDataGrid.DataGrid.DataSource = winFormDataGrid.GetValue(e.Property);
 				}
 			}), null));
 
@@ -71,6 +70,7 @@ namespace AnalitF.Net.Client.Controls
 			set
 			{
 				this.SetValue(MyDataSourceProperty, value);
+				((DataGridViewTextBoxCellEx)DataGrid[0, 0]).ColumnSpan = 5;
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Controls
 			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
 			{
 				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null && winFormDataGrid.DataGrid.Grid != null)
+				if (winFormDataGrid != null && winFormDataGrid.DataGrid != null && winFormDataGrid.DataGrid.CurrentCell != null )
 				{
 					winFormDataGrid.SelectedItem = winFormDataGrid.GetValue(e.Property);
 				}
@@ -89,21 +89,21 @@ namespace AnalitF.Net.Client.Controls
 			get
 			{
 				CurrentRowRefresh();
-				DataGrid.Grid.Invalidate();
+				DataGrid.Invalidate();
 				return this.GetValue(SelectedItemProperty);
 			}
 			set
 			{
-				if (DataGrid.Grid.CurrentRow == null || (DataGrid.Grid.CurrentRow != null && !DataGrid.Grid.CurrentRow.DataBoundItem.Equals(value)))
-					foreach (DataGridViewRow r in DataGrid.Grid.Rows)
+				if (DataGrid.CurrentRow == null || (DataGrid.CurrentRow != null && !DataGrid.CurrentRow.DataBoundItem.Equals(value)))
+					foreach (DataGridViewRow r in DataGrid.Rows)
 					{
 						if (r.DataBoundItem.Equals(value))
 						{
-							foreach (DataGridViewColumn c in DataGrid.Grid.Columns)
+							foreach (DataGridViewColumn c in DataGrid.Columns)
 							{
 								if (c.Visible)
 								{
-									DataGrid.Grid.CurrentCell = DataGrid.Grid.Rows[r.Index].Cells[c.Index];
+									DataGrid.CurrentCell = DataGrid.Rows[r.Index].Cells[c.Index];
 									break;
 								}
 							}
@@ -114,134 +114,31 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
-		public static readonly DependencyProperty ProducerPromotionsVisibleProperty = DependencyProperty.Register("ProducerPromotionsVisible", typeof(Object), typeof(WinFormDataGrid),
-			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
-			{
-				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null)
-				{
-					winFormDataGrid.DataGrid.ProducerPromotions.Visible = (bool)winFormDataGrid.GetValue(e.Property);
-				}
-			}), null));
-
-		public object ProducerPromotionsVisible
-		{
-			get { return this.GetValue(ProducerPromotionsVisibleProperty); }
-			set
-			{
-				this.SetValue(ProducerPromotionsVisibleProperty, value);
-			}
-		}
-
-		public static readonly DependencyProperty ProducerPromotionsItemsProperty = DependencyProperty.Register("ProducerPromotionsItems", typeof(Object), typeof(WinFormDataGrid),
-			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
-			{
-				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null)
-				{
-					winFormDataGrid.DataGrid.ProducerPromotionsItems = winFormDataGrid.GetValue(e.Property);
-				}
-			}), null));
-
-		public object ProducerPromotionsItems
-		{
-			get { return this.GetValue(ProducerPromotionsItemsProperty); }
-			set
-			{
-				this.SetValue(ProducerPromotionsItemsProperty, value);
-			}
-		}
-
-		public static readonly DependencyProperty PromotionsVisibleProperty = DependencyProperty.Register("PromotionsVisible", typeof(Object), typeof(WinFormDataGrid),
-			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
-			{
-				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null)
-				{
-					winFormDataGrid.DataGrid.Promotions.Visible = (bool)winFormDataGrid.GetValue(e.Property);
-				}
-			}), null));
-
-		public object PromotionsVisible
-		{
-			get { return this.GetValue(PromotionsVisibleProperty); }
-			set
-			{
-				this.SetValue(PromotionsVisibleProperty, value);
-			}
-		}
-
-		public static readonly DependencyProperty PromotionsItemsProperty = DependencyProperty.Register("PromotionsItems", typeof(Object), typeof(WinFormDataGrid),
-			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
-			{
-				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null)
-				{
-					winFormDataGrid.DataGrid.PromotionsItems = winFormDataGrid.GetValue(e.Property);
-				}
-			}), null));
-
-		public object PromotionsItems
-		{
-			get { return this.GetValue(PromotionsItemsProperty); }
-			set
-			{
-				this.SetValue(PromotionsItemsProperty, value);
-			}
-		}
-
-		public static readonly DependencyProperty OrderWarningProperty = DependencyProperty.Register("OrderWarning", typeof(Object), typeof(WinFormDataGrid),
-			new PropertyMetadata("", new PropertyChangedCallback((d, e) =>
-			{
-				var winFormDataGrid = d as WinFormDataGrid;
-				if (winFormDataGrid != null)
-				{
-					winFormDataGrid.DataGrid.OrderWarning = winFormDataGrid.GetValue(e.Property);
-				}
-			}), null));
-
-		public object OrderWarning
-		{
-			get { return this.GetValue(OrderWarningProperty); }
-			set
-			{
-				this.SetValue(OrderWarningProperty, value);
-			}
-		}
-
 		public WinFormDataGrid() : base()
 		{
-			DataGrid.Grid.BackgroundColor = Color.FromArgb(255, 240, 240, 240);
-			DataGrid.Grid.Font = new Font("Segoe UI", 10);
-			DataGrid.Grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
-			DataGrid.Grid.ColumnHeadersHeight = DataGrid.Grid.RowTemplate.Height + 20;
-			DataGrid.Grid.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
 			presentationSource = Keyboard.PrimaryDevice.ActiveSource;
-			DataGrid.Grid.AutoGenerateColumns = false;
-			SetDoubleBuffered(DataGrid.Grid);
-			DataGrid.Grid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			DataGrid.Grid.ReadOnly = true;
-			DataGrid.Grid.AllowUserToOrderColumns = true;
-			DataGrid.Grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-			DataGrid.Grid.RowHeadersWidth = 10;
+			DataGrid.AutoGenerateColumns = false;
+			SetDoubleBuffered(DataGrid);
+			DataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			DataGrid.ReadOnly = true;
+			DataGrid.AllowUserToOrderColumns = true;
+			DataGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+			DataGrid.RowHeadersWidth = 10;
 			this.Child = DataGrid;
 			InitDataSourceProperty();
 			InitSelectedItemProperty();
-			InitPromotionsVisibleProperty();
-			InitSelectedItemProperty();
 			this.DataGrid.SizeChanged += DataGrid_SizeChanged;
-			this.DataGrid.Grid.ColumnWidthChanged += DataGrid_ColumnWidthChanged;
-			this.DataGrid.Grid.DataBindingComplete += DataGrid_DataBindingComplete;
-			this.DataGrid.Grid.Paint += DataGrid_Paint;
-			this.DataGrid.Grid.KeyPress += DataGrid_KeyPress;
-			this.DataGrid.Grid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+			this.DataGrid.ColumnWidthChanged += DataGrid_ColumnWidthChanged;
+			this.DataGrid.DataBindingComplete += DataGrid_DataBindingComplete;
+			this.DataGrid.Paint += DataGrid_Paint;
+			this.DataGrid.KeyPress += DataGrid_KeyPress;
+			this.DataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
 			menu.Items.Add(сolumnsMenuItem);
-			this.DataGrid.Grid.ContextMenuStrip = menu;
+			this.DataGrid.ContextMenuStrip = menu;
 			this.сolumnsMenuItem.Click += ColumnsMenuItem_Click;
-			this.DataGrid.Grid.CellFormatting += DataGrid_CellFormatting;
-			this.DataGrid.Grid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-			this.DataGrid.Grid.PreviewKeyDown += DataGrid_PreviewKeyDown;
-			DataGrid.Grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.Disable;
+			this.DataGrid.CellFormatting += DataGrid_CellFormatting;
+			this.DataGrid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+			this.DataGrid.PreviewKeyDown += DataGrid_PreviewKeyDown;
 		}
 
 		private void DataGrid_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -268,7 +165,7 @@ namespace AnalitF.Net.Client.Controls
 				e.Value = groupHeader[e.RowIndex].Name;
 				e.FormattingApplied = true;
 			}
-			if (groupHeader.Keys.Contains(e.RowIndex) && e.ColumnIndex > 0 && e.ColumnIndex < DataGrid.Grid.ColumnCount)
+			if (groupHeader.Keys.Contains(e.RowIndex) && e.ColumnIndex > 0 && e.ColumnIndex < DataGrid.ColumnCount)
 			{
 				e.Value = string.Empty;
 				e.FormattingApplied = true;
@@ -290,9 +187,9 @@ namespace AnalitF.Net.Client.Controls
 
 		private void DataGrid_KeyPress(object sender, KeyPressEventArgs e)
 		{
-			RaiseEvent(new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
-				new TextComposition(InputManager.Current, this, e.KeyChar.ToString()))
-					{ RoutedEvent = UIElement.TextInputEvent });
+			if ((sender as DataGridView).CurrentCell != null && !groupHeader.Keys.Contains((sender as DataGridView).CurrentCell.RowIndex))
+				GenerateMyTextInputEvent(this, new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+							new TextComposition(InputManager.Current, this, e.KeyChar.ToString())));
 			e.Handled = true;
 		}
 
@@ -329,34 +226,18 @@ namespace AnalitF.Net.Client.Controls
 
 		private void InitDataSourceProperty()
 		{
-			this.DataGrid.Grid.DataSourceChanged += new EventHandler((sender, e) =>
+			this.DataGrid.DataSourceChanged += new EventHandler((sender, e) =>
 			{
-				this.SetValue(MyDataSourceProperty, this.DataGrid.Grid.DataSource);
+				this.SetValue(MyDataSourceProperty, this.DataGrid.DataSource);
 			});
 		}
 
 		private void InitSelectedItemProperty()
 		{
-			this.DataGrid.Grid.CurrentCellChanged += new EventHandler((sender, e) =>
+			this.DataGrid.CurrentCellChanged += new EventHandler((sender, e) =>
 			{
-				if (this.DataGrid.Grid.CurrentRow != null && !groupHeader.Keys.Contains(DataGrid.Grid.CurrentRow.Index))
-					this.SetValue(SelectedItemProperty, this.DataGrid.Grid.CurrentRow.DataBoundItem);
-			});
-		}
-
-		private void InitProducerPromotionsVisibleProperty()
-		{
-			this.DataGrid.ProducerPromotions.VisibleChanged += new EventHandler((sender, e) =>
-			{
-				this.SetValue(ProducerPromotionsVisibleProperty, this.DataGrid.ProducerPromotions.Visible);
-			});
-		}
-
-		private void InitPromotionsVisibleProperty()
-		{
-			this.DataGrid.Promotions.VisibleChanged += new EventHandler((sender, e) =>
-			{
-				this.SetValue(PromotionsVisibleProperty, this.DataGrid.Promotions.Visible);
+				if (this.DataGrid.CurrentRow != null && !groupHeader.Keys.Contains(DataGrid.CurrentRow.Index))
+					this.SetValue(SelectedItemProperty, this.DataGrid.CurrentRow.DataBoundItem);
 			});
 		}
 
@@ -366,7 +247,7 @@ namespace AnalitF.Net.Client.Controls
 			{
 				int x = 0;
 				int y = 0;
-				foreach (DataGridViewTextBoxColumnEx col in DataGrid.Grid.Columns)
+				foreach (DataGridViewTextBoxColumnEx col in DataGrid.Columns)
 				{
 					if (col.Visible)
 					{
@@ -377,7 +258,7 @@ namespace AnalitF.Net.Client.Controls
 				{
 					x = DataGrid.Width / y;
 				}
-				foreach (DataGridViewTextBoxColumnEx col in DataGrid.Grid.Columns)
+				foreach (DataGridViewTextBoxColumnEx col in DataGrid.Columns)
 				{
 					if (col.Visible)
 					{
@@ -397,7 +278,7 @@ namespace AnalitF.Net.Client.Controls
 			calculatedWidth = true;
 			int x = 0;
 			int y = 0;
-			foreach (DataGridViewTextBoxColumnEx col in DataGrid.Grid.Columns)
+			foreach (DataGridViewTextBoxColumnEx col in DataGrid.Columns)
 			{
 				if (col.Visible)
 				{
@@ -408,7 +289,7 @@ namespace AnalitF.Net.Client.Controls
 			{
 				x = DataGrid.Width / y;
 			}
-			foreach (DataGridViewTextBoxColumnEx col in DataGrid.Grid.Columns)
+			foreach (DataGridViewTextBoxColumnEx col in DataGrid.Columns)
 			{
 				if (col.Visible)
 				{
@@ -433,14 +314,14 @@ namespace AnalitF.Net.Client.Controls
 					{
 						if (((Setter)setter).Property.Name == "Background")
 						{
-							DataGrid.Grid.Rows[rowIndex].DefaultCellStyle.SelectionBackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].DefaultCellStyle.SelectionBackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
 						}
 						if (((Setter)setter).Property.Name == "Foreground")
 						{
-							DataGrid.Grid.Rows[rowIndex].DefaultCellStyle.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].DefaultCellStyle.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
@@ -450,14 +331,14 @@ namespace AnalitF.Net.Client.Controls
 					{
 						if (((Setter)setter).Property.Name == "Background")
 						{
-							DataGrid.Grid.Rows[rowIndex].DefaultCellStyle.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].DefaultCellStyle.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
 						}
 						if (((Setter)setter).Property.Name == "Foreground")
 						{
-							DataGrid.Grid.Rows[rowIndex].DefaultCellStyle.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].DefaultCellStyle.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
@@ -472,17 +353,17 @@ namespace AnalitF.Net.Client.Controls
 					{
 						if (((Setter)setter).Property.Name == "Background")
 						{
-							DataGrid.Grid.Rows[rowIndex].Cells[columnIndex].Style.SelectionBackColor =
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionBackColor =
 								Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
-							if (DataGrid.Grid.Rows[rowIndex].Cells[columnIndex].Style.SelectionBackColor != Color.Black)
-								DataGrid.Grid.Rows[rowIndex].Cells[columnIndex].Style.SelectionForeColor = Color.Black;
+							if (DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionBackColor != Color.Black)
+								DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionForeColor = Color.Black;
 						}
 						if (((Setter)setter).Property.Name == "Foreground")
 						{
-							DataGrid.Grid.Rows[rowIndex].Cells[columnIndex].Style.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.SelectionForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
@@ -492,14 +373,14 @@ namespace AnalitF.Net.Client.Controls
 					{
 						if (((Setter)setter).Property.Name == "Background")
 						{
-							DataGrid.Grid.Rows[rowIndex].Cells[columnIndex].Style.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.BackColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
 						}
 						if (((Setter)setter).Property.Name == "Foreground")
 						{
-							DataGrid.Grid.Rows[rowIndex].Cells[columnIndex].Style.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
+							DataGrid.Rows[rowIndex].Cells[columnIndex].Style.ForeColor = Color.FromArgb(((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.A,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.R,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.G,
 								((System.Windows.Media.SolidColorBrush)(((Setter)setter).Value)).Color.B);
@@ -515,19 +396,19 @@ namespace AnalitF.Net.Client.Controls
 			if (Type != null)
 				style = (Style)styleresources[Type.Name + "Row"];
 			foreach (KeyValuePair<int, GroupHeader> k in groupHeader)
-				((DataGridViewTextBoxCellEx)DataGrid.Grid[0, k.Key]).ColumnSpan = DataGrid.Grid.ColumnCount;
-			foreach (DataGridViewRow e in DataGrid.Grid.Rows)
+				((DataGridViewTextBoxCellEx)DataGrid[0, k.Key]).ColumnSpan = DataGrid.ColumnCount;
+			foreach (DataGridViewRow e in DataGrid.Rows)
 			{
 				if (groupHeader.Keys.Contains(e.Index))
 				{
-					DataGrid.Grid.Rows[e.Index].DefaultCellStyle.Font = new System.Drawing.Font(DataGrid.Grid.DefaultCellStyle.Font, System.Drawing.FontStyle.Bold);
-					DataGrid.Grid.Rows[e.Index].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 226, 231, 234);
-					DataGrid.Grid.Rows[e.Index].DefaultCellStyle.BackColor = Color.FromArgb(255, 238, 248, 255);
+					DataGrid.Rows[e.Index].DefaultCellStyle.Font = new System.Drawing.Font(DataGrid.DefaultCellStyle.Font, System.Drawing.FontStyle.Bold);
+					DataGrid.Rows[e.Index].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 226, 231, 234);
+					DataGrid.Rows[e.Index].DefaultCellStyle.BackColor = Color.FromArgb(255, 238, 248, 255);
 				}
 				else
 				{
 					#region Ячейки
-					foreach (DataGridViewColumn column in DataGrid.Grid.Columns)
+					foreach (DataGridViewColumn column in DataGrid.Columns)
 					{
 						Style styleCell;
 						string key;
@@ -560,8 +441,8 @@ namespace AnalitF.Net.Client.Controls
 										flag = false;
 									if (!((System.Windows.Data.Binding)c.Binding).Path.Path.StartsWith("(Is"))
 									{
-										if (Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path) != null && DataGrid.Grid.Rows[e.Index].DataBoundItem != null
-											&& !Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Grid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
+										if (Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path) != null && DataGrid.Rows[e.Index].DataBoundItem != null
+											&& !Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
 										{
 											flag = false;
 										}
@@ -590,9 +471,9 @@ namespace AnalitF.Net.Client.Controls
 							#endregion
 
 							#region DataTrigger
-							else if (tr is DataTrigger && DataGrid.Grid.Rows[e.Index].DataBoundItem != null)
+							else if (tr is DataTrigger && DataGrid.Rows[e.Index].DataBoundItem != null)
 							{
-								if (Type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Grid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
+								if (Type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
 								{
 									foreach (SetterBase setter in (tr as DataTrigger).Setters)
 									{
@@ -624,7 +505,7 @@ namespace AnalitF.Net.Client.Controls
 								//соотвествие свойства условия
 								if (((System.Windows.Data.Binding)c.Binding).Path.Path != "(IsSelected)" && ((System.Windows.Data.Binding)c.Binding).Path.Path != "(Selector.IsSelectionActive)")
 								{
-									if (DataGrid.Grid.Rows[e.Index].DataBoundItem != null && !Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Grid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
+									if (DataGrid.Rows[e.Index].DataBoundItem != null && !Type.GetProperty(((System.Windows.Data.Binding)c.Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(c.Value))
 									{
 										flag = false;
 									}
@@ -651,9 +532,9 @@ namespace AnalitF.Net.Client.Controls
 						}
 						#endregion
 						#region DataTrigger
-						else if (tr is DataTrigger && DataGrid.Grid.Rows[e.Index].DataBoundItem != null)
+						else if (tr is DataTrigger && DataGrid.Rows[e.Index].DataBoundItem != null)
 						{
-							if (Type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Grid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
+							if (Type.GetProperty(((System.Windows.Data.Binding)((DataTrigger)tr).Binding).Path.Path).GetValue(DataGrid.Rows[e.Index].DataBoundItem, new object[] { }).Equals(((DataTrigger)tr).Value))
 							{
 								foreach (SetterBase setter in (tr as DataTrigger).Setters)
 								{
@@ -678,10 +559,10 @@ namespace AnalitF.Net.Client.Controls
 
 		public void SaveColumnOrder()
 		{
-			if (DataGrid.Grid.AllowUserToOrderColumns)
+			if (DataGrid.AllowUserToOrderColumns)
 			{
 				List<ColumnOrderItem> columnOrder = new List<ColumnOrderItem>();
-				DataGridViewColumnCollection columns = DataGrid.Grid.Columns;
+				DataGridViewColumnCollection columns = DataGrid.Columns;
 				for (int i = 0; i < columns.Count; i++)
 				{
 					columnOrder.Add(new ColumnOrderItem
@@ -712,9 +593,9 @@ namespace AnalitF.Net.Client.Controls
 					var sorted = columnOrder.OrderBy(i => i.DisplayIndex);
 					foreach (var item in sorted)
 					{
-						DataGrid.Grid.Columns[item.ColumnIndex].DisplayIndex = item.DisplayIndex;
-						DataGrid.Grid.Columns[item.ColumnIndex].Visible = item.Visible;
-						((DataGridViewTextBoxColumnEx)DataGrid.Grid.Columns[item.ColumnIndex]).Width = item.Width;
+						DataGrid.Columns[item.ColumnIndex].DisplayIndex = item.DisplayIndex;
+						DataGrid.Columns[item.ColumnIndex].Visible = item.Visible;
+						((DataGridViewTextBoxColumnEx)DataGrid.Columns[item.ColumnIndex]).Width = item.Width;
 					}
 				}
 			}
@@ -723,8 +604,9 @@ namespace AnalitF.Net.Client.Controls
 
 		public void CurrentRowRefresh()
 		{
-			DataGrid.Grid.CurrentRow.Selected = false;
-			DataGrid.Grid.CurrentRow.Selected = true;
+			DataGrid.CurrentRow.Selected = false;
+			DataGrid.CurrentRow.Selected = true;
+
 		}
 	}
 
