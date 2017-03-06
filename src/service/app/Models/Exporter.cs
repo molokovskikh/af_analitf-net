@@ -467,15 +467,6 @@ where pc.CostCode = :costId")
 	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates,
 	s.VendorId
 from Customers.Suppliers s
-where s.Name = s.FullName and s.Name = 'Собственный поставщик'
-union
-select
-	s.Id,
-	s.Name,
-	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
-	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates,
-	s.VendorId
-from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(Result, sql, "suppliers", truncate: true);
 
