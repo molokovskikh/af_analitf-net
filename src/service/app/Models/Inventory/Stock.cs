@@ -52,7 +52,7 @@ namespace AnalitF.Net.Service.Models.Inventory
 			SupplierFullName = source.SupplierFullName;
 		}
 
-	public Stock()
+		public Stock()
 		{
 		}
 
