@@ -105,7 +105,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected void Fixture(object fixture)
 		{
+			var trx =  session.Transaction.IsActive;
+			if (trx)
+				session.Transaction.Commit();
 			fixtureHelper.Run(fixture);
+			if (trx)
+				session.Transaction.Begin();
 		}
 
 		protected Order MakeOrder(Address address = null, Offer offer = null)
