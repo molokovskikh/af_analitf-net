@@ -22,7 +22,7 @@
 			<ColumnDefinition></ColumnDefinition>
 			<ColumnDefinition></ColumnDefinition>
 		</Grid.ColumnDefinitions>
-		
+
 		<DockPanel Grid.Row="0" Grid.Column="0">
 			<Label DockPanel.Dock="Top" Padding="5, 0, 5, 0">Справочник товаров</Label>
 			<c:DataGrid2 x:Name="Catalogs" 
@@ -58,11 +58,35 @@
 		</DockPanel>
 
 		<DockPanel Grid.Row="1" Grid.ColumnSpan="2">
-			<Label DockPanel.Dock="Top" Padding="5, 0, 5, 0">Партии товара на складе</Label>
+			<Label DockPanel.Dock="Top" Padding="5, 0, 5, 0">Партии товара</Label>
 			<c:DataGrid2 x:Name="Stocks" 
 			CanUserSortColumns="False"
-			ItemsSource="{Binding DisplayItems.Value}"
-			SelectedItem="{Binding CurrentDisplayItem.Value}">
+			ItemsSource="{Binding Stocks.Value}"
+			SelectedItem="{Binding CurrentStock.Value}">
+				<DataGrid.Columns>
+					<c:DataGridTextColumnEx x:Name="clmnId" Width="10*" Header="№"
+						Binding="{Binding Stock.Id}" TextAlignment="Right" />
+					<c:DataGridTextColumnEx x:Name="clmnDocumentDate" Width="10*" Header="Дата документа"
+						Binding="{Binding Stock.DocumentDate}" />
+					<c:DataGridTextColumnEx x:Name="clmnSupplierName" Width="20*" Header="Поставщик"
+						Binding="{Binding WaybillLine.Waybill.SupplierName}" />
+					<c:DataGridTextColumnEx x:Name="clmnAddressName" Width="20*" Header="Адрес заказа"
+						Binding="{Binding WaybillLine.Waybill.AddressName}"/>
+					<c:DataGridTextColumnEx x:Name="ClmnPeriod" Width="10*" Header="Срок годности" 
+						Binding="{Binding Stock.Period}"/>
+					<c:DataGridTextColumnEx x:Name="ClmnSerialNumber" Width="10*" Header="Серия"
+						Binding="{Binding Stock.SerialNumber}"/>
+					<c:DataGridTextColumnEx x:Name="ClmnCount" Width="10*" Header="Кол-во" 
+						Binding="{Binding WaybillLine.Quantity}" TextAlignment="Right" />
+					<c:DataGridTextColumnEx x:Name="ClmnQuantity" Width="10*" Header="Остаток"
+						Binding="{Binding Stock.Quantity}" TextAlignment="Right" />
+					<c:DataGridTextColumnEx x:Name="ClmnSupplierCostWithoutNds" Width="10*" Header="Цена закупки"
+						Binding="{Binding Stock.SupplierCostWithoutNds}" TextAlignment="Right" />
+					<c:DataGridTextColumnEx x:Name="ClmnSupplierCost" Width="10*" Header="Цена закупки с НДС"
+						Binding="{Binding Stock.SupplierCost}" TextAlignment="Right" />
+					<c:DataGridTextColumnEx x:Name="ClmnRetailCost" Width="10*" Header="Цена розничная"
+						Binding="{Binding Stock.RetailCost}" TextAlignment="Right"  />
+				</DataGrid.Columns>
 			</c:DataGrid2>
 		</DockPanel>
 
