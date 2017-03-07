@@ -99,7 +99,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void NavigateBack()
 		{
-			if (conductor.Items.Count > 1) {
+			//Разрешается переходить назад только из дочерних окон
+			if (conductor.Items.Count > 2) {
 				conductor.DeactivateItem(conductor.ActiveItem, true);
 			}
 		}
