@@ -155,7 +155,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
 				.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
-				.Select(_ => Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser)
+				.Select(_ => !User.IsStockEnabled && Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser)
 				.Subscribe(CanToEditable);
 
 			if (Waybill.IsNew)
