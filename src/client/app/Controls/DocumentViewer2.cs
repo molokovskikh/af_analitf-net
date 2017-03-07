@@ -166,6 +166,7 @@ namespace AnalitF.Net.Client.Controls
 				if (result.Success) {
 					if (result.Dialog.FilterIndex == 1) {
 						var paginator = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
+						paginator.ComputePageCount();
 						for (int i = 0; i < paginator.PageCount; i++) {
 							var bitmap = PrintHelper.ToBitmap(paginator, i, true);
 							var bmf = BitmapFrame.Create(bitmap);
