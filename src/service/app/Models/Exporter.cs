@@ -2846,7 +2846,10 @@ select if(s.CreatedByUserId = ?userId, s.ClientPrimaryKey, null) as Id,
 	s.SupplyQuantity,
 	s.RetailCost,
 	s.RetailMarkup,
-	dh.DownloadId as WaybillId
+	dh.DownloadId as WaybillId,
+	s.WaybillNumber,
+	s.SupplierId,
+	s.SupplierFullName
 from Inventory.Stocks s
 	join Customers.Addresses a on a.Id = s.AddressId
 		join Customers.UserAddresses ua on ua.Addressid = a.Id
