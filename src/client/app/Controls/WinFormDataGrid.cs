@@ -244,18 +244,6 @@ namespace AnalitF.Net.Client.Controls
 			DataGrid.Grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.Disable;
 		}
 
-		public IList<T> GetItems<T>()
-		{
-			List<T> list = new List<T>();
-			foreach (DataGridViewRow item in DataGrid.Grid.Rows)
-			{
-				if (!groupHeader.Keys.Contains(item.Index)
-					&& item.DataBoundItem is T)
-					list.Add((T)item.DataBoundItem);
-			}
-			return list;
-		}
-
 		private void DataGrid_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
 			if (e.KeyData == Keys.Delete)

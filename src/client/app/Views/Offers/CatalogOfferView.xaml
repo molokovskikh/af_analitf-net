@@ -100,6 +100,18 @@
 			OrderWarning="{Binding MessagesForWinFormGrid.Value,  Mode=TwoWay}"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"/>
 
+		<!--<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
+			<StackPanel Orientation="Vertical" Grid.Row="1">
+				<ContentControl x:Name="Promotions" />
+				<ContentControl x:Name="ProducerPromotions" />
+			</StackPanel>
+		</Grid>-->
+
 		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" />
 
 		<StackPanel Grid.Row="3" Name="Legend" />
