@@ -605,7 +605,7 @@
     </Compile>
     <Compile Include="Views\Dialogs\WinFormDataGridConfig.xaml.cs">
       <DependentUpon>WinFormDataGridConfig.xaml</DependentUpon>
-	</Compile>
+    </Compile>
     <Compile Include="Views\Dialogs\EditDefectSeries.xaml.cs">
       <DependentUpon>EditDefectSeries.xaml</DependentUpon>
     </Compile>
@@ -647,7 +647,7 @@
     </Compile>
     <Compile Include="Views\Inventory\ShelfLife.xaml.cs">
       <DependentUpon>ShelfLife.xaml</DependentUpon>
-		</Compile>
+    </Compile>
     <Compile Include="Views\Inventory\AddStockFromCatalog.xaml.cs">
       <DependentUpon>AddStockFromCatalog.xaml</DependentUpon>
     </Compile>
@@ -1018,7 +1018,7 @@
     <Page Include="Views\Inventory\ShelfLife.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-		</Page>
+    </Page>
     <Page Include="Views\Inventory\AddStockFromCatalog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
