@@ -69,9 +69,9 @@
 					<c:DataGridTextColumnEx x:Name="clmnDocumentDate" Width="10*" Header="Дата документа"
 						Binding="{Binding Stock.DocumentDate}" />
 					<c:DataGridTextColumnEx x:Name="clmnSupplierName" Width="20*" Header="Поставщик"
-						Binding="{Binding WaybillLine.Waybill.SupplierName}" />
+						Binding="{Binding Stock.SupplierFullName}" />
 					<c:DataGridTextColumnEx x:Name="clmnAddressName" Width="20*" Header="Адрес заказа"
-						Binding="{Binding WaybillLine.Waybill.AddressName}"/>
+						Binding="{Binding Stock.Address.Name}"/>
 					<c:DataGridTextColumnEx x:Name="ClmnPeriod" Width="10*" Header="Срок годности" 
 						Binding="{Binding Stock.Period}"/>
 					<c:DataGridTextColumnEx x:Name="ClmnSerialNumber" Width="10*" Header="Серия"

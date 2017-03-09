@@ -83,16 +83,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			CurrentAddressStock
 				.Changed()
-				.SelectMany(_ => RxQuery(LoadStoks))
-				.Subscribe(Stocks);
+				.Select(_ => RxQuery(LoadStoks))
+				.Switch()
+				.Subscribe(Stocks, CloseCancellation.Token);
 
-			//Stocks
-			//	.Changed()
-			//	.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
-			//	.Subscribe(_ =>
-			//	{
-			//		CurrentStock.Value = (Stocks.Value ?? Enumerable.Empty<StockEx>()).FirstOrDefault();
-			//	});
+			Stocks
+				.Changed()
+				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
+				.Subscribe(_ =>
+				{
+					CurrentStock.Value = (Stocks.Value ?? Enumerable.Empty<StockEx>()).FirstOrDefault();
+				});
 		}
 
 		public List<AddressStock> LoadAddressStock(IStatelessSession session)
@@ -120,7 +121,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public List<StockEx> LoadStoks(IStatelessSession session)
 		{
-			return LoadStoks(session, Cache, Settings.Value, CurrentAddressStock.Value ,CurrentCatalog.Value);
+			return LoadStoks(session, Cache, Settings.Value, CurrentAddressStock.Value, CurrentCatalog.Value);
 		}
 
 		public static List<StockEx> LoadStoks(IStatelessSession session, SimpleMRUCache cache,
@@ -128,40 +129,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (AddressStock == null)
 				return new List<StockEx>();
-			var query = session.Query<WaybillLine>()
-				.Fetch(x => x.Waybill)
-				.Join(session.Query<Stock>(),
-					waybillLine => waybillLine.Id,
-					stock => stock.WaybillLineId,
-					(waybillLine, stock) => new StockEx
-					{
-						WaybillLine = waybillLine,
-						Stock = stock
-					});
-			
-		return query
-				.Where(x => x.Stock.Status == StockStatus.Available)
-				.Where(x => x.Stock.ProductId == Catalog.Id)
-				.OrderByDescending(y => y.Stock.DocumentDate)
-				.ToList();
-			//if (AddressStock == null)
-			//	return new List<StockEx>();
-			//var query = session.Query<Stock>()
-			//	//.Fetch(x => x.Address).OrderBy(x => x.DocumentDate)
-			//	.Join(session.Query<WaybillLine>(),
-			//		stock => stock.WaybillLineId,
-			//		waybillLine => waybillLine.Id,
-			//		(stock, waybillLine) => new StockEx
-			//		{
-			//			Stock = stock,
-			//			WaybillLine = waybillLine
-			//		});
-
-			//return query
-			//		.Where(x => x.Stock.Status == StockStatus.Available)
-			//		.Where(x => x.Stock.ProductId == Catalog.Id)
-			//		.OrderByDescending(y => y.Stock.DocumentDate)
-			//		.ToList();
+			var query = session.Query<Stock>()
+				.Fetch(x => x.Address)
+				//.Fetch(x => x.WaybillLine)
+				.Where(x => x.Status == StockStatus.Available)
+				.Where(x => x.ProductId == Catalog.Id)
+				.Join(session.Query<WaybillLine>(),
+							stock => stock.WaybillLineId,
+							waybillLine => waybillLine.Id,
+							(stock, waybillLine) => new StockEx { Stock = stock, WaybillLine = waybillLine });
+			return query
+			.ToList();
 
 		}
 	}
