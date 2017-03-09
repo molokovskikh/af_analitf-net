@@ -36,5 +36,16 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.IsTrue(user.CanExport("TestViewMode.Items"));
 			Assert.IsFalse(user.CanExport("CatalogSearchViewModel.Items"));
 		}
+
+		[Test]
+		public void Check_default_permissions()
+		{
+			var user = new User();
+			Assert.IsFalse(user.HasStockPermission());
+			Assert.IsTrue(user.HasOrderPermission());
+			user.Permissions.Add(new Permission("STCK"));
+			Assert.IsTrue(user.HasStockPermission());
+			Assert.IsFalse(user.HasOrderPermission());
+		}
 	}
 }
