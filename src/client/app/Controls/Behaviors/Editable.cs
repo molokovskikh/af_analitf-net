@@ -43,12 +43,17 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		public void Attach(UIElement grid)
 		{
+			string metod = "";
+			if (grid is DataGrid)
+				metod = "TextInput";
+			else if (grid is WinFormDataGrid)
+				metod = "MyTextInputEvent";
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
-			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput");
+			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, metod);
 			var lastEdit = DateTime.MinValue;
 			var edit = textInput
 				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Text) != null)
-				.Do(e => {e.EventArgs.Handled = true; })
+				.Do(e => { if (grid is DataGrid) e.EventArgs.Handled = true; })
 				.Select(e => new Func<string, string>(v => {
 					var text = e.EventArgs.Text;
 					var now = DateTime.Now;
