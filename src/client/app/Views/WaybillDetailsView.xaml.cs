@@ -96,15 +96,16 @@ namespace AnalitF.Net.Client.Views
 			lines.Name = "Lines";
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Наименование",
-				Binding = new Binding("Product") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
+				Binding = new Binding("Product"),
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
 				SortDirection = ListSortDirection.Ascending,
-				IsReadOnly = false
+				IsReadOnly = true
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Производитель",
 				Binding = new Binding("Producer"),
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
+				IsReadOnly = true
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Страна",

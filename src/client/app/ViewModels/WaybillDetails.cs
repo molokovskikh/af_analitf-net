@@ -635,5 +635,24 @@ namespace AnalitF.Net.Client.ViewModels
 			};
 		}
 #endif
+
+		public IEnumerable<IResult> SelectFromCatalog()
+		{
+			var line = CurrentLine.Value as WaybillLine;
+			if (!Waybill.IsCreatedByUser || line?.CatalogId != null)
+				yield break;
+			var dlg = new SelectFromCatalog(Session, Address);
+			yield return new DialogResult(dlg);
+			if (line == null) {
+				line = new WaybillLine(Waybill);
+				Lines.Value.AddNewItem(line);
+				CurrentLine.Value = line;
+			}
+			line.CatalogId = dlg.CurrentCatalog.Value.Id;
+			line.ProductId = Session.Query<Product>().FirstOrDefault(r => r.CatalogId == line.CatalogId)?.Id;
+			line.Product = dlg.CurrentCatalog.Value.FullName;
+			line.ProducerId = dlg.CurrentProducer.Value.Id;
+			line.Producer = dlg.CurrentProducer.Value.Name;
+		}
 	}
 }

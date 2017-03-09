@@ -14,6 +14,7 @@
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 		<KeyBinding Gesture="Ctrl+L" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Tags" />
+		<KeyBinding Gesture="Ctrl+K" Command="caliburn:Commands.InvokeViewModel" CommandParameter="SelectFromCatalog" />
 	</UserControl.InputBindings>
 
 	<Grid Name="MainGrid">
