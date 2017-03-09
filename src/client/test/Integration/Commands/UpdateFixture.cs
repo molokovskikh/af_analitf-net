@@ -433,6 +433,32 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Notify_on_rejected_in_stock()
+		{
+			var reject = localSession.Query<Client.Models.Reject>().FirstOrDefault();
+			if (reject == null) {
+				reject = new Client.Models.Reject();
+				localSession.Save(reject);
+				localSession.Flush();
+			}
+			var fix = new LocalWaybill();
+			fix.Execute(localSession);
+			var line = fix.Waybill.Lines.First();
+			line.RejectId = reject.Id;
+			localSession.Update(fix.Waybill);
+			var stock = new Stock() {WaybillLineId = line.Id, Quantity = 1};
+			localSession.Save(stock);
+			localSession.Flush();
+
+			var cmd = new UpdateCommand();
+			Run(cmd);
+
+			var model = ((PostUpdate)((DialogResult)cmd.Results[0]).Model);
+			Assert.That(model.Text, Does.Contain("на складе присутствуют забракованные препараты"));
+			Assert.IsTrue(model.IsRejectedOnStock);
+		}
+
+		[Test]
 		public void Load_history()
 		{
 			var priceId = localSession.Query<Offer>().First().Price.Id.PriceId;
