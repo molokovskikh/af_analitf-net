@@ -157,6 +157,38 @@ namespace AnalitF.Net.Client.Test.Unit
 		}
 
 		[Test]
+		public void Check_custom_price_tag_address()
+		{
+			var address = new Address("Тестовый адрес");
+			var lines = new List<TagPrintable>();
+			var line = new TagPrintable()
+			{
+				ClientName = "Тестовый клиент",
+				Nds = 10,
+				RetailCost = 251.20m,
+				Product = "Диклофенак",
+				Quantity = 1
+			};
+			lines.Add(line);
+
+			var priceTagSettings = new PriceTagSettings()
+			{
+				Type = PriceTagType.Custom,
+				Address = address
+			};
+			var priceTag = PriceTag.Default(TagType.PriceTag, address);
+			var doc = new PriceTagDocument(lines, priceTagSettings, priceTag).Build();
+			Assert.IsNotNull(doc);
+
+			var text = doc.Descendants<StackPanel>()
+				.First()
+				.Descendants<Label>()
+				.First()
+				.Content.ToString().Trim();
+			Assert.AreEqual($"{line.ClientName}, {address.Name}", text);
+		}
+
+		[Test]
 		public void Build_all_tags()
 		{
 			var lines = new List<TagPrintable>();

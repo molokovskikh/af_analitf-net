@@ -262,9 +262,9 @@ namespace AnalitF.Net.Client.Models
 			return tag;
 		}
 
-		public virtual FrameworkElement ToElement(TagPrintable line)
+		public virtual FrameworkElement ToElement(TagPrintable line, Address address = null)
 		{
-			return PriceTagItem.ToElement(Width, Height, Items, PriceTagItem.Map(line));
+			return PriceTagItem.ToElement(Width, Height, Items, PriceTagItem.Map(line, address));
 		}
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;
@@ -276,7 +276,7 @@ namespace AnalitF.Net.Client.Models
 
 		public static Dictionary<string, string> DemoData = new Dictionary<string, string> {
 			{"Цена", "221-03"},
-			{"Наименование клиента", "Здоровая Аптека"},
+			{"Наименование клиента", "Здоровая Аптека, ул.Крылова, 7а"},
 			{"Наименование", "Доксазозин 4мг таб. Х30 (R)"},
 			{"Страна", "РОССИЯ"},
 			{"Производитель", "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ"},
@@ -466,11 +466,11 @@ namespace AnalitF.Net.Client.Models
 			return format;
 		}
 
-		public static Dictionary<string, string> Map(TagPrintable line)
+		public static Dictionary<string, string> Map(TagPrintable line, Address address)
 		{
 			return new Dictionary<string, string> {
 				{"Цена", String.Format(GetFormat(), "{0:0.00}", line.RetailCost)},
-				{"Наименование клиента", line.ClientName},
+				{"Наименование клиента", address == null ? line.ClientName : $"{line.ClientName}, {address.Name}"},
 				{"Наименование", line.Product},
 				{"Страна", line.Country},
 				{"Производитель", line.Producer},
