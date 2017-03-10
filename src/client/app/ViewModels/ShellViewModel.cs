@@ -1130,8 +1130,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private static void CreateLink(string srcLink, string name, string exe)
 		{
+			var dirLink = Path.GetDirectoryName(srcLink);
+			var dstLink = Path.Combine(dirLink, $"АналитФармация - {name}.lnk");
+
 			if (File.Exists(srcLink)) {
-				var dstLink = Path.Combine(Path.GetDirectoryName(srcLink), $"АналитФармация - {name}.lnk");
+				//Копируем существующий ярлык
 				File.Copy(srcLink, dstLink);
 				var link = new ShellLink(dstLink) {
 					Target = exe,
@@ -1140,6 +1143,16 @@ namespace AnalitF.Net.Client.ViewModels
 					WorkingDirectory = Path.GetDirectoryName(exe),
 				};
 				link.Save();
+			} else {
+				//Создаем новый ярлык
+				if (!Directory.Exists(dirLink)) Directory.CreateDirectory(dirLink);
+				var link = new ShellLink() {
+					Target = exe,
+					IconPath = exe,
+					IconIndex = 0,
+					WorkingDirectory = Path.GetDirectoryName(exe)
+				};
+				link.Save(dstLink);
 			}
 		}
 
