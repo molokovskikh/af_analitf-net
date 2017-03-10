@@ -507,7 +507,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			shell.User.Value = localUser;
 			Assert.IsFalse(shell.IsStockEnabled);
 			Assert.IsFalse(shell.IsCashEnabled);
-			Assert.IsFalse(shell.IsOrderEnabled);
+			Assert.IsTrue(shell.IsOrderEnabled);
 		}
 
 		private void Collect(IEnumerable<IResult> results)

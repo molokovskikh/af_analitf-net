@@ -145,7 +145,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool HasOrderPermission()
 		{
-			return Permissions.Any(r => r.Name.Match("ORDR"));
+			// пользователь имеет право работать с заказами, если это право ему было дано явно,
+			// либо по умолчанию, если права он ещё не получал
+			return Permissions.Any(r => r.Name.Match("ORDR")) || !Permissions.Any(r => r.Name.Match("STCK") || r.Name.Match("CASH"));
 		}
 
 		public virtual bool HasPermission(Dictionary<string, string> map, params Type[] types)
