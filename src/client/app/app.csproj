@@ -246,6 +246,12 @@
     <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
     <Compile Include="Controls\WinFormDataGrid.cs" />
+    <Compile Include="Controls\WinFormGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\WinFormGrid.Designer.cs">
+      <DependentUpon>WinFormGrid.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
@@ -1405,6 +1411,11 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\WinFormGrid.resx">
+      <DependentUpon>WinFormGrid.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Target Name="BeforeBuild">
     <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />

@@ -60,6 +60,7 @@
 			<controls:PopupSelector VerticalAlignment="Center" x:Name="StatusFilter"
 				ButtonContent="Статус"
 				Member="Name" />
+			<CheckBox x:Name="OnlyRejected_Value" VerticalAlignment="Center" Margin="4">Только забраковка</CheckBox>
 			<Button Name="OpenWaybill">В накладную</Button>
 		</WrapPanel>
 		<controls:DataGrid2 x:Name="Items" Grid.Row="2" ShowAddressColumn="{Binding AddressSelector.All.Value}" AddressColumn="{x:Reference Name=AddressColumn}">
