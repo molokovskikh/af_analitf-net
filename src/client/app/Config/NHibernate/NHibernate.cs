@@ -287,6 +287,10 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				});
 			});
+			mapper.Class<DisplacementLine>(m => {
+				m.ManyToOne(x => x.SrcStock, p => p.Cascade(Cascade.Refresh));
+				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
+			});
 			mapper.Class<ReassessmentDoc>(m => {
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
 				m.Bag(o => o.Lines, c => {

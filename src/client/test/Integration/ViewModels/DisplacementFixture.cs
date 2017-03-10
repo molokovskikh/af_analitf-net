@@ -18,19 +18,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	[TestFixture]
 	public class DisplacementFixture : ViewModelFixture
 	{
-		private DisplacementDoc doc;
-
 		private DisplacementDocs model;
-
 		private EditDisplacementDoc modelDetails;
-
-		private Stock stock;
+		private Address secondAddress;
 
 		[SetUp]
 		public void Setup()
 		{
+			shell.CurrentAddress.Value = address; 
 			restore = true;
-			stock = new Stock()
+			var stock = new Stock()
 			{
 				Product = "Папаверин",
 				Status = StockStatus.Available,
@@ -41,17 +38,37 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			};
 			session.Save(stock);
 
+			//На складе есть Папаверин в количестве 5шт.
+			Assert.AreEqual(stock.Quantity, 5);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+
 			session.DeleteEach<DisplacementDoc>();
 
-			var dstAddress = new Address("Тестовый адрес");
-			session.Save(dstAddress);
+			secondAddress = new Address("Тестовый адрес");
+			session.Save(secondAddress);
 
-			doc = new DisplacementDoc {
+			var dstStock = stock.Copy();
+			dstStock.Address = secondAddress;
+			dstStock.Quantity = 0;
+			session.Save(dstStock);
+
+			var doc = new DisplacementDoc {
 				Date = DateTime.Now,
 				Address = address,
-				DstAddress = dstAddress
+				DstAddress = secondAddress,
 			};
+			//Мы создаем документ Внутренее перемещение на 3 упаковки, после того как строка папаверина
+			//добавлена и документ сохранен, на складе у нас будет - Папаверин 2шт, 3шт в резерве
+			// Резерв – состояние создания документа. Товар, введенный в документ, на складе находится в состоянии Резерв
+			var line = new DisplacementLine(stock, dstStock, 3);
+			doc.Lines.Add(line);
 			session.Save(doc);
+			Assert.AreEqual(stock.Quantity, 2);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(dstStock.Quantity, 0);
+			Assert.AreEqual(dstStock.ReservedQuantity, 0);
+			Assert.AreEqual(line.Quantity, 3);
+			Assert.AreEqual(doc.Status, DisplacementDocStatus.NotPosted);
 
 			model = Open(new DisplacementDocs());
 			modelDetails = Open(new EditDisplacementDoc(doc.Id));
@@ -107,39 +124,25 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Doc_Flow()
 		{
-			//На складе есть Папаверин в количестве 5шт.
-			Assert.AreEqual(stock.Quantity, 5);
-			Assert.AreEqual(stock.ReservedQuantity, 0);
-
-			var dstStock = stock.Copy();
-			dstStock.Address = doc.DstAddress;
-			dstStock.Quantity = 0;
-			session.Save(dstStock);
-
-			//Мы создаем документ Внутренее перемещение на 3 упаковки, после того как строка папаверина
-			//добавлена и документ сохранен, на складе у нас будет - Папаверин 2шт, 3шт в резерве
-			// Резерв – состояние создания документа. Товар, введенный в документ, на складе находится в состоянии Резерв
-			var line = new DisplacementLine(stock, dstStock, 3);
-			doc.Lines.Add(line);
-			Assert.AreEqual(stock.Quantity, 2);
-			Assert.AreEqual(stock.ReservedQuantity, 3);
-			Assert.AreEqual(dstStock.Quantity, 0);
-			Assert.AreEqual(dstStock.ReservedQuantity, 0);
-			Assert.AreEqual(line.Quantity, 3);
-			Assert.AreEqual(doc.Status, DisplacementDocStatus.NotPosted);
+			var doc = modelDetails.Doc;
+			var line = doc.Lines[0];
+			var stock = line.SrcStock;
+			var dstStock = line.DstStock;
+			modelDetails.CurrentLine.Value = line;
 
 			//Если мы закроем документ то получим - Папаверен 2шт, 0шт в резерве
 			// В пути – документ закрыт и переведен. Товар на складе отправителя списан, на складе получателя находится в ожидаемом
-			doc.Post(session);
+			modelDetails.Post();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 			Assert.AreEqual(line.Quantity, 3);
 			Assert.AreEqual(dstStock.Quantity, 0);
 			Assert.AreEqual(dstStock.ReservedQuantity, 3);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.Posted);
-
+			// сменили текущий адрес #60121			
+			shell.CurrentAddress.Value = secondAddress;
 			// по факту получения товара на складе получателя, пользователь переводит документ в Получено. Товар на складе в состоянии В наличии
-			doc.End(session);
+			modelDetails.EndDoc();
 			Assert.AreEqual(dstStock.Quantity, 3);
 			Assert.AreEqual(dstStock.ReservedQuantity, 0);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.End);
@@ -151,7 +154,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.Posted);
 
 			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
-			doc.UnPost(session);
+			modelDetails.UnPost();
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
@@ -159,7 +162,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.NotPosted);
 
 			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве
-			doc.BeforeDelete();
+			modelDetails.Delete();
 			Assert.AreEqual(stock.Quantity, 5);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 		}

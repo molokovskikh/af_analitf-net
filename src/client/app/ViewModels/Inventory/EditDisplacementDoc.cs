@@ -15,8 +15,6 @@ using ReactiveUI;
 using NPOI.HSSF.UserModel;
 using System.Collections.ObjectModel;
 using System.Printing;
-using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
@@ -30,14 +28,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.FlushMode = FlushMode.Never;
 			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
-		}
-
-		public EditDisplacementDoc(DisplacementDoc doc)
-			: this()
-		{
-			DisplayName = "Новое внутреннее перемещение";
-			InitDoc(doc);
-			Lines.AddRange(doc.Lines);
 		}
 
 		public EditDisplacementDoc(uint id)
@@ -60,17 +50,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanEndDoc { get; set; }
 
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-			if (Doc.Id == 0)
-				Doc.Address = Address;
-		}
-
 		protected override void OnDeactivate(bool close)
 		{
 			Save();
 			base.OnDeactivate(close);
+		}
+
+		public override void Update()
+		{
+			Session.Refresh(Doc);
 		}
 
 		private void InitDoc(DisplacementDoc doc)
@@ -171,13 +159,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!IsValide(Doc))
 				return;
-			if (Doc.Id == 0)
-				Session.Save(Doc);
-			else
-				Session.Update(Doc);
-			Session.Flush();
-			Bus.SendMessage(nameof(DisplacementDoc), "db");
-			Bus.SendMessage(nameof(Stock), "db");
+			if (Session.IsDirty()) {
+				Session.Flush();
+				Bus.SendMessage(nameof(DisplacementDoc), "db");
+				Bus.SendMessage(nameof(Stock), "db");
+			}
 		}
 
 		public IResult ExportExcel()
