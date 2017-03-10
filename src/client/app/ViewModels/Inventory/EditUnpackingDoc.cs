@@ -42,6 +42,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnDeactivate(close);
 		}
 
+		public override void Update()
+		{
+			Session.Refresh(Doc);
+		}
+
 		private void InitDoc(UnpackingDoc doc)
 		{
 			Doc = doc;
