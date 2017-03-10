@@ -25,6 +25,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 					text += "\r\n  - появились препараты, которые включены Вами в список ожидаемых позиций";
 				if (IsDocsReceived)
 					text += "\r\n  - получены новые документы";
+				if (IsRejectedOnStock)
+					text += "\r\n  - на складе присутствуют забракованные препараты";
 				return text;
 			}
 		}
@@ -32,8 +34,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public bool IsRejected { get; set; }
 		public bool IsAwaited { get; set; }
 		public bool IsDocsReceived { get; set; }
+		public bool IsRejectedOnStock { get; set; }
 
-		public bool IsMadeSenseToShow => IsRejected || IsAwaited || IsDocsReceived;
+		public bool IsMadeSenseToShow => IsRejected || IsAwaited || IsDocsReceived || IsRejectedOnStock;
 
 		public void ShowNewDocs()
 		{
@@ -50,6 +53,12 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public void ShowAwaited()
 		{
 			Shell.ShowAwaited();
+			TryClose();
+		}
+
+		public void ShowRejectedOnStock()
+		{
+			Shell.ShowRejectedOnStock();
 			TryClose();
 		}
 	}

@@ -829,6 +829,13 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(model);
 		}
 
+		public void ShowRejectedOnStock()
+		{
+			var model = new Stocks();
+			model.OnlyRejected.Value = true;
+			NavigateRoot(model);
+		}
+
 		public void ShowWaybills()
 		{
 			NavigateRoot(new WaybillsViewModel());
