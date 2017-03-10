@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			DisplayName = "Столбцы";
 			List<DataGridViewTextBoxColumnEx> tmp = new List<DataGridViewTextBoxColumnEx>();
 			Columns = new NotifyValue<List<DataGridViewTextBoxColumnEx>>();
-			foreach (WinForm.DataGridViewColumn c in grid.DataGrid.Columns)
+			foreach (WinForm.DataGridViewColumn c in grid.DataGrid.Grid.Columns)
 			{
 				if (c is DataGridViewTextBoxColumnEx)
 					tmp.Add((DataGridViewTextBoxColumnEx)c);
