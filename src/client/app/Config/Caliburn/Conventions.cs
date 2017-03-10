@@ -100,6 +100,11 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					}
 					return false;
 				};
+			ConventionManager.AddElementConvention<WinFormDataGrid>(ItemsControl.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
+
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					return true;
+				};
 			ConventionManager.AddElementConvention<Label>(ContentControl.ContentProperty, "Content", "DataContextChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
 					return ConventionManager.SetBindingWithoutBindingOverwrite(viewModelType, path, property, element, convention, convention.GetBindableProperty(element));

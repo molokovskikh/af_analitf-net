@@ -92,19 +92,13 @@
 
 		<c:WinFormDataGrid x:Name="Offers" Grid.Row="1" 
 			MyDataSource="{Binding DisplayItems.Value, Mode=TwoWay}"
-			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"/>
-
-		<Grid Grid.Row="1" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto" />
-				<RowDefinition Height="*" />
-			</Grid.RowDefinitions>
-			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
-			<StackPanel Orientation="Vertical" Grid.Row="1">
-				<ContentControl x:Name="Promotions" />
-				<ContentControl x:Name="ProducerPromotions" />
-			</StackPanel>
-		</Grid>
+			SelectedItem ="{Binding CurrentDisplayItem.Value, Mode=TwoWay}"
+			ProducerPromotionsItems ="{Binding ProducerPromotions.ProducerPromotions.Value, Mode=TwoWay}"
+			PromotionsItems ="{Binding Promotions.Promotions.Value, Mode=TwoWay}"
+			PromotionsVisible="{Binding Promotions.Visible.Value, Mode=TwoWay}"
+			ProducerPromotionsVisible="{Binding ProducerPromotions.Visible.Value, Mode=TwoWay}"
+			OrderWarning="{Binding MessagesForWinFormGrid.Value,  Mode=TwoWay}"
+			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]"/>
 
 		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" />
 
