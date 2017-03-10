@@ -336,7 +336,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Create()
 		{
-			if (Address == null || !Shell?.IsStockEnabled)
+			if (Address == null || !IsStockEnabled)
 				yield break;
 			var waybill = new Waybill(Address) {Supplier = null, UserSupplierName = "Собственный поставщик"};
 			yield return new DialogResult(new CreateWaybill(waybill));

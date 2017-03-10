@@ -87,9 +87,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(result.MoveNext());
 			var dialog = (CreateWaybill)((DialogResult)result.Current).Model;
 			dialog.Waybill.ProviderDocumentId = "1";
-			dialog.Waybill.UserSupplierName = "test";
 			result.MoveNext();
 			scheduler.Start();
+			Assert.AreEqual("Собственный поставщик", dialog.Waybill.UserSupplierName);
 			Assert.IsNotNull(dialog.Waybill.Address);
 			Assert.AreEqual(dialog.Waybill.Address.Id, address.Id);
 			Assert.Contains(dialog.Waybill.Id, model.Waybills.Value.Select(w => w.Id).ToArray());

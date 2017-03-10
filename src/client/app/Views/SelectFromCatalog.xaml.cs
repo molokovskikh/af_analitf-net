@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -23,23 +24,22 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			CatalogProducts.GotFocus += (sender, args) => {
-				CatalogProducts.IsDropDownOpen = true;
-			};
+			IsVisibleChanged += SelectFromCatalog_IsVisibleChanged;
 
-			CatalogProducts.DropDownClosed += (sender, args) => {
-				if (CatalogProducts.IsKeyboardFocusWithin && CatalogProducts.SelectedItem != null)
-					OK.Focus();
+			Catalogs.GotFocus += (sender, args) => {
+				Catalogs.IsDropDownOpen = true;
 			};
 
 			Producers.GotFocus += (sender, args) => {
 				Producers.IsDropDownOpen = true;
 			};
+		}
 
-			Producers.DropDownClosed += (sender, args) => {
-				if (Producers.IsKeyboardFocusWithin && Producers.SelectedItem != null)
-					OK.Focus();
-			};
+		private void SelectFromCatalog_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if ((bool)e.NewValue == false)
+				return;
+			Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(delegate() { Catalogs.Focus(); }));
 		}
 	}
 }

@@ -641,12 +641,13 @@ namespace AnalitF.Net.Client.ViewModels
 			var line = CurrentLine.Value as WaybillLine;
 			if (!Waybill.IsCreatedByUser || line?.CatalogId != null)
 				yield break;
-			var dlg = new SelectFromCatalog(Session, Address);
+			var dlg = new SelectFromCatalog();
 			yield return new DialogResult(dlg);
+			if (dlg.WasCancelled)
+				yield break;
 			if (line == null) {
 				line = new WaybillLine(Waybill);
 				Lines.Value.AddNewItem(line);
-				CurrentLine.Value = line;
 			}
 			line.CatalogId = dlg.CurrentCatalog.Value.Id;
 			line.ProductId = Session.Query<Product>().FirstOrDefault(r => r.CatalogId == line.CatalogId)?.Id;

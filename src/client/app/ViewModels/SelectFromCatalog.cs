@@ -13,30 +13,22 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class SelectFromCatalog : BaseScreen, ICancelable
 	{
-		private ISession _session;
-
-		public SelectFromCatalog(ISession session, Address address)
+		public SelectFromCatalog()
 		{
+			InitFields();
 			DisplayName = "Добавление из каталога";
-			Item = new Stock() {
-				Status = StockStatus.Available,
-				Quantity = 1,
-				ReservedQuantity = 0,
-				SupplyQuantity = 1,
-				Address=address
-			};
-
 			CurrentCatalog = new NotifyValue<Catalog>();
 			CatalogTerm = new NotifyValue<string>();
-
 			ProducerTerm = new NotifyValue<string>();
 			CurrentProducer = new NotifyValue<Producer>();
 			WasCancelled = true;
-			_session = session;
+			IsOkEnabled.Value = false;
+			CurrentCatalog.Changed()
+				.Merge(CurrentProducer.Changed())
+				.Subscribe(_ => IsOkEnabled.Value = CurrentCatalog.Value != null && CurrentProducer.Value != null);
 		}
 
 		public bool WasCancelled { get; private set; }
-		public Stock Item { get; set; }
 		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 		public NotifyValue<string> CatalogTerm { get; set; }
@@ -46,6 +38,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsProducerOpen { get; set; }
 		public NotifyValue<Producer> CurrentProducer { get; set; }
 		public NotifyValue<string> ProducerTerm { get; set; }
+
+		public NotifyValue<bool> IsOkEnabled { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -78,10 +72,6 @@ order by Score, {c.FullName}")
 				.Switch()
 				.ToValue(CloseCancellation);
 			IsCatalogOpen = Catalogs.Select(v => v != null && v.Count > 0).Where(v => v).ToValue();
-			CurrentCatalog.Subscribe(v => {
-				Item.CatalogId =(v != null && v.Id > 0) ? v.Id : (uint?)null;
-				Item.Product = (v != null && v.Id > 0) ? v.FullName : string.Empty;
-			});
 
 			Producers = ProducerTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
@@ -110,15 +100,10 @@ order by Score, {p.Name}")
 				.Switch()
 				.ToValue(CloseCancellation);
 			IsProducerOpen = Producers.Select(v => v != null && v.Count > 1).Where(v => v).ToValue();
-			CurrentProducer.Subscribe(v => {
-				Item.Producer = (v != null && v.Id > 0) ? v.Name : string.Empty;
-				Item.ProducerId=(v != null && v.Id > 0) ? v.Id : (uint?)null;
-			});
 		}
 
 		public void OK()
 		{
-			_session.Save(Item);
 			WasCancelled = false;
 			TryClose();
 		}
