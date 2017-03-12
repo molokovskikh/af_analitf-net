@@ -36,16 +36,26 @@ namespace AnalitF.Net.Client.Models
 			PropertyChanged += CalculateRetailData;
 		}
 
+		private bool retailPriceChanged;
+		private bool retailMarkupChanged;
 		private void CalculateRetailData(object sender, PropertyChangedEventArgs args)
 		{
-			if (args.PropertyName == "RetailMarkup")
-			{
-				RetailPrice = Math.Round(MixedCost * (1m + (RetailMarkup ?? 0) / 100m), 2);
+			if (args.PropertyName == "RetailMarkup") {
+				if (retailPriceChanged)
+					retailPriceChanged = false;
+				else {
+					retailMarkupChanged = true;
+					RetailPrice = Math.Round(MixedCost * (1m + (RetailMarkup ?? 0) / 100m), 2);
+				}
 			}
-			else if (args.PropertyName == "RetailPrice")
-			{
-				var markup = (RetailPrice ?? 0) - MixedCost;
-				RetailMarkup = markup > 0 && MixedCost > 0 ? Math.Round(markup * 100 / MixedCost, 2) : (decimal?)null;
+			else if (args.PropertyName == "RetailPrice") {
+				if (retailMarkupChanged)
+					retailMarkupChanged = false;
+				else {
+					retailPriceChanged = true;
+					var markup = (RetailPrice ?? 0) - MixedCost;
+					RetailMarkup = markup > 0 && MixedCost > 0 ? Math.Round(markup * 100 / MixedCost, 2) : (decimal?) null;
+				}
 			}
 		}
 
