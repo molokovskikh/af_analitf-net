@@ -131,6 +131,9 @@ namespace AnalitF.Net.Client.ViewModels
 			var connection = session.Connection;
 			var conditions = new List<string>();
 
+			if ((ParentModel.CurrentFiltercategory != null) && (ParentModel.CurrentFiltercategory.Id > 0)){
+				conditions.Add("c.CategoryId = " + ParentModel.CurrentFiltercategory.Id.ToString());
+			}                
 			if (ParentModel.FiltredMnn != null) {
 				conditions.Add("cn.MnnId = @mnnId");
 			}

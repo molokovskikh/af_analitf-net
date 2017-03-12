@@ -944,10 +944,11 @@ select
 	c.Narcotic,
 	c.Toxic,
 	c.Combined,
-	c.Other
+	c.Other,
+  c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where c.Hidden = 0";
+where c.Hidden = 0";                                       
 				CachedExport(Result, sql, "catalogs");
 			}
 			else {
@@ -964,11 +965,32 @@ select
 	c.Narcotic,
 	c.Toxic,
 	c.Combined,
-	c.Other
+	c.Other,
+  c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where c.UpdateTime > ?lastSync";
+where c.UpdateTime > ?lastSync";                           
 				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
+			
+			if (cumulative){
+				sql = @"
+select
+	c.Id,
+	c.Name,
+  c.GroupId
+from Catalogs.Category c";
+				CachedExport(Result, sql, "categories");
+			}
+			else{
+				sql = @"
+select
+	c.Id,
+	c.Name,
+  c.GroupId
+from Catalogs.Category c
+where c.UpdateTime > ?lastSync";
+				Export(Result, sql, "categories", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
 			if (cumulative) {

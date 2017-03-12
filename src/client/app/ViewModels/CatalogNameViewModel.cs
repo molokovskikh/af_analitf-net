@@ -20,6 +20,7 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using Common.Tools;
+using Dapper;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -186,7 +187,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var queryable = session.Query<CatalogName>();
 				var filterType = (ParentModel.CurrentFilter?.FilterType).GetValueOrDefault();
-			if (ParentModel.ShowWithoutOffers) {
+			if (ParentModel.ShowWithoutOffers)
+			{
+
 				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
 					queryable = queryable.Where(c => c.VitallyImportant);
 
@@ -205,8 +208,16 @@ namespace AnalitF.Net.Client.ViewModels
 					queryable = queryable.Where(c => c.Combined);
 				if (filterType == FilterType.PKUOther)
 					queryable = queryable.Where(c => c.Other);
+
+				if ((ParentModel.CurrentFiltercategory != null) && (ParentModel.CurrentFiltercategory.Id > 0)){
+					queryable = queryable.Where(n => session.Query<Catalog>()
+											.Any((c) => (c.Name == n) && ((c.Category != null) && (c.Category.Id == ParentModel.CurrentFiltercategory.Id))));
+				}
+				
 			} else {
+
 				if (ParentModel.Mode == CatalogViewMode.Basic) {
+
 					queryable = queryable.Where(c => c.HaveOffers);
 					if (ParentModel.CurrentFilter == ParentModel.Filters[1])
 						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.VitallyImportant));
@@ -229,6 +240,12 @@ namespace AnalitF.Net.Client.ViewModels
 						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Combined));
 					if (filterType == FilterType.PKUOther)
 						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Other));
+
+					if ((ParentModel.CurrentFiltercategory != null) && (ParentModel.CurrentFiltercategory.Id > 0)){
+						queryable = queryable.Where(n => session.Query<Catalog>()
+								.Any((c) => (c.Name == n) && c.HaveOffers && ((c.Category != null) && (c.Category.Id == ParentModel.CurrentFiltercategory.Id))));
+					}																																		
+					
 				}
 				else if (ParentModel.Mode == CatalogViewMode.CatalogSelector)
 				{
@@ -256,6 +273,12 @@ namespace AnalitF.Net.Client.ViewModels
 						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.Combined));
 					if (filterType == FilterType.PKUOther)
 						queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && catalogIds.Contains(c.Id) && c.Other));
+
+					if ((ParentModel.CurrentFiltercategory != null) && (ParentModel.CurrentFiltercategory.Id > 0)){
+						queryable = queryable.Where(n => session.Query<Catalog>()
+												.Any((c) => (c.Name == n) && catalogIds.Contains(c.Id) && ((c.Category!=null)&&(c.Category.Id == ParentModel.CurrentFiltercategory.Id))));
+					}
+	
 				}
 			}
 
@@ -329,4 +352,5 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 	}
+
 }
