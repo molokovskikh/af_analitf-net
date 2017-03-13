@@ -44,17 +44,19 @@ namespace AnalitF.Net.Client.Models
 				if (retailPriceChanged)
 					retailPriceChanged = false;
 				else {
-					retailMarkupChanged = true;
-					RetailPrice = Math.Round(MixedCost * (1m + (RetailMarkup ?? 0) / 100m), 2);
+					var retailPrice = Math.Round(MixedCost * (1m + (RetailMarkup ?? 0) / 100m), 2);
+					retailMarkupChanged = retailPrice != RetailPrice;
+					RetailPrice = retailPrice;
 				}
 			}
 			else if (args.PropertyName == "RetailPrice") {
 				if (retailMarkupChanged)
 					retailMarkupChanged = false;
 				else {
-					retailPriceChanged = true;
 					var markup = (RetailPrice ?? 0) - MixedCost;
-					RetailMarkup = markup > 0 && MixedCost > 0 ? Math.Round(markup * 100 / MixedCost, 2) : (decimal?) null;
+					var retailMarkup = markup > 0 && MixedCost > 0 ? Math.Round(markup * 100 / MixedCost, 2) : (decimal?)null;
+					retailPriceChanged = retailMarkup != RetailMarkup;
+					RetailMarkup = retailMarkup;
 				}
 			}
 		}

@@ -101,6 +101,25 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual(15, model.Lines.Value[0].Count);
 		}
 
+		[Test]
+		public void Calculate_retail_data()
+		{
+			var price = new Price("тестовый");
+			var order = new Order(new Address("тестовый"), new Offer(price, 294.11m) { RequestRatio = 15 }, 15);
+			Activate(model);
+			model.Lines.Value = new ObservableCollection<OrderLine>(order.Lines);
+			model.CurrentLine.Value = model.Lines.Value[0];
+
+			model.CurrentLine.Value.RetailMarkup = 20;
+			Assert.AreEqual(352.93m, model.CurrentLine.Value.RetailPrice);
+			model.CurrentLine.Value.RetailPrice = 353;
+			Assert.AreEqual(20.02m, model.CurrentLine.Value.RetailMarkup);
+			Assert.AreEqual(353m, model.CurrentLine.Value.RetailPrice);
+
+			Close(model);
+			model.TryClose();
+		}
+
 		private void Close(Screen model)
 		{
 			ScreenExtensions.TryDeactivate(model, true);
