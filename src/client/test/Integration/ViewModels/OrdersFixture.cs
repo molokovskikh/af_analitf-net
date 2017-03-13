@@ -67,12 +67,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Delete_order_without_price()
 		{
 			var order = PrepareCurrent();
-			var price = new Price("тестовый прайс для удаления");
-			session.Save(price);
-			session.Flush();
-			order.Price = price;
-			order.SavePriceInfo();
-			session.Flush();
 
 			shell.UpdateStat();
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));

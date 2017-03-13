@@ -85,9 +85,9 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (IsPriceExists())
 					return Price;
-				return new Price {
-					Id = Price.Id
-				};
+				if (Price == null)
+					return new Price {Id = new PriceComposedId()};
+				return new Price {Id = Price.Id};
 			}
 		}
 
