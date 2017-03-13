@@ -279,14 +279,22 @@ namespace AnalitF.Net.Client.Models
 		CheckReturn
 	}
 
+	public enum ActionTypeChange
+	{
+		Plus,
+		Minus
+	}
+
 	public class StockActionAttrs
 	{
 		public virtual ActionType ActionType { get; set; }
+		public virtual ActionTypeChange TypeChange { get; set; }
 		public virtual uint ClientStockId { get; set; }
 		public virtual ulong? SourceStockId { get; set; }
 		public virtual int? SourceStockVersion { get; set; }
 		public virtual decimal Quantity { get; set; }
 		public virtual decimal? RetailCost { get; set; }
 		public virtual decimal? RetailMarkup { get; set; }
+		public virtual decimal? DiscountSum { get; set; }
 	}
 }

@@ -7,23 +7,42 @@ using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class WriteoffDoc : BaseNotify, IDataErrorInfo2
+	public class WriteoffDoc : BaseNotify, IDataErrorInfo2, IStockDocument
 	{
 		private DocStatus _status;
+		private string _number { get; set; }
+		private string _numberprefix { get; set; }
 
 		public WriteoffDoc()
 		{
+			DisplayName = "Списание";
 			Lines = new List<WriteoffLine>();
 		}
 
-		public WriteoffDoc(Address address)
+		public WriteoffDoc(Address address, string numberprefix)
 			: this()
 		{
+			
 			Date = DateTime.Now;
 			Address = address;
+			_numberprefix = numberprefix;
+			DisplayName = "Списание";
 		}
 
 		public virtual uint Id { get; set; }
+		public virtual string DisplayName { get; set; }
+		public virtual string Number
+		{
+			get
+			{
+				return _number;
+			}
+			set { _number = _numberprefix + Id.ToString("d8"); }
+		}
+		public virtual string FromIn
+		{ get { return string.Empty; } }
+		public virtual string OutTo
+		{ get { return string.Empty; } }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
@@ -78,7 +97,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
 			foreach (var line in Lines)
-				session.Save(line.Stock.ApplyReserved(line.Quantity));
+				session.Save(line.Stock.ApplyReserved(this, line.Quantity));
 		}
 
 		public virtual void UpdateStat()

@@ -11,6 +11,7 @@ using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Util;
 using Common.Tools.Calendar;
+using AnalitF.Net.Client.ViewModels.Parts;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -36,11 +37,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<AddressStock> CurrentAddressStock { get; set; }
 		public NotifyValue<List<StockEx>> Stocks { get; set; }
 		public NotifyValue<StockEx> CurrentStock { get; set; }
+		public NotifyValue<List<StockAction>> StockActions { get; set; }
+		public NotifyValue<StockAction> CurrentStockAction { get; set; }
+
+		public QuickSearch<Catalog> CatalogsSearch { get; }
 
 		public StockAssortmentViewModel()
 		{
-			DisplayName = "111";
+			DisplayName = "Ассортимент товаров";
 			InitFields();
+
+			CatalogsSearch = new QuickSearch<Catalog>(UiScheduler,
+				v => Catalogs.Value.FirstOrDefault(n => n.FullName.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
+				c => CurrentCatalog.Value = c);
 		}
 
 		public override void PostActivated()
@@ -94,6 +103,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				{
 					CurrentStock.Value = (Stocks.Value ?? Enumerable.Empty<StockEx>()).FirstOrDefault();
 				});
+
+			CurrentStock
+				.Changed()
+				.Select(_ => RxQuery(LoadStockActions))
+				.Switch()
+				.Subscribe(StockActions, CloseCancellation.Token);
+
+			StockActions
+				.Changed()
+				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
+				.Subscribe(_ =>
+				{
+					CurrentStockAction.Value = (StockActions.Value ?? Enumerable.Empty<StockAction>()).FirstOrDefault();
+				});
 		}
 
 		public List<AddressStock> LoadAddressStock(IStatelessSession session)
@@ -138,6 +161,23 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 							stock => stock.WaybillLineId,
 							waybillLine => waybillLine.Id,
 							(stock, waybillLine) => new StockEx { Stock = stock, WaybillLine = waybillLine });
+			return query
+			.ToList();
+
+		}
+
+		public List<StockAction> LoadStockActions(IStatelessSession session)
+		{
+			return LoadStockActions(session, Cache, Settings.Value, CurrentStock.Value);
+		}
+
+		public static List<StockAction> LoadStockActions(IStatelessSession session, SimpleMRUCache cache,
+			Settings settings, StockEx Stock)
+		{
+			if (Stock == null)
+				return new List<StockAction>();
+			var query = session.Query<StockAction>()
+				.Where(x => x.ClientStockId == Stock.Stock.Id);
 			return query
 			.ToList();
 

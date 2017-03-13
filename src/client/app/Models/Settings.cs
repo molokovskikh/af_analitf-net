@@ -96,6 +96,7 @@ namespace AnalitF.Net.Client.Models
 		private string _docDir;
 		private string _userName;
 		private string _password;
+		private string _numberprefix;
 		private string _proxyUserName;
 		private string _proxyPassword;
 		private string _proxyHost;
@@ -181,6 +182,12 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return _password; }
 			set { _password = value?.Trim(); }
+		}
+
+		public virtual string NumberPrefix
+		{
+			get { return _numberprefix; }
+			set { _numberprefix = value?.Trim(); }
 		}
 
 		//в жизни часы клиента и сервера не будут совпадать

@@ -230,14 +230,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
-				var check = new Check(Address, Lines, checkType);
+				var check = new Check(Address, Settings.Value.NumberPrefix, Lines, checkType);
 				check.Payment = payment;
 				check.Charge = charge;
 				using (var trx = s.BeginTransaction()) {
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
 					s.InsertEach(Lines);
-					s.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
+					s.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, ActionTypeChange.Minus, x.Stock, check, x.Quantity)));
 					s.UpdateEach(Lines.Select(x => x.Stock).Distinct());
 					trx.Commit();
 				}
@@ -364,7 +364,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			srcStock.Quantity += CurrentLine.Value.Quantity;
 			Lines.Remove(CurrentLine.Value);
 
-			var doc = new UnpackingDoc(Address);
+			var doc = new UnpackingDoc(Address, Settings.Value.NumberPrefix);
 			var uline = new UnpackingDocLine(srcStock, settings.Multiplicity);
 			doc.Lines.Add(uline);
 			doc.UpdateStat();

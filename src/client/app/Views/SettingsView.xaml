@@ -335,6 +335,9 @@
 
 					<Label>Бухгалтер:</Label>
 					<TextBox x:Name="CurrentWaybillSettings_Value_Accountant" />
+					
+					<Label>Префикс номера документов</Label>
+					<TextBox x:Name="Settings_NumberPrefix" />
 
 					<Label>Способ налогообложения:</Label>
 					<ComboBox Style="{StaticResource Select}" x:Name="CurrentWaybillSettings_Value_Taxation" />
@@ -346,6 +349,7 @@
 					<CheckBox x:Name="CurrentWaybillSettings_Value_IncludeNds">
 						Включать входную НДС в расчет розничной надбавки для НеЖНВЛС при ЕНВД
 					</CheckBox>
+					
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройки поставщиков" Name="DirMapTab"

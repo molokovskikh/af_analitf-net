@@ -36,11 +36,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Полная стоимость")] FullCost,
 	}
 
-	public class Check : BaseNotify
+	public class Check : BaseNotify, IStockDocument
 	{
-		public Check(Address address, IEnumerable<CheckLine> lines, CheckType checkType)
+		private string _number { get; set; }
+		private string _numberprefix { get; set; }
+
+		public Check(Address address, string numberprefix, IEnumerable<CheckLine> lines, CheckType checkType)
 			: this()
 		{
+			DisplayName = "Чек";
+			_numberprefix = numberprefix;
 			CheckType = checkType;
 			Date = DateTime.Now;
 			ChangeOpening = DateTime.Today;
@@ -54,10 +59,25 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Check()
 		{
+			DisplayName = "Чек";
 			Lines = new List<CheckLine>();
 		}
 
 		public virtual uint Id { get; set; }
+		public virtual string DisplayName { get; set; }
+		public virtual string Number
+		{
+			get
+			{
+				return _number;
+			}
+			set { _number = _numberprefix + Id.ToString("d8"); }
+		}
+		public virtual string FromIn
+		{ get { return string.Empty; } }
+		public virtual string OutTo
+		{ get { return "Покупатель"; } }
+
 		public virtual CheckType CheckType { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime ChangeOpening { get; set; }

@@ -8,25 +8,45 @@ using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class ReturnToSupplier : BaseStatelessObject, IDataErrorInfo2
+	public class ReturnToSupplier : BaseStatelessObject, IDataErrorInfo2, IStockDocument
 	{
+		private string _number { get; set; }
+		private string _numberprefix { get; set; }
+
 		public ReturnToSupplier()
 		{
+			DisplayName = "Возврат поставщику";
 			Lines = new List<ReturnToSupplierLine>();
 		}
 
-		public ReturnToSupplier(Address address)
+		public ReturnToSupplier(Address address, string numberprefix)
 			: this()
 		{
 			Address = address;
 			Date = DateTime.Now;
 			Status = DocStatus.NotPosted;
+			_numberprefix = numberprefix;
+			DisplayName = "Возврат поставщику";
 			UpdateStat();
 		}
 
 		private DocStatus _status;
 
 		public override uint Id { get; set; }
+		public virtual string DisplayName { get; set; }
+		public virtual string Number
+		{
+			get
+			{
+				return _number;
+			}
+			set { _number = _numberprefix + Id.ToString("d8"); }
+		}
+		public virtual string FromIn
+		{ get { return string.Empty; } }
+		public virtual string OutTo
+		{ get { return SupplierName; } }
+
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
@@ -84,7 +104,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
 			foreach (var line in Lines)
-				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
+				session.Save(line.Stock.ReturnToSupplier(this, line.Quantity));
 		}
 
 		public virtual void UnPost(ISession session)
@@ -92,7 +112,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = null;
 			Status = DocStatus.NotPosted;
 			foreach (var line in Lines)
-				session.Save(line.Stock.CancelReturnToSupplier(line.Quantity));
+				session.Save(line.Stock.CancelReturnToSupplier(this, line.Quantity));
 		}
 
 		public virtual void BeforeDelete()

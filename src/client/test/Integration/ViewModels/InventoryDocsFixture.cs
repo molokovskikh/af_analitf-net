@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 5);
 			Assert.AreEqual(stock.SupplyQuantity, 5);
 
-			var line = new InventoryDocLine(stock, 3, session);
+			var line = new InventoryDocLine(doc, stock, 3, session);
 			doc.Lines.Add(line);
 			session.Save(doc);
 			session.Flush();

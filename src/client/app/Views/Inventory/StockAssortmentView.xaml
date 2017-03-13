@@ -7,6 +7,7 @@
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
  		xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
  		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+		xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"			 
 		behaviors:Focusable.DefaultFocus="{x:Reference Catalogs}">
 
 	<i:Interaction.Behaviors>
@@ -35,6 +36,9 @@
 				</DataGrid.Columns>
 			</c:DataGrid2>
 		</DockPanel>
+
+		<ContentControl x:Name="CatalogsSearch" Grid.Row="0" Grid.Column="0"
+			caliburn:QuickSearchBehavior.GridRef="{x:Reference Catalogs}" />
 
 		<DockPanel Grid.Row="0" Grid.Column="1">
 			<Label DockPanel.Dock="Top" Padding="5, 0, 5, 0">Список адресов доставки</Label>
@@ -92,10 +96,28 @@
 
 		<DockPanel Grid.Row="2" Grid.ColumnSpan="2">
 			<Label DockPanel.Dock="Top" Padding="5, 0, 5, 0">Движения по партии</Label>
-			<c:DataGrid2 x:Name="Stocks1" Grid.Row="2" Grid.ColumnSpan="2"
+			<c:DataGrid2 x:Name="StockActions" Grid.Row="2" Grid.ColumnSpan="2"
 			CanUserSortColumns="False"
-			ItemsSource="{Binding DisplayItems.Value}"
-			SelectedItem="{Binding CurrentDisplayItem.Value}">
+			ItemsSource="{Binding StockActions.Value}"
+			SelectedItem="{Binding CurrentStockAction.Value}">
+				<DataGrid.Columns>
+					<c:DataGridTextColumnEx x:Name="Document" Width="10*" Header="Документ"
+						Binding="{Binding Document}" />
+					<c:DataGridTextColumnEx x:Name="DocumentDate" Width="10*" Header="Дата документа"
+						Binding="{Binding Timestamp}" />
+					<c:DataGridTextColumnEx x:Name="FromIn" Width="10*" Header="Отправитель"
+						Binding="{Binding FromIn}" />
+					<c:DataGridTextColumnEx x:Name="OutTo" Width="10*" Header="Получатель"
+						Binding="{Binding OutTo}" />
+					<c:DataGridTextColumnEx x:Name="Quantity" Width="10*" Header="Количество"
+						Binding="{Binding QuantityEx}" TextAlignment="Right" />
+					<c:DataGridTextColumnEx x:Name="RetailCostEx" Width="10*" Header="Цена розничная"
+						Binding="{Binding RetailCostEx}" TextAlignment="Right"  />
+					<c:DataGridTextColumnEx x:Name="RetailSummEx" Width="10*" Header="Сумма розничная"
+						Binding="{Binding RetailSummEx}" TextAlignment="Right"  />
+					<c:DataGridTextColumnEx x:Name="DiscountSum" Width="10*" Header="Скидка"
+						Binding="{Binding DiscountSum}" TextAlignment="Right"  />					
+				</DataGrid.Columns>
 			</c:DataGrid2>
 		</DockPanel>
 	</Grid>

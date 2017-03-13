@@ -19,16 +19,22 @@ namespace AnalitF.Net.Client.Models.Inventory
 		End
 	}
 
-	public class DisplacementDoc : BaseStatelessObject, IDataErrorInfo2
+	public class DisplacementDoc : BaseStatelessObject, IDataErrorInfo2, IStockDocument
 	{
+		private string _number { get; set; }
+		private string _numberprefix { get; set; }
+
 		public DisplacementDoc()
 		{
+			DisplayName = "накладная перемещения";
 			Lines = new List<DisplacementLine>();
 		}
 
-		public DisplacementDoc(Address address)
+		public DisplacementDoc(Address address, string numberprefix)
 			: this()
 		{
+			DisplayName = "накладная перемещения";
+			_numberprefix = numberprefix;
 			Address = address;
 			Date = DateTime.Now;
 			Status = DisplacementDocStatus.NotPosted;
@@ -38,6 +44,24 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private DisplacementDocStatus _status;
 
 		public override uint Id { get; set; }
+		public virtual string DisplayName { get; set; }
+		public virtual string Number
+		{
+			get
+			{
+				return _number;
+			}
+			set { _number = _numberprefix + Id.ToString("d8"); }
+		}
+		public virtual string FromIn
+		{
+			get
+			{
+				return string.Empty;
+			}
+		}
+		public virtual string OutTo
+		{ get { return DstAddressName; } }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
@@ -98,8 +122,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = DateTime.Now;
 			Status = DisplacementDocStatus.Posted;
 			foreach (var line in Lines) {
-				session.Save(line.SrcStock.DisplacementTo(line.Quantity));
-				session.Save(line.DstStock.DisplacementFrom(line.Quantity));
+				session.Save(line.SrcStock.DisplacementTo(this, line.Quantity));
+				session.Save(line.DstStock.DisplacementFrom(this, line.Quantity));
 			}
 		}
 
@@ -108,8 +132,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = null;
 			Status = DisplacementDocStatus.NotPosted;
 			foreach (var line in Lines) {
-				session.Save(line.SrcStock.CancelDisplacementTo(line.Quantity));
-				session.Save(line.DstStock.CancelDisplacementFrom(line.Quantity));
+				session.Save(line.SrcStock.CancelDisplacementTo(this, line.Quantity));
+				session.Save(line.DstStock.CancelDisplacementFrom(this, line.Quantity));
 			}
 		}
 
