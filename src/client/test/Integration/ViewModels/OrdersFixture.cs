@@ -95,8 +95,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentDeletedOrder = model.DeletedOrders.First();
 			model.SelectedDeletedOrders.Add(model.CurrentDeletedOrder);
 			Assert.That(model.DeletedOrders.Count(), Is.EqualTo(1));
-			Assert.That(model.CurrentDeletedOrder.AddressName.Length, Is.GreaterThan(0));
-			Assert.That(model.CurrentDeletedOrder.PriceName.Length, Is.EqualTo(0));
 
 			// возвращаем из корзины
 			TaskResult(model.UnDelete());
