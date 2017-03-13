@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Models
 			DeletedOn = DateTime.Now;
 			Address = order.Address;
 			Price = order.Price;
-			PriceDate = Price.PriceDate;
+			PriceDate = order.Price is NHibernate.Proxy.INHibernateProxy ? order.CreatedOn : Price.PriceDate;
 			CreatedOn = order.CreatedOn;
 			LinesCount = order.LinesCount;
 			Sum = order.Sum;
