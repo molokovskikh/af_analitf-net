@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
+using System.Windows.Documents;
 using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Models.Print
@@ -19,7 +21,7 @@ namespace AnalitF.Net.Client.Models.Print
 			{
 				new PrintColumn("№ чека", 45),
 				new PrintColumn("Дата", 90),
-				new PrintColumn("ККМ", 90),
+				new PrintColumn("Кассир", 90),
 				new PrintColumn("Отдел", 120),
 				new PrintColumn("Аннулирован", 80),
 				new PrintColumn("розничная", 80),
@@ -36,7 +38,7 @@ namespace AnalitF.Net.Client.Models.Print
 			{
 				o.Id,
 				o.Date.ToString("dd/M/yyyy"),
-				o.KKM,
+				o.Clerk,
 				o.Address.Name,
 				o.Cancelled,
 				o.RetailSum,
@@ -44,7 +46,26 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Sum,
 			});
 
-			BuildTable(rows, headers, columnGrops);
+			var table = BuildTable(rows, headers, columnGrops);
+			table.RowGroups[0].Rows.Add(new TableRow {
+					Cells = {
+						new TableCell(new Paragraph(new Run("Итого: ")) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							ColumnSpan = 7,
+							TextAlignment = TextAlignment.Right
+						},
+						new TableCell(new Paragraph(new Run(_checks.Sum(x => x.Sum).ToString("0.00"))) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							TextAlignment = TextAlignment.Center
+						},
+					}
+				});
 		}
 	}
 }

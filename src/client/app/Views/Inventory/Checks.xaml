@@ -47,10 +47,10 @@
             <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
           </StackPanel>
         </GroupBox>
-				<!--это код потребуется когда доведем до ума работу с ккм-->
-        <!--<controls:PopupSelector x:Name="KKMFilter" ButtonContent="ККМ"
-					Member="Item" />-->
         <ContentControl x:Name="AddressSelector" />
+				<controls:PopupSelector VerticalAlignment="Center" x:Name="Users"
+					ButtonContent="Кассиры"
+					Member="Item" />
       </StackPanel>
     </Grid>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items"
@@ -61,8 +61,6 @@
 					IsReadOnly="True" />
         <controls:DataGridTextColumnEx x:Name="IdColumn" Header="Номер" Binding="{Binding Id}" Width="*" />
         <controls:DataGridTextColumnEx x:Name="DateColumn" Header="Дата" Binding="{Binding Date}" Width="*" />
-				<!--это код потребуется когда доведем до ума работу с ккм-->
-        <!--<controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />-->
         <controls:DataGridTextColumnEx x:Name="TypeColumn" Header="Тип чека" Binding="{Binding CheckType}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx x:Name="ShiftDateColumn" Header="Открытие смены" Binding="{Binding ChangeOpening}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx x:Name="StatusColumn" Header="Статус" Binding="{Binding Status}" Width="*" Visibility="Collapsed"/>

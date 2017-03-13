@@ -155,7 +155,7 @@ where Timestamp > @lastSync");
 			NotifyValue<User> user)
 		{
 			while (!token.IsCancellationRequested) {
-				await TaskEx.WhenAny(TaskEx.Delay(TimeSpan.FromMinutes(10), token), TaskEx.Run(() => startEvent.Wait()));
+				await TaskEx.WhenAny(TaskEx.Delay(TimeSpan.FromSeconds(30), token), TaskEx.Run(() => startEvent.Wait()));
 				if (token.IsCancellationRequested)
 					return;
 				if (user.Value?.IsStockEnabled == false)

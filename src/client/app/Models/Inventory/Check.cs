@@ -38,9 +38,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public class Check : BaseNotify
 	{
-		public Check(Address address, IEnumerable<CheckLine> lines, CheckType checkType)
+		public Check(User user, Address address, IEnumerable<CheckLine> lines, CheckType checkType)
 			: this()
 		{
+			Clerk = user.Id.ToString();
 			CheckType = checkType;
 			Date = DateTime.Now;
 			ChangeOpening = DateTime.Today;

@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.Frontend2"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	mc:Ignorable="d"
+	d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.Resources>
+		<Style x:Key="Input" TargetType="TextBox">
+			<Setter Property="FontSize" Value="30" />
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="MinHeight" Value="40" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Right" />
+		</Style>
+	</UserControl.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<controls:DataGrid2 Grid.Row="0" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Штрих-Код" Binding="{Binding Barcode}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Серия" Binding="{Binding SerialNumber}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding RetailSum}" Width="*" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<ContentControl Focusable="False" x:Name="Warning" Grid.Row="0" />
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="3*" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<TextBox Grid.Row="0" Grid.Column="0" Name="Input" Style="{StaticResource Input}" />
+			<Button Focusable="False" Grid.Column="1" Name="Close">Закрыть чек</Button>
+		</Grid>
+	</Grid>
+</UserControl>

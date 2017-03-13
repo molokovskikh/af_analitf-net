@@ -766,7 +766,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowFrontend()
 		{
-			NavigateRoot(new Inventory.Frontend());
+			NavigateRoot(new Inventory.Frontend2());
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;

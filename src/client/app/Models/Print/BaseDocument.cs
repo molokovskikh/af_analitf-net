@@ -288,6 +288,9 @@ namespace AnalitF.Net.Client.Models.Print
 			var text = "";
 			if (value != null)
 				text = value.ToString();
+			if (value is bool) {
+				text = (bool)value ? "Да" : "Нет";
+			}
 
 			//разделитель страницы может оказаться в середине ячейки
 			var cell = new TableCell(new Paragraph(new Run(text)) {

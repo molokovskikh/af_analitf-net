@@ -251,7 +251,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
-				var check = new Check(Address, Lines, checkType);
+				var check = new Check(User, Address, Lines, checkType);
 				check.Payment = payment;
 				check.Charge = charge;
 				using (var trx = s.BeginTransaction()) {

@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class CheckLine : BaseStock
+	public class CheckLine : BaseStock, IInlineEditable
 	{
 		private decimal _quantity;
+		private uint _confirmedQuantity;
 
 		public CheckLine()
 		{
@@ -36,6 +38,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 		}
 
+		public CheckLine(Stock stock, uint quantity)
+		{
+			WaybillLineId = stock.WaybillLineId;
+			if (stock.Quantity < quantity)
+				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Quantity}");
+			Stock = stock;
+			CopyFromStock(stock);
+			Quantity = quantity;
+		}
+
 		public virtual uint Id { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
 		public virtual uint? ServerDocId { get; set; }
@@ -47,7 +59,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			{
 				if (_quantity != value) {
 					_quantity = value;
+					ConfirmedQuantity = 0;
 					OnPropertyChanged();
+					OnPropertyChanged(nameof(RetailSum));
 				}
 			}
 		}
@@ -108,5 +122,28 @@ namespace AnalitF.Net.Client.Models.Inventory
 				dstProp?.SetValue(dstItem, srcProp.GetValue(srcItem, null), null);
 			}
 		}
+
+		public virtual uint Value
+		{
+			get { return (uint)Quantity; }
+			set { Quantity = value; }
+		}
+
+		[Ignore]
+		public virtual uint ConfirmedQuantity
+		{
+			get { return _confirmedQuantity; }
+			set
+			{
+				if (_confirmedQuantity != value) {
+					_confirmedQuantity = value;
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(Confirmed));
+				}
+			}
+		}
+
+		[Ignore, Style]
+		public virtual bool Confirmed => ConfirmedQuantity == Quantity;
 	}
 }

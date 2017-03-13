@@ -224,6 +224,7 @@ namespace AnalitF.Net.Client.Helpers
 					}
 				},
 				{ "InFrozenOrders", Background(Colors.Gray) },
+				{ "Confirmed", Background(Colors.Green) },
 			};
 		}
 

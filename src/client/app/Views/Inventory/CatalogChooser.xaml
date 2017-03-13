@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.CatalogChooser"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Dialogs"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+             xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+             xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+             xmlns:parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
+             xmlns:cal="http://www.caliburnproject.org"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300" behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
+			<TextBox x:Name="SearchText"
+				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+				Style="{StaticResource SearchText}"
+				caliburn:SearchBinder.Grid="Items" />
+		</StackPanel>
+
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items"
+			controls:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
+			SelectionMode="Single">
+			<DataGrid.Columns>
+				<controls:SearchableDataGridColumn
+					Width="*"
+					Header="Наименование"
+					Binding="{Binding Name}"
+					HighlightStyle="{StaticResource DataGridHighlight}"
+					CanUserSort="False" />
+				<controls:SearchableDataGridColumn
+					Width="*"
+					Header="Формы выпуска"
+					Binding="{Binding Form}"
+					HighlightStyle="{StaticResource DataGridHighlight}"
+					CanUserSort="False" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+
+		<ProgressBar Grid.Row="1" IsIndeterminate="True"
+			Width="200"
+			Height="20"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
+	</Grid>
+</UserControl>
