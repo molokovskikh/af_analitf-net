@@ -76,6 +76,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 							.ToList();
 				}).Subscribe(Catalogs);
 
+			Catalogs
+				.Changed()
+				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
+				.Subscribe(_ =>
+				{
+					CurrentCatalog.Value = (Catalogs.Value ?? Enumerable.Empty<Catalog>()).FirstOrDefault();
+				});
+
 			CurrentCatalog
 				.Changed()
 				.Select(_=>RxQuery(LoadAddressStock))
