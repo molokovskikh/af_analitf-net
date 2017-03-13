@@ -38,14 +38,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public class Check : BaseNotify, IStockDocument
 	{
-		private string _number { get; set; }
-		private string _numberprefix { get; set; }
+		private bool _new;
+		private uint _id;
+		private string _numberprefix;
 
 		public Check(Address address, string numberprefix, IEnumerable<CheckLine> lines, CheckType checkType)
 			: this()
 		{
 			DisplayName = "Чек";
 			_numberprefix = numberprefix;
+			_new = true;
 			CheckType = checkType;
 			Date = DateTime.Now;
 			ChangeOpening = DateTime.Today;
@@ -55,6 +57,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SaleType = SaleType.FullCost;
 			Lines.AddEach(lines);
 			UpdateStat();
+
 		}
 
 		public Check()
@@ -63,16 +66,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<CheckLine>();
 		}
 
-		public virtual uint Id { get; set; }
-		public virtual string DisplayName { get; set; }
-		public virtual string Number
+		public virtual uint Id
 		{
-			get
+			get { return _id; }
+			set
 			{
-				return _number;
+				_id = value;
+				if (_new)
+					Number = _numberprefix + Id.ToString("d8");
 			}
-			set { _number = _numberprefix + Id.ToString("d8"); }
 		}
+		public virtual string DisplayName { get; set; }
+		public virtual string Number { get; set; }
 		public virtual string FromIn
 		{ get { return string.Empty; } }
 		public virtual string OutTo

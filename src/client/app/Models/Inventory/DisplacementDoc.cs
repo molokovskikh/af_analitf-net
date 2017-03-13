@@ -21,20 +21,22 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public class DisplacementDoc : BaseStatelessObject, IDataErrorInfo2, IStockDocument
 	{
-		private string _number { get; set; }
-		private string _numberprefix { get; set; }
+		private bool _new;
+		private uint _id;
+		private string _numberprefix;
 
 		public DisplacementDoc()
 		{
-			DisplayName = "накладная перемещения";
+			DisplayName = "Накладная перемещения";
 			Lines = new List<DisplacementLine>();
 		}
 
 		public DisplacementDoc(Address address, string numberprefix)
 			: this()
 		{
-			DisplayName = "накладная перемещения";
+			DisplayName = "Накладная перемещения";
 			_numberprefix = numberprefix;
+			_new = true;
 			Address = address;
 			Date = DateTime.Now;
 			Status = DisplacementDocStatus.NotPosted;
@@ -43,16 +45,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		private DisplacementDocStatus _status;
 
-		public override uint Id { get; set; }
-		public virtual string DisplayName { get; set; }
-		public virtual string Number
+		public override uint Id
 		{
-			get
+			get { return _id; }
+			set
 			{
-				return _number;
+				_id = value;
+				if (_new)
+					Number = _numberprefix + Id.ToString("d8");
 			}
-			set { _number = _numberprefix + Id.ToString("d8"); }
 		}
+		public virtual string DisplayName { get; set; }
+		public virtual string Number { get; set; }
 		public virtual string FromIn
 		{
 			get
@@ -62,6 +66,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 		public virtual string OutTo
 		{ get { return DstAddressName; } }
+
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }

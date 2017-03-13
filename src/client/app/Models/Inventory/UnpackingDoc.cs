@@ -10,8 +10,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 	public class UnpackingDoc : BaseNotify, IStockDocument
 	{
 		private DocStatus _status;
-		private string _number { get; set; }
-		private string _numberprefix { get; set; }
+		private bool _new;
+		private uint _id;
+		private string _numberprefix;
 
 		public UnpackingDoc()
 		{
@@ -27,18 +28,21 @@ namespace AnalitF.Net.Client.Models.Inventory
 			UpdateStat();
 			_numberprefix = numberprefix;
 			DisplayName = "Списание";
+			_new = true;
 		}
 
-		public virtual uint Id { get; set; }
-		public virtual string DisplayName { get; set; }
-		public virtual string Number
+		public virtual uint Id
 		{
-			get
+			get { return _id; }
+			set
 			{
-				return _number;
+				_id = value;
+				if (_new)
+					Number = _numberprefix + Id.ToString("d8");
 			}
-			set { _number = _numberprefix + Id.ToString("d8"); }
 		}
+		public virtual string DisplayName { get; set; }
+		public virtual string Number { get; set; }
 		public virtual string FromIn
 		{ get { return string.Empty; } }
 		public virtual string OutTo
