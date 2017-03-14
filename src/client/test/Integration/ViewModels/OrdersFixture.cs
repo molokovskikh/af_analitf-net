@@ -245,6 +245,29 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Sent_order_without_price()
+		{
+			var prices = session.Query<Price>().ToArray();
+			var maxId = prices.Max(r => r.Id).PriceId;
+			var price = new Price("тестовый прайс для удаления") {
+				Id = new PriceComposedId() {
+					PriceId = maxId + 10,
+					RegionId = prices.First().RegionId
+				}
+			};
+			session.Save(price);
+			var offer = new Offer(price, 150m);
+			session.Save(offer);
+			var order = PrepareSent(offer);
+
+			session.Delete(order.Price);
+			session.Flush();
+
+			var sentOrder = session.Query<SentOrder>().First(r => r.Id == order.Id);
+			Assert.AreEqual("тестовый прайс для удаления", sentOrder.PriceName);
+		}
+
+		[Test]
 		public void Select_all_orders()
 		{
 			session.DeleteEach<Order>();
@@ -428,11 +451,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			return order;
 		}
 
-		private SentOrder PrepareSent()
+		private SentOrder PrepareSent(params Offer[] offers)
 		{
 			session.DeleteEach<Order>();
 			session.DeleteEach<SentOrder>();
-			var order = MakeSentOrder();
+			var order = MakeSentOrder(offers);
 
 			SelectSent();
 			return order;
