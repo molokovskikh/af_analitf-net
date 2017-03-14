@@ -124,7 +124,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintChecks()
 		{
-			return Preview("Чеки", new CheckDocument(Items.Value.ToArray()));
+			return Preview(DisplayName, new CheckDocument(Items.Value.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintReturnAct()
@@ -170,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void SetMenuItems()
 		{
-			var item = new MenuItem {Header = "Чеки"};
+			var item = new MenuItem {Header = DisplayName};
 			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Акт возврата"};
@@ -182,8 +182,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
-					if ((string) item.Header == "Чеки")
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
+					if ((string) item.Header == DisplayName)
 						docs.Add(new CheckDocument(Items.Value.ToArray()));
 					if ((string) item.Header == "Акт возврата")
 						docs.Add(new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
@@ -191,7 +194,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
 
-			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
 				Coroutine.BeginExecute(PrintChecks().GetEnumerator());
 			if(LastOperation == "Акт возврата")
 				Coroutine.BeginExecute(PrintReturnAct().GetEnumerator());

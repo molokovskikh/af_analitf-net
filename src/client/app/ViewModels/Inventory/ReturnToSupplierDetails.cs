@@ -252,13 +252,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			PrintMenuItems.Add(item);
 		}
 
-
-
 		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
 					if ((string)item.Header == "Возврат товара")
 						docs.Add(new ReturnToSuppliersDetailsDocument(Lines.ToArray(), Doc, Session.Query<WaybillSettings>().First()));
 					if ((string)item.Header == "Возврат ярлык")

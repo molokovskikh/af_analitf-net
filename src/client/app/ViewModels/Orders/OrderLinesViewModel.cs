@@ -172,7 +172,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
 					if ((string)item.Header == DisplayName)
 						docs.Add(new OrderLinesDocument(this));
 				}

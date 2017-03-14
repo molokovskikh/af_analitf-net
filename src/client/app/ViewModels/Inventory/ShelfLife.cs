@@ -146,12 +146,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			return Preview("Отчет по срокам годности", new ShelfLifeDocument(Items.Value.ToArray(), GetVisibilityDic()));
+			return Preview(DisplayName, new ShelfLifeDocument(Items.Value.ToArray(), GetVisibilityDic()));
 		}
 
 		public void SetMenuItems()
 		{
-			var item = new MenuItem {Header = "Отчет по срокам годности" };
+			var item = new MenuItem {Header = DisplayName };
 			PrintMenuItems.Add(item);
 		}
 
@@ -159,14 +159,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
-					if ((string) item.Header == "Отчет по срокам годности")
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
+					if ((string) item.Header == DisplayName)
 						docs.Add(new ShelfLifeDocument(Items.Value.ToArray(), GetVisibilityDic()));
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
 
-			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Отчет по срокам годности")
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
 				Coroutine.BeginExecute(Print().GetEnumerator());
 			return null;
 		}

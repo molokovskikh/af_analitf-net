@@ -57,8 +57,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintCheckDetails()
 		{
-			LastOperation = "Чеки";
-			return Preview("Чеки", new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
+			LastOperation = DisplayName;
+			return Preview(DisplayName, new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
 		}
 
 		public IResult ExportExcel()
@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void SetMenuItems()
 		{
-			var item = new MenuItem {Header = "Чеки"};
+			var item = new MenuItem {Header = DisplayName};
 			PrintMenuItems.Add(item);
 		}
 
@@ -106,14 +106,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
-					if ((string) item.Header == "Чеки")
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
+					if ((string) item.Header == DisplayName)
 						docs.Add(new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
 				}
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
 
-			if(String.IsNullOrEmpty(LastOperation) || LastOperation == "Чеки")
+			if(String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
 				Coroutine.BeginExecute(PrintCheckDetails().GetEnumerator());
 			return null;
 		}

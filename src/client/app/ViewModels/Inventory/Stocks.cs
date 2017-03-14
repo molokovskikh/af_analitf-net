@@ -268,10 +268,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void SetMenuItems()
 		{
-			var item = new MenuItem {Header = "Ярлыки"};
+			var item = new MenuItem {Header = "Товарные запасы" };
 			PrintMenuItems.Add(item);
 
-			item = new MenuItem {Header = "Товарные запасы"};
+			item = new MenuItem {Header = "Ярлыки" };
 			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности"};
@@ -286,7 +286,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var docs = new List<BaseDocument>();
 
 			if (!IsView) {
-				foreach (var item in PrintMenuItems.Where(i => i.IsChecked)) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
 					if ((string)item.Header == "Товарные запасы")
 						docs.Add(new StockDocument(Items.Value.ToArray()));
 					if ((string) item.Header == "Ярлыки")
