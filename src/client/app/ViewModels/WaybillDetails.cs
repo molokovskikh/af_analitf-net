@@ -280,6 +280,7 @@ namespace AnalitF.Net.Client.ViewModels
 				RetailCost = x.RetailCost,
 				SupplierName = Waybill.Supplier?.FullName,
 				ClientName = User?.FullName,
+				AddressName = Settings.Value.Waybills.FirstOrDefault(y => y.BelongsToAddress.Id == Address.Id)?.Name,
 				Producer = x.Producer,
 				ProviderDocumentId = Waybill.ProviderDocumentId,
 				DocumentDate = Waybill.DocumentDate,

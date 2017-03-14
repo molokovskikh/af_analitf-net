@@ -12,6 +12,7 @@ namespace AnalitF.Net.Client.Models.Print
 		public decimal? RetailCost { get; set; }
 		public string SupplierName { get; set; }
 		public string ClientName { get; set; }
+		public string AddressName { get; set; }
 		public string Producer { get; set; }
 		public string ProviderDocumentId { get; set; }
 		public DateTime DocumentDate { get; set; }
