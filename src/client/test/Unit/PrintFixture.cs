@@ -128,6 +128,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var lines = new List<TagPrintable>();
 			var line = new TagPrintable()
 			{
+				AddressName = "Тестовый измененный адрес",
 				ClientName = "Тестовый клиент",
 				Nds = 10,
 				RetailCost = 251.20m,
@@ -153,7 +154,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				.Descendants<TextBlock>()
 				.First()
 				.Text;
-			Assert.AreEqual($"{line.ClientName}, {address.Name}", text);
+			Assert.AreEqual($"{line.ClientName}, {line.AddressName}", text);
 		}
 
 		[Test]
@@ -163,6 +164,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var lines = new List<TagPrintable>();
 			var line = new TagPrintable()
 			{
+				AddressName = "Тестовый измененный адрес",
 				ClientName = "Тестовый клиент",
 				Nds = 10,
 				RetailCost = 251.20m,
@@ -185,7 +187,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				.Descendants<Label>()
 				.First()
 				.Content.ToString().Trim();
-			Assert.AreEqual($"{line.ClientName}, {address.Name}", text);
+			Assert.AreEqual($"{line.ClientName}, {line.AddressName}", text);
 		}
 
 		[Test]

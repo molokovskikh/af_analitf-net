@@ -470,7 +470,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			return new Dictionary<string, string> {
 				{"Цена", String.Format(GetFormat(), "{0:0.00}", line.RetailCost)},
-				{"Наименование клиента", address == null ? line.ClientName : $"{line.ClientName}, {address.Name}"},
+				{"Наименование клиента", address == null ? line.ClientName : $"{line.ClientName}, {line.AddressName}"},
 				{"Наименование", line.Product},
 				{"Страна", line.Country},
 				{"Производитель", line.Producer},
