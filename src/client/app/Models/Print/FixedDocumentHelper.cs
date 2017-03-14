@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Models.Print
 					Padding = new Thickness(0, 5, 0, 5),
 					Content = address == null
 						? $"{lines[0].ProviderDocumentId} {lines[0].ClientName}"
-						: $"{lines[0].ProviderDocumentId} {lines[0].ClientName}, {address?.Name}",
+						: $"{lines[0].ProviderDocumentId} {lines[0].ClientName}, {lines[0].AddressName}",
 					FontFamily = new FontFamily("Arial"),
 				};
 				panel.Children.Add(label);

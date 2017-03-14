@@ -251,7 +251,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Height = 106,
 			};
 			var nameAndAddressLabel = new TextBlock {
-				Text = $"{line.ClientName}, {priceTagSettings.Address?.Name}",
+				Text = $"{line.ClientName}, {line.AddressName}",
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
 				FontSize = 8,
@@ -331,7 +331,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 
 			var nameAndAddressLabel = new TextBlock {
-				Text = $"{line.ClientName}, {priceTagSettings.Address?.Name}",
+				Text = $"{line.ClientName}, {line.AddressName}",
 				TextAlignment = TextAlignment.Center,
 				FontSize = 6,
 				Width = 162,
@@ -457,7 +457,7 @@ namespace AnalitF.Net.Client.Models.Print
 							},
 							new TextBlock {
 								Height = 20,
-								Text = priceTagSettings.PrintFullName ? $"{line.ClientName}, {priceTagSettings.Address?.Name}" : "",
+								Text = priceTagSettings.PrintFullName ? $"{line.ClientName}, {line.AddressName}" : "",
 								FontSize = 8,
 								TextAlignment = TextAlignment.Center,
 								VerticalAlignment = VerticalAlignment.Center,

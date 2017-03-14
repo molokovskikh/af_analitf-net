@@ -348,7 +348,11 @@ limit 300";
 		{
 			var dir = Settings.Value.WaybillDir ?? Settings.Value.MapPath("Waybills");
 			if (!Directory.Exists(dir))
-				FileHelper.CreateDirectoryRecursive(dir);
+				try
+				{
+					FileHelper.CreateDirectoryRecursive(dir);
+				}
+				catch { dir = Settings.Value.GetVarRoot(); }
 
 			var dialog = new SelectDirResult(dir);
 			yield return dialog;
@@ -360,7 +364,11 @@ limit 300";
 		{
 			var dir = Settings.Value.RejectDir ?? Settings.Value.MapPath("Rejects");
 			if (!Directory.Exists(dir))
-				FileHelper.CreateDirectoryRecursive(dir);
+				try
+				{
+					FileHelper.CreateDirectoryRecursive(dir);
+				}
+				catch { dir = Settings.Value.GetVarRoot(); }
 
 			var dialog = new SelectDirResult(dir);
 			yield return dialog;
@@ -372,7 +380,11 @@ limit 300";
 		{
 			var dir = Settings.Value.ReportDir ?? Settings.Value.MapPath("Reports");
 			if (!Directory.Exists(dir))
-				FileHelper.CreateDirectoryRecursive(dir);
+				try
+				{
+					FileHelper.CreateDirectoryRecursive(dir);
+				}
+				catch { dir = Settings.Value.GetVarRoot(); }
 
 			var dialog = new SelectDirResult(dir);
 			yield return dialog;
