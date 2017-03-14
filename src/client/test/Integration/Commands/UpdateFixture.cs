@@ -736,33 +736,6 @@ update Addresses set Id =  2575 where Id = :addressId")
 			Assert.AreEqual(0, cmd.Results.Count);
 		}
 
-		[Test]
-		public void Sync_command()
-		{
-			settings.LastSync = DateTime.MinValue;
-			var stock = new Stock {
-				Product = "Папаверин",
-				Status = StockStatus.Available,
-				Address = address,
-				Quantity = 5,
-				ReservedQuantity = 0,
-				SupplyQuantity = 5
-			};
-			localSession.Save(stock);
-
-			var doc = new InventoryDoc(address);
-			doc.Lines.Add(new InventoryLine(stock, 1, localSession));
-			doc.UpdateStat();
-			doc.Post();
-			localSession.Save(doc);
-			Run(new SyncCommand());
-
-			TimeMachine.ToFuture(TimeSpan.FromMinutes(10));
-			doc.UnPost();
-			doc.Post();
-			Run(new SyncCommand());
-		}
-
 		[Test, Ignore("Тест содержит дефекты")]
 		public void Update_address()
 		{

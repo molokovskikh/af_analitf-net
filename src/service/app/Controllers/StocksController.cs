@@ -176,11 +176,13 @@ where l.{name}DocId is null
 			if (action.ActionType == ActionType.Sale)
 				source.Quantity -= action.Quantity;
 			else if (action.ActionType == ActionType.Stock) {
-				source.Quantity -= action.Quantity;
-				var target = new Stock(CurrentUser, source, action.Quantity, action.ClientStockId,
-						action.RetailCost.Value,
-						action.RetailMarkup.Value);
-				Session.Save(target);
+				source.ClientPrimaryKey = action.ClientStockId;
+				source.CreatedByUser = CurrentUser;
+				source.RetailCost = action.RetailCost;
+				source.RetailMarkup = action.RetailMarkup;
+				source.Status = StockStatus.Available;
+				source.CreatedByUser = CurrentUser;
+				Session.Save(source);
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
 			}

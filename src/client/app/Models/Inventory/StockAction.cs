@@ -17,13 +17,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SourceStockVersion = stock.ServerVersion;
 			Quantity = quantity;
 			SrcStock = stock;
+			Timestamp = DateTime.Now;
 		}
 
 		public virtual uint Id { get; set; }
 		public virtual DateTime Timestamp { get; set; }
-
-		[Ignore]
-		public virtual Stock DstStock { get; set; }
 
 		[Ignore]
 		public virtual Stock SrcStock { get; set; }

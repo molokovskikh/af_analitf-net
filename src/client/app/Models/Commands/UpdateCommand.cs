@@ -65,6 +65,12 @@ namespace AnalitF.Net.Client.Models.Commands
 		public string BatchFile;
 		public BatchMode BatchMode;
 
+		public UpdateCommand(string syncData)
+			: this()
+		{
+			this.syncData = syncData;
+		}
+
 		public UpdateCommand()
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";

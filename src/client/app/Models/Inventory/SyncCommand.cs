@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using Common.Tools;
 using Dapper;
+using Devart.Data.MySql;
 using Ionic.Zip;
 using log4net;
 using Newtonsoft.Json;
@@ -26,22 +27,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			var newLastSync = SystemTime.Now();
 			using (var disposable = new CompositeDisposable())
-			using (var zipStream = File.Open(Cleaner.TmpFile(), FileMode.Open))
-			using (var checkStream = File.Open(Cleaner.TmpFile(), FileMode.Open))
-			using (var lineStream = File.Open(Cleaner.TmpFile(), FileMode.Open)) {
+			using (var zipStream = File.Open(Cleaner.TmpFile(), FileMode.Open)) {
 				var lastSync = Settings.LastSync.ToUniversalTime();
-
-				using (var reader = Session.Connection.ExecuteReader("select * from Checks where Timestamp > @lastSync",
-						new { lastSync }))
-					WriteTable(reader, checkStream);
-
-				var sql = @"
-select l.*
-from CheckLines l
-	join Checks c on c.Id = l.CheckId
-where c.Timestamp > @lastSync";
-				using (var reader = Session.Connection.ExecuteReader(sql, new { lastSync }))
-					WriteTable(reader, lineStream);
 
 				var actions = Session.Connection
 					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
@@ -49,10 +36,16 @@ where c.Timestamp > @lastSync";
 					.ToArray();
 
 				using (var zip = new ZipFile()) {
-					zip.AddEntry("check-lines", lineStream);
-					zip.AddEntry("checks", checkStream);
 					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
 					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions));
+
+					WriteSql(zip, disposable, "check-lines", @"
+select l.*
+from CheckLines l
+	join Checks c on c.Id = l.CheckId
+where c.Timestamp > @lastSync");
+					WriteSql(zip, disposable, "checks", "select * from Checks where Timestamp > @lastSync");
+
 					WriteModel(zip, disposable, typeof(DisplacementDoc));
 					WriteSql(zip, disposable, "DisplacementLines", @"
 select l.*
@@ -98,7 +91,7 @@ where d.Timestamp > @lastSync");
 					WriteSql(zip, disposable, "Waybills", @"
 select Id, Timestamp
 from Waybills
-where Timestamp > @lastSync");
+where Timestamp > @lastSync and IsCreatedByUser");
 
 					zip.Save(zipStream);
 				}
@@ -136,17 +129,16 @@ where Timestamp > @lastSync");
 		{
 			var stream = File.Open(Cleaner.TmpFile(), FileMode.Open);
 			disposable.Add(stream);
-			using (var reader = Session.Connection.ExecuteReader(sql, new { lastSync = Settings.LastSync.ToUniversalTime() }))
-				WriteTable(reader, stream);
-			zip.AddEntry(name, stream);
-		}
+			var cmd = new MySqlCommand(sql, (MySqlConnection)Session.Connection);
+			cmd.Parameters.AddWithValue("lastSync", Settings.LastSync.ToUniversalTime());
+			var adaper = new MySqlDataAdapter(cmd);
 
-		private static void WriteTable(IDataReader reader, FileStream stream)
-		{
-			var table = new DataTable();
-			table.Load(reader);
+			var table = new DataTable("data");
+			adaper.Fill(table);
+			table.Constraints.Clear();
 			table.WriteXml(stream, XmlWriteMode.WriteSchema);
 			stream.Position = 0;
+			zip.AddEntry(name, stream);
 		}
 
 		public static async Task Start(Config.Config config,

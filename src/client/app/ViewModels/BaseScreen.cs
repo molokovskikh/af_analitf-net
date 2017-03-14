@@ -548,6 +548,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
+			//если у нас есть активная транакция значит комит этой транакции завершился ошибкой
+			if (Session?.Transaction.IsActive == true)
+				Session.Transaction.Rollback();
 			Session?.Dispose();
 			Session = null;
 		}

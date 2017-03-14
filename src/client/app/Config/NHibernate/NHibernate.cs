@@ -202,10 +202,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			});
 			mapper.Class<Check>(m => {
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
-				m.Version(p => p.Timestamp, c => {
-					c.Type(new TimestampType());
-					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
-				});
 			});
 
 			mapper.Class<Mail>(m => {
@@ -354,12 +350,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
 				m.Property(x => x.RetailCost, p => p.Access(Accessor.Field));
 				m.Property(x => x.RetailMarkup, p => p.Access(Accessor.Field));
-			});
-			mapper.Class<StockAction>(m => {
-				m.Version(p => p.Timestamp, c => {
-					c.Type(new TimestampType());
-					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
-				});
 			});
 
 			mapper.BeforeMapClass += (inspector, type, customizer) => {

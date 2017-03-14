@@ -89,6 +89,9 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 					Certificates = "РОСС RU.ФМ08.Д38737",
 					Period = "01.05.2017",
 					Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
+					SupplierCostWithoutNDS = 23.5m,
+					SupplierCost = 25.86m,
+					Quantity = 2,
 				});
 			return waybill;
 		}

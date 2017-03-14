@@ -407,23 +407,20 @@ namespace AnalitF.Net.Client.Models
 			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
 			var stockActions = new List<StockAction>();
 			foreach (var line in lines) {
-				if (line.Stock != null) line.Stock.Quantity -= line.Quantity.Value;
-				var stock = new Stock(this, line, session);
-				stockActions.Add(new StockAction {
-					ActionType = ActionType.Stock,
-					SourceStockId = line.StockId,
-					SourceStockVersion = line.StockVersion,
-					Quantity = line.Quantity.GetValueOrDefault(),
+				if (line.Stock == null)
+					line.Stock = new Stock(this, line, session);
+				line.Stock.Status = StockStatus.Available;
+				line.Stock.RetailCost = line.RetailCost;
+				line.Stock.RetailMarkup = line.RetailMarkup;
+				stockActions.Add(new StockAction(ActionType.Stock, line.Stock, line.Quantity.GetValueOrDefault()) {
 					RetailCost = line.RetailCost,
 					RetailMarkup = line.RetailMarkup,
-					DstStock = stock,
 					SrcStock = line.Stock,
 				});
 			}
 			foreach (var action in stockActions) {
-				session.Save(action.DstStock);
-				if (action.SrcStock != null) session.Update(action.SrcStock);
-				action.ClientStockId = action.DstStock.Id;
+				session.SaveOrUpdate(action.SrcStock);
+				action.ClientStockId = action.SrcStock.Id;
 			}
 			session.SaveEach(stockActions);
 			return true;

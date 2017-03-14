@@ -41,6 +41,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public Check(User user, Address address, IEnumerable<CheckLine> lines, CheckType checkType)
 			: this()
 		{
+			Timestamp = DateTime.Now;
 			Clerk = user.Id.ToString();
 			CheckType = checkType;
 			Date = DateTime.Now;

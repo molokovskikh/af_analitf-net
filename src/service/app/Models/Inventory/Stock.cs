@@ -64,6 +64,7 @@ namespace AnalitF.Net.Service.Models.Inventory
 		public virtual StockStatus Status { get; set; }
 
 		public virtual uint? WaybillLineId { get; set; }
+		public virtual uint? WaybillId { get; set; }
 		public virtual Address Address { get; set; }
 		public virtual User CreatedByUser { get; set; }
 
@@ -142,7 +143,8 @@ insert into Inventory.Stocks(WaybillLineId,
 	CountryCode,
 	WaybillNumber,
 	SupplierId,
-	SupplierFullName
+	SupplierFullName,
+	WaybillId
 )
 select db.Id,
 	:status,
@@ -174,7 +176,8 @@ select db.Id,
 	db.CountryCode,
 	dh.ProviderDocumentId,
 	dh.FirmCode,
-	sp.FullName
+	sp.FullName,
+	dh.DownloadId
 from Customers.UserAddresses ua
 	join Customers.Addresses a on a.Id = ua.AddressId
 		join Documents.DocumentHeaders dh on dh.Addressid = a.Id

@@ -123,6 +123,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			}
 		}
 
+		[Ignore]
 		public virtual uint Value
 		{
 			get { return (uint)Quantity; }
@@ -145,5 +146,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		[Ignore, Style]
 		public virtual bool Confirmed => ConfirmedQuantity == Quantity;
+
+		public virtual StockAction UpdateStock(Stock stock)
+		{
+			stock.Quantity -= Quantity;
+			return new StockAction(ActionType.Sale, stock, Quantity);
+		}
 	}
 }
