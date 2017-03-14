@@ -83,6 +83,23 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Create()
 		{
+			model.User.IsStockEnabled = false;
+			var result = model.Create().GetEnumerator();
+			Assert.IsTrue(result.MoveNext());
+			var dialog = (CreateWaybill)((DialogResult)result.Current).Model;
+			dialog.Waybill.ProviderDocumentId = "1";
+			dialog.Waybill.UserSupplierName = "test";
+			result.MoveNext();
+			scheduler.Start();
+			Assert.IsNotNull(dialog.Waybill.Address);
+			Assert.AreEqual(dialog.Waybill.Address.Id, address.Id);
+			Assert.Contains(dialog.Waybill.Id, model.Waybills.Value.Select(w => w.Id).ToArray());
+		}
+
+		[Test]
+		public void Create_with_stock_enabled()
+		{
+			model.User.IsStockEnabled = true;
 			var result = model.Create().GetEnumerator();
 			Assert.IsTrue(result.MoveNext());
 			var dialog = (CreateWaybill)((DialogResult)result.Current).Model;
