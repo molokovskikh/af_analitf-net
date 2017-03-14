@@ -15,11 +15,17 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			InitFields();
 			Waybill = waybill;
 			DisplayName = "Создание накладной";
+			if (UseSupplierList)
+				RxQuery(x => x.Query<Supplier>().OrderBy(s => s.Name).ToArray()).Subscribe(Suppliers);
 			WasCancelled = true;
 		}
 
 		public bool WasCancelled { get; private set; }
 		public Waybill Waybill { get; set; }
+		public NotifyValue<Supplier[]> Suppliers { get; set; }
+
+		public bool UseSupplierList => !(User?.IsStockEnabled ?? false);
+		public bool DontUseSupplierList => !UseSupplierList;
 
 		public void OK()
 		{

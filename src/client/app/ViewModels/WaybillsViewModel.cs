@@ -91,8 +91,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<DocumentTypeFilter> TypeFilter { get; set; }
 		public AddressSelector AddressSelector { get; set; }
 
-		public bool IsStockEnabled => Shell?.IsStockEnabled.Value ?? false;
-
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -336,9 +334,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Create()
 		{
-			if (Address == null || !IsStockEnabled)
+			if (Address == null)
 				yield break;
-			var waybill = new Waybill(Address) {Supplier = null, UserSupplierName = "Собственный поставщик"};
+			var waybill = new Waybill(Address) {
+				Supplier = null,
+				UserSupplierName = (User?.IsStockEnabled ?? false) ? "Собственный поставщик" : string.Empty
+			};
 			yield return new DialogResult(new CreateWaybill(waybill));
 			Session.Save(waybill);
 			Update();

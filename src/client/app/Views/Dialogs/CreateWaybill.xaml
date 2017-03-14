@@ -4,7 +4,13 @@
 	MinWidth="200">
 	<StackPanel Margin="4">
 		<Label>Поставщик</Label>
-		<TextBox Name="Waybill_UserSupplierName" IsReadOnly="True" />
+		<TextBox Name="Waybill_UserSupplierName" IsReadOnly="True"
+			Visibility="{Binding DontUseSupplierList, Converter={StaticResource BoolToCollapsed}}" />
+		<ComboBox Name="SupplierName"
+			ItemsSource="{Binding Suppliers.Value}"
+			Text="{Binding Waybill.UserSupplierName}"
+			SelectedItem="{Binding Waybill.Supplier}" DisplayMemberPath="Name" IsEditable="True"
+			Visibility="{Binding UseSupplierList, Converter={StaticResource BoolToCollapsed}}" />
 		<Label>Номер накладной</Label>
 		<TextBox Name="Waybill_ProviderDocumentId" />
 		<Label>Дата накладной</Label>
