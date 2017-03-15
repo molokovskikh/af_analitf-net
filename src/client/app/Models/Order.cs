@@ -94,6 +94,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual string SavePriceName { get; set; }
 
 		public virtual string SaveRegionName { get; set; }
+
+		public virtual DateTime SavePriceDate { get; set; }
+
 		/// <summary>
 		/// заявки отмеченные этим флагом не участвуют в механизме восстановления заявок
 		/// предполагается что эта заявка априори актуальная и ее не нужно восстанавливать
@@ -218,6 +221,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string PriceName => SafePrice?.Name;
 
+		public virtual DateTime PriceDate => SafePrice.PriceDate;
+
 		public virtual Address SafeAddress => IsAddressExists() ? Address : new Address();
 
 		public virtual string AddressName => SafeAddress?.Name;
@@ -232,7 +237,8 @@ namespace AnalitF.Net.Client.Models
 					Id = Price.Id,
 					CostFactor = 1,
 					Name  = SavePriceName,
-					RegionName = SaveRegionName
+					RegionName = SaveRegionName,
+					PriceDate = SavePriceDate
 				};
 			}
 		}
@@ -262,6 +268,7 @@ namespace AnalitF.Net.Client.Models
 				return;
 			SavePriceName = Price.Name;
 			SaveRegionName = Price.RegionName;
+			SavePriceDate = Price.PriceDate;
 		}
 
 		public virtual void UpdateStat()
