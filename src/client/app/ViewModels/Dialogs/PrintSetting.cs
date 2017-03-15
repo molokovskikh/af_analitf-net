@@ -5,10 +5,11 @@ using System.Printing;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Inventory;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
-	internal class ReportSetting : BaseScreen2, ICancelable
+	public class PrintSetting : BaseScreen2, ICancelable
 	{
 		public bool WasCancelled { get; private set; }
 		public bool IsView { get; set; }
@@ -16,13 +17,19 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public string PrinterName { get; set; }
 		public ObservableCollection<string> Printers { get; set; }
 
-		public ReportSetting()
+		public PrintSetting()
 		{
-			DisplayName = "Настройки отчетов";
+			DisplayName = "Настройка печати";
 			WasCancelled = true;
-			IsView = true;
 			Printers = new ObservableCollection<string>(PrintHelper.GetPrinters().Select(x => x.Name));
 			Printers.Add("");
+		}
+
+		public PrintSetting(string printerName, bool isView) : this()
+		{
+			PrinterName = printerName;
+			IsView = isView;
+			IsPrint = !IsView;
 		}
 
 		public void Save()

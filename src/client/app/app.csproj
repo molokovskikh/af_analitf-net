@@ -447,7 +447,7 @@
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
     <Compile Include="ViewModels\Dialogs\Login.cs" />
-    <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
+    <Compile Include="ViewModels\Dialogs\PrintSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
@@ -565,8 +565,8 @@
     <Compile Include="Views\Dialogs\Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Dialogs\ReportSetting.xaml.cs">
-      <DependentUpon>ReportSetting.xaml</DependentUpon>
+    <Compile Include="Views\Dialogs\PrintSetting.xaml.cs">
+      <DependentUpon>PrintSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\RequirementNegotiationProtocol.xaml.cs">
       <DependentUpon>RequirementNegotiationProtocol.xaml</DependentUpon>
@@ -992,7 +992,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\ReportSetting.xaml">
+    <Page Include="Views\Dialogs\PrintSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

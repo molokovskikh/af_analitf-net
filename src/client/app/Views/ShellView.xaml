@@ -104,6 +104,7 @@
 					cal:Message.Attach="CleanSync" />
 				<Separator />
 				<MenuItem Header="Сохранить" InputGestureText="Ctrl+T" cal:Message.Attach="Export" />
+				<MenuItem Header="Предварительный просмотр..." cal:Message.Attach="Preview" />
 				<MenuItem Header="Печать" InputGestureText="Ctrl+P" cal:Message.Attach="Print" />
 				<Separator />
 				<MenuItem Header="Выход" InputGestureText="Alt+F4" cal:Message.Attach="TryClose" />

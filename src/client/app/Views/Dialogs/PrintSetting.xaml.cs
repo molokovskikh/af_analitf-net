@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace AnalitF.Net.Client.Views.Dialogs
 {
 	/// <summary>
-	/// Interaction logic for ReportSetting.xaml
+	/// Interaction logic for PrintSetting.xaml
 	/// </summary>
-	public partial class ReportSetting : UserControl
+	public partial class PrintSetting : UserControl
 	{
-		public ReportSetting()
+		public PrintSetting()
 		{
 			InitializeComponent();
 		}
