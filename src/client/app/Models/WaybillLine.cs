@@ -252,6 +252,15 @@ namespace AnalitF.Net.Client.Models
 		[Style("SupplierPriceMarkup", Description = "Торговая наценка оптовика: превышение наценки оптовика")]
 		public virtual bool IsSupplierPriceMarkupInvalid => SupplierPriceMarkup > _maxSupplierMarkup;
 
+		[Style("Product", Description = "Название препарата: не указано")]
+		public virtual bool IsProductEmpty => CatalogId == null;
+
+		[Style("SupplierCost", Description = "Цена поставщика с НДС: не указана")]
+		public virtual bool IsSupplierCostInvalid => (SupplierCost ?? 0) <= 0;
+
+		[Style("Quantity", Description = "Заказ: не указано количество")]
+		public virtual bool IsQuantityInvalid => (Quantity ?? 0) <= 0;
+
 		public virtual decimal? RetailSum => Quantity * RetailCost;
 
 		public virtual decimal? AmountExcludeTax => Amount - NdsAmount;

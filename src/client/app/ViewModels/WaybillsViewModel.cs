@@ -336,7 +336,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (Address == null)
 				yield break;
-			var waybill = new Waybill(Address);
+			var waybill = new Waybill(Address) {
+				Supplier = null,
+				UserSupplierName = (User?.IsStockEnabled ?? false) ? "Собственный поставщик" : string.Empty
+			};
 			yield return new DialogResult(new CreateWaybill(waybill));
 			Session.Save(waybill);
 			Update();
