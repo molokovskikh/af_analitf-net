@@ -25,6 +25,7 @@
 				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Серия" Binding="{Binding SerialNumber}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Срок годности" Binding="{Binding Exp, StringFormat=d}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Остаток" Binding="{Binding Quantity}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Ordered}" Width="*" />

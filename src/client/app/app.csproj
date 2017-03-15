@@ -451,6 +451,7 @@
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
     <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
+    <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
     <Compile Include="ViewModels\Inventory\Frontend2.cs" />
     <Compile Include="ViewModels\Inventory\StockChooser.cs" />
     <Compile Include="ViewModels\Inventory\ShelfLife.cs" />
@@ -660,8 +661,8 @@
     <Compile Include="Views\Inventory\Frontend2.xaml.cs">
       <DependentUpon>Frontend2.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Inventory\SelectExp.xaml.cs">
-      <DependentUpon>SelectExp.xaml</DependentUpon>
+    <Compile Include="Views\Inventory\ExpSelector.xaml.cs">
+      <DependentUpon>ExpSelector.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ShelfLife.xaml.cs">
       <DependentUpon>ShelfLife.xaml</DependentUpon>
@@ -1044,7 +1045,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\Inventory\SelectExp.xaml">
+    <Page Include="Views\Inventory\ExpSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

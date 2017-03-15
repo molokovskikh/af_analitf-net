@@ -38,8 +38,6 @@ namespace AnalitF.Net.Client.Models
 		private bool _print;
 		private Waybill _waybill;
 		private bool isCertificateNotFound;
-		private bool _isReadyForStock;
-		private int _quantityToReceive;
 		private Stock _stock;
 
 		public WaybillLine()

@@ -91,7 +91,7 @@ where d.Timestamp > @lastSync");
 					WriteSql(zip, disposable, "Waybills", @"
 select Id, Timestamp
 from Waybills
-where Timestamp > @lastSync and IsCreatedByUser");
+where Timestamp > @lastSync and IsCreatedByUser = 0");
 
 					zip.Save(zipStream);
 				}
@@ -130,9 +130,8 @@ where Timestamp > @lastSync and IsCreatedByUser");
 			var stream = File.Open(Cleaner.TmpFile(), FileMode.Open);
 			disposable.Add(stream);
 			var cmd = new MySqlCommand(sql, (MySqlConnection)Session.Connection);
-			cmd.Parameters.AddWithValue("lastSync", Settings.LastSync.ToUniversalTime());
+			cmd.Parameters.AddWithValue("@lastSync", Settings.LastSync.ToUniversalTime());
 			var adaper = new MySqlDataAdapter(cmd);
-
 			var table = new DataTable("data");
 			adaper.Fill(table);
 			table.Constraints.Clear();

@@ -17,9 +17,9 @@ namespace AnalitF.Net.Client.Views.Inventory
 	/// <summary>
 	/// Interaction logic for SelectExp.xaml
 	/// </summary>
-	public partial class SelectExp : UserControl
+	public partial class ExpSelector : UserControl
 	{
-		public SelectExp()
+		public ExpSelector()
 		{
 			InitializeComponent();
 		}

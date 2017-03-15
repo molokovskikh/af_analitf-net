@@ -59,6 +59,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			});
 
 			waybill.Stock(localSession);
+			Assert.AreEqual(DocStatus.Posted, waybill.Status);
 
 			var check = new Check(localSession.Query<User>().First(), address, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
 			localSession.Save(check);
@@ -74,6 +75,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			foreach (var stock in stocks) {
 				Assert.AreEqual(Service.Models.Inventory.StockStatus.Available, stock.Status, $"stock id = {stock.Id}");
 			}
+			waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
+			Assert.AreEqual(DocStatus.Posted, waybill.Status);
+			var postedCount = session.Connection
+				.Query<int>("select count(*) from Inventory.StockedWaybills where DownloadId = @id", new { id = fixture.Waybill.Log.Id })
+				.First();
+			Assert.AreEqual(1, postedCount, $"downloadid = {fixture.Waybill.Log.Id}");
+
 
 			//повторная попытка что бы проверить на ошибку избыточной синхронизации
 			Run(new SyncCommand());

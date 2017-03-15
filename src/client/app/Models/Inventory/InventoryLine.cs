@@ -31,8 +31,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual decimal Quantity { get; set; }
 
-		public virtual string Period { get; set; }
-
 		public virtual Stock Stock { get; set; }
 
 		public virtual void UpdateQuantity(decimal oldQuantity, ISession session)

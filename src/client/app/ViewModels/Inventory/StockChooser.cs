@@ -58,6 +58,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					.OrderBy(x => x.Exp)
 					.ToList();
 				foreach (var item in items) {
+					if (item.Exp != null)
+						item.Exp = item.Exp.Value.ToLocalTime();
 					item.Ordered = (uint?)lines.FirstOrDefault(x => x.Id == item.Id)?.Quantity;
 				}
 				return items;
@@ -75,6 +77,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (CurrentItem.Value == null)
 				return;
+			if (Items.Value.All(x => x.Ordered == null)) {
+				CurrentItem.Value.Ordered = 1;
+				Updated();
+			}
 			WasCancelled = false;
 			TryClose();
 		}

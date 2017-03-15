@@ -53,6 +53,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual bool? VitallyImportant { get; set; }
 
 		public virtual decimal SupplyQuantity { get; set; }
+
+		public virtual DateTime? Exp { get; set; }
+		public virtual string Period { get; set; }
 	}
 
 	public class Stock : BaseStock
@@ -343,8 +346,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? RetailSum => Quantity * RetailCost;
 		public virtual string Vmn { get; set; }
 		public virtual string Gtd { get; set; }
-		public virtual DateTime? Exp { get; set; }
-		public virtual string Period { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
 

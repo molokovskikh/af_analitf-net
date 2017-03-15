@@ -261,7 +261,7 @@ namespace AnalitF.Net.Client.Models.Print
 				FontFamily = new FontFamily("Arial"),
 			});
 			subBody.Cell(0, 3, new TextBlock {
-				Text = line.Quantity != null ? line.Quantity.ToString() : "",
+				Text = line.Quantity.ToString(),
 				FontSize = 10,
 				FontFamily = new FontFamily("Arial"),
 			});

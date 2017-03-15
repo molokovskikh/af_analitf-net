@@ -24,10 +24,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? WaybillLineId { get; set; }
 
-		public virtual DateTime? Exp { get; set; }
-
-		public virtual string Period { get; set; }
-
 		public virtual decimal? SupplierSumWithoutNds => SupplierCostWithoutNds*Quantity;
 
 		public virtual decimal? SupplierSum => SupplierCost * Quantity;
