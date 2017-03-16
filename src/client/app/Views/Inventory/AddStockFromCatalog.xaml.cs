@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -22,6 +23,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 		public AddStockFromCatalog()
 		{
 			InitializeComponent();
+
+			IsVisibleChanged += AddStockFromCatalog_IsVisibleChanged;
 
 			CatalogProducts.GotFocus += (sender, args) => {
 				CatalogProducts.IsDropDownOpen = true;
@@ -40,6 +43,13 @@ namespace AnalitF.Net.Client.Views.Inventory
 				if (Producers.IsKeyboardFocusWithin && Producers.SelectedItem != null)
 					OK.Focus();
 			};
+		}
+
+		private void AddStockFromCatalog_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if ((bool)e.NewValue == false)
+				return;
+			Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(delegate () { CatalogProducts.Focus(); }));
 		}
 	}
 }
