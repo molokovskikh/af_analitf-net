@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			});
 			foreach (var item in Waybill.Lines)
 			{
-				item.Stock = new Stock(Waybill, item);
+				item.Stock = new Stock(Waybill, item, session);
 				session.Save(item.Stock);
 			}
 			Waybill.Calculate(settings, new List<uint>());

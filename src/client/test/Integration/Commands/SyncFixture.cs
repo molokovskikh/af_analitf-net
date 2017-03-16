@@ -30,8 +30,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			};
 			localSession.Save(stock);
 
-			var doc = new InventoryDoc(address);
-			doc.Lines.Add(new InventoryLine(stock, 1, localSession));
+			var doc = new InventoryDoc(address, settings.NumberPrefix);
+			doc.Lines.Add(new InventoryLine(doc, stock, 1, localSession));
 			doc.UpdateStat();
 			doc.Post();
 			localSession.Save(doc);
@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			waybill.Stock(localSession);
 			Assert.AreEqual(DocStatus.Posted, waybill.Status);
 
-			var check = new Check(localSession.Query<User>().First(), address, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
+			var check = new Check(localSession.Query<User>().First(), address, settings.NumberPrefix, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);
 			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock)));

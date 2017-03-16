@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using NHibernate;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
