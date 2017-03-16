@@ -101,8 +101,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public NotifyValue<Producer> CurrentFilterProducer { get; set; }
 
-		public NotifyValue<List<Message>> MessagesForWinFormGrid { get; set; }
-
 		protected bool ProducerFilterIsUsed { get; set; }
 
 		//фактический адрес доставки для которого нужно формировать заявки
@@ -364,7 +362,6 @@ where c.Id = ?";
 		protected void ShowValidationError(List<Message> messages)
 		{
 			OrderWarning.Show(messages);
-			MessagesForWinFormGrid.Value = messages;
 
 			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
 			//мог ввести корректное значение

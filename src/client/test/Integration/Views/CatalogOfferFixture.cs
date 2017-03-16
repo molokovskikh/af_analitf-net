@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.AreEqual(Colors.Red, ((SolidColorBrush)setter.Value).Color);
 		}
 
-		[Test(Description = "Часто в результате переименований view теряется, ищем подобные ошибки")]
+		[Test(Description = "Часто в результате переименований view теряется, ищем подобные ошибки")Ignore("тест конфликтует с WinForm.DataGridView")]
 		public void Check_view_binding()
 		{
 			var ignore = new[] { typeof(BaseShell), typeof(BaseScreen), typeof(BaseScreen2) };

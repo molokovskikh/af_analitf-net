@@ -769,22 +769,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var view = GetView();
 			if (view == null)
 				return null;
-			if (((FrameworkElement)view).Descendants<DataGrid>()
-				.FirstOrDefault(g => g.Name == name) != null)
-			{
-				return ((FrameworkElement)view).Descendants<DataGrid>()
+			return ((FrameworkElement)view).Descendants<DataGrid>()
 				.First(g => g.Name == name)
 				.Items
 				.OfType<T>().ToArray();
-			}
-			if (((FrameworkElement)view).Descendants<WinFormDataGrid>()
-					.FirstOrDefault(g => g.Name == name) != null)
-			{
-				return ((FrameworkElement)view).Descendants<WinFormDataGrid>()
-				.First(g => g.Name == name)
-				.GetItems<T>();
-			}
-			return null;
 		}
 
 		protected void InitFields()
