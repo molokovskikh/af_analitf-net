@@ -486,7 +486,8 @@ where p.IsSynced = 1 or p.PriceId is null;";
 					"DisplayId",
 					"KeepId",
 					"SavePriceName",
-					"SaveRegionName"
+					"SaveRegionName",
+					"SavePriceDate"
 				})
 					.ToArray();
 			}

@@ -117,6 +117,7 @@ namespace AnalitF.Net.Client.Models
 			Address = order.Address;
 			Price = order.Price;
 			PriceDate = Price.PriceDate;
+			SavePriceName = Price.PriceName;
 			CreatedOn = order.CreatedOn;
 			LinesCount = order.LinesCount;
 			Sum = order.Sum;
@@ -134,6 +135,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint DisplayId => (uint)ServerId;
 
 		public virtual Price Price { get; set; }
+
+		public virtual string SavePriceName { get; set; }
 
 		public virtual Address Address { get; set; }
 
@@ -194,7 +197,8 @@ namespace AnalitF.Net.Client.Models
 				if (IsPriceExists())
 					return Price;
 				return new Price {
-					Id = Price.Id
+					Id = Price.Id,
+					Name = SavePriceName
 				};
 			}
 		}
