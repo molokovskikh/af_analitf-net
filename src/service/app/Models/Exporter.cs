@@ -1733,8 +1733,10 @@ select oh.RowId as ServerId,
 	oh.AddressId,
 	oh.PriceCode as PriceId,
 	oh.RegionCode as RegionId,
-	oh.ClientAddition as Comment
+	oh.ClientAddition as Comment,
+	ifnull(p.PriceName, oh.PriceName) as SavePriceName
 from Orders.OrdersHead oh
+left join UserSettings.Prices p on oh.PriceCode = p.PriceCode
 {condition}";
 			Export(Result, sql, "SentOrders", truncate: false, parameters: new { userId = user.Id });
 
