@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Models
 			DeletedOn = DateTime.Now;
 			Address = order.Address;
 			Price = order.Price;
-			PriceDate = Price.PriceDate;
+			PriceDate = order.Price is NHibernate.Proxy.INHibernateProxy ? order.SavePriceDate : Price.PriceDate;
 			CreatedOn = order.CreatedOn;
 			LinesCount = order.LinesCount;
 			Sum = order.Sum;
@@ -85,9 +85,9 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (IsPriceExists())
 					return Price;
-				return new Price {
-					Id = Price.Id
-				};
+				if (Price == null)
+					return new Price {Id = new PriceComposedId()};
+				return new Price {Id = Price.Id};
 			}
 		}
 

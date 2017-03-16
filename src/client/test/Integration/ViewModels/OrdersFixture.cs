@@ -64,6 +64,58 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Delete_order_without_price()
+		{
+			var prices = session.Query<Price>().ToArray();
+			var maxId = prices.Max(p => p.Id.PriceId);
+			var price = new Price("тестовый прайс для удаления")
+			{
+				RegionName = prices[0].RegionName,
+				Id = {
+					PriceId = maxId + 10,
+					RegionId = prices[0].Id.RegionId
+				},
+				RegionId = prices[0].Id.RegionId
+			};
+			session.Save(price);
+			var offer = new Offer(price, 150m);
+			session.Save(offer);
+			var order = PrepareCurrent(offer);
+
+			shell.UpdateStat();
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
+			scheduler.AdvanceByMs(5000);
+			Assert.That(model.CanDelete, Is.True);
+
+			//удаляем прайс
+			session.Delete(order.Price);
+			session.Flush();
+
+			// перемещаем в корзину
+			session.DeleteEach<DeletedOrder>();
+			session.Flush();
+			model.Delete();
+			scheduler.AdvanceByMs(5000);
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
+
+			model.IsDeletedSelected.Value = true;
+			model.IsCurrentSelected.Value = false;
+			model.CurrentDeletedOrder = model.DeletedOrders.First();
+			model.SelectedDeletedOrders.Add(model.CurrentDeletedOrder);
+			Assert.That(model.DeletedOrders.Count(), Is.EqualTo(1));
+
+			// возвращаем из корзины
+			TaskResult(model.UnDelete());
+			scheduler.AdvanceByMs(5000);
+			Assert.That(model.DeletedOrders.Count(), Is.EqualTo(1));
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
+
+			Close(model);
+			session.Clear();
+			Assert.Null(session.Get<Order>(order.Id));
+		}
+
+		[Test]
 		public void Load_order_on_open_tab()
 		{
 			Assert.That(model.SentOrders, Is.Null);
