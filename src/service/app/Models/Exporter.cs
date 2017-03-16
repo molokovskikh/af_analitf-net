@@ -1925,8 +1925,7 @@ select l.WaybillLineId,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.DisplacementDocId as ServerDocId,
-	l.Exp,
-	l.Period
+	l.Exp
 from Inventory.DisplacementLines l
 	join Inventory.DisplacementDocs d on d.Id = l.DisplacementDocId
 where d.Timestamp > ?lastSync
@@ -1979,8 +1978,7 @@ select l.Quantity,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.InventoryDocId as ServerDocId,
-	l.Exp,
-	l.Period
+	l.Exp
 from Inventory.InventoryLines l
 	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
 where d.Timestamp > ?lastSync
@@ -2038,9 +2036,7 @@ select l.Exp,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.ReassessmentDocId as ServerDocId,
-	l.Exp,
-	l.Period
+	l.ReassessmentDocId as ServerDocId
 from Inventory.ReassessmentLines l
 	join Inventory.ReassessmentDocs d on d.Id = l.ReassessmentDocId
 where d.Timestamp > ?lastSync
@@ -2207,9 +2203,7 @@ select l.WaybillLineId,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.WriteoffDocId as ServerDocId,
-	l.Exp,
-	l.Period
+	l.WriteoffDocId as ServerDocId
 from Inventory.WriteoffLines l
 	join Inventory.WriteoffDocs d on d.Id = l.WriteoffDocId
 where d.Timestamp > ?lastSync

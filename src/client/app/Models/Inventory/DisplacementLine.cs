@@ -22,8 +22,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual decimal RetailSum => Quantity * RetailCost.GetValueOrDefault();
 
-		public virtual string Period { get; set; }
-
 		public virtual Stock SrcStock { get; set; }
 
 		public virtual Stock DstStock { get; set; }
