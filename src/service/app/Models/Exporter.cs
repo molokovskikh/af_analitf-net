@@ -1868,7 +1868,9 @@ select l.CheckId as ServerDocId,
 	l.ExciseTax,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
-	l.SupplyQuantity
+	l.SupplyQuantity,
+	l.Exp,
+	l.Period
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
@@ -1922,7 +1924,9 @@ select l.WaybillLineId,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.DisplacementDocId as ServerDocId
+	l.DisplacementDocId as ServerDocId,
+	l.Exp,
+	l.Period
 from Inventory.DisplacementLines l
 	join Inventory.DisplacementDocs d on d.Id = l.DisplacementDocId
 where d.Timestamp > ?lastSync
@@ -1974,7 +1978,9 @@ select l.Quantity,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.InventoryDocId as ServerDocId
+	l.InventoryDocId as ServerDocId,
+	l.Exp,
+	l.Period
 from Inventory.InventoryLines l
 	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
 where d.Timestamp > ?lastSync
@@ -2032,7 +2038,9 @@ select l.Exp,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.ReassessmentDocId as ServerDocId
+	l.ReassessmentDocId as ServerDocId,
+	l.Exp,
+	l.Period
 from Inventory.ReassessmentLines l
 	join Inventory.ReassessmentDocs d on d.Id = l.ReassessmentDocId
 where d.Timestamp > ?lastSync
@@ -2086,7 +2094,9 @@ select l.WaybillLineId,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.ReturnDocId as ServerDocId
+	l.ReturnDocId as ServerDocId,
+	l.Exp,
+	l.Period
 from Inventory.ReturnLines l
 	join Inventory.ReturnDocs d on d.Id = l.ReturnDocId
 where d.Timestamp > ?lastSync
@@ -2139,7 +2149,9 @@ select l.Quantity,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.UnpackingDocId as ServerDocId
+	l.UnpackingDocId as ServerDocId,
+	l.Exp,
+	l.Period
 from Inventory.UnpackingLines l
 	join Inventory.UnpackingDocs d on d.Id = l.UnpackingDocId
 where d.Timestamp > ?lastSync
@@ -2195,7 +2207,9 @@ select l.WaybillLineId,
 	l.BillOfEntryNumber,
 	l.VitallyImportant,
 	l.SupplyQuantity,
-	l.WriteoffDocId as ServerDocId
+	l.WriteoffDocId as ServerDocId,
+	l.Exp,
+	l.Period
 from Inventory.WriteoffLines l
 	join Inventory.WriteoffDocs d on d.Id = l.WriteoffDocId
 where d.Timestamp > ?lastSync
