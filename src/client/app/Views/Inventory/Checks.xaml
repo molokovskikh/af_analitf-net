@@ -51,7 +51,7 @@
 				<controls:DataGridTextColumnEx x:Name="AddressColumn" Width="*" Header="Адрес" Binding="{Binding Address.Name}"
 					Visibility="Collapsed"
 					IsReadOnly="True" />
-        <controls:DataGridTextColumnEx x:Name="IdColumn" Header="Номер" Binding="{Binding Id}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="IdColumn" Header="Номер" Binding="{Binding NumberDoc}" Width="*" />
         <controls:DataGridTextColumnEx x:Name="DateColumn" Header="Дата" Binding="{Binding Date}" Width="*" />
 				<!--это код потребуется когда доведем до ума работу с ккм-->
         <!--<controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />-->

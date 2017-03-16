@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 			SrcStock = stock;
 			DisplayDoc = doc.DisplayName;
-			Number = doc.Number;
+			Number = doc.NumberDoc;
 			FromIn = doc.FromIn;
 			OutTo = doc.OutTo;
 			RetailCost = stock.RetailCost;

@@ -32,8 +32,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 	public interface IStockDocument
 	{
 		uint Id { get; set; }
-		string Number { get; set; }
-		string DisplayName { get; set; }
+		string NumberDoc { get; }
+		string DisplayName { get; }
 		string FromIn { get; }
 		string OutTo { get; }
 	}

@@ -13,11 +13,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private bool _new;
 		private uint _id;
 		private string _numberprefix;
+		private string _numberdoc;
 
 		public ReassessmentDoc()
 		{
 			Lines = new List<ReassessmentLine>();
-			DisplayName = "Переоценка";
 		}
 
 		public ReassessmentDoc(Address address, string numberprefix)
@@ -26,7 +26,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Date = DateTime.Now;
 			Address = address;
 			_numberprefix = numberprefix;
-			DisplayName = "Переоценка";
 			_new = true;
 		}
 
@@ -37,11 +36,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 			{
 				_id = value;
 				if (_new)
-					Number = _numberprefix + Id.ToString("d8");
+					NumberDoc = _numberprefix + Id.ToString("d8");
 			}
 		}
-		public virtual string DisplayName { get; set; }
-		public virtual string Number { get; set; }
+		public virtual string DisplayName { get { return "Переоценка"; } }
+		public virtual string NumberDoc
+		{
+			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
+			set { _numberdoc = value; }
+		}
 		public virtual string FromIn
 		{ get { return string.Empty; } }
 		public virtual string OutTo

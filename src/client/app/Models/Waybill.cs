@@ -53,7 +53,6 @@ namespace AnalitF.Net.Client.Models
 		private Rounding? _rounding;
 		private DocStatus _status;
 		private bool _isCreatedByUser;
-		private string _number;
 		private string _numberprefix;
 
 		public Waybill()
@@ -84,18 +83,14 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public override uint Id { get; set; }
-		[Ignore]
-		public virtual string DisplayName { get; set; }
-		[Ignore]
-		public virtual string Number
+		public virtual string DisplayName { get { return "Приходная накладная"; } }
+		public virtual string NumberDoc
 		{
 			get
 			{
-				return _number;
+				return Id.ToString("d8"); ;
 			}
-			set { _number = _numberprefix + Id.ToString("d8"); }
 		}
-		[Ignore]
 		public virtual string FromIn
 		{
 			get
@@ -103,7 +98,6 @@ namespace AnalitF.Net.Client.Models
 				return SupplierName;
 			}
 		}
-		[Ignore]
 		public virtual string OutTo
 		{ get { return string.Empty; } }
 		public virtual string ProviderDocumentId { get; set; }

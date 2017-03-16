@@ -41,11 +41,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private bool _new;
 		private uint _id;
 		private string _numberprefix;
+		private string _numberdoc;
 
 		public Check(Address address, string numberprefix, IEnumerable<CheckLine> lines, CheckType checkType)
 			: this()
 		{
-			DisplayName = "Чек";
 			_numberprefix = numberprefix;
 			_new = true;
 			CheckType = checkType;
@@ -62,7 +62,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Check()
 		{
-			DisplayName = "Чек";
 			Lines = new List<CheckLine>();
 		}
 
@@ -73,11 +72,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 			{
 				_id = value;
 				if (_new)
-					Number = _numberprefix + Id.ToString("d8");
+					NumberDoc = _numberprefix + Id.ToString("d8");
 			}
 		}
-		public virtual string DisplayName { get; set; }
-		public virtual string Number { get; set; }
+		public virtual string DisplayName { get { return "Чек"; } }
+		public virtual string NumberDoc
+		{
+			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
+			set { _numberdoc = value; }
+		}
 		public virtual string FromIn
 		{ get { return string.Empty; } }
 		public virtual string OutTo

@@ -44,7 +44,7 @@
 
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding NumberDoc}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" />
