@@ -7,10 +7,11 @@ using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Config;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using Common.Tools;
 using Dapper;
-using Diadoc.Api.Proto;
+using Devart.Data.MySql;
 using Ionic.Zip;
 using log4net;
 using Newtonsoft.Json;
@@ -24,39 +25,73 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		protected override UpdateResult Execute()
 		{
-			var newLastSync = DateTime.Now;
+			var newLastSync = SystemTime.Now();
 			using (var disposable = new CompositeDisposable())
-			using (var zipStream = File.Open(Cleaner.TmpFile(), FileMode.Open))
-			using (var checkStream = File.Open(Cleaner.TmpFile(), FileMode.Open))
-			using (var lineStream = File.Open(Cleaner.TmpFile(), FileMode.Open)) {
-				using (var reader = Session.Connection.ExecuteReader("select * from Checks where Timestamp > @lastSync",
-						new { lastSync = Settings.LastSync }))
-					WriteTable(reader, checkStream);
-
-				var sql = @"
-select l.*
-from CheckLines l
-	join Checks c on c.Id = l.CheckId
-where c.Timestamp > @lastSync";
-				using (var reader = Session.Connection.ExecuteReader(sql, new {lastSync = Settings.LastSync }))
-					WriteTable(reader, lineStream);
+			using (var zipStream = File.Open(Cleaner.TmpFile(), FileMode.Open)) {
+				var lastSync = Settings.LastSync.ToUniversalTime();
 
 				var actions = Session.Connection
 					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
-						new { lastSync = Settings.LastSync })
+						new { lastSync })
 					.ToArray();
 
 				using (var zip = new ZipFile()) {
-					zip.AddEntry("check-lines", lineStream);
-					zip.AddEntry("checks", checkStream);
 					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
 					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions));
-					WriteModel(zip, disposable, Cleaner, typeof(DisplacementDoc));
-					WriteModel(zip, disposable, Cleaner, typeof(InventoryDoc));
-					WriteModel(zip, disposable, Cleaner, typeof(ReassessmentDoc));
-					WriteModel(zip, disposable, Cleaner, typeof(ReturnToSupplier));
-					WriteModel(zip, disposable, Cleaner, typeof(WriteoffDoc));
-					WriteModel(zip, disposable, Cleaner, typeof(UnpackingDoc));
+
+					WriteSql(zip, disposable, "check-lines", @"
+select l.*
+from CheckLines l
+	join Checks c on c.Id = l.CheckId
+where c.Timestamp > @lastSync");
+					WriteSql(zip, disposable, "checks", "select * from Checks where Timestamp > @lastSync");
+
+					WriteModel(zip, disposable, typeof(DisplacementDoc));
+					WriteSql(zip, disposable, "DisplacementLines", @"
+select l.*
+from DisplacementLines l
+	join DisplacementDocs d on d.Id = l.DisplacementDocId
+where d.Timestamp > @lastSync");
+
+					WriteModel(zip, disposable, typeof(InventoryDoc));
+					WriteSql(zip, disposable, "InventoryLines", @"
+select l.*
+from InventoryLines l
+	join InventoryDocs d on d.Id = l.InventoryDocId
+where d.Timestamp > @lastSync");
+
+					WriteModel(zip, disposable, typeof(ReassessmentDoc));
+					WriteSql(zip, disposable, "ReassessmentLines", @"
+select l.*
+from ReassessmentLines l
+	join ReassessmentDocs d on d.Id = l.ReassessmentDocId
+where d.Timestamp > @lastSync");
+
+					WriteModel(zip, disposable, typeof(ReturnDoc));
+					WriteSql(zip, disposable, "ReturnLines", @"
+select l.*
+from ReturnLines l
+	join ReturnDocs d on d.Id = l.ReturnDocId
+where d.Timestamp > @lastSync");
+
+					WriteModel(zip, disposable, typeof(WriteoffDoc));
+					WriteSql(zip, disposable, "WriteoffLines", @"
+select l.*
+from WriteoffLines l
+	join WriteoffDocs d on d.Id = l.WriteoffDocId
+where d.Timestamp > @lastSync");
+
+					WriteModel(zip, disposable, typeof(UnpackingDoc));
+					WriteSql(zip, disposable, "UnpackingLines", @"
+select l.*
+from UnpackingLines l
+	join UnpackingDocs d on d.Id = l.UnpackingDocId
+where d.Timestamp > @lastSync");
+
+					WriteSql(zip, disposable, "Waybills", @"
+select Id, Timestamp
+from Waybills
+where Timestamp > @lastSync and IsCreatedByUser = 0");
 
 					zip.Save(zipStream);
 				}
@@ -75,53 +110,60 @@ where c.Timestamp > @lastSync";
 				var import = Configure(new ImportCommand(dir) {
 					Strict = false
 				});
-				import.ImportTables();
+				var ListAdresesBeforeImport = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+				import.ImportTables(ListAdresesBeforeImport);
 				Settings.LastSync = newLastSync;
 				Settings.ServerLastSync = DateTime.Parse(File.ReadAllText(Path.Combine(dir, "server-timestamp")));
-				using (var trx = Session.BeginTransaction()) {
-					Session.Flush();
-					trx.Commit();
-				}
 			}
 			return UpdateResult.OK;
 		}
 
-		private void WriteModel(ZipFile zip, CompositeDisposable disposable, FileCleaner cleaner, Type type)
+		private void WriteModel(ZipFile zip, CompositeDisposable disposable, Type type)
 		{
 			var mapping = Configuration.GetClassMapping(type);
 			var sql = $"select * from {mapping.Table.Name} where Timestamp > @lastSync";
-			var stream = File.Open(Cleaner.TmpFile(), FileMode.Open);
-			disposable.Add(stream);
-			using (var reader = Session.Connection.ExecuteReader(sql, new { lastSync = Settings.LastSync }))
-				WriteTable(reader, stream);
+			WriteSql(zip, disposable, mapping.Table.Name, sql);
 		}
 
-		private static void WriteTable(IDataReader reader, FileStream stream)
+		private void WriteSql(ZipFile zip, CompositeDisposable disposable, string name, string sql)
 		{
-			var table = new DataTable();
-			table.Load(reader);
+			var stream = File.Open(Cleaner.TmpFile(), FileMode.Open);
+			disposable.Add(stream);
+			var cmd = new MySqlCommand(sql, (MySqlConnection)Session.Connection);
+			cmd.Parameters.AddWithValue("@lastSync", Settings.LastSync.ToUniversalTime());
+			var adaper = new MySqlDataAdapter(cmd);
+			var table = new DataTable("data");
+			adaper.Fill(table);
+			table.Constraints.Clear();
 			table.WriteXml(stream, XmlWriteMode.WriteSchema);
 			stream.Position = 0;
+			zip.AddEntry(name, stream);
 		}
 
 		public static async Task Start(Config.Config config,
 			ManualResetEventSlim startEvent,
-			CancellationToken token)
+			CancellationToken token,
+			NotifyValue<User> user)
 		{
 			while (!token.IsCancellationRequested) {
-				await TaskEx.WhenAny(TaskEx.Delay(TimeSpan.FromMinutes(10), token), TaskEx.Run(() => startEvent.Wait()));
+				await TaskEx.WhenAny(TaskEx.Delay(TimeSpan.FromSeconds(30), token), TaskEx.Run(() => startEvent.Wait()));
 				if (token.IsCancellationRequested)
 					return;
+				if (user.Value?.IsStockEnabled == false)
+					continue;
 
 				startEvent.Reset();
 				try {
 					using (var sync = new SyncCommand()) {
 						sync.InitSession();
-						var settings = sync.Session.Query<Settings>().FirstOrDefault();
-						if (settings?.IsValid == true) {
-							sync.Configure(settings, config, token);
-							sync.Execute();
-							Env.Current.Bus.SendMessage("stocks", "reload");
+						using (var trx = sync.Session.BeginTransaction()) {
+							var settings = sync.Session.Query<Settings>().FirstOrDefault();
+							if (settings?.IsValid == true) {
+								sync.Configure(settings, config, token);
+								sync.Execute();
+								Env.Current.Bus.SendMessage("stocks", "reload");
+							}
+							trx.Commit();
 						}
 					}
 				} catch(Exception e) {

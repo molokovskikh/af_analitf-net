@@ -11,6 +11,7 @@ using AnalitF.Net.Service.Models;
 using AnalitF.Net.Service.Models.Inventory;
 using Common.Models;
 using Common.Tools;
+using Dapper;
 using Ionic.Crc;
 using Ionic.Zip;
 using log4net;
@@ -34,6 +35,7 @@ namespace AnalitF.Net.Service.Controllers
 			var input = request.Content.ReadAsStreamAsync().Result;
 			var serverTimestamp = DateTime.Now;
 			var lastSync = DateTime.MinValue;
+			var postProcessing = new List<string>();
 			using (var zip = ZipFile.Read(input)) {
 				foreach (var item in zip) {
 					if (item.FileName == "stock-actions") {
@@ -58,10 +60,25 @@ namespace AnalitF.Net.Service.Controllers
 
 					var table = new DataTable();
 					table.ReadXml(item.OpenReader());
+					table.Constraints.Clear();
+					if (table.Columns.Contains("ServerDocId"))
+						table.Columns.Remove("ServerDocId");
+					if (table.Columns.Contains("ServerId"))
+						table.Columns.Remove("ServerId");
+					if (table.Columns.Contains("Timestamp") && !item.FileName.EndsWith("Waybills"))
+						table.Columns.Remove("Timestamp");
+
 					MySqlCommand cmd;
 					var columnMap = new Dictionary<string ,string>(StringComparer.InvariantCultureIgnoreCase) {
 						{ "Id", "ClientPrimaryKey" }
 					};
+					if (item.FileName == "check-lines") {
+						columnMap.Add("CheckId", "ClientDocId");
+					} else if (item.FileName.EndsWith("Lines")) {
+						var name = item.FileName.Replace("Lines", "");
+						columnMap.Add($"{name}DocId", "ClientDocId");
+					}
+
 					foreach (DataColumn dataColumn in table.Columns) {
 						if (!columnMap.ContainsKey(dataColumn.ColumnName))
 							columnMap.Add(dataColumn.ColumnName, dataColumn.ColumnName);
@@ -69,9 +86,28 @@ namespace AnalitF.Net.Service.Controllers
 					var parametersSql = columnMap.Values.Implode(x => "?" + x);
 					var columns = columnMap.Values.Implode();
 					if (item.FileName == "checks") {
-						cmd = new MySqlCommand($"insert into Inventory.Checks (UserId, {columns}) values (?userId, {parametersSql})");
+						cmd = new MySqlCommand($"insert into Inventory.Checks (UserId, {columns}) values (?userId, {parametersSql});");
 					} else if (item.FileName == "check-lines") {
-						cmd = new MySqlCommand($"insert into Inventory.CheckLines ({columns}) values ({parametersSql})");
+						cmd = new MySqlCommand($"insert into Inventory.CheckLines (UserId, {columns}) values (?userId, {parametersSql});");
+						postProcessing.Add(@"
+update Inventory.CheckLines l
+join Inventory.Checks d on d.ClientPrimaryKey = l.ClientDocId and d.UserId = l.UserId
+set l.CheckId = d.Id
+where l.CheckId is null
+	and d.UserId = ?userId");
+					} else if (item.FileName.EndsWith("Docs")) {
+						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} (UserId, {columns}) values (?userId, {parametersSql});");
+					} else if (item.FileName.EndsWith("Lines")) {
+						var name = item.FileName.Replace("Lines", "");
+						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} (UserId, {columns}) values (?userId, {parametersSql});");
+						postProcessing.Add($@"
+update Inventory.{item.FileName} l
+join Inventory.{name}Docs d on d.ClientPrimaryKey = l.ClientDocId and d.UserId = l.UserId
+set l.{name}DocId = d.Id
+where l.{name}DocId is null
+	and d.UserId = ?userId");
+					} else if (item.FileName.EndsWith("Waybills")) {
+						cmd = new MySqlCommand("insert into Inventory.StockedWaybills (UserId, DownloadId, ClientTimestamp) values (?userId, ?ClientPrimaryKey, ?Timestamp);");
 					} else {
 						throw new Exception($"Неизвестный тип данных {item.FileName}");
 					}
@@ -88,14 +124,25 @@ namespace AnalitF.Net.Service.Controllers
 
 					foreach (var row in table.AsEnumerable()) {
 						foreach (DataColumn column in table.Columns) {
-							cmd.Parameters[columnMap[column.ColumnName]].Value = row[column];
+							var value = row[column];
+							if (value is DateTime) {
+								value = ((DateTime)value).ToLocalTime();
+							}
+							cmd.Parameters[columnMap[column.ColumnName]].Value = value;
 						}
-						cmd.ExecuteNonQuery();
+						try {
+							cmd.ExecuteNonQuery();
+						} catch(Exception e) {
+							throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
+						}
 					}
 				}
 			}
 
 			Stock.CreateInTransitStocks(Session, CurrentUser);
+			foreach (var sql in postProcessing) {
+				Session.Connection.Execute(sql, new { userId = CurrentUser.Id });
+			}
 			var memory = new MemoryStream();
 			//todo: обдумать возможность ограничения передачи клиентского идентификатора исходя из версии
 			//из-за возможных проблем при пересоздании базы
@@ -120,8 +167,6 @@ namespace AnalitF.Net.Service.Controllers
 			Stock source;
 			if (action.SourceStockId != null) {
 				source = Session.Load<Stock>(action.SourceStockId);
-				if (source.Version != action.SourceStockVersion)
-					throw new Exception($"Конкурентная операция над строкой {action.SourceStockId}");
 			} else {
 				source = Session.Query<Stock>().OrderByDescending(x => x.Id)
 					.FirstOrDefault(x => x.CreatedByUser == CurrentUser && x.ClientPrimaryKey == action.ClientStockId);
@@ -131,11 +176,13 @@ namespace AnalitF.Net.Service.Controllers
 			if (action.ActionType == ActionType.Sale)
 				source.Quantity -= action.Quantity;
 			else if (action.ActionType == ActionType.Stock) {
-				source.Quantity -= action.Quantity;
-				var target = new Stock(CurrentUser, source, action.Quantity, action.ClientStockId,
-						action.RetailCost.Value,
-						action.RetailMarkup.Value);
-				Session.Save(target);
+				source.ClientPrimaryKey = action.ClientStockId;
+				source.CreatedByUser = CurrentUser;
+				source.RetailCost = action.RetailCost;
+				source.RetailMarkup = action.RetailMarkup;
+				source.Status = StockStatus.Available;
+				source.CreatedByUser = CurrentUser;
+				Session.Save(source);
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
 			}

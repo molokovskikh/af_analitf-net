@@ -274,6 +274,63 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsValid => !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName);
 
+		public virtual bool IsWaybillDirValid
+		{
+			get
+			{
+				try
+				{
+					Directory.CreateDirectory(WaybillDir);
+					return true;
+				}
+				catch { return false; }
+			}
+		}
+
+		public virtual bool IsRejectDirValid
+		{
+			get
+			{
+				try
+				{
+					Directory.CreateDirectory(RejectDir);
+					return true;
+				}
+				catch { return false; }
+			}
+		}
+
+		public virtual bool IsReportDirValid
+		{
+			get
+			{
+				try
+				{
+					Directory.CreateDirectory(ReportDir);
+					return true;
+				}
+				catch { return false; }
+			}
+		}
+
+		public virtual bool IsDirectoryValid()
+		{
+			//не проверяем DocDir так как путь данной папки не редактируется в ручную
+			if (IsWaybillDirValid && IsRejectDirValid && IsReportDirValid)
+			{
+				OnPropertyChanged("IsWaybillDirValid");
+
+				OnPropertyChanged("IsRejectDirValid");
+				OnPropertyChanged("IsReportDirValid");
+				return true;
+			}
+			OnPropertyChanged("IsWaybillDirValid");
+			OnPropertyChanged("IsRejectDirValid");
+			OnPropertyChanged("IsReportDirValid");
+			return false;
+
+		}
+
 		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
 		public virtual WaybillActDocumentSettings WaybillActDoc { get; set; }
 		public virtual WaybillProtocolDocumentSettings WaybillProtocolDoc { get; set; }
@@ -639,10 +696,13 @@ namespace AnalitF.Net.Client.Models
 			try {
 				client.DefaultRequestHeaders.Add("OS-Version", Environment.OSVersion.VersionString);
 			} catch (Exception) { }
+#if DEBUG
+			client.DefaultRequestHeaders.Add("Debug-UserName", UserName);
 			if (DebugTimeout > 0)
 				client.DefaultRequestHeaders.Add("debug-timeout", DebugTimeout.ToString());
 			if (DebugFault)
 				client.DefaultRequestHeaders.Add("debug-fault", "true");
+#endif
 			client.BaseAddress = config.BaseUrl;
 			return client;
 		}

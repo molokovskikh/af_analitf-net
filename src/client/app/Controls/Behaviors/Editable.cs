@@ -41,15 +41,14 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			this.scheduler = scheduler ?? DispatcherScheduler.Current;
 		}
 
-		public void Attach(DataGrid grid)
+		public void Attach(UIElement grid)
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
 			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput");
-
 			var lastEdit = DateTime.MinValue;
 			var edit = textInput
 				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Text) != null)
-				.Do(e => e.EventArgs.Handled = true)
+				.Do(e => {e.EventArgs.Handled = true; })
 				.Select(e => new Func<string, string>(v => {
 					var text = e.EventArgs.Text;
 					var now = DateTime.Now;
@@ -98,17 +97,15 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		private void UpdateValue(object sender, Func<string, string> value)
 		{
-			var dataGrid = (DataGrid)sender;
-			var item = dataGrid.SelectedItem as IInlineEditable;
+			IInlineEditable item = sender is DataGrid ? (sender as DataGrid).SelectedItem as IInlineEditable : (sender as WinFormDataGrid).SelectedItem as IInlineEditable;
 			if (item == null)
 				return;
 			item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString()));
-			var editor = GetEditor(dataGrid);
-			if (editor != null) {
+			var editor = GetEditor(sender as UIElement);
+			if (editor != null)
 				editor.Updated();
-			} else {
-				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
-			}
+			else
+				ViewModelHelper.InvokeDataContext(sender, "OfferUpdated");
 		}
 
 		public static void AutoEditOnDigit(DataGrid2 grid, string name)

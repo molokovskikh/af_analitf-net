@@ -65,6 +65,12 @@ namespace AnalitF.Net.Client.Models.Commands
 		public string BatchFile;
 		public BatchMode BatchMode;
 
+		public UpdateCommand(string syncData)
+			: this()
+		{
+			this.syncData = syncData;
+		}
+
 		public UpdateCommand()
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
@@ -112,7 +118,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			var logs = PackLogs(Cleaner.RandomFile());
 			var sendLogsTask = PostFile("Logs", logs);
 			var errorCount = 0;
-			var maxErrorCount = 5;
 			string[] files;
 			while (true) {
 				try {
@@ -121,7 +126,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						var resend = sendLogsTask.IsFaulted || sendLogsTask.IsCanceled
 							|| (sendLogsTask.IsCompleted && sendLogsTask.Result?.IsSuccessStatusCode == false);
 						if (resend) {
-							Log.Warn($"Отправка логов завершился ошибкой, повторяю операцию, попытка {errorCount}/{maxErrorCount}", sendLogsTask.Exception);
+							Log.Warn($"Отправка логов завершился ошибкой, повторяю операцию, попытка {errorCount}/{Config.MaxErrorCount}", sendLogsTask.Exception);
 							sendLogsTask = PostFile("Logs", logs);
 						}
 					}
@@ -203,9 +208,9 @@ namespace AnalitF.Net.Client.Models.Commands
 					if (Token.IsCancellationRequested)
 						throw;
 					errorCount++;
-					if (errorCount > maxErrorCount)
+					if (errorCount >= Config.MaxErrorCount)
 						throw;
-					Log.Error($"Запрос обновления завершился ошибкой, повторяю операцию, попытка {errorCount}/{maxErrorCount}", e);
+					Log.Error($"Запрос обновления завершился ошибкой, повторяю операцию, попытка {errorCount}/{Config.MaxErrorCount}", e);
 				}
 			}//while(true)
 
@@ -915,6 +920,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			//будь бдителен ImportCommand очистит сессию
 			RunCommand(new ImportCommand(data));
 			var settings = Session.Query<Settings>().First();
+			var user = Session.Query<User>().First();
 
 			Log.Info("Пересчет заявок");
 			SyncOrders();
@@ -954,6 +960,10 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			var postUpdate = new PostUpdate();
 			Log.Info("Вычисление забраковки");
 			postUpdate.IsRejected = CalculateRejects(settings);
+			if (user.IsStockEnabled) {
+				Log.Info("Вычисление забраковки на складе");
+				postUpdate.IsRejectedOnStock = CalculateRejectsOnStock(settings);
+			}
 			Log.Info("Вычисление ожидаемых");
 			postUpdate.IsAwaited = offersImported && CalculateAwaited();
 				//в режиме получения документов мы не должны предлагать а должны просто открывать
@@ -993,9 +1003,20 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 				RestoreOrders(request);
 			}
 
-			foreach (var dir in settings.DocumentDirs)
-				Directory.CreateDirectory(dir);
-
+			try
+			{
+				foreach (var dir in settings.DocumentDirs)
+					Directory.CreateDirectory(dir);
+			}
+			catch (Exception e)
+			{
+				if (e is PathTooLongException || e is UnauthorizedAccessException || e is IOException)
+					throw new IOException("Не удалось получить обновление. В настройках некорректно " +
+						"указана папка для сохранения накладных, отказов, отчетов\n" + e.Message);
+				else
+					throw new IOException("Не удалось получить обновление. В настройках некорректно " +
+						"указана папка для сохранения накладных, отказов, отчетов");
+			}
 			//все ошибки при файловых операциях считаются некритическими и игнорируются
 			//это сделано тк на этой фазе наиболее вероятны разнообразные ошибки
 			//но данные в базу уже импортированы и если подтверждение не произойдет они буду выгружены повторно
@@ -1127,6 +1148,25 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
 				.ExecuteUpdate();
+
+			return exists;
+		}
+
+		public bool CalculateRejectsOnStock(Settings settings)
+		{
+			Session.CreateSQLQuery("update Stocks s " +
+				"join WaybillLines l on s.WaybillLineId = l.Id " +
+				"join Rejects r on l.RejectId = r.Id " +
+				"set s.RejectStatus = 2, s.RejectId = r.Id " +
+				"where s.RejectStatus <> 2 " +
+				"and r.Canceled = 0")
+				.ExecuteUpdate();
+			var exists = Session.CreateSQLQuery(
+				"select count(*) " +
+				"from Stocks s " +
+				"where s.Quantity > 0 " +
+				"and s.RejectStatus in (1, 2)")
+				.UniqueResult<long?>() > 0;
 
 			return exists;
 		}

@@ -76,7 +76,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
-				if (DbHelper.IsTestFail() && IsCI()
+				if (DbHelper.IsTestFail() && DbHelper.IsCI()
 					&& activeWindow != null) {
 					dispatcher.Invoke(() => {
 						PrintFixture.SaveToPng(activeWindow, DbHelper.FailDir("screen.png"));
@@ -90,11 +90,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				dispatcher.Invoke(() => shell.Dispose());
 				dispatcher.InvokeShutdown();
 			}
-		}
-
-		public static bool IsCI()
-		{
-			return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"));
 		}
 
 		public void DoubleClick(UIElement element, object origin = null)

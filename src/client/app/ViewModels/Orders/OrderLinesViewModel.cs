@@ -19,6 +19,8 @@ using Common.Tools.Calendar;
 using NHibernate.Linq;
 using ReactiveUI;
 using System.ComponentModel;
+using System.Windows.Controls;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -102,6 +104,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			SessionValue(End, GetType().Name + ".End");
 			SessionValue(IsSentSelected, GetType().Name + ".IsSentSelected");
 			Persist(IsExpanded, "IsExpanded");
+
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public List<Selectable<Tuple<string, string>>> FilterItems { get; set; }
@@ -143,6 +148,16 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public MatchedWaybills MatchedWaybills { get; set; }
 
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
 		public bool CanPrint
 		{
 			get
@@ -151,6 +166,30 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					return User.CanPrint<OrderLinesDocument, OrderLine>();
 				return User.CanPrint<OrderLinesDocument, SentOrderLine>();
 			}
+		}
+
+		public PrintResult Print()
+		{
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
+					if ((string)item.Header == DisplayName)
+						docs.Add(new OrderLinesDocument(this));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			return Preview(DisplayName, new OrderLinesDocument(this));
 		}
 
 		public Editor Editor { get; set; }
@@ -340,7 +379,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			if (!CanDelete)
 				return;
-
 			Editor.Delete();
 		}
 
@@ -356,11 +394,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			//мы могли создать новую строку или удалить существующую
 			//нужно обновить список строк
 			DbReloadToken.Refresh();
-		}
-
-		public PrintResult Print()
-		{
-			return new PrintResult(DisplayName, new OrderLinesDocument(this));
 		}
 	}
 }

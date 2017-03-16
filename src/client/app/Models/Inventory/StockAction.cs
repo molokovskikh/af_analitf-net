@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			RetailMarkup = stock.RetailMarkup;
 			DiscountSum = TypeChange == ActionTypeChange.Minus 
 						&& discountsum != null ? -discountsum : discountsum;
+			Timestamp = DateTime.Now;
 		}
 
 		public virtual uint Id { get; set; }

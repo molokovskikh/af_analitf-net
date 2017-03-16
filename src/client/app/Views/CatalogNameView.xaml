@@ -24,10 +24,11 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
 
 
-			<c:DataGrid2  x:Name="CatalogNames" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"
+			<c:DataGrid2  x:Name="CatalogNames" Grid.Row="1" Grid.RowSpan="3" Grid.Column="0"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
 			SelectionMode="Single" VerticalAlignment="Top" HorizontalScrollBarVisibility="Disabled">
             <DataGrid.Columns>
@@ -37,7 +38,7 @@
             </DataGrid.Columns>
         </c:DataGrid2>
 
-        <ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" />
+        <ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" />
 
         <GridSplitter Grid.Row="1"
 			Grid.Column="1"
@@ -69,7 +70,7 @@
 
         <ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2"
 			caliburn:QuickSearchBehavior.GridRef="{x:Reference Catalogs}" />
-        <Parts:CatalogPanel Grid.Row="2" Grid.Column="2"
+        <Parts:CatalogPanel Grid.Row="3" Grid.Column="2"
 			cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}" />
     </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 using System;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
@@ -9,21 +10,27 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	//очередное безумие будь бдителен
 	//BaseNotify не используется но если wpf binding используется для класса без INotifyPropertyChanged
 	//этот объект попадет в глобальную таблицу внутри wpf и это приведет к утечки памяти
-	public class SearchBehavior : BaseNotify
+	public class SearchBehavior : BaseNotify, IDisposable
 	{
+		IDisposable dispose;
 		//блокирует обработку ввода с клавиатуры в таблице что была возможность у другого обработчика
 		//например у быстрого поиска
 		public bool HandleGridKeyboardInput = true;
 
 		public SearchBehavior(BaseScreen screen)
+			: this(screen.Env)
+		{
+			screen.OnCloseDisposable.Add(this);
+		}
+
+		public SearchBehavior(Env env)
 		{
 			SearchText = new NotifyValue<string>();
 			ActiveSearchTerm = new NotifyValue<string>();
-
-			screen.OnCloseDisposable.Add(SearchText.Changed()
-				.Throttle(Consts.SearchTimeout, screen.Scheduler)
-				.ObserveOn(screen.UiScheduler)
-				.Subscribe(_ => Search()));
+			dispose = SearchText.Changed()
+				.Throttle(Consts.SearchTimeout, env.Scheduler)
+				.ObserveOn(env.UiScheduler)
+				.Subscribe(_ => Search());
 		}
 
 		public NotifyValue<string> SearchText { get; set; }
@@ -52,6 +59,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			ActiveSearchTerm.Value = SearchText.Value;
 			SearchText.Value = "";
 			return HandledResult.Handled();
+		}
+
+		public void Dispose()
+		{
+			dispose?.Dispose();
 		}
 	}
 }

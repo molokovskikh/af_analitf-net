@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
 using AnalitF.Net.Client.Config.NHibernate;
@@ -8,6 +7,7 @@ using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Print;
+using System.Globalization;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -62,6 +62,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual bool? VitallyImportant { get; set; }
 
 		public virtual decimal SupplyQuantity { get; set; }
+
+		public virtual DateTime? Exp { get; set; }
+		public virtual string Period { get; set; }
 	}
 
 	public class Stock : BaseStock
@@ -74,7 +77,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			DocumentDate = DateTime.Now;
 		}
 
-		public Stock(Waybill waybill, WaybillLine line)
+		public Stock(Waybill waybill, WaybillLine line, ISession session)
 		{
 			WaybillId = waybill.Id;
 			WaybillLineId = line.Id;
@@ -84,10 +87,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplierFullName = waybill.Supplier?.FullName;
 			WaybillNumber = waybill.ProviderDocumentId;
 
-			Product = line.Product;
+			Product = line.CatalogId.HasValue ? session.Load<Catalog>(line.CatalogId).FullName : line.Product;
 			ProductId = line.ProductId;
+			CatalogId = line.CatalogId;
 			Producer = line.Producer;
-			ProducerId = line.ProductId;
+			ProducerId = line.ProducerId;
 			Country = line.Country;
 			CountryCode = line.CountryCode;
 			Period = line.Period;
@@ -110,6 +114,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplierCost = line.SupplierCost.GetValueOrDefault();
 			RetailCost = line.RetailCost.GetValueOrDefault();
 			RetailMarkup = line.RetailMarkup;
+			RejectId = line.RejectId;
+			if (line.IsReject)
+				RejectStatus = RejectStatus.Defective;
 		}
 
 		public virtual uint Id { get; set; }
@@ -150,6 +157,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
+		[Ignore]
+		public virtual decimal? NdsAmountResidue
+		{
+			get
+			{
+				if ((SupplierCost == SupplierCostWithoutNds) && (Nds == null || Nds == 0))
+					return Nds;
+				return Math.Round(((SupplierCost - SupplierCostWithoutNds) * Quantity).Value, 2);
+			}
+		}
 		public virtual double NdsPers { get; set; }
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
@@ -164,6 +181,31 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		[Ignore]
 		public virtual bool SpecialMarkup { get; set; }
+
+		[Style]
+		public virtual DateTime? ParsedPeriod
+		{
+			get
+			{
+				DateTime date;
+				if (DateTime.TryParseExact(Period, "dd.MM.yyyy", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date))
+					return date;
+				return null;
+			}
+		}
+
+		[Style("Period")]
+		public virtual bool IsOverdue => ParsedPeriod.HasValue && ParsedPeriod.Value < DateTime.Now;
+
+		public virtual string PeriodMonth
+		{
+			get
+			{
+				if (ParsedPeriod.HasValue)
+					return ParsedPeriod.Value.ToString("MMMM yyyy", CultureInfo.CreateSpecificCulture("ru-RU"));
+				return null;
+			}
+		}
 
 		public override decimal? RetailCost
 		{
@@ -313,12 +355,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? RetailSum => Quantity * RetailCost;
 		public virtual string Vmn { get; set; }
 		public virtual string Gtd { get; set; }
-		public virtual DateTime? Exp { get; set; }
-		public virtual string Period { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
+		public virtual uint? RejectId { get; set; }
 
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 

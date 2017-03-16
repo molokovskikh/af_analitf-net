@@ -10,11 +10,13 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Iesi.Collections;
 using Newtonsoft.Json.Utilities;
 using NPOI.SS.Formula.Functions;
+using WinForm = System.Windows.Forms;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -213,7 +215,16 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsFullyStocked", Background("#25BC37") },
 				{ "IsPartialyStocked", Background("#94BA99") },
 				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
+				{ "IsOverdue", new DataTrigger {
+						Binding = new Binding("IsOverdue"),
+						Value = true,
+						Setters = {
+							new Setter(Control.ForegroundProperty, new SolidColorBrush(Colors.Red)),
+						}
+					}
+				},
 				{ "InFrozenOrders", Background(Colors.Gray) },
+				{ "Confirmed", Background(Colors.Green) },
 			};
 		}
 
@@ -587,22 +598,26 @@ namespace AnalitF.Net.Client.Helpers
 			return (foreground - background) * factor + background;
 		}
 
-		public static void ApplyStyles(Type type, DataGrid grid, ResourceDictionary resources,
+		public static void ApplyStyles(Type type, UIElement grid, ResourceDictionary resources,
 			Panel legend = null,
 			string context = null)
 		{
-			foreach (var column in grid.Columns) {
-				var key = GetKey(column);
-				if (String.IsNullOrEmpty(key))
-					continue;
-				var resource = resources[CellKey(type, key)] as Style
-					?? resources[CellKey(type, key, context)] as Style;
-				if (resource == null)
-					continue;
-				column.CellStyle = resource;
-			}
+			if (grid is DataGrid)
+			{
+				foreach (var column in (grid as DataGrid).Columns)
+				{
+					var key = GetKey(column);
+					if (String.IsNullOrEmpty(key))
+						continue;
+					var resource = resources[CellKey(type, key)] as Style
+						?? resources[CellKey(type, key, context)] as Style;
+					if (resource == null)
+						continue;
+					column.CellStyle = resource;
+				}
 
-			grid.CellStyle = (Style)resources[type.Name + "Row"];
+				 (grid as DataGrid).CellStyle = (Style)resources[type.Name + "Row"];
+			}
 			BuildLegend(type, grid, resources, legend, context);
 		}
 
@@ -619,7 +634,13 @@ namespace AnalitF.Net.Client.Helpers
 			return key;
 		}
 
-		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, Panel legend,
+		private static string GetKey(WinForm.DataGridViewColumn column)
+		{
+			var key = column.DataPropertyName;
+			return key;
+		}
+
+		private static void BuildLegend(Type type, UIElement grid, ResourceDictionary resources, Panel legend,
 			string context)
 		{
 			if (legend == null)
@@ -627,7 +648,8 @@ namespace AnalitF.Net.Client.Helpers
 
 			var labels = from p in type.GetProperties()
 				from StyleAttribute a in p.GetCustomAttributes(typeof(StyleAttribute), true)
-				where grid.Columns.Any(c => IsApplicable(c, a))
+				where  ((grid is DataGrid && (grid as DataGrid).Columns.Any(c => IsApplicable(c, a)))
+							 || (grid is WinFormDataGrid && IsApplicable((WinFormDataGrid)grid, a)))
 					&& (String.IsNullOrEmpty(a.Context) || context == a.Context)
 				orderby a.Description
 				let key = LegendKey(type, p)
@@ -635,7 +657,7 @@ namespace AnalitF.Net.Client.Helpers
 				where style != null
 				select ConnectEdit(new Label {
 					Style = style,
-					Tag = "generated" + grid.Name,
+					Tag = "generated" + (grid as FrameworkElement).Name,
 					Name = a.GetName(p) + "LegendItem",
 				});
 
@@ -674,10 +696,12 @@ namespace AnalitF.Net.Client.Helpers
 			else {
 				//если пользовательские стили изменились нужно перестроить легенду
 				var panel = legend.Children.OfType<LegendPanel>().First();
-				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated" + grid.Name, c.Tag))
+				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated" + (grid as FrameworkElement).Name, c.Tag))
 					.ToArray()
 					.Each(c => panel.Children.Remove(c));
 				panel.Children.AddRange(labels);
+				if (grid is WinFormDataGrid)
+					(grid as WinFormDataGrid).IsStyleAppled = true;
 			}
 		}
 
@@ -695,6 +719,17 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			var key = GetKey(col);
 			return attr.Columns.Length == 0 || (!String.IsNullOrEmpty(key) && attr.Columns.Contains(key));
+		}
+
+		private static bool IsApplicable(WinFormDataGrid grid, StyleAttribute attr)
+		{
+			foreach (WinForm.DataGridViewColumn col in grid.DataGrid.Grid.Columns)
+			{
+				var key = GetKey(col);
+				if (attr.Columns.Length == 0 || (!String.IsNullOrEmpty(key) && attr.Columns.Contains(key)))
+					return true;
+			}
+			return false;
 		}
 
 		public static List<CustomStyle> GetDefaultStyles()

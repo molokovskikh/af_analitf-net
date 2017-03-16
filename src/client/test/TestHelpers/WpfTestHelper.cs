@@ -20,6 +20,7 @@ using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Microsoft.Diagnostics.Runtime;
+using NUnit.Framework;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -28,26 +29,32 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		public static void WithWindow(Action<Window> action)
 		{
+			var testName = TestContext.CurrentContext?.Test?.FullName;
 			var exceptions = new List<Exception>();
 			var t = new Thread(() => {
-				Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
-				var window = new Window();
-				SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
 				try {
-					window.Dispatcher.UnhandledException += (sender, args) => {
-						args.Handled = true;
-						exceptions.Add(args.Exception);
-						window.Close();
-						window.Dispatcher.InvokeShutdown();
-					};
-					action(window);
-				}
-				catch(Exception e) {
+					Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
+					var window = new Window();
+					SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
+					try {
+						window.Dispatcher.UnhandledException += (sender, args) => {
+							args.Handled = true;
+							exceptions.Add(args.Exception);
+							window.Close();
+							window.Dispatcher.InvokeShutdown();
+						};
+						action(window);
+					}
+					catch(Exception e) {
+						exceptions.Add(e);
+						throw;
+					}
+					window.Show();
+					Dispatcher.Run();
+				} catch (Exception e) {
+					Console.WriteLine($"Ошибка в тесте {testName} - {e}");
 					exceptions.Add(e);
-					throw;
 				}
-				window.Show();
-				Dispatcher.Run();
 			}) {
 				IsBackground = true
 			};
@@ -65,30 +72,36 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static void WithWindow2(Func<Window, Task> action)
 		{
+			var testName = TestContext.CurrentContext?.Test?.FullName;
 			var exceptions = new List<Exception>();
 			var t = new Thread(() => {
-				Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
-				var window = new Window();
-				SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
 				try {
-					window.Dispatcher.UnhandledException += (sender, args) => {
-						args.Handled = true;
-						exceptions.Add(args.Exception);
-						window.Close();
-						window.Dispatcher.InvokeShutdown();
-					};
-					action(window).ContinueWith(it => {
-						if (it.IsFaulted)
-							exceptions.AddRange(it.Exception.InnerExceptions);
-						Shutdown(window);
-					});
-				}
-				catch(Exception e) {
+					Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
+					var window = new Window();
+					SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
+					try {
+						window.Dispatcher.UnhandledException += (sender, args) => {
+							args.Handled = true;
+							exceptions.Add(args.Exception);
+							window.Close();
+							window.Dispatcher.InvokeShutdown();
+						};
+						action(window).ContinueWith(it => {
+							if (it.IsFaulted)
+								exceptions.AddRange(it.Exception.InnerExceptions);
+							Shutdown(window);
+						});
+					}
+					catch(Exception e) {
+						exceptions.Add(e);
+						throw;
+					}
+					window.Show();
+					Dispatcher.Run();
+				} catch(Exception e) {
+					Console.WriteLine($"Ошибка в тесте {testName} - {e}");
 					exceptions.Add(e);
-					throw;
 				}
-				window.Show();
-				Dispatcher.Run();
 			}) {
 				IsBackground = true
 			};

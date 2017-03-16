@@ -24,13 +24,13 @@ using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditReassessmentDoc : BaseScreen2, IPrintableStock
+	public class EditReassessmentDoc : BaseScreen2, IPrintable
 	{
 		private EditReassessmentDoc()
 		{
 			Lines = new ReactiveCollection<ReassessmentLine>();
 			Session.FlushMode = FlushMode.Never;
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 		}
 
@@ -73,6 +73,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Save();
 			base.OnDeactivate(close);
+		}
+
+		public override void Update()
+		{
+			Session.Refresh(Doc);
 		}
 
 		private void InitDoc(ReassessmentDoc doc)
@@ -264,33 +269,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new Tags(null, tags));
 		}
 
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Переоценка"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Акт переоценки"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Ярлыки"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
 					if ((string) item.Header == "Переоценка")
 						docs.Add(new ReassessmentDocument(Lines.ToArray()));
 					if ((string) item.Header == "Акт переоценки")
@@ -320,12 +318,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else if (dialog.ShowDialog() == true)
 				dialog.PrintDocument(doc, name);
 		}
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

@@ -120,7 +120,7 @@
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnDocumentDate}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnWriteTime}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnType}, Path=ActualWidth}"/>
-							<c:DataGridTextColumnEx Width="{Binding Source={x:Reference Status}, Path=ActualWidth}"/>
+								<c:DataGridTextColumnEx Width="{Binding Source={x:Reference Status}, Path=ActualWidth}" Header="Статус"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSupplierName}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
                                         Binding="{Binding TotalSum}"/>

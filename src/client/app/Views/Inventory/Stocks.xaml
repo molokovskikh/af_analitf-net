@@ -4,10 +4,18 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
 	mc:Ignorable="d"
-	d:DesignHeight="300" d:DesignWidth="300">
+	d:DesignHeight="300" d:DesignWidth="300"
+	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="CTRL+SHIFT+R" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="Update" />
@@ -22,20 +30,29 @@
 		</Grid.RowDefinitions>
 		<Menu Grid.Row="0">
 			<MenuItem Header="Приходные документы">
-				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
-				<MenuItem Header="Излишки" Name="InventoryDocs" />
+				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders"
+					Visibility="{Binding Shell.IsOrderEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Излишки" Name="InventoryDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
 			</MenuItem>
 			<MenuItem Header="Расходные документы">
-				<MenuItem Header="Переоценка" Name="ReassessmentDocs" />
-				<MenuItem Header="Списание" Name="WriteoffDocs" />
-				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
-				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
+				<MenuItem Header="Переоценка" Name="ReassessmentDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Списание" Name="WriteoffDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
 				<MenuItem Header="Распаковка" Name="UnpackingDocs" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
-				<MenuItem Header="Чеки" Name="Checks" />
-				<MenuItem Header="Движение товара по накладным" Name="GoodsMovement" />
+				<MenuItem Header="Чеки" Name="Checks"
+					Visibility="{Binding Shell.IsCashEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Движение товара по накладным" Name="GoodsMovement"
+					Visibility="{Binding Shell.IsStockEnabled.Value, Converter={StaticResource BoolToCollapsed}}" />
+				<MenuItem Header="Отчет по срокам годности" Name="ShelfLife" />
 			</MenuItem>
 		</Menu>
 		<WrapPanel Grid.Row="1" Style="{StaticResource FilterWrapPanel}" >
@@ -43,6 +60,7 @@
 			<controls:PopupSelector VerticalAlignment="Center" x:Name="StatusFilter"
 				ButtonContent="Статус"
 				Member="Name" />
+			<CheckBox x:Name="OnlyRejected_Value" VerticalAlignment="Center" Margin="4">Только забраковка</CheckBox>
 			<Button Name="OpenWaybill">В накладную</Button>
 		</WrapPanel>
 		<controls:DataGrid2 x:Name="Items" Grid.Row="2" ShowAddressColumn="{Binding AddressSelector.All.Value}" AddressColumn="{x:Reference Name=AddressColumn}">
@@ -57,6 +75,8 @@
 				<controls:DataGridTextColumnEx x:Name="ClmnWaybill" Header="Накладная" Binding="{Binding WaybillId}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCount" Header="Кол-во" Binding="{Binding Quantity}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnReservedQuantity" Header="В резерве" Binding="{Binding ReservedQuantity}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSerialNumber" Header="Серия" Binding="{Binding SerialNumber}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnExp" Header="Срок годности" Binding="{Binding Exp, StringFormat=d}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding SupplierCost}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnRetailCost" Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnSum" Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" TextAlignment="Right" />
@@ -81,6 +101,8 @@
 																			 FontWeight="Bold" Binding="{Binding TotalCount}" TextAlignment="Right"/>
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnReservedQuantity}, Path=ActualWidth}"
 																			 FontWeight="Bold" Binding="{Binding ReservedQuantity}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnSerialNumber}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnExp}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCost}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnRetailCost}, Path=ActualWidth}" />
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnSum}, Path=ActualWidth}"

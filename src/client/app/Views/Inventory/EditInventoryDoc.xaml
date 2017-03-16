@@ -5,12 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
              xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+             xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 						 xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="1000">
+             d:DesignHeight="300" d:DesignWidth="1000"
+             behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="Ctrl+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Add" />
+		<KeyBinding Gesture="Ctrl+K" Command="caliburn:Commands.InvokeViewModel" CommandParameter="AddFromCatalog" />
 		<KeyBinding Gesture="Delete" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Delete" />
 		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Post" />
 		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel" CommandParameter="UnPost" />
@@ -29,6 +37,7 @@
 
 		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
 			<Button Name="Add" Style="{StaticResource FilterElement}" ToolTip="Добавить (Ctrl+N)">Добавить</Button>
+			<Button Name="AddFromCatalog" Style="{StaticResource FilterElement}" ToolTip="Добавить из каталога (Ctrl+K)">Добавить из каталога</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
 			<Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>

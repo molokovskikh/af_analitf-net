@@ -31,9 +31,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint Id { get; set; }
 
-		public virtual DateTime? Exp { get; set; }
-
-		public virtual string Period { get; set; }
+		public virtual uint? ServerDocId { get; set; }
 
 		public virtual decimal? SupplierSumWithoutNds => SupplierCostWithoutNds * Quantity;
 

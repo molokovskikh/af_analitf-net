@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public static string DebugLogin()
 		{
-			return ConfigurationManager.AppSettings["DebugUser"] ?? Environment.UserName;
+			return ConfigurationManager.AppSettings["DebugUser"] ?? "test";
 		}
 
 		protected void ExecuteFixture(ServerFixture fixture, ISession session)
@@ -36,6 +36,12 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			fixture.Config = Config;
 			fixture.Verbose = Verbose;
 			fixture.Execute(session);
+		}
+
+		protected void Log(string message)
+		{
+			if (Verbose)
+				Console.WriteLine(message);
 		}
 	}
 }

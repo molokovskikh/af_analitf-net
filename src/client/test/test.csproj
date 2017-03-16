@@ -133,6 +133,7 @@
     <Reference Include="UIAutomationProvider" />
     <Reference Include="UIAutomationTypes" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
     <Reference Include="WpfAnimatedGif">
       <HintPath>..\..\..\packages\WpfAnimatedGif.1.4.13\lib\net\WpfAnimatedGif.dll</HintPath>
     </Reference>
@@ -148,6 +149,10 @@
     <Compile Include="Acceptance\StartFixture.cs" />
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
+    <Compile Include="Integration\Commands\SyncFixture.cs" />
+    <Compile Include="Integration\ViewModels\ShelfLifeFixture.cs" />
+    <Compile Include="Fixtures\CreateUser.cs" />
+    <Compile Include="Integration\ViewModels\EditInventoryDocFixture.cs" />
     <Compile Include="Integration\ViewModels\FrontendFixture.cs" />
     <Compile Include="Integration\ViewModels\StockAssortmentFixture.cs" />
     <Compile Include="Integration\ViewModels\UnpackingDocsFixture.cs" />

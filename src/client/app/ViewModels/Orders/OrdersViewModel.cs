@@ -26,6 +26,7 @@ using NHibernate.Proxy;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using Common.NHibernate;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -53,6 +54,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected.Value))
 				.Subscribe(_ => {
+					SetAddressesToMove();
 					NotifyOfPropertyChange(nameof(CanDelete));
 					NotifyOfPropertyChange(nameof(CanFreeze));
 					NotifyOfPropertyChange(nameof(CanUnfreeze));
@@ -113,6 +115,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			IsCurrentSelected
 				.Select(v => v ? "Orders" : "SentOrders")
 				.Subscribe(ExcelExporter.ActiveProperty);
+
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		public AddressSelector AddressSelector { get; set; }
@@ -127,13 +132,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
+			AddressesToMove = new List<Address>();
 			AddressSelector.Init();
 			AddressSelector.FilterChanged.Cast<object>()
 				.Merge(Prices.SelectMany(x => x?.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
 					?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()))
 				.Merge(Prices.Where(x => x != null))
 				.Subscribe(_ => Update(), CloseCancellation.Token);
-			AddressesToMove = Addresses.Where(x => x != Address).ToList();
 
 			RxQuery(s => s.Query<Price>().OrderBy(x => x.Name).Select(x => new Selectable<Price>(x)).ToList())
 				.Subscribe(Prices, CloseCancellation.Token);
@@ -217,8 +222,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.ToList();
 					orders.Each(o => o.CalculateStyle(Address));
 				}
-				if (CurrentOrder != null)
+				if (CurrentOrder != null) {
 					CurrentOrder = orders.FirstOrDefault(x => x.Id == CurrentOrder.Id);
+					SetAddressesToMove();
+				}
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true
 				};
@@ -256,10 +263,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			if (AddressToMove != null)
 				AddressToMove = Session.Load<Address>(AddressToMove.Id);
-
-			AddressesToMove = Addresses.Where(a => a != Address)
-				.OrderBy(a => a.Name)
-				.ToList();
 		}
 
 		public IOrder EditableOrder
@@ -562,6 +565,19 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			return Run(new UnfreezeCommand<Order>(ids, AddressToMove));
 		}
 
+		/// <summary>
+		/// Установка списка адресов для перемещения заказа
+		/// </summary>
+		private void SetAddressesToMove()
+		{
+			if (CurrentOrder != null) {
+				AddressesToMove.Clear();
+				AddressesToMove.AddRange(Addresses.Where(a => a.Id != CurrentOrder.Address.Id)
+					.OrderBy(a => a.Name)
+					.ToList());
+			}
+		}
+
 		public void EnterOrder()
 		{
 			if (CurrentOrder == null)
@@ -578,6 +594,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			Shell.Navigate(new OrderDetailsViewModel(CurrentSentOrder));
 		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
 
 		public bool CanPrint
 		{

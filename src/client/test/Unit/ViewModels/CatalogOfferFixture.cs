@@ -59,6 +59,43 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual(model.RetailCost.Value, 180);
 		}
 
+		/// <summary>
+		/// Проверяем округление цены.
+		/// </summary>
+		[Test]
+		public void Recalculate_on_rounding_changed()
+		{
+			//Arrange
+			decimal expectedNotRound = new decimal(1.65);
+			decimal expectedRound010 = new decimal(1.60);
+			decimal expectedRound050 = new decimal(1.50);
+			decimal expectedRound100 = new decimal(1.00);
+			model.Offers.Value = new List<Offer> {
+				new Offer(new Price("test1"), expectedNotRound) {
+					Id = {
+						OfferId = 1
+					}
+				}
+			};
+			model.CurrentOffer.Value = model.Offers.Value[0];
+			model.RetailMarkup.Value = 0;
+
+			//Act
+			var costNotRound = model.RetailCost.Value;
+			model.Rounding.Value = Rounding.To0_10;
+			var costRound010 = model.RetailCost.Value;
+			model.Rounding.Value = Rounding.To0_50;
+			var costRound050 = model.RetailCost.Value;
+			model.Rounding.Value = Rounding.To1_00;
+			var costRound100 = model.RetailCost.Value;
+
+			//Assert
+			Assert.AreEqual(expectedNotRound, costNotRound);
+			Assert.AreEqual(expectedRound010, costRound010);
+			Assert.AreEqual(expectedRound050, costRound050);
+			Assert.AreEqual(expectedRound100, costRound100);
+		}
+
 		[Test]
 		public void Recalculate_stat_on_edit_reject()
 		{

@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 		public int MappingHash;
 		public bool UseRelativePath;
 
-		public void Init(string connectionStringName = "local", bool debug = false)
+		public void Init(string connectionStringName = "local", bool debug = false, string database = "")
 		{
 			//ilmerge
 			//если сборки объединены то логика определения системы протоколирование не работает
@@ -201,10 +201,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				});
 			});
 			mapper.Class<Check>(m => {
-				m.Version(p => p.Timestamp, c => {
-					c.Type(new TimestampType());
-					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
-				});
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
 			});
 
 			mapper.Class<Mail>(m => {
@@ -251,26 +248,53 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				c.Inverse(true);
 			}));
-			mapper.Class<InventoryDoc>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-			}));
-			mapper.Class<UnpackingDoc>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-			}));
-			mapper.Class<UnpackingDocLine>(m => {
+			mapper.Class<InventoryDoc>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
+			mapper.Class<UnpackingDoc>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
+			mapper.Class<UnpackingLine>(m => {
 				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
 				m.ManyToOne(x => x.SrcStock, p => p.Cascade(Cascade.All));
 			});
 
-			mapper.Class<WriteoffDoc>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-			}));
-			mapper.Class<ReturnToSupplier>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-			}));
-			mapper.Class<DisplacementDoc>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-			}));
+			mapper.Class<WriteoffDoc>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
+			mapper.Class<ReturnDoc>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
+			mapper.Class<DisplacementDoc>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
+			mapper.Class<DisplacementLine>(m => {
+				m.ManyToOne(x => x.SrcStock, p => p.Cascade(Cascade.Refresh));
+				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));
+			});
+			mapper.Class<ReassessmentDoc>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
+			mapper.Class<ReassessmentLine>(m => m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All)));
+
 			mapper.Class<Offer>(m => {
 				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
 				m.Property(l => l.RetailPrice, p => p.Access(Accessor.Field));
@@ -322,21 +346,10 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
 
-			mapper.Class<ReassessmentDoc>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-			}));
-			mapper.Class<ReassessmentLine>(m => m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All)));
-
 			mapper.Class<Stock>(m => {
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
 				m.Property(x => x.RetailCost, p => p.Access(Accessor.Field));
 				m.Property(x => x.RetailMarkup, p => p.Access(Accessor.Field));
-			});
-			mapper.Class<StockAction>(m => {
-				m.Version(p => p.Timestamp, c => {
-					c.Type(new TimestampType());
-					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
-				});
 			});
 
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
@@ -354,7 +367,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					}
 				}
 
-				if (propertyType == typeof(DateTime)) {
+				if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?)) {
 					customizer.Type<UtcToLocalDateTimeType>();
 				}
 
@@ -416,7 +429,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			var dialect = typeof(DevartMySqlDialect).AssemblyQualifiedName;
 
 			if (connectionString.Contains("Embedded=True")) {
-				connectionString = FixRelativePaths(connectionString);
+				connectionString = FixRelativePaths(connectionString, database);
 				driver = typeof(DevartDriver).AssemblyQualifiedName;
 			}
 
@@ -478,12 +491,14 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			throw new Exception(propertyInfo.PropertyType.ToString());
 		}
 
-		public string FixRelativePaths(string connectionString)
+		public string FixRelativePaths(string connectionString, string database = "")
 		{
 			var builder = new MySqlConnectionStringBuilder(connectionString);
+			if (!string.IsNullOrEmpty(database))
+				builder.Database = database;
 			var parameters = builder.ServerParameters;
 			if (String.IsNullOrEmpty(parameters))
-				return connectionString;
+				return string.IsNullOrEmpty(database) ? connectionString : builder.ToString();
 			var dictionary = parameters
 				.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Split('='))
 				.ToDictionary(p => p[0], p => p[1]);

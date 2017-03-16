@@ -306,5 +306,34 @@ namespace AnalitF.Net.Client.Helpers
 				return "Товар был заказан за последние " + days + " дней";
 			return "";
 		}
+
+		/// <summary>
+		/// Проверка на валидность 8/12/13/14-значного штрих-кода
+		/// </summary>
+		/// <param name="code"></param>
+		/// <returns>True, если штрих-код валидный, иначе false</returns>
+		public static bool IsValidBarCode(string code)
+		{
+			if (string.IsNullOrWhiteSpace(code)) return false;
+			if (code.Length != 8 && code.Length != 12 && code.Length != 13 && code.Length != 14) return false;
+
+			int sum = 0;
+			for (int i = 0; i < code.Length - 1; i++){
+				if (!char.IsNumber(code[i])) return false;
+
+				var cchari = (int)char.GetNumericValue(code[i]);
+				if ((code.Length + i) % 2 == 0)
+					sum += cchari * 3;
+				else
+					sum += cchari;
+			}
+
+			//Последняя цифра - контрольное число
+			char checkChar = code[code.Length - 1];
+			if (!char.IsNumber(checkChar)) return false;
+
+			int checkChari = (int)char.GetNumericValue(checkChar);
+			return checkChari == (10 - (sum % 10)) % 10;
+		}
 	}
 }

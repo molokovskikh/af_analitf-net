@@ -12,6 +12,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? WaybillLineId { get; set; }
 
+		public virtual uint? ServerDocId { get; set; }
+
 		public virtual decimal Quantity { get; set; }
 
 		public virtual decimal SupplierSumWithoutNds => Quantity * SupplierCostWithoutNds.GetValueOrDefault();
@@ -19,8 +21,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal SupplierSum => Quantity * SupplierCost.GetValueOrDefault();
 
 		public virtual decimal RetailSum => Quantity * RetailCost.GetValueOrDefault();
-
-		public virtual string Period { get; set; }
 
 		public virtual Stock SrcStock { get; set; }
 

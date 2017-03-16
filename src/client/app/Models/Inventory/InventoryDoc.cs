@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public InventoryDoc()
 		{
-			Lines = new List<InventoryDocLine>();
+			Lines = new List<InventoryLine>();
 		}
 
 		public InventoryDoc(Address address, string numberprefix)
@@ -57,6 +57,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{ get { return string.Empty; } }
 		public virtual string OutTo
 		{ get { return string.Empty; } }
+
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
@@ -88,7 +90,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal LinesCount { get; set; }
 		public virtual string Comment { get; set; }
 
-		public virtual IList<InventoryDocLine> Lines { get; set; }
+		public virtual IList<InventoryLine> Lines { get; set; }
 
 		public virtual string[] FieldsForValidate => new[] { nameof(Address) };
 
@@ -108,7 +110,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual void Post()
 		{
-			CloseDate = DateTime.Now;
+			CloseDate = SystemTime.Now();
+			Timestamp = SystemTime.Now();
 			Status = DocStatus.Posted;
 			// с поставки на склад
 			foreach (var line in Lines)

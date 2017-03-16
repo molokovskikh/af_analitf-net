@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
@@ -35,6 +36,7 @@ using log4net.Config;
 using ILog = log4net.ILog;
 using LogManager = Caliburn.Micro.LogManager;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
+using System.Text.RegularExpressions;
 
 namespace AnalitF.Net.Client
 {
@@ -177,6 +179,16 @@ namespace AnalitF.Net.Client
 			Util.SetValue(instance, "Env", Shell.Env);
 		}
 
+		private int CountDb()
+		{
+			var root = Path.GetDirectoryName(Config.RootDir);
+			var data = Path.Combine(root, "data");
+			var reg = new Regex(@"\\ldb\d{1,9}$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			var dir = new DirectoryInfo(root);
+			var files = dir.GetFiles("users.frm", SearchOption.AllDirectories);
+			return files.Count(r => Equals(r.DirectoryName, data) || reg.IsMatch(r.DirectoryName));
+		}
+
 		private void InitLog()
 		{
 			if (FailFast) {
@@ -210,7 +222,15 @@ namespace AnalitF.Net.Client
 					var property = Config.GetType().GetField(key);
 					if (property == null)
 						continue;
-					property.SetValue(Config, value);
+					if (property.FieldType.IsInstanceOfType(value)) {
+						property.SetValue(Config, value);
+					} else {
+						try {
+							property.SetValue(Config, Convert.ChangeType(value, property.FieldType));
+						} catch (Exception) {
+							property.SetValue(Config, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(value));
+						}
+					}
 				}
 				catch(Exception e) {
 #if DEBUG
@@ -250,6 +270,8 @@ namespace AnalitF.Net.Client
 			else {
 				Directory.CreateDirectory(Config.TmpDir);
 			}
+
+			Config.MultiUser = CountDb() > 1;
 		}
 
 		public void InitShell()

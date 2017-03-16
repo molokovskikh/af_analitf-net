@@ -9,6 +9,8 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
@@ -48,12 +50,18 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 	public class DocModel<T> : BaseScreen, IPrintable where T : class, IDocModel
 	{
-		public DocModel(IDocModel docModel)
+		public DocModel()
+		{
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
+		}
+
+		public DocModel(IDocModel docModel) : this()
 		{
 			Model = docModel;
 		}
 
-		public DocModel(uint id)
+		public DocModel(uint id) : this()
 		{
 			Model = Session.Get<T>(id);
 		}
@@ -62,6 +70,16 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public FlowDocument Document { get; set; }
 
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
 		public bool CanPrint => Document != null;
 
 		public bool CanSave => Document != null;

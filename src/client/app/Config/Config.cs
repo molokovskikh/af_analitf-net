@@ -103,6 +103,7 @@ namespace AnalitF.Net.Client.Config
 			SettingsPath = GetType().Assembly.GetName().Name + ".data";
 		}
 
+		public int MaxErrorCount = 5;
 		public string DebugPipeName;
 		public bool Quiet;
 		public string Cmd;
@@ -113,6 +114,7 @@ namespace AnalitF.Net.Client.Config
 		public string DiadokApiKey;
 		public string DiadokUrl;
 		public SimpleMRUCache Cache = new SimpleMRUCache(10);
+		public bool MultiUser;
 
 		public string TmpDir
 		{

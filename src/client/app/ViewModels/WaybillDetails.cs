@@ -147,6 +147,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null) {
 				return;
 			}
+			Waybill.Settings = Settings;
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
 				.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanStock);
 			Waybill.ObservableForProperty(x => x.Status, skipInitial: false)
@@ -154,7 +155,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Waybill.ObservableForProperty(m => (object)m.Status, skipInitial: false)
 				.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
-				.Select(_ => Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser)
+				.Select(_ => !User.IsStockEnabled && Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser)
 				.Subscribe(CanToEditable);
 
 			if (Waybill.IsNew)
@@ -279,6 +280,7 @@ namespace AnalitF.Net.Client.ViewModels
 				RetailCost = x.RetailCost,
 				SupplierName = Waybill.Supplier?.FullName,
 				ClientName = User?.FullName,
+				AddressName = Settings.Value.Waybills.FirstOrDefault(y => y.BelongsToAddress.Id == Address.Id)?.Name,
 				Producer = x.Producer,
 				ProviderDocumentId = Waybill.ProviderDocumentId,
 				DocumentDate = Waybill.DocumentDate,
@@ -318,15 +320,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.Update(Waybill);
 			Session.Flush();
 			Env.Bus.SendMessage("Changed", "db");
-		}
-
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null) {
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
 		public IEnumerable<IResult> ConsumptionReport()
@@ -615,12 +608,27 @@ namespace AnalitF.Net.Client.ViewModels
 			IsRejectVisible.Value = false;
 		}
 
+		/// <summary>
+		/// Проверка накладной на правильность заполнения
+		/// </summary>
+		/// <returns>true - правильно заполнена, false - неправильно</returns>
+		private bool CheckWaybill()	{
+			if (Lines.Value.OfType<WaybillLine>().Any(l => !l.Quantity.HasValue || (l.Quantity.HasValue && l.Quantity == 0))) {
+				Manager.Notify("Пожалуйста, введите количество в поле 'Заказ'");
+				return false;
+			}
+
+			return true;
+		}
+
 		public void Stock()
 		{
 			if (!CanStock.Value)
 				return;
-			Waybill.Stock(Session);
-			Manager.Notify("Накладная оприходована");
+			if (CheckWaybill()) {
+				Waybill.Stock(Session);
+				Manager.Notify("Накладная оприходована");
+			}
 		}
 
 		public void ToEditable()
@@ -643,5 +651,25 @@ namespace AnalitF.Net.Client.ViewModels
 			};
 		}
 #endif
+
+		public IEnumerable<IResult> SelectFromCatalog()
+		{
+			var line = CurrentLine.Value as WaybillLine;
+			if (!Waybill.IsCreatedByUser || line?.CatalogId != null)
+				yield break;
+			var dlg = new SelectFromCatalog();
+			yield return new DialogResult(dlg);
+			if (dlg.WasCancelled)
+				yield break;
+			if (line == null) {
+				line = new WaybillLine(Waybill);
+				Lines.Value.AddNewItem(line);
+			}
+			line.CatalogId = dlg.CurrentCatalog.Value.Id;
+			line.ProductId = Session.Query<Product>().FirstOrDefault(r => r.CatalogId == line.CatalogId)?.Id;
+			line.Product = dlg.CurrentCatalog.Value.FullName;
+			line.ProducerId = dlg.CurrentProducer.Value.Id;
+			line.Producer = dlg.CurrentProducer.Value.Name;
+		}
 	}
 }

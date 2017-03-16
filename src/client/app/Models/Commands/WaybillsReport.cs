@@ -286,8 +286,8 @@ where d.`Status` = 1 and wl.WaybillId = ?
 union all
 select wl.Product, wl.Producer, wl.SerialNumber, wl.Quantity,
 'Возврат поставщику' as DocType, d.Id as DocumentId, d.Date, l.Quantity as Quantity2
-from returntosupplierlines l
-join returntosuppliers d on d.Id = l.ReturnToSupplierId
+from ReturnLines l
+	join ReturnDocs d on d.Id = l.ReturnDocId
 join waybilllines wl on wl.Id = l.WaybillLineId
 where d.`Status` = 1 and wl.WaybillId = ?
 union all

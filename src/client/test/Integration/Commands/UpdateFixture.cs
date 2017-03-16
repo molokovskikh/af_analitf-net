@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -432,6 +433,32 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Notify_on_rejected_in_stock()
+		{
+			var reject = localSession.Query<Client.Models.Reject>().FirstOrDefault();
+			if (reject == null) {
+				reject = new Client.Models.Reject();
+				localSession.Save(reject);
+				localSession.Flush();
+			}
+			var fix = new LocalWaybill();
+			fix.Execute(localSession);
+			var line = fix.Waybill.Lines.First();
+			line.RejectId = reject.Id;
+			localSession.Update(fix.Waybill);
+			var stock = new Stock() {WaybillLineId = line.Id, Quantity = 1};
+			localSession.Save(stock);
+			localSession.Flush();
+
+			var cmd = new UpdateCommand();
+			Run(cmd);
+
+			var model = ((PostUpdate)((DialogResult)cmd.Results[0]).Model);
+			Assert.That(model.Text, Does.Contain("на складе присутствуют забракованные препараты"));
+			Assert.IsTrue(model.IsRejectedOnStock);
+		}
+
+		[Test]
 		public void Load_history()
 		{
 			var priceId = localSession.Query<Offer>().First().Price.Id.PriceId;
@@ -707,6 +734,43 @@ update Addresses set Id =  2575 where Id = :addressId")
 			cmd.SyncData = "Waybills";
 			Run(cmd);
 			Assert.AreEqual(0, cmd.Results.Count);
+		}
+
+		[Test, Ignore("Тест содержит дефекты")]
+		public void Update_address()
+		{
+			var fixtureAddressChange = Fixture<CreateAddress>();
+			var fixtureAddressNotChange = Fixture<CreateAddress>();
+
+			User user = new User();
+			Address AddressChange = new Address("тестовый адрес доставки до изменения");
+			WaybillSettings WaybillSettingsChange = new WaybillSettings(user, AddressChange);
+
+			Address AddressNotChange = new Address("тестовый адрес доставки до изменения");
+			WaybillSettings WaybillSettingsNotChange = new WaybillSettings(user, AddressNotChange);
+
+
+			using (var transaction = localSession.BeginTransaction())
+			{
+				AddressChange.Id = fixtureAddressChange.Address.Id;
+				AddressNotChange.Id = fixtureAddressNotChange.Address.Id;
+				WaybillSettingsChange.Address = "тестовый адрес доставки до изменения";
+				WaybillSettingsNotChange.Address = "тестовый адрес доставки после ручного изменения";
+
+				localSession.Save(AddressChange);
+				localSession.Save(AddressNotChange);
+				localSession.Save(WaybillSettingsChange);
+				localSession.Save(WaybillSettingsNotChange);
+				transaction.Commit();
+			}
+
+			localSession.Clear();
+			Run(new UpdateCommand());
+
+			WaybillSettingsChange = localSession.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == AddressChange.Id);
+			Assert.AreEqual(fixtureAddressChange.Address.Value, WaybillSettingsChange.Address);
+			WaybillSettingsNotChange = localSession.Query<WaybillSettings>().FirstOrDefault(x => x.BelongsToAddress.Id == AddressNotChange.Id);
+			Assert.AreEqual("тестовый адрес доставки после ручного изменения", WaybillSettingsNotChange.Address);
 		}
 	}
 }

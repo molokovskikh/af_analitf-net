@@ -195,6 +195,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
     <Reference Include="WpfAnimatedGif">
       <HintPath>..\..\..\packages\WpfAnimatedGif.1.4.13\lib\net\WpfAnimatedGif.dll</HintPath>
       <Private>True</Private>
@@ -244,6 +245,13 @@
     <Compile Include="Controls\Preview.cs" />
     <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
+    <Compile Include="Controls\WinFormDataGrid.cs" />
+    <Compile Include="Controls\WinFormGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\WinFormGrid.Designer.cs">
+      <DependentUpon>WinFormGrid.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
@@ -300,13 +308,13 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\Inventory\DisplacementDoc.cs" />
-    <Compile Include="Models\Inventory\InventoryDocLine.cs" />
+    <Compile Include="Models\Inventory\InventoryLine.cs" />
     <Compile Include="Models\Inventory\ReassessmentLine.cs" />
     <Compile Include="Models\Inventory\UnpackingDoc.cs" />
-    <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
+    <Compile Include="Models\Inventory\ReturnDoc.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
     <Compile Include="Models\Inventory\DisplacementLine.cs" />
-    <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
+    <Compile Include="Models\Inventory\ReturnLine.cs" />
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
     <Compile Include="Models\Inventory\ReassessmentDoc.cs" />
@@ -314,11 +322,13 @@
     <Compile Include="Models\Inventory\StockAction.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
     <Compile Include="Models\Inventory\SyncCommand.cs" />
+    <Compile Include="Models\Inventory\UnpackingLine.cs" />
     <Compile Include="Models\Inventory\WriteoffDoc.cs" />
     <Compile Include="Models\Inventory\WriteoffLine.cs" />
     <Compile Include="Models\Inventory\WriteoffReason.cs" />
     <Compile Include="Models\Print\CheckDetailsDocument.cs" />
     <Compile Include="Models\Print\CheckDocument.cs" />
+    <Compile Include="Models\Print\ShelfLifeDocument.cs" />
     <Compile Include="Models\Print\DisplacementDocumentWaybill.cs" />
     <Compile Include="Models\Print\InventoryDocument.cs" />
     <Compile Include="Models\Print\InventoryActDocument.cs" />
@@ -436,9 +446,17 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
-    <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
+    <Compile Include="ViewModels\SelectFromCatalog.cs" />
+    <Compile Include="ViewModels\Dialogs\Login.cs" />
+    <Compile Include="ViewModels\Dialogs\PrintSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
+    <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
+    <Compile Include="ViewModels\Inventory\Frontend2.cs" />
+    <Compile Include="ViewModels\Inventory\StockChooser.cs" />
+    <Compile Include="ViewModels\Inventory\ShelfLife.cs" />
+    <Compile Include="ViewModels\Inventory\AddStockFromCatalog.cs" />
     <Compile Include="ViewModels\Inventory\CreateDisplacementDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateInventoryDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
@@ -465,6 +483,7 @@
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
     <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
+    <Compile Include="ViewModels\Dialogs\WinFormDataGridConfig.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
@@ -543,8 +562,17 @@
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Dialogs\ReportSetting.xaml.cs">
-      <DependentUpon>ReportSetting.xaml</DependentUpon>
+    <Compile Include="Views\SelectFromCatalog.xaml.cs">
+      <DependentUpon>SelectFromCatalog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\CatalogChooser.xaml.cs">
+      <DependentUpon>CatalogChooser.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\PrintSetting.xaml.cs">
+      <DependentUpon>PrintSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\RequirementNegotiationProtocol.xaml.cs">
       <DependentUpon>RequirementNegotiationProtocol.xaml</DependentUpon>
@@ -593,6 +621,9 @@
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\WinFormDataGridConfig.xaml.cs">
+      <DependentUpon>WinFormDataGridConfig.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\EditDefectSeries.xaml.cs">
       <DependentUpon>EditDefectSeries.xaml</DependentUpon>
     </Compile>
@@ -632,6 +663,18 @@
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Inventory\Frontend2.xaml.cs">
+      <DependentUpon>Frontend2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ExpSelector.xaml.cs">
+      <DependentUpon>ExpSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ShelfLife.xaml.cs">
+      <DependentUpon>ShelfLife.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\AddStockFromCatalog.xaml.cs">
+      <DependentUpon>AddStockFromCatalog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Inventory\CreateDisplacementDoc.xaml.cs">
       <DependentUpon>CreateDisplacementDoc.xaml</DependentUpon>
     </Compile>
@@ -649,6 +692,9 @@
     </Compile>
     <Compile Include="Views\Inventory\StockAssortmentView.xaml.cs">
       <DependentUpon>StockAssortmentView.xaml</DependentUpon>
+	</Compile>
+    <Compile Include="Views\Inventory\StockChooser.xaml.cs">
+      <DependentUpon>StockChooser.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Tags.xaml.cs">
       <DependentUpon>Tags.xaml</DependentUpon>
@@ -875,6 +921,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\SelectFromCatalog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\CatalogNameView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -915,6 +965,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\CatalogChooser.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\CreateWaybill.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -922,6 +976,10 @@
     <Page Include="Views\Dialogs\DocModel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\WinFormDataGridConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Dialogs\EditDefectSeries.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -935,6 +993,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\Login.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\OrderWarning.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -943,7 +1005,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\ReportSetting.xaml">
+    <Page Include="Views\Dialogs\PrintSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -991,6 +1053,22 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\Frontend2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\ExpSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ShelfLife.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\AddStockFromCatalog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Inventory\CreateDisplacementDoc.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1012,6 +1090,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\StockAssortmentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\StockChooser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1377,6 +1459,11 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\WinFormGrid.resx">
+      <DependentUpon>WinFormGrid.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Target Name="BeforeBuild">
     <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />

@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class Frontend : BaseScreen2
 	{
+		private const string TXT_START_STATUS = "Готов к работе (F1 для справки)";
+
 		public Frontend()
 		{
 			DisplayName = "Регистрация продаж";
@@ -27,17 +29,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines = new ReactiveCollection<CheckLine>();
 			Lines.Changed.Subscribe(_ => {
 				if (Lines.Count == 0) {
-					Status.Value = "Готов к работе";
 					Discount.Value = null;
 					Sum.Value = null;
 				} else {
+					Status.Value = StatusText();
 					Change.Value = null;
-					Status.Value = "Открыт чек продажи";
 					Sum.Value = Lines.Sum(x => x.RetailSum);
 					Discount.Value = Lines.Sum(x => x.DiscontSum);
 				}
 			});
-			Status.Value = "Готов к работе (F1 для справки)";
+			Status.Value = TXT_START_STATUS;
 			checkType = CheckType.SaleBuyer;
 			PaymentType.Value = Models.Inventory.PaymentType.Cash;
 			PaymentType.Subscribe(_ => {
@@ -60,6 +61,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private CheckType checkType { get; set; }
 		public NotifyValue<PaymentType> PaymentType { get; set; }
+
+		private string StatusText()
+		{
+			return checkType == CheckType.SaleBuyer ? "Открыт чек продажи" : "Открыт возврат по чеку";
+		}
 
 		private void Message(string text)
 		{
@@ -136,7 +142,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == barcode)).Result;
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).Where(x => x.Barcode == barcode)).Result;
 			UpdateProduct(stock, "Штрих код");
 		}
 
@@ -151,12 +157,30 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			UpdateProduct(stock, "Штрих код");
 		}
 
+		private bool HasStocksSimilarities(List<Stock> stocks)
+		{
+			var item = stocks.FirstOrDefault();
+			if (item == null)
+				return false;
+
+			var anotherProductIdInList = stocks.Where(i => i.ProductId.HasValue)
+				.Select(d => d.ProductId).GroupBy(f => f.Value).Count();
+
+			var currenProductIdInStock = Env.Query(s => Stock
+				.AvailableStocks(s, Address).Where(i => i.ProductId.HasValue)
+				.Count(x => x.ProductId.Value == item.ProductId.Value)).Result;
+
+			return anotherProductIdInList > 1 || currenProductIdInStock > 1;
+		}
+
 		private void UpdateProduct(Stock stock, string operation)
 		{
 			if (stock == null) {
 					Error("Товар не найден");
 					return;
 			}
+			if (!StockCheck(stock))
+				return;
 			if (Quantity.Value == null) {
 				Error("Введите количество");
 				return;
@@ -178,34 +202,31 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void UpdateProduct(IQueryable<Stock> stocks, string operation)
 		{
-			if (Quantity.Value == null) {
-				Error("Введите количество");
-				return;
-			}
+			//если элементов нет - выводим ошибку
 			if (!stocks.Any()) {
 				Error("Товар не найден");
 				return;
 			}
-			if (stocks.Count() > 1) {
-				var result = SearchByTerm(stocks.First().Product);
+			//если элементов больше одного или для первого элемента есть выбор, предоставляем выбор пользователю
+			if (stocks.Count() > 1 || HasStocksSimilarities(stocks.ToList())) {
+				var result = SearchByTerm(stocks.First().Barcode);
 				Coroutine.BeginExecute(result.GetEnumerator(), new ActionExecutionContext());
 				return;
 			}
-			var stock = stocks.First();
-			//списывать количество мы должны с загруженного объекта
-			var quantity = Quantity.Value.Value;
-			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
-			if (checkType == CheckType.SaleBuyer && stock.Quantity < quantity) {
-				Error("Нет требуемого количества");
-				return;
-			}
-			Input.Value = null;
-			Message(operation);
+			//если элемент один и нет возможного выбора, обрабатываем его
+			UpdateProduct(stocks.First(), operation);
+		}
 
-			var line = new CheckLine(stock, quantity, checkType);
-			Lines.Add(line);
-			CurrentLine.Value = line;
-			Quantity.Value = null;
+		private bool StockCheck(Stock stock)
+		{
+			if (stock.RejectStatus == RejectStatus.Defective) {
+				var cause = "";
+				if (stock.RejectId.HasValue)
+					cause = Env.Query(s => s.Get<Reject>(stock.RejectId)?.CauseRejects).Result;
+				if (!Confirm($"Продажа забракованного товара. {cause}"))
+					return false;
+			}
+			return true;
 		}
 
 		// Закрыть чек Enter
@@ -230,7 +251,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
-				var check = new Check(Address, Settings.Value.NumberPrefix, Lines, checkType);
+
+				var check = new Check(User, Address, Settings.Value.NumberPrefix, Lines, checkType);
+
 				check.Payment = payment;
 				check.Charge = charge;
 				using (var trx = s.BeginTransaction()) {
@@ -255,22 +278,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Trigger()
 		{
 			Reset();
-			if (checkType == CheckType.SaleBuyer)
-			{
-				checkType = CheckType.CheckReturn;
-				Status.Value = "Открыт возврат по чеку";
-			}
-			else if (checkType == CheckType.CheckReturn)
-			{
-				checkType = CheckType.SaleBuyer;
-				Status.Value = "Открыт чек продажи";
-			}
+			checkType = checkType == CheckType.SaleBuyer ? CheckType.CheckReturn : CheckType.SaleBuyer;
+			Status.Value = StatusText();
 		}
 
 		private void Reset()
 		{
 			Lines.Clear();
-			Status.Value = "Готов к работе";
+			Status.Value = TXT_START_STATUS;
 			Quantity.Value = null;
 			PaymentType.Value = Models.Inventory.PaymentType.Cash;
 		}
@@ -283,7 +298,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				: Models.Inventory.PaymentType.Cash;
 		}
 
-		// Поиск товара  F6
+		// Поиск товара по наименованию F6
 		public IEnumerable<IResult> SearchByTerm(string term = "")
 		{
 			if (Quantity.Value == null) {
@@ -297,6 +312,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
 
+		// Поиск товара по цене F7
 		public IEnumerable<IResult> SearchByCost(decimal cost = 0)
 		{
 			if (Quantity.Value == null) {
@@ -321,14 +337,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (String.IsNullOrEmpty(Input.Value))
 				yield break;
 			var barcode = Input.Value;
-			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).FirstOrDefault(x => x.Barcode == barcode)).Result;
-			if (stock == null)
+			var stock = Env.Query(s => Stock.AvailableStocks(s, Address).Where(x => x.Barcode == barcode)).Result;
+			if (!stock.Any())
 				yield break;
 			if (Quantity.Value == null)
 				Quantity.Value = 1;
 			UpdateProduct(stock, "Штрих код");
 		}
-
+		
 		public class UnpackSettings
 		{
 			[Display(Name = "Количество")]
@@ -365,7 +381,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 
 			var doc = new UnpackingDoc(Address, Settings.Value.NumberPrefix);
-			var uline = new UnpackingDocLine(srcStock, settings.Multiplicity);
+			var uline = new UnpackingLine(srcStock, settings.Multiplicity);
 			doc.Lines.Add(uline);
 			doc.UpdateStat();
 			doc.Post();

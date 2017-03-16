@@ -49,6 +49,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{ get { return string.Empty; } }
 		public virtual string OutTo
 		{ get { return string.Empty; } }
+
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
@@ -86,6 +88,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.ApplyReserved(this, line.Quantity));
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -97,12 +98,14 @@ namespace AnalitF.Net.Client.Views
 				Header = "Наименование",
 				Binding = new Binding("Product"),
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
-				SortDirection = ListSortDirection.Ascending
+				SortDirection = ListSortDirection.Ascending,
+				IsReadOnly = true
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Производитель",
 				Binding = new Binding("Producer"),
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
+				IsReadOnly = true
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Страна",
@@ -126,7 +129,6 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(13, DataGridLengthUnitType.Star),
 				Header = "Штрихкод",
 				Binding = new Binding("EAN13"),
-				Visibility = Visibility.Collapsed
 			});
 			lines.Columns.Add(new CustomDataGridColumn((c, i) => null) {
 				Header = "Сертификаты",
@@ -185,8 +187,9 @@ namespace AnalitF.Net.Client.Views
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Цена поставщика с НДС",
-				Binding = new Binding("SupplierCost"),
+				Binding = new Binding("SupplierCost") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Макс. розничная наценка",
@@ -216,8 +219,9 @@ namespace AnalitF.Net.Client.Views
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Заказ",
-				Binding = new Binding("Quantity"),
+				Binding = new Binding("Quantity") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Розничная сумма",
@@ -264,6 +268,7 @@ namespace AnalitF.Net.Client.Views
 						lines.ItemsSource = model.Lines.Value;
 					}
 					else if (args.PropertyName == "Status") {
+						lines.CommitEdit();//Завершаем редактирование, чтобы не исчезла текущая строка
 						lines.IsReadOnly = model.Waybill.Status == DocStatus.Posted;
 					}
 				};

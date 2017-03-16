@@ -4,13 +4,13 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class InventoryDocLine : BaseStock, IEditableObject
+	public class InventoryLine : BaseStock, IEditableObject
 	{
-		public InventoryDocLine()
+		public InventoryLine()
 		{
 		}
 
-		public InventoryDocLine(InventoryDoc doc, Stock stock, decimal quantity, ISession session)
+		public InventoryLine(InventoryDoc doc, Stock stock, decimal quantity, ISession session)
 		{
 			Stock.Copy(stock, this);
 			Id = 0;
@@ -24,6 +24,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual InventoryDoc Doc { get; set; }
 
+		public virtual uint? ServerDocId { get; set; }
+
 		public virtual decimal SupplierSumWithoutNds => Quantity * SupplierCostWithoutNds.GetValueOrDefault();
 
 		public virtual decimal SupplierSum => Quantity * SupplierCost.GetValueOrDefault();
@@ -31,8 +33,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal RetailSum => Quantity * RetailCost.GetValueOrDefault();
 
 		public virtual decimal Quantity { get; set; }
-
-		public virtual string Period { get; set; }
 
 		public virtual Stock Stock { get; set; }
 

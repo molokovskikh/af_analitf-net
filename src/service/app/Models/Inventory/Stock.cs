@@ -16,6 +16,7 @@ namespace AnalitF.Net.Service.Models.Inventory
 		{
 			Address = source.Address;
 			ProductId = source.ProductId;
+			CatalogId = source.CatalogId;
 			Product = source.Product;
 			ProducerId = source.ProducerId;
 			Producer = source.Producer;
@@ -45,6 +46,10 @@ namespace AnalitF.Net.Service.Models.Inventory
 			ClientPrimaryKey = clientId;
 			RetailCost = retailCost;
 			RetailMarkup = retailMarkup;
+
+			WaybillNumber = source.WaybillNumber;
+			SupplierId = source.SupplierId;
+			SupplierFullName = source.SupplierFullName;
 		}
 
 		public Stock()
@@ -59,6 +64,7 @@ namespace AnalitF.Net.Service.Models.Inventory
 		public virtual StockStatus Status { get; set; }
 
 		public virtual uint? WaybillLineId { get; set; }
+		public virtual uint? WaybillId { get; set; }
 		public virtual Address Address { get; set; }
 		public virtual User CreatedByUser { get; set; }
 
@@ -100,6 +106,10 @@ namespace AnalitF.Net.Service.Models.Inventory
 		public virtual decimal? RetailCost { get; set; }
 		public virtual decimal? RetailMarkup { get; set; }
 
+		public virtual string WaybillNumber { get; set; }
+		public virtual uint? SupplierId { get; set; }
+		public virtual string SupplierFullName { get; set; }
+
 		public static void CreateInTransitStocks(ISession session, User user)
 		{
 			session.CreateSQLQuery(@"
@@ -130,14 +140,18 @@ insert into Inventory.Stocks(WaybillLineId,
 	Exp,
 	Certificates,
 	Barcode,
-	CountryCode
+	CountryCode,
+	WaybillNumber,
+	SupplierId,
+	SupplierFullName,
+	WaybillId
 )
 select db.Id,
 	:status,
 	dh.AddressId,
 	db.ProductId,
 	p.CatalogId,
-	db.Product,
+	IFNULL(c.Name, db.Product),
 	db.ProducerId,
 	db.Producer,
 	db.Country,
@@ -159,12 +173,18 @@ select db.Id,
 	str_to_date(db.Period, '%d.%m.%Y') as Exp,
 	db.Certificates,
 	db.EAN13 as Barcode,
-	db.CountryCode
+	db.CountryCode,
+	dh.ProviderDocumentId,
+	dh.FirmCode,
+	sp.FullName,
+	dh.DownloadId
 from Customers.UserAddresses ua
 	join Customers.Addresses a on a.Id = ua.AddressId
 		join Documents.DocumentHeaders dh on dh.Addressid = a.Id
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 				left join Catalogs.Products p on p.Id = db.ProductId
+				left join Catalogs.Catalog c on c.Id = p.CatalogId
+				left join Customers.Suppliers sp on sp.Id = dh.FirmCode
 				left join Inventory.Stocks s on s.WaybillLineId = db.Id
 where ua.UserId = :userId
 	and a.Enabled = 1

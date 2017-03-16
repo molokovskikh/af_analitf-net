@@ -65,5 +65,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			navigationStack.Remove(item);
 			(item as IDisposable)?.Dispose();
 		}
+
+		public void CloseAll()
+		{
+			for (var i = conductor.Items.Count - 1; i >= 0; i--)
+				CloseScreen(conductor.Items[i]);
+		}
 	}
 }

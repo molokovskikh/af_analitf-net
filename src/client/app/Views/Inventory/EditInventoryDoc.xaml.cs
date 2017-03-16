@@ -31,11 +31,11 @@ namespace AnalitF.Net.Client.Views.Inventory
 
 			Lines.BeginningEdit += (sender, args) =>
 			{
-				Lines.Tag = ((InventoryDocLine)args.Row.Item).Quantity;
+				Lines.Tag = ((InventoryLine)args.Row.Item).Quantity;
 			};
 
 			Lines.RowEditEnding += (sender, args) => {
-				var line = (InventoryDocLine)args.Row.Item;
+				var line = (InventoryLine)args.Row.Item;
 				var oldQuantity = (decimal)Lines.Tag;
 				model.UpdateQuantity(line, oldQuantity);
 			};

@@ -11,7 +11,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	class CreateReturnToSupplier : BaseScreen, ICancelable
 	{
-		public CreateReturnToSupplier(ReturnToSupplier doc)
+		public CreateReturnToSupplier(ReturnDoc doc)
 		{
 			InitFields();
 			Doc = doc;
@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			WasCancelled = true;
 		}
 
-		public ReturnToSupplier Doc { get; set; }
+		public ReturnDoc Doc { get; set; }
 		public bool WasCancelled { get; private set; }
 		public Supplier[] Suppliers { get; set; }
 

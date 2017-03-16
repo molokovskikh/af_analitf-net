@@ -70,6 +70,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string OutTo
 		{ get { return DstAddressName; } }
 
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
@@ -129,6 +130,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DisplacementDocStatus.Posted;
+			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.DisplacementTo(this, line.Quantity));
 				session.Save(line.DstStock.DisplacementFrom(this, line.Quantity));

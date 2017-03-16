@@ -15,29 +15,19 @@ using ReactiveUI;
 using NPOI.HSSF.UserModel;
 using System.Collections.ObjectModel;
 using System.Printing;
-using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class EditDisplacementDoc : BaseScreen2, IPrintableStock
+	public class EditDisplacementDoc : BaseScreen2, IPrintable
 	{
 		private EditDisplacementDoc()
 		{
 			Lines = new ReactiveCollection<DisplacementLine>();
 			Session.FlushMode = FlushMode.Never;
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
-		}
-
-		public EditDisplacementDoc(DisplacementDoc doc)
-			: this()
-		{
-			DisplayName = "Новое внутреннее перемещение";
-			InitDoc(doc);
-			Lines.AddRange(doc.Lines);
 		}
 
 		public EditDisplacementDoc(uint id)
@@ -60,17 +50,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> CanUnPost { get; set; }
 		public NotifyValue<bool> CanEndDoc { get; set; }
 
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-			if (Doc.Id == 0)
-				Doc.Address = Address;
-		}
-
 		protected override void OnDeactivate(bool close)
 		{
 			Save();
 			base.OnDeactivate(close);
+		}
+
+		public override void Update()
+		{
+			Session.Refresh(Doc);
 		}
 
 		private void InitDoc(DisplacementDoc doc)
@@ -171,13 +159,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!IsValide(Doc))
 				return;
-			if (Doc.Id == 0)
-				Session.Save(Doc);
-			else
-				Session.Update(Doc);
-			Session.Flush();
-			Bus.SendMessage(nameof(DisplacementDoc), "db");
-			Bus.SendMessage(nameof(Stock), "db");
+			if (Session.IsDirty()) {
+				Session.Flush();
+				Bus.SendMessage(nameof(DisplacementDoc), "db");
+				Bus.SendMessage(nameof(Stock), "db");
+			}
 		}
 
 		public IResult ExportExcel()
@@ -254,39 +240,32 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new Tags(null, tags));
 		}
 
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
-		}
-
 		public void SetMenuItems()
 		{
 			var item = new MenuItem {Header = "Печать документов"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Ярлыки"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Требование-накладная"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Внутреннее-перемещение"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Протокол согласования цен ЖНВЛП"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
 					if ((string) item.Header == "Печать документов")
 						docs.Add(new DisplacementDocument(Lines.ToArray()));
 					if ((string) item.Header == "Ярлыки")
@@ -335,11 +314,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else if (dialog.ShowDialog() == true)
 				dialog.PrintDocument(doc, name);
 		}
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
 		}

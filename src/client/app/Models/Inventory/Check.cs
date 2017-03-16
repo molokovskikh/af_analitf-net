@@ -43,11 +43,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private string _numberprefix;
 		private string _numberdoc;
 
-		public Check(Address address, string numberprefix, IEnumerable<CheckLine> lines, CheckType checkType)
+		public Check(User user, Address address, string numberprefix, IEnumerable<CheckLine> lines, CheckType checkType)
 			: this()
 		{
 			_numberprefix = numberprefix;
 			_new = true;
+			Timestamp = DateTime.Now;
+			Clerk = user.Id.ToString();
 			CheckType = checkType;
 			Date = DateTime.Now;
 			ChangeOpening = DateTime.Today;
@@ -86,6 +88,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string OutTo
 		{ get { return "Покупатель"; } }
 
+		public virtual uint? ServerId { get; set; }
 		public virtual CheckType CheckType { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime ChangeOpening { get; set; }

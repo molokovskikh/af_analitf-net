@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
@@ -8,12 +10,14 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using NUnit.Framework;
 using TestStack.White.InputDevices;
+using Point = System.Windows.Point;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {

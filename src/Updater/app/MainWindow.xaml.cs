@@ -70,9 +70,13 @@ namespace Updater
 			}
 
 			if (process != null && process.MainWindowHandle != IntPtr.Zero) {
-				new WindowInteropHelper(this) {
-					Owner = process.MainWindowHandle
-				};
+				try {
+					new WindowInteropHelper(this) {
+						Owner = process.MainWindowHandle
+					};
+				} catch(Exception e) {
+					log.Warn("Не удалось получить указатель на главное окно приложения", e);
+				}
 				WindowStartupLocation = WindowStartupLocation.CenterOwner;
 			}
 			else {

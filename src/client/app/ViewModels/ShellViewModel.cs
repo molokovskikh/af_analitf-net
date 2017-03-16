@@ -55,16 +55,9 @@ namespace AnalitF.Net.Client.ViewModels
 	public interface IPrintable
 	{
 		bool CanPrint { get; }
-
-		PrintResult Print();
-	}
-
-	public interface IPrintableStock
-	{
-		bool CanPrintStock { get; }
 		bool IsView { get; set; }
-		ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
-		PrintResult PrintStock();
+		ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		PrintResult Print();
 		string LastOperation { get; set; }
 		string PrinterName { get; set; }
 		void SetMenuItems();
@@ -130,6 +123,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public NotifyValue<string> UserName { get; set; }
+		private string password;
+
 		//не верь решарперу
 		public ShellViewModel()
 			: this(new Config.Config())
@@ -165,6 +161,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => UpdateDisplayName());
 
 			Stat.CombineLatest(CurrentAddress, (x, y) => x?.ReadyForSendOrdersCount > 0 && y != null)
+				.CombineLatest(User, (x, y) => x && (y?.HasOrderPermission() ?? false))
 				.Subscribe(CanSendOrders);
 
 			CurrentAddress.Subscribe(_ => {
@@ -230,6 +227,7 @@ namespace AnalitF.Net.Client.ViewModels
 					: Observable.Return(false))
 				.Switch()
 				.ToValue(CancelDisposable);
+
 			CanPrint = this.ObservableForProperty(m => m.ActiveItem)
 				.Select(e => e.Value is IPrintable
 					? ((IPrintable)e.Value).ObservableForProperty(m => m.CanPrint, skipInitial: false)
@@ -237,36 +235,32 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
-				CanPrintPreview = CanPrint.ToValue();
 
-			CanPrintStock = this.ObservableForProperty(m => m.ActiveItem)
-				.Select(e => e.Value is IPrintableStock
-					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.CanPrintStock, skipInitial: false)
-					: Observable.Return(new ObservedChange<IPrintableStock, bool>()))
-				.Switch()
-				.Select(e => e.Value)
-				.ToValue(CancelDisposable);
-
-			PrintStockMenuItems = this.ObservableForProperty(m => m.ActiveItem)
-				.Select(e => e.Value is IPrintableStock
-					? ((IPrintableStock)e.Value).ObservableForProperty(m => m.PrintStockMenuItems, skipInitial: false, beforeChange: true)
-					: Observable.Return(new ObservedChange<IPrintableStock, ObservableCollection<MenuItem>>()))
+			PrintMenuItems = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintable
+					? ((IPrintable)e.Value).ObservableForProperty(m => m.PrintMenuItems, skipInitial: false, beforeChange: true)
+					: Observable.Return(new ObservedChange<IPrintable, ObservableCollection<MenuItem>>()))
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => SetMenuItems());
-			User.Select(x => x?.IsStockEnabled ?? false)
+			User.Select(x => (x?.IsStockEnabled ?? false) && (x?.HasStockPermission() ?? false))
 				.Subscribe(IsStockEnabled);
+			User.Select(x => (x?.IsStockEnabled ?? false) && (x?.HasCashPermission() ?? false))
+				.Subscribe(IsCashEnabled);
+			User.Select(x => x?.HasOrderPermission() ?? false)
+				.Subscribe(IsOrderEnabled);
+			UserName.Subscribe(_ => SwitchUser());
 
-			//if (Env.Factory != null) {
-			//	var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
-			//	CloseDisposable.Add(Disposable.Create(() => {
-			//		CancelDisposable.Dispose();
-			//		task.Wait(TimeSpan.FromSeconds(10));
-			//	}));
-			//}
+			if (Env.Factory != null) {
+				var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token, User).Wait());
+				CloseDisposable.Add(Disposable.Create(() => {
+					CancelDisposable.Dispose();
+					task.Wait(TimeSpan.FromSeconds(10));
+				}));
+			}
 		}
 
 		public Config.Config Config { get; set; }
@@ -282,6 +276,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<int> NewDocsCount { get; set; }
 		public NotifyValue<string[]> Instances { get; set; }
 		public NotifyValue<bool> IsStockEnabled { get; set; }
+		public NotifyValue<bool> IsCashEnabled { get; set; }
+		public NotifyValue<bool> IsOrderEnabled { get; set; }
+		public bool IsShowLoginEnabled => Config.MultiUser;
 
 		public string Version { get; set; }
 
@@ -320,6 +317,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override IEnumerable<IResult> OnViewReady()
 		{
+#if DEBUG
+			if (!Env.IsUnitTesting && IsShowLoginEnabled) {
+#else
+			if (IsShowLoginEnabled) {
+#endif
+				if (!ShowLogin()) {
+					windowManager.Notify("Вход в приложение отменён");
+					TryClose();
+					return Enumerable.Empty<IResult>();
+				}
+			}
+
 			Env.Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
 				//если в папке с обновлением есть данные то мы должны их импортировать
@@ -354,6 +363,18 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 				return results;
 			}
+		}
+
+		public bool ShowLogin()
+		{
+			var result = new DialogResult(new Login());
+			result.Execute(null);
+			if ((result.Model as Login).WasCancelled)
+				return false;
+
+			password = (result.Model as Login).Password;
+			UserName.Value = (result.Model as Login).UserName;
+			return true;
 		}
 
 		public void CloseActive()
@@ -420,7 +441,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Settings.Value.IsValid)
 				CheckSettings();
-
+			if (!Settings.Value.IsDirectoryValid())
+				CheckSettingsDir();
 			if (!Settings.Value.IsValid)
 				return Enumerable.Empty<IResult>();
 
@@ -489,6 +511,40 @@ namespace AnalitF.Net.Client.ViewModels
 			return true;
 		}
 
+		private bool CheckSettingsDir()
+		{
+			if (!Settings.Value.IsDirectoryValid())
+			{
+				windowManager.Warning("В настройках некорректно указана папка для " +
+					"сохранения накладных, отказов, отчетов.");
+				ShowSettings("AdditionSettingsTab");
+				return false;
+			}
+			return true;
+		}
+		private void SwitchUser()
+		{
+			if (string.IsNullOrEmpty(UserName))
+				return;
+			session.Close();
+			var dbName = $"ldb{UserName}";
+			AppBootstrapper.NHibernate.Init(database: dbName);
+			Config.DbDir = dbName;
+			using (var sanityCheck = new SanityCheck(Config) {SwitchUser = true})
+				sanityCheck.Check();
+			Env.Current = new Env();
+			Env = Env.Current;
+			session = Env.Factory.OpenSession();
+			Reload();
+			if (Settings.Value.UserName != UserName) {
+				Settings.Value.UserName = UserName;
+				Settings.Value.Password = password;
+				session.Flush();
+			}
+			Navigator.CloseAll();
+			ShowMain();
+		}
+
 		public void Reload()
 		{
 			if (session == null)
@@ -550,94 +606,86 @@ namespace AnalitF.Net.Client.ViewModels
 			return ((IExportable)ActiveItem).Export();
 		}
 
+		public NotifyValue<bool> CanPreview => CanPrint;
 		public NotifyValue<bool> CanPrint { get; set; }
+		public NotifyValue<ObservableCollection<MenuItem>> PrintMenuItems { get; set;}
+		[DataMember]
+		public string PrinterName { get; set; }
+		[DataMember]
+		public bool IsView { get; set; }
+		public static RoutedCommand PrintStockRoutedCommand = new RoutedCommand();
 
 		public IResult Print()
 		{
 			if (!CanPrint.Value)
 				return null;
-
-			return ((IPrintable)ActiveItem).Print();
+			var printable = (IPrintable)ActiveItem;
+			printable.IsView = IsView;
+			printable.PrinterName = PrinterName;
+			return printable.Print();
 		}
 
-		public NotifyValue<bool> CanPrintStock { get; set; }
-		public NotifyValue<ObservableCollection<MenuItem>> PrintStockMenuItems { get; set;}
-		public string PrinterName { get; set; }
-		public bool IsView { get; set; }
-		public static RoutedCommand PrintStockRoutedCommand = new RoutedCommand();
-
-		public IResult PrintStock()
+		public IResult Preview()
 		{
-			if (!CanPrintStock.Value)
+			if (!CanPrint.Value)
 				return null;
-			return ((IPrintableStock) ActiveItem).PrintStock();
+			var printable = (IPrintable)ActiveItem;
+			printable.IsView = true;
+			printable.PrinterName = PrinterName;
+			printable.LastOperation = null;
+			return printable.Print();
 		}
 
 		private void ExecutedPrintStockCommand(object sender, ExecutedRoutedEventArgs e)
 		{
-			var item = (MenuItem) sender;
-			var printableStock = (IPrintableStock) ActiveItem;
-			printableStock.IsView = IsView;
-			printableStock.LastOperation = item.Header.ToString();
+			var item = (MenuItem)sender;
+			var printable = (IPrintable)ActiveItem;
+			printable.IsView = IsView;
+			printable.PrinterName = PrinterName;
+			printable.LastOperation = item.Header.ToString();
 			if (IsView)
-				printableStock.PrintStock();
+				printable.Print();
 		}
 
 		private void CanExecutePrintStocCommand(object sender, CanExecuteRoutedEventArgs e)
 		{
-			e.CanExecute = CanPrintStock;
+			e.CanExecute = CanPrint;
 		}
 
 		public void SetMenuItems()
 		{
-			if (!CanPrintStock)
+			if (!CanPrint)
 				return;
-			PrintStockMenuItems.Value.Clear();
-			((IPrintableStock) ActiveItem).SetMenuItems();
+			PrintMenuItems.Value.Clear();
+			var printable = (IPrintable)ActiveItem;
+			printable.SetMenuItems();
 			CommandBinding commandBinding = new CommandBinding(PrintStockRoutedCommand, ExecutedPrintStockCommand,
 				CanExecutePrintStocCommand);
-			foreach (var it in PrintStockMenuItems.Value) {
+			foreach (var it in PrintMenuItems.Value) {
 				it.CommandBindings.Add(commandBinding);
 				it.Command = PrintStockRoutedCommand;
 			}
 			var item = new MenuItem {Header = "Настройки"};
-			item.Click += (sender, args) => Coroutine.BeginExecute(ReportSetting().GetEnumerator());
-			PrintStockMenuItems.Value.Add(item);
+			item.Click += (sender, args) => Coroutine.BeginExecute(ShowPrintSetting().GetEnumerator());
+			PrintMenuItems.Value.Add(item);
+			SetMenuItemsCheckable();
 		}
 
-		public IEnumerable<IResult> ReportSetting()
+		public IEnumerable<IResult> ShowPrintSetting()
 		{
-			var req = new ReportSetting();
+			var req = new PrintSetting(PrinterName, IsView);
 			yield return new DialogResult(req);
 			PrinterName = req.PrinterName;
-			if (req.IsView) {
-				IsView = true;
-				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = false);
-				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsChecked = false);
-			}
-
-			if (req.IsPrint) {
-				IsView = false;
-				PrintStockMenuItems.Value.Where(m=>m.HeaderStringFormat != "Настройки").Each(m=>m.IsCheckable = true);
-			}
-
+			IsView = req.IsView;
+			SetMenuItemsCheckable();
 		}
 
-
-		public NotifyValue<bool> CanPrintPreview { get; set; }
-
-		public void PrintPreview()
+		private void SetMenuItemsCheckable()
 		{
-			if (!CanPrintPreview)
-				return;
-
-			var printResult = ((IPrintable)ActiveItem).Print();
-			windowManager.ShowDialog(
-				new PrintPreviewViewModel(printResult),
-				null,
-				new Dictionary<string, object> {
-					{"WindowState", WindowState.Maximized}
-				});
+			PrintMenuItems.Value.Each(m => m.IsCheckable = false);
+			PrintMenuItems.Value.Each(m => m.IsChecked = false);
+			if (!IsView && PrintMenuItems.Value.Count > 2)
+				PrintMenuItems.Value.Where(m => m.Header.ToString() != "Настройки").Each(m => m.IsCheckable = true);
 		}
 
 		public void ShowAbout()
@@ -742,7 +790,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowFrontend()
 		{
-			NavigateRoot(new Inventory.Frontend());
+			NavigateRoot(new Inventory.Frontend2());
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;
@@ -805,6 +853,13 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(model);
 		}
 
+		public void ShowRejectedOnStock()
+		{
+			var model = new Stocks();
+			model.OnlyRejected.Value = true;
+			NavigateRoot(model);
+		}
+
 		public void ShowWaybills()
 		{
 			NavigateRoot(new WaybillsViewModel());
@@ -838,6 +893,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public void CheckDefectSeries()
 		{
 			NavigateRoot(new CheckDefectSeries());
+		}
+
+		public void ShelfLife()
+		{
+			NavigateRoot(new ShelfLife());
 		}
 
 		public void ReceivingOrders()
@@ -1101,8 +1161,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private static void CreateLink(string srcLink, string name, string exe)
 		{
+			var dirLink = Path.GetDirectoryName(srcLink);
+			var dstLink = Path.Combine(dirLink, $"АналитФармация - {name}.lnk");
+
 			if (File.Exists(srcLink)) {
-				var dstLink = Path.Combine(Path.GetDirectoryName(srcLink), $"АналитФармация - {name}.lnk");
+				//Копируем существующий ярлык
 				File.Copy(srcLink, dstLink);
 				var link = new ShellLink(dstLink) {
 					Target = exe,
@@ -1111,6 +1174,16 @@ namespace AnalitF.Net.Client.ViewModels
 					WorkingDirectory = Path.GetDirectoryName(exe),
 				};
 				link.Save();
+			} else {
+				//Создаем новый ярлык
+				if (!Directory.Exists(dirLink)) Directory.CreateDirectory(dirLink);
+				var link = new ShellLink() {
+					Target = exe,
+					IconPath = exe,
+					IconIndex = 0,
+					WorkingDirectory = Path.GetDirectoryName(exe)
+				};
+				link.Save(dstLink);
 			}
 		}
 

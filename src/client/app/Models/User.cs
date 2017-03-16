@@ -133,6 +133,23 @@ namespace AnalitF.Net.Client.Models
 			return Check(Permission.ShortcutExportMap, key);
 		}
 
+		public virtual bool HasStockPermission()
+		{
+			return Permissions.Any(r => r.Name.Match("STCK"));
+		}
+
+		public virtual bool HasCashPermission()
+		{
+			return Permissions.Any(r => r.Name.Match("CASH"));
+		}
+
+		public virtual bool HasOrderPermission()
+		{
+			// пользователь имеет право работать с заказами, если это право ему было дано явно,
+			// либо по умолчанию, если права он ещё не получал
+			return Permissions.Any(r => r.Name.Match("ORDR")) || !Permissions.Any(r => r.Name.Match("STCK") || r.Name.Match("CASH"));
+		}
+
 		public virtual bool HasPermission(Dictionary<string, string> map, params Type[] types)
 		{
 			var key = types.Implode(t => t.Name, ".");

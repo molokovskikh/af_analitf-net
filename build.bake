@@ -1,4 +1,4 @@
-import Boo.Lang.PatternMatching
+﻿import Boo.Lang.PatternMatching
 import System
 import System.Collections
 import System.Reflection
@@ -16,8 +16,7 @@ import Mono.Cecil
 import Newtonsoft.Json
 
 def SignFileLocal(file as string):
-	return
-	SignFile(file, "assets/cs.pfx", "password")
+	SignFile(file, "assets/cs.pfx", "")
 
 def SignDir(dir as string):
 	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
@@ -43,9 +42,12 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	script = Path.GetFullPath("scripts/iis.ps1")
 	hostsArg = join(hosts, ",")
 	psArgs = ""
-	if Globals.Environment == @Production:
+
+	user = ReadUserConfig("User")
+	password = ReadUserConfig("Password")
+	if String.IsNullOrEmpty(user) or String.IsNullOrEmpty(password):
 		user, password = AskCredentials("user for $hostsArg:")
-		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
+	psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
 	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string, src as string):
@@ -100,7 +102,6 @@ Global(
 		},
 	},
 	JenkinsProject: "AnalitF.Net",
-	Retarget: true,
 	TargetFramework: "net40",
 	AdditionalAssemblies: ("src/service/app/bin/AnalitF.Net.Service.dll", ),
 	Config: {
@@ -163,8 +164,9 @@ task "deploy:service", ["build:service"]:
 	#создаем маршрут в прокси
 	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
 	proxyConfig = Path.Combine(deployTo, @config)
-	using writer = StreamWriter(proxyConfig, true):
-		writer.WriteLine("$version " + Globals.ProxyUrlRoot + "-$version")
+	ImpersonateIfNeeded(Globals):
+		using writer = StreamWriter(proxyConfig, true):
+			writer.WriteLine("$version " + Globals.ProxyUrlRoot + "-$version")
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
@@ -190,14 +192,15 @@ task @deploy, ["env", "version:generate", "git:tag", "prepare", "check", "build"
 task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
 task "deploy:client", ["build:setup"]:
-	if Globals.Maybe.SetupDeployRoot:
+	return unless Globals.Maybe.SetupDeployRoot
+	version = File.ReadAllText("output/setup/version.txt")
+	ImpersonateIfNeeded(Globals):
 		root = Globals.Maybe.SetupDeployRoot
 		MkDir(root)
-		version = File.ReadAllText("output/setup/version.txt")
 		dst = Path.Combine(root, "AnalitF.Net-$version.exe")
+
 		Cp("output/setup/setup.exe", dst, true)
-	if Globals.Maybe.PackageRoot:
-		ImpersonateIfNeeded(Globals):
+		if Globals.Maybe.PackageRoot:
 			root = Globals.PackageRoot
 			Cp("output/package/*.nupkg", "$root/packages", true)
 
@@ -448,7 +451,12 @@ task "test:binary":
 				print e.Message
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
-		Sh("nunit3-console --labels=all --stoponerror --verbose --full --test test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
+
+		target = Path.GetFullPath("./src/client/test.release/test.release.csproj")
+		projectFile = GetProjects("assets/full.sln").First({x| String.Equals(x, target, StringComparison.OrdinalIgnoreCase)})
+		BuildCore(Globals, projectFile, {})
+		TestProject(projectFile, CheckExitCode: true).Test("--stoponerror --verbose --full --test test.release.AppFixture")
+
 		targetChannel = Configuration.Maybe.targetChannel or "beta"
 		CopyUpdateBin(targetChannel, "output/updater/")
 		CopyUpdateBin("migration-$targetChannel", "output/migration-update/")

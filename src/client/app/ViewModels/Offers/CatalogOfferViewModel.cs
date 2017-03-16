@@ -16,6 +16,9 @@ using NHibernate.Linq;
 using ReactiveUI;
 using System.Windows;
 using AnalitF.Net.Client.ViewModels.Parts;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
@@ -25,6 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		private Catalog filterCatalog;
 
 		public List<Offer> CatalogOffers = new List<Offer>();
+
 
 		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
 			: base(initOfferId)
@@ -44,15 +48,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
 				Settings);
 
-			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
-				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
+			RetailCost = CurrentOffer.CombineLatest(RetailMarkup, Rounding,
+				(o, m, r) => Round(NullableHelper.Round(o?.ResultCost * (1 + m / 100),2), r))
 				.ToValue();
 
 			CurrentOffer.Subscribe(_ => RetailMarkup.Recalculate());
+
 			Persist(HideJunk, "HideJunk");
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");
 			SessionValue(CurrentFilter, "CurrentFilter");
+
+			PrintMenuItems = new ObservableCollection<MenuItem>();
+			IsView = true;
 		}
 
 		//для восстановления состояния
@@ -96,9 +104,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<decimal?> RetailCost { get; set; }
 		public NotifyValue<decimal> RetailMarkup { get; set; }
 		public NotifyValue<List<object>> DisplayItems { get; set; }
-		public NotifyValue<object> CurrentDisplayItem { get; set; }
+		NotifyValue<object> currentDisplayItem;
+		public NotifyValue<object> CurrentDisplayItem
+		{ get
+			{
+				return currentDisplayItem; }
 
-		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
+			set
+			{
+				currentDisplayItem =value;
+			}
+		}
+
+
 
 		protected override void OnInitialize()
 		{
@@ -171,6 +189,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
 				?? Offers.Value.FirstOrDefault();
 		}
+
+
 
 		private void UpdateMaxProducers()
 		{
@@ -246,10 +266,64 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
+		/// <summary>
+		/// Округление денежного значения.
+		/// </summary>
+		/// <param name="value">Исходное денежное значение.</param>
+		/// <param name="roundingValue">Тип округления.</param>
+		/// <returns>Округленное денежное значение.</returns>
+		private decimal? Round(decimal? value, Models.Rounding? roundingValue)
+		{
+			var rounding = roundingValue ?? Models.Rounding.None;
+			if (rounding != Models.Rounding.None) {
+				var @base = 10;
+				var factor = 1;
+				if (rounding == Models.Rounding.To1_00) {
+					@base = 1;
+				}
+				else if (rounding == Models.Rounding.To0_50) {
+					@factor = 5;
+				}
+				var normalized = (int?) (value * @base);
+				return (normalized - normalized % factor) / (decimal) @base;
+			}
+			return value;
+		}
+
+		public void SetMenuItems()
+		{
+			var item = new MenuItem { Header = DisplayName };
+			PrintMenuItems.Add(item);
+		}
+
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
+		public string LastOperation { get; set; }
+		public string PrinterName { get; set; }
+		public bool IsView { get; set; }
+		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
+
 		public PrintResult Print()
 		{
-			var doc = new CatalogOfferDocument(ViewHeader, GetPrintableOffers());
-			return new PrintResult(DisplayName, doc);
+			var docs = new List<BaseDocument>();
+			if (!IsView) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
+					if ((string)item.Header == DisplayName)
+						docs.Add(new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
+				}
+				return new PrintResult(DisplayName, docs, PrinterName);
+			}
+
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
+				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			return null;
+		}
+
+		public IEnumerable<IResult> PrintPreview()
+		{
+			return Preview(DisplayName, new CatalogOfferDocument(ViewHeader, GetPrintableOffers()));
 		}
 
 		public void ShowPrice()
@@ -309,5 +383,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			};
 		}
 #endif
+
+
+		/// <summary>
+		/// Задает или возвращает тип округления стоимости.
+		/// </summary>
+		public NotifyValue<Rounding?> Rounding { get; set; }
 	}
 }

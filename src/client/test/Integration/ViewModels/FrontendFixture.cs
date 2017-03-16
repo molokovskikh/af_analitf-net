@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -11,6 +12,8 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
+using AnalitF.Net.Client.Models;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -24,10 +27,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
+			settings.Waybills.Add(new WaybillSettings(user, address));
 			session.DeleteEach<Stock>();
 			model = Open(new Frontend());
-			stock = new Stock()
-			{
+			stock = new Stock() {
 				Product = "Папаверин",
 				Status = StockStatus.Available,
 				Address = address,
@@ -35,9 +38,51 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Quantity = 5,
 				ReservedQuantity = 0,
 				Barcode = "10",
-				ProductId = 1
+				ProductId = 1,
+				Exp = SystemTime.Now()
 			};
 			stateless.Insert(stock);
+
+			var stockForList = new Stock() {
+				Product = "Аспирин 1",
+				Status = StockStatus.Available,
+				Address = address,
+				RetailCost = 133,
+				Quantity = 5,
+				ReservedQuantity = 0,
+				Barcode = "4605635002748",
+				ProductId = 3,
+				Exp = SystemTime.Now()
+			};
+			stateless.Insert(stockForList);
+
+			stockForList = new Stock() {
+				Product = "Аспирин 2",
+				Status = StockStatus.Available,
+				Address = address,
+				RetailCost = 132,
+				Quantity = 5,
+				ReservedQuantity = 0,
+				Barcode = "4605635002748",
+				ProductId = 2,
+				Exp = SystemTime.Now()
+			};
+			stateless.Insert(stockForList);
+
+			for (int i = 0; i < 3; i++) {
+				stockForList = new Stock() {
+					Exp = SystemTime.Now().AddDays(- i),
+					Product = $"Аспирин 0{i}",
+					Status = StockStatus.Available,
+					Address = address,
+					RetailCost = 132,
+					Quantity = 2 + i,
+					ReservedQuantity = 0,
+					Barcode = "4030855000890",
+					ProductId = Convert.ToUInt32(4 + (i == 1 ? 0 : i)) //нужен один повтор
+				};
+				stateless.Insert(stockForList);
+			}
 
 			session.DeleteEach<Check>();
 			session.Flush();
@@ -52,6 +97,69 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual("Штрих код", model.LastOperation.Value);
 			Assert.AreEqual("Папаверин", model.CurrentLine.Value.Product);
 		}
+
+		[Test]
+		public void Find_by_barcodeDubleMatch()
+		{
+			var barcode = "4605635002748";
+			model.Input.Value = barcode;
+			model.Quantity = new NotifyValue<uint?>(1);
+
+			var result = model.SearchByTerm(barcode).GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch)((DialogResult)result.Current).Model;
+			Open(dialog);
+			Assert.IsTrue(dialog.Items.Value.Count == 2);
+			Assert.IsTrue(dialog.Items.Value.Any(s=>s.Product == "Аспирин 1"));
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Product == "Аспирин 2"));
+
+			dialog.CurrentItem.Value = dialog.Items.Value.First();
+			dialog.EnterItem();
+
+			//у товаров разные ProductId, поэтому SearchByProductId должен дать один единственный остаток для "Аспирин 1", затем добавить его в чек
+			Assert.AreEqual(false, model.HasError.Value);
+			Assert.AreEqual(false, model.LastOperation.HasValue);
+			model.Input.Value = dialog.CurrentItem.Value.ProductId.ToString();
+			model.SearchByProductId();
+
+			Assert.AreEqual(false, model.HasError.Value);
+			Assert.AreEqual("Код товара", model.LastOperation.Value);
+			Assert.AreEqual("Аспирин 1", model.CurrentLine.Value.Product);
+		}
+
+
+		[Test]
+		public void Find_by_barcodeDubleMatchSameProductId()
+		{
+			var barcode = "4030855000890";
+			model.Input.Value = barcode;
+			model.Quantity = new NotifyValue<uint?>(1);
+
+			var result = model.SearchByTerm(barcode).GetEnumerator();
+			result.MoveNext();
+			var dialog = (StockSearch) ((DialogResult) result.Current).Model;
+			Open(dialog);
+			Assert.AreEqual(3, dialog.Items.Value.Count);
+			Assert.AreEqual("Поиск товара по названию", dialog.DisplayName);
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Product == "Аспирин 01"));
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Product == "Аспирин 02"));
+
+
+			// выбор Barcode = "4030855000890"
+			dialog.CurrentItem.Value = dialog.Items.Value.First();
+			dialog.EnterItem();
+			// Barcode = "10" старше, чем "4030855000890", поэтому после проверки он должен быть выбран по умолчанию
+			Assert.AreEqual(2, dialog.Items.Value.Count);
+			Assert.AreEqual(2, dialog.Items.Value.Count(s => s.ProductId == 4));
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Barcode == "4030855000890"));
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Barcode == "4030855000890"));
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Product == "Аспирин 01"));
+			Assert.IsTrue(dialog.Items.Value.Any(s => s.Product == "Аспирин 00"));
+			Assert.AreEqual("4030855000890", dialog.CurrentItem.Value.Barcode);
+			Assert.AreEqual(4, dialog.CurrentItem.Value.ProductId);
+			Assert.AreEqual("Поиск товара: 4030855000890 - \"Аспирин 00\"", dialog.DisplayName);
+		}
+
 
 		[Test]
 		public void Find_by_barcode()
@@ -207,6 +315,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var status = model.Status.Value == "Открыт чек продажи" ? "Открыт возврат по чеку" : "Открыт чек продажи";
 			model.Trigger();
 			Assert.AreEqual(status, model.Status.Value);
+		}
+
+		[Test]
+		public void Check_status_after_adding_line()
+		{
+			model.Trigger();
+			Assert.AreEqual("Открыт возврат по чеку", model.Status.Value);
+			var line = new CheckLine(stock, 1, CheckType.CheckReturn);
+			model.Lines.Add(line);
+			Assert.AreEqual("Открыт возврат по чеку", model.Status.Value);
 		}
 	}
 }

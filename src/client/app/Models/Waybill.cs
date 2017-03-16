@@ -100,6 +100,7 @@ namespace AnalitF.Net.Client.Models
 		}
 		public virtual string OutTo
 		{ get { return string.Empty; } }
+		public virtual DateTime Timestamp { get; set; }
 		public virtual string ProviderDocumentId { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
 		public virtual DateTime WriteTime { get; set; }
@@ -420,31 +421,24 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool Stock(ISession session)
 		{
 			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
 			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
 			var stockActions = new List<StockAction>();
 			foreach (var line in lines) {
-				line.Stock.Quantity -= line.Quantity.Value;
-				var stock = new Stock(this, line);
-				stockActions.Add(new StockAction {
-					ActionType = ActionType.Stock,
-					TypeChange = ActionTypeChange.Plus,
-					SourceStockId = line.StockId,
-					SourceStockVersion = line.StockVersion,
-					Quantity = line.Quantity.GetValueOrDefault(),
+				if (line.Stock == null)
+					line.Stock = new Stock(this, line, session);
+				line.Stock.Status = StockStatus.Available;
+				line.Stock.RetailCost = line.RetailCost;
+				line.Stock.RetailMarkup = line.RetailMarkup;
+				stockActions.Add(new StockAction(ActionType.Stock, ActionTypeChange.Plus, line.Stock, this, line.Quantity.GetValueOrDefault()) {
 					RetailCost = line.RetailCost,
 					RetailMarkup = line.RetailMarkup,
-					DisplayDoc = Type,
-					Number = Id.ToString(),
-					FromIn = FromIn,
-					OutTo = OutTo,
-					DstStock = stock,
 					SrcStock = line.Stock,
 				});
 			}
 			foreach (var action in stockActions) {
-				session.Save(action.DstStock);
-				session.Update(action.SrcStock);
-				action.ClientStockId = action.DstStock.Id;
+				session.SaveOrUpdate(action.SrcStock);
+				action.ClientStockId = action.SrcStock.Id;
 			}
 			session.SaveEach(stockActions);
 			return true;

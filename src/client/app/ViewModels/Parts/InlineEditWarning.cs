@@ -39,6 +39,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}
 		}
 
+		public void Show(Message message)
+		{
+			Show(new List<Message> { message });
+		}
+
 		public void Show(List<Message> messages)
 		{
 			var warnings = messages.Where(m => m.IsWarning).Implode(Environment.NewLine);

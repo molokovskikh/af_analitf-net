@@ -15,6 +15,8 @@ using Caliburn.Micro;
 using Common.Tools;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using WinFrom = System.Windows.Forms;
+using AnalitF.Net.Client.Controls;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -52,29 +54,65 @@ namespace AnalitF.Net.Client.Models
 		public IResult Export()
 		{
 			var grid = FindGrid();
-			if (grid == null)
+			var WinFormGrid = FindWinFormGrid();
+			if (grid == null && WinFormGrid == null)
 				return null;
 
-			var items = grid.ItemsSource;
+			IEnumerable items = null;
+			if (grid != null)
+				items = grid.ItemsSource;
+			else if (WinFormGrid != null && WinFormGrid.MyDataSource is IEnumerable)
+				items = (IEnumerable)WinFormGrid.MyDataSource;
 			if (items == null)
 				return null;
 
-			var columns = grid.Columns.OfType<DataGridBoundColumn>()
-				.OrderBy(c => c.DisplayIndex)
-				.Where(c => c.Visibility == Visibility.Visible)
-				.ToArray();
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Экспорт");
 			var rowIndex = 0;
-			var row = sheet.CreateRow(rowIndex++);
-			for(var i = 0; i < columns.Length; i++) {
-				row.CreateCell(i).SetCellValue(DataGridHelper.GetHeader(columns[i]));
+			if (grid != null)
+			{
+				var columns = grid.Columns.OfType<DataGridBoundColumn>()
+					.OrderBy(c => c.DisplayIndex)
+					.Where(c => c.Visibility == Visibility.Visible)
+					.ToArray();
+
+				var row = sheet.CreateRow(rowIndex++);
+				for (var i = 0; i < columns.Length; i++)
+				{
+					row.CreateCell(i).SetCellValue(DataGridHelper.GetHeader(columns[i]));
+				}
+
+				foreach (var item in items)
+				{
+					row = sheet.CreateRow(rowIndex++);
+					for (var i = 0; i < columns.Length; i++)
+					{
+						var path = ((Binding)columns[i].Binding).Path.Path;
+						SetCellValue(row, i, Util.GetValue(item, path));
+					}
+				}
 			}
-			foreach (var item in items) {
-				row = sheet.CreateRow(rowIndex++);
-				for(var i = 0; i < columns.Length; i++) {
-					var path = ((Binding)columns[i].Binding).Path.Path;
-					SetCellValue(row, i, Util.GetValue(item, path));
+			else if (WinFormGrid != null)
+			{
+				var columns = WinFormGrid.DataGrid.Grid.Columns.OfType<WinFrom.DataGridViewColumn>()
+
+					.OrderBy(c => c.DisplayIndex)
+					.Where(c => c.Visible == true)
+					.ToArray();
+				var row = sheet.CreateRow(rowIndex++);
+				for (var i = 0; i < columns.Length; i++)
+				{
+					row.CreateCell(i).SetCellValue(columns[i].HeaderText);
+				}
+
+				foreach (var item in items)
+				{
+					row = sheet.CreateRow(rowIndex++);
+					for (var i = 0; i < columns.Length; i++)
+					{
+						var path = columns[i].DataPropertyName;
+						SetCellValue(row, i, Util.GetValue(item, path));
+					}
 				}
 			}
 
@@ -89,6 +127,20 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			return new OpenResult(filename);
+		}
+
+		private WinFormDataGrid FindWinFormGrid()
+		{
+			var view = (UserControl)model.GetView();
+			if (view == null)
+				return null;
+			return view.Descendants<WinFormDataGrid>()
+				.Where(g => Properties.Contains(g.Name))
+				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 1000
+
+					+ Convert.ToUInt32(ActiveProperty.Value == g.Name) * 1000
+					+ Convert.ToUInt32(g.IsVisible) * 10)
+				.FirstOrDefault();
 		}
 
 		private DataGrid FindGrid()

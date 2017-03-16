@@ -4,6 +4,7 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 using AnalitF.Net.Client.Config.NHibernate;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -50,6 +51,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{ get { return string.Empty; } }
 		public virtual string OutTo
 		{ get { return string.Empty; } }
+		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
@@ -101,8 +103,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual void Post(ISession session)
 		{
-			CloseDate = DateTime.Now;
+			CloseDate = SystemTime.Now();
 			Status = DocStatus.Posted;
+			Timestamp = SystemTime.Now();
 			foreach (var line in Lines)
 				session.Save(line.Stock.ApplyReserved(this, line.Quantity));
 		}

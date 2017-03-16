@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Begin.Value = DateTime.Today.AddDays(-30);
 			End.Value = DateTime.Today;
-			SelectedItems = new List<ReturnToSupplier>();
+			SelectedItems = new List<ReturnDoc>();
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
 				CanDelete.Value = x?.Status == DocStatus.NotPosted;
@@ -27,15 +27,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				CanUnPost.Value = x?.Status == DocStatus.Posted;
 			});
 			DisplayName = "Возврат поставщику";
-			TrackDb(typeof(ReturnToSupplier));
+			TrackDb(typeof(ReturnDoc));
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 		[Export]
-		public NotifyValue<List<ReturnToSupplier>> Items { get; set; }
-		public NotifyValue<ReturnToSupplier> CurrentItem { get; set; }
-		public List<ReturnToSupplier> SelectedItems { get; set; }
+		public NotifyValue<List<ReturnDoc>> Items { get; set; }
+		public NotifyValue<ReturnDoc> CurrentItem { get; set; }
+		public List<ReturnDoc> SelectedItems { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			DbReloadToken
 				.Merge(Begin.Select(x => (object)x))
 				.Merge(End.Select(x => (object)x))
-				.SelectMany(_ => RxQuery(s => s.Query<ReturnToSupplier>()
+				.SelectMany(_ => RxQuery(s => s.Query<ReturnDoc>()
 					.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1))
 					.Fetch(x => x.Address)
 					.Fetch(x => x.Supplier)
@@ -59,7 +59,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Address == null)
 				yield break;
-			var doc = new ReturnToSupplier(Address, Settings.Value.NumberPrefix);
+
+			var doc = new ReturnDoc(Address, Settings.Value.NumberPrefix);
+
 			yield return new DialogResult(new CreateReturnToSupplier(doc));
 			Session.Save(doc);
 			Update();
@@ -77,7 +79,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
-			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			var doc = Session.Load<ReturnDoc>(CurrentItem.Value.Id);
 			doc.BeforeDelete();
 			Session.Delete(doc);
 			Session.Flush();
@@ -88,7 +90,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Провести выбранный документ?"))
 				return;
-			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			var doc = Session.Load<ReturnDoc>(CurrentItem.Value.Id);
 			if (!doc.Lines.Any()) {
 				Manager.Warning("Пустой документ не может быть проведен");
 				return;
@@ -105,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Confirm("Распровести выбранный документ?"))
 				return;
-			var doc = Session.Load<ReturnToSupplier>(CurrentItem.Value.Id);
+			var doc = Session.Load<ReturnDoc>(CurrentItem.Value.Id);
 			doc.UnPost(Session);
 			Session.Update(doc);
 			Session.Flush();

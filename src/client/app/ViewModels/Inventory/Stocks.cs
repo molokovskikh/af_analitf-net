@@ -29,7 +29,7 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Stocks : BaseScreen2, IPrintableStock
+	public class Stocks : BaseScreen2, IPrintable
 	{
 		private string Name;
 
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				CurrentItem);
 			TrackDb(typeof(Stock));
 
-			PrintStockMenuItems = new ObservableCollection<MenuItem>();
+			PrintMenuItems = new ObservableCollection<MenuItem>();
 			IsView = true;
 			CurrentItem.Select(x => x?.WaybillId != null).Subscribe(CanOpenWaybill);
 		}
@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public AddressSelector AddressSelector { get; set; }
 		public NotifyValue<IList<Selectable<StockStatus>>> StatusFilter { get; set; }
 		public NotifyValue<bool> CanOpenWaybill { get; set; }
+		public NotifyValue<bool> OnlyRejected { get; set; }
 
 		private void Items_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
@@ -90,12 +91,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(DbReloadToken)
 				.Merge(StatusFilter.FilterChanged())
 				.Merge(AddressSelector.FilterChanged.Cast<object>())
+				.Merge(OnlyRejected.Changed())
 				.SelectMany(_ => RxQuery(x => {
 					var query = x.Query<Stock>().Where(y => y.Quantity != 0 || y.ReservedQuantity != 0);
 					if (StatusFilter.IsFiltred()) {
 						var values = StatusFilter.GetValues();
 						query = query.Where(y => values.Contains(y.Status));
 					}
+					if (OnlyRejected.Value)
+						query = query.Where(r => r.RejectStatus == RejectStatus.Defective || r.RejectStatus == RejectStatus.Perhaps);
 					var addresses = AddressSelector.GetActiveFilter().Select(y => y.Id);
 					query = query.Where(y => addresses.Contains(y.Address.Id));
 					return query.Fetch(y => y.Address).OrderBy(y => y.Product).ToList();
@@ -178,19 +182,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return row;
 		}
 
-		public IEnumerable<IResult> PrintStock()
+		public IEnumerable<IResult> Print()
 		{
 			return Preview("Товарные запасы", new StockDocument(Items.Value.ToArray()));
-		}
-
-		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
-		{
-			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
-				yield return new DialogResult(new SimpleSettings(docSettings));
-			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
 		public IEnumerable<IResult> PrintStockLimitMonth()
@@ -215,6 +209,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void CheckDefectSeries()
 		{
 			Shell.Navigate(new CheckDefectSeries());
+		}
+
+		public void ShelfLife()
+		{
+			Shell.Navigate(new ShelfLife());
 		}
 
 		public void GoodsMovement()
@@ -269,25 +268,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void SetMenuItems()
 		{
-			var item = new MenuItem {Header = "Ярлыки"};
-			PrintStockMenuItems.Add(item);
+			var item = new MenuItem {Header = "Товарные запасы" };
+			PrintMenuItems.Add(item);
 
-			item = new MenuItem {Header = "Товарные запасы"};
-			PrintStockMenuItems.Add(item);
+			item = new MenuItem {Header = "Ярлыки" };
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 
 			item = new MenuItem {Header = "Товары со сроком годности менее 1 месяца"};
-			PrintStockMenuItems.Add(item);
+			PrintMenuItems.Add(item);
 		}
 
-		PrintResult IPrintableStock.PrintStock()
+		PrintResult IPrintable.Print()
 		{
 			var docs = new List<BaseDocument>();
 
 			if (!IsView) {
-				foreach (var item in PrintStockMenuItems.Where(i => i.IsChecked)) {
+				var printItems = PrintMenuItems.Where(i => i.IsChecked).ToList();
+				if (!printItems.Any())
+					printItems.Add(PrintMenuItems.First());
+				foreach (var item in printItems) {
 					if ((string)item.Header == "Товарные запасы")
 						docs.Add(new StockDocument(Items.Value.ToArray()));
 					if ((string) item.Header == "Ярлыки")
@@ -305,7 +307,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 
 			if(string.IsNullOrEmpty(LastOperation) || LastOperation == "Товарные запасы")
-				Coroutine.BeginExecute(PrintStock().GetEnumerator());
+				Coroutine.BeginExecute(Print().GetEnumerator());
 			if(LastOperation == "Ярлыки")
 				Tags();
 			if(LastOperation == "Товары со сроком годности")
@@ -325,14 +327,43 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else if (dialog.ShowDialog() == true)
 				dialog.PrintDocument(doc, name);
 		}
-		public ObservableCollection<MenuItem> PrintStockMenuItems { get; set; }
+		public ObservableCollection<MenuItem> PrintMenuItems { get; set; }
 		public string LastOperation { get; set; }
 		public string PrinterName { get; set; }
 		public bool IsView { get; set; }
 
-		public bool CanPrintStock
+		public bool CanPrint
 		{
 			get { return true; }
+		}
+
+		protected override void OnViewLoaded(object view)
+		{
+			base.OnViewLoaded(view);
+
+			SetColumnsForGrid();
+		}
+
+		/// <summary>
+		/// Обновление представления столбцов пользователем.
+		/// Синхронизируем гриды
+		/// </summary>
+		public override void UpdateColumns()
+		{
+			SetColumnsForGrid();
+		}
+
+		/// <summary>
+		/// Синхронизируем нижний грид с верхним
+		/// </summary>
+		private void SetColumnsForGrid()
+		{
+			var view = (Views.Inventory.Stocks)GetView();
+			for (int i = 0; i < view.Items.Columns.Count; i++)
+			{
+				view.DgItemsTotal.Columns[i].Visibility = view.Items.Columns[i].Visibility;
+				view.DgItemsTotal.Columns[i].DisplayIndex = view.Items.Columns[i].DisplayIndex;
+			}
 		}
 
 	}
