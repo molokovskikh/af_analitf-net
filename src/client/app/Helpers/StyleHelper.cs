@@ -723,7 +723,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		private static bool IsApplicable(WinFormDataGrid grid, StyleAttribute attr)
 		{
-			foreach (WinForm.DataGridViewColumn col in grid.DataGrid.Columns)
+			foreach (WinForm.DataGridViewColumn col in grid.DataGrid.Grid.Columns)
 			{
 				var key = GetKey(col);
 				if (attr.Columns.Length == 0 || (!String.IsNullOrEmpty(key) && attr.Columns.Contains(key)))
