@@ -253,7 +253,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsSupplierPriceMarkupInvalid => SupplierPriceMarkup > _maxSupplierMarkup;
 
 		[Style("Product", Description = "Название препарата: не указано")]
-		public virtual bool IsProductEmpty => CatalogId == null;
+		public virtual bool IsProductEmpty => CatalogId == null && string.IsNullOrWhiteSpace(Product);
 
 		[Style("SupplierCost", Description = "Цена поставщика с НДС: не указана")]
 		public virtual bool IsSupplierCostInvalid => (SupplierCost ?? 0) <= 0;

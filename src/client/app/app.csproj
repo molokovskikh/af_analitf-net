@@ -440,7 +440,7 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
-    <Compile Include="ViewModels\SelectFromCatalog.cs" />
+    <Compile Include="ViewModels\AddWaybillLineFromCatalog.cs" />
     <Compile Include="ViewModels\Dialogs\Login.cs" />
     <Compile Include="ViewModels\Dialogs\ReportSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
@@ -551,8 +551,8 @@
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SelectFromCatalog.xaml.cs">
-      <DependentUpon>SelectFromCatalog.xaml</DependentUpon>
+    <Compile Include="Views\AddWaybillLineFromCatalog.xaml.cs">
+      <DependentUpon>AddWaybillLineFromCatalog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
@@ -895,7 +895,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SelectFromCatalog.xaml">
+    <Page Include="Views\AddWaybillLineFromCatalog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
