@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				File.Delete(result.Filename);
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Export()
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Export_prices()
 		{
 			var model = new PriceViewModel();

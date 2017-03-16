@@ -123,54 +123,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Price Price { get; set; }
 
-
-		[Ignore]
-		public virtual string PriceName
-		{
-			get
-			{
-				return Price.Name;
-			}
-		}
-
-		[Ignore]
-		public virtual string PriceRegionName
-		{
-			get
-			{
-				return Price.RegionName;
-			}
-		}
-
-		[Ignore]
-		public virtual DateTime PricePriceDate
-		{
-			get
-			{
-				return Price.PriceDate;
-			}
-		}
-		[Ignore]
-		public virtual decimal? OrderLineResultSum
-		{
-			get
-			{
-				if (OrderLine == null)
-					return null;
-				return OrderLine.ResultSum;
-			}
-		}
-		[Ignore]
-		public virtual string OrderLineComment
-		{
-			get
-			{
-				if (OrderLine == null)
-					return string.Empty;
-				return OrderLine.Comment;
-			}
-		}
-
 		public virtual Price LeaderPrice { get; set; }
 
 		//Если есть более одно предложения с одинаковой ценой

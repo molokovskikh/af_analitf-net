@@ -132,6 +132,14 @@ namespace AnalitF.Net.Client.ViewModels
 			HideStatus(view);
 		}
 
+		protected IEnumerable<DataGrid> GetDataGrids(object view)
+		{
+			var dependencyObject = view as DependencyObject;
+			if (dependencyObject == null)
+				return Enumerable.Empty<DataGrid>();
+			return dependencyObject.LogicalDescendants().OfType<DataGrid>();
+		}
+
 		protected override void OnViewLoaded(object view)
 		{
 			base.OnViewLoaded(view);
