@@ -19,7 +19,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	{
 		private Waybill Waybill;
 		private StockAssortmentViewModel model;
-
 		[SetUp]
 		public void Setup()
 		{
@@ -50,6 +49,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				//для отчета по жизененно важным
 				EAN13 = "4606915000379",
 			});
+			session.Save(Waybill);
 			foreach (var item in Waybill.Lines)
 			{
 				item.Stock = new Stock(Waybill, item, session);
@@ -66,7 +66,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		public void StockAssortment()
 		{
-
 			Assert.That(model.Catalogs.Value.Count, Is.GreaterThan(0));
 			Assert.That(model.AddressStock.Value.Count, Is.GreaterThan(0));
 			Assert.That(model.Stocks.Value.Count, Is.GreaterThan(0));

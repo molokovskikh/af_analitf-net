@@ -115,12 +115,8 @@ where Timestamp > @lastSync and IsCreatedByUser = 0");
 				var ResultVersion = long.Parse(File.ReadAllText(Path.Combine(dir, "server-LastVersion")));
 				if (ResultVersion > 0)
 				{
-					using (var trx = Session.BeginTransaction())
-					{
-						actions.Each(x => x.Version = ResultVersion);
-						actions.Each(x => Session.Update(x));
-						trx.Commit();
-					}
+					actions.Each(x => x.Version = ResultVersion);
+					actions.Each(x => Session.Update(x));
 				}
 			}
 			return UpdateResult.OK;

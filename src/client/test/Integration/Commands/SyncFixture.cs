@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Sync_command()
 		{
-			settings.LastSync = DateTime.MinValue;
+			//settings.LastSync = DateTime.MinValue;
 			var stock = new Stock {
 				Product = "Папаверин",
 				Status = StockStatus.Available,
@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(DocStatus.Posted, waybill.Status);
 
 			var check = new Check(localSession.Query<User>().First(), address, settings.NumberPrefix, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
+			check.Lines.Each(x => x.Doc = check);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);
 			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock)));
