@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 			SrcStock = stock;
 			DisplayDoc = doc.DisplayName;
-			Number = doc.NumberDoc;
+			NumberDoc = doc.NumberDoc;
 			FromIn = doc.FromIn;
 			OutTo = doc.OutTo;
 			RetailCost = stock.RetailCost;
@@ -28,21 +28,17 @@ namespace AnalitF.Net.Client.Models.Inventory
 			DiscountSum = TypeChange == ActionTypeChange.Minus 
 						&& discountsum != null ? -discountsum : discountsum;
 			Timestamp = DateTime.Now;
+			Version = 0;
 		}
 
 		public virtual uint Id { get; set; }
-		public virtual DateTime Timestamp { get; set; }
-		public virtual string DisplayDoc { get; set; }
-		public virtual string Number { get; set; }
-		public virtual string FromIn { get; set; }
-		public virtual string OutTo { get; set; }
 
 		[Ignore]
 		public virtual string Document
 		{
 			get
 			{
-				return DisplayDoc + " " + Number;
+				return DisplayDoc + " " + NumberDoc;
 			}
 		}
 
@@ -81,7 +77,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 					return Math.Round((RetailCost * Quantity - (DiscountSum != null ? DiscountSum : 0)).Value, 2);
 			}
 		}
-
 
 		[Ignore]
 		public virtual decimal? RetailSummEx

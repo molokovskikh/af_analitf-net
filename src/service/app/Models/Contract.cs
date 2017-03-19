@@ -296,5 +296,12 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? RetailCost { get; set; }
 		public virtual decimal? RetailMarkup { get; set; }
 		public virtual decimal? DiscountSum { get; set; }
+
+		public virtual DateTime Timestamp { get; set; }
+		public virtual string DisplayDoc { get; set; }
+		public virtual string NumberDoc { get; set; }
+		public virtual string FromIn { get; set; }
+		public virtual string OutTo { get; set; }
+		public virtual long Version { get; set; }
 	}
 }

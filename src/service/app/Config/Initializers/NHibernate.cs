@@ -23,6 +23,16 @@ namespace AnalitF.Net.Service.Config.Initializers
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(typeof(SmartOrderRule).Assembly));
 
+			Mapper.Class<ClientVersion>(m => {
+				m.Schema("Inventory");
+				m.Table("ClientVersion");
+			});
+
+			Mapper.Class<ServerVersion>(m => {
+				m.Schema("Inventory");
+				m.Table("ServerVersion");
+			});
+
 			Mapper.Class<Stock>(m => {
 				m.Schema("Inventory");
 				m.Version(x => x.Version, _ => {});
