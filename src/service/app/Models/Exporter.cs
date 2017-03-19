@@ -2926,7 +2926,7 @@ where a.Enabled = 1
 	and s.Timestamp > ?lastSync";
 			Export(Result, sql, "stocks", false, new {userId = user.Id, lastSync});
 
-			//ExportStockActions(clientVersion);
+			ExportStockActions(clientVersion);
 		}
 
 		public void ExportStockActions(ClientVersion clientVersion)
@@ -2947,7 +2947,8 @@ where a.Enabled = 1
 				sa.Quantity,
 				sa.RetailCost,
 				sa.RetailMarkup,
-				sa.DiscountSum
+				sa.DiscountSum,
+				sa.Version
 			from Inventory.StockActions sa
 				join Inventory.Stocks s on s.Id =sa.SourceStockId
 					join Customers.Addresses a on a.Id = s.AddressId
@@ -2965,11 +2966,7 @@ where a.Enabled = 1
 				new { userId = user.Id, lastVersion = clientVersion.Version, maxVersion});
 
 			clientVersion.Version = maxVersion;
-			session.SaveOrUpdate(clientVersion);
-			//Result.Add(new UpdateData("server-LastVersion")
-			//{
-			//	Content = clientVersion.Version.ToString()
-			//});
+			session.Update(clientVersion);
 		}
 	}
 
