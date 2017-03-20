@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Address == null)
 				yield break;
-			var doc = new ReassessmentDoc(Address);
+			var doc = new ReassessmentDoc(Address, User);
 			yield return new DialogResult(new CreateReassessmentDoc(doc));
 			Session.Save(doc);
 			Update();

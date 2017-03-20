@@ -8,25 +8,57 @@ using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class ReturnDoc : BaseStatelessObject, IDataErrorInfo2
+
+	public class ReturnDoc : BaseStatelessObject, IDataErrorInfo2, IStockDocument
 	{
+		private bool _new;
+		private uint _id;
+		private string _numberprefix;
+		private string _numberdoc;
+
+
 		public ReturnDoc()
+
 		{
 			Lines = new List<ReturnLine>();
 		}
 
-		public ReturnDoc(Address address)
+
+		public ReturnDoc(Address address, User user)
 			: this()
 		{
 			Address = address;
 			Date = DateTime.Now;
 			Status = DocStatus.NotPosted;
+			_numberprefix = user.Id.ToString() + "-";
+			_new = true;
 			UpdateStat();
 		}
 
 		private DocStatus _status;
 
-		public override uint Id { get; set; }
+		public override uint Id
+		{
+			get { return _id; }
+			set
+			{
+				_id = value;
+				if (_new)
+					NumberDoc = _numberprefix + Id.ToString("d8");
+			}
+		}
+		public virtual string DisplayName { get { return "Возврат поставщику"; } }
+		public virtual string NumberDoc
+		{
+			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
+			set { _numberdoc = value; }
+		}
+		public virtual string FromIn
+		{ get { return string.Empty; } }
+		public virtual string OutTo
+		{ get { return SupplierName; } }
+
+
 		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
@@ -86,7 +118,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Status = DocStatus.Posted;
 			Timestamp = DateTime.Now;
 			foreach (var line in Lines)
-				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
+				session.Save(line.Stock.ReturnToSupplier(this, line.Quantity));
 		}
 
 		public virtual void UnPost(ISession session)
@@ -94,7 +126,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = null;
 			Status = DocStatus.NotPosted;
 			foreach (var line in Lines)
-				session.Save(line.Stock.CancelReturnToSupplier(line.Quantity));
+				session.Save(line.Stock.CancelReturnToSupplier(this, line.Quantity));
 		}
 
 		public virtual void BeforeDelete()

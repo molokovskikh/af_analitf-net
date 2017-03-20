@@ -97,7 +97,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new InventoryLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+
+				var line = new InventoryLine(Doc, Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -114,7 +116,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new InventoryLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				var line = new InventoryLine(Doc, Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -125,7 +127,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Delete()
 		{
 			// с поставки наружу
-			Session.Save(CurrentLine.Value.Stock.CancelInventoryDoc(CurrentLine.Value.Quantity));
+			Session.Save(CurrentLine.Value.Stock.CancelInventoryDoc(Doc, CurrentLine.Value.Quantity));
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
 			Lines.Remove(CurrentLine.Value);

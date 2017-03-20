@@ -256,9 +256,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				check.Charge = charge;
 				using (var trx = s.BeginTransaction()) {
 					s.Insert(check);
-					Lines.Each(x => x.CheckId = check.Id);
+					Lines.Each(x => { x.CheckId = check.Id; x.Doc = check; });
 					s.InsertEach(Lines);
-					s.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
+					s.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, ActionTypeChange.Minus, x.Stock, check, x.Quantity)));
 					s.UpdateEach(Lines.Select(x => x.Stock).Distinct());
 					trx.Commit();
 				}
@@ -378,7 +378,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			srcStock.Quantity += CurrentLine.Value.Quantity;
 			Lines.Remove(CurrentLine.Value);
 
-			var doc = new UnpackingDoc(Address);
+			var doc = new UnpackingDoc(Address, User);
 			var uline = new UnpackingLine(srcStock, settings.Multiplicity);
 			doc.Lines.Add(uline);
 			doc.UpdateStat();

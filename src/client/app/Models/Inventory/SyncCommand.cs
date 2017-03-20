@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 				var actions = Session.Connection
 					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
-						new { lastSync })
+ 						new { lastSync })
 					.ToArray();
 
 				using (var zip = new ZipFile()) {
