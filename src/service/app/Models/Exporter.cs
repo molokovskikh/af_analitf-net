@@ -1874,7 +1874,7 @@ select l.CheckId as ServerDocId,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.Exp,
-	l.Period,
+	l.PaymentByCard,
 	l.DocId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId

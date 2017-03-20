@@ -654,7 +654,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> AddFromCatalog()
 		{
-			if (!Waybill.IsCreatedByUser)
+			if (!Waybill.IsCreatedByUser || !User.IsStockEnabled)
 				yield break;
 			var dlg = new AddWaybillLineFromCatalog();
 			yield return new DialogResult(dlg);

@@ -856,12 +856,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			dispatcher.Invoke(() => {
 				var grid = activeWindow.Descendants().OfType<DataGrid>().First(x => x.Name == "Lines");
-				Assert.IsTrue(grid.CanUserAddRows);
+				Assert.IsTrue(grid.CanUserAddRows || shell.User.Value.IsStockEnabled);
 				Assert.IsTrue(grid.CanUserDeleteRows);
-				EditCell(grid, "Цена поставщика без НДС", 0, "500");
-				EditCell(grid, "Цена поставщика с НДС", 0, "510");
-				EditCell(grid, "НДС", 0, "10");
-				Assert.AreEqual("620.00", GetCell(grid, "Розничная цена").AsText());
+				if (!shell.User.Value.IsStockEnabled) {
+					EditCell(grid, "Цена поставщика без НДС", 0, "500");
+					EditCell(grid, "Цена поставщика с НДС", 0, "510");
+					EditCell(grid, "НДС", 0, "10");
+					Assert.AreEqual("620.00", GetCell(grid, "Розничная цена").AsText());
+				}
 			});
 		}
 
