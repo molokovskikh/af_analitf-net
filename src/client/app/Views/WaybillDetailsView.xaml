@@ -147,7 +147,8 @@
 		<StackPanel Grid.Row="3" Style="{StaticResource FilterPanel}"
 			Visibility="{Binding Waybill.IsCreatedByUser, Converter={StaticResource BoolToCollapsed}}">
 			<Button Style="{StaticResource FilterElement}"
-				Name="AddFromCatalog" ToolTip="Добавить строку из каталога (Ctrl+K)">Добавить из каталога</Button>
+				Name="AddFromCatalog" ToolTip="Добавить строку из каталога (Ctrl+K)"
+				Visibility="{Binding User.IsStockEnabled, Converter={StaticResource BoolToCollapsed}}">Добавить из каталога</Button>
 			<Button Style="{StaticResource FilterElement}"
 				Command="ApplicationCommands.Delete"
 				ToolTip="Удалить строку (Del)">Удалить строку</Button>
