@@ -374,7 +374,6 @@
 					<CheckBox x:Name="CurrentWaybillSettings_Value_IncludeNds">
 						Включать входную НДС в расчет розничной надбавки для НеЖНВЛС при ЕНВД
 					</CheckBox>
-					
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройки поставщиков" Name="DirMapTab"

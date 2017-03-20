@@ -96,7 +96,6 @@ namespace AnalitF.Net.Client.Models
 		private string _docDir;
 		private string _userName;
 		private string _password;
-		private string _numberprefix;
 		private string _proxyUserName;
 		private string _proxyPassword;
 		private string _proxyHost;
