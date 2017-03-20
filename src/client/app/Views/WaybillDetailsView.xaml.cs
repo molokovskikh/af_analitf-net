@@ -137,7 +137,6 @@ namespace AnalitF.Net.Client.Views
 				Generator = (c, i) => new ContentControl { Style = (Style)FindResource("DownloadLink") }
 			});
 			if (model.Waybill.IsCreatedByUser == true) {
-				lines.CanUserAddRows = true;
 				lines.CanUserDeleteRows = true;
 				lines.Columns.Add(new CustomDataGridColumn {
 					Header = "ЖНВЛС",
