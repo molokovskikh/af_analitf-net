@@ -1872,7 +1872,8 @@ select l.CheckId as ServerDocId,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.Exp,
-	l.Period
+	l.Period,
+	l.PaymentByCard
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
