@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Sync_command()
 		{
-			//settings.LastSync = DateTime.MinValue;
+			settings.LastSync = DateTime.MinValue;
 			var stock = new Stock {
 				Product = "Папаверин",
 				Status = StockStatus.Available,

@@ -22,7 +22,6 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Service.Controllers
 {
-
 	public class StocksController : ApiController
 	{
 		private ILog log = LogManager.GetLogger(typeof(StocksController));
@@ -37,21 +36,15 @@ namespace AnalitF.Net.Service.Controllers
 			var serverTimestamp = DateTime.Now;
 			var lastSync = DateTime.MinValue;
 			var postProcessing = new List<string>();
-			ServerVersion ServerVersion = null;
 			using (var zip = ZipFile.Read(input)) {
 				foreach (var item in zip) {
 					if (item.FileName == "stock-actions") {
 						var reader = new JsonTextReader(new StreamReader(item.OpenReader()));
 						var serializer = new JsonSerializer();
 						var actions = serializer.Deserialize<StockActionAttrs[]>(reader);
-						if (actions.Count() > 0)
-						{
-							ServerVersion = new ServerVersion(CurrentUser);
-							Session.Save(ServerVersion);
-						}
 						foreach (var action in actions) {
 							try {
-								HandleStockAction(action, ServerVersion);
+								HandleStockAction(action);
 							} catch (Exception ex) {
 								log.Error(ex);
 							}
@@ -64,6 +57,7 @@ namespace AnalitF.Net.Service.Controllers
 						lastSync = DateTime.Parse(Encoding.UTF8.GetString(buffer));
 						continue;
 					}
+
 					var table = new DataTable();
 					table.ReadXml(item.OpenReader());
 					table.Constraints.Clear();
@@ -159,10 +153,6 @@ where l.{name}DocId is null
 				exporter.Result.Add(new UpdateData("server-timestamp") {
 					Content = serverTimestamp.ToString("O")
 				});
-				exporter.Result.Add(new UpdateData("server-LastVersion")
-				{
-					Content = ServerVersion != null ?ServerVersion.Id.ToString(): "-1"
-				});
 				exporter.Compress(memory);
 				memory.Position = 0;
 			}
@@ -172,7 +162,7 @@ where l.{name}DocId is null
 			};
 		}
 
-		private void HandleStockAction(StockActionAttrs action, ServerVersion ServerVersion)
+		private void HandleStockAction(StockActionAttrs action)
 		{
 			Stock source;
 			if (action.SourceStockId != null) {
@@ -195,37 +185,6 @@ where l.{name}DocId is null
 				Session.Save(source);
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
-			}
-			// 
-			string sql = @"insert into Inventory.stockactions " +
-				"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, "+
-				" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum, Version)" +
-				"values (?userId, '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "', " +
-						"'" + action.DisplayDoc + "', " +
-						"'" + action.NumberDoc + "', " +
-						"'" + action.FromIn + "', " +
-						"'" + action.OutTo + "', " +
-						(int)action.ActionType + ", " +
-						(int)action.TypeChange + ", " +
-						action.ClientStockId + ", " +
-						(action.SourceStockId != null ? action.SourceStockId.ToString() : " null ") + ", " +
-						(action.SourceStockVersion != null ?  action.SourceStockVersion.ToString() : " null ") + ", " +
-						action.Quantity.ToString().Replace(',', '.') + ", " +
-						(action.RetailCost != null ? action.RetailCost.ToString().Replace(',', '.') : " null ") + ", " +
-						(action.RetailMarkup != null ? action.RetailMarkup.ToString().Replace(',', '.') : " null ") + ", " +
-						(action.DiscountSum != null ? action.DiscountSum.ToString().Replace(',', '.')  : " null ") + ", " +
-						ServerVersion.Id +	");";
-			MySqlCommand cmd = new MySqlCommand(sql);
-			cmd.Parameters.AddWithValue("userId", CurrentUser.Id);
-			cmd.Connection = (MySqlConnection)Session.Connection;
-			cmd.Prepare();
-			try
-			{
-				cmd.ExecuteNonQuery();
-			}
-			catch (Exception e)
-			{
-				throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
 			}
 		}
 	}

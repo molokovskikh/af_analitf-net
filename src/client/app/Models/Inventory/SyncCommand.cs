@@ -31,11 +31,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 				var lastSync = Settings.LastSync.ToUniversalTime();
 
 				var actions = Session.Connection
-					.Query<StockAction>("select * from StockActions where Version = 0")
+					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
+ 							new { lastSync })
 					.ToArray();
 				using (var zip = new ZipFile()) {
 					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
-					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions), System.Text.Encoding.UTF8);
+					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions));
 
 					WriteSql(zip, disposable, "check-lines", @"
 select l.*
@@ -112,12 +113,6 @@ where Timestamp > @lastSync and IsCreatedByUser = 0");
 				import.ImportTables(ListAdresesBeforeImport);
 				Settings.LastSync = newLastSync;
 				Settings.ServerLastSync = DateTime.Parse(File.ReadAllText(Path.Combine(dir, "server-timestamp")));
-				var ResultVersion = long.Parse(File.ReadAllText(Path.Combine(dir, "server-LastVersion")));
-				if (ResultVersion > 0)
-				{
-					actions.Each(x => x.Version = ResultVersion);
-					actions.Each(x => Session.Update(x));
-				}
 			}
 			return UpdateResult.OK;
 		}
