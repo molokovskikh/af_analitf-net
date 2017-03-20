@@ -37,13 +37,13 @@ namespace AnalitF.Net.Client.Models.Print
 			var rows = _checks.Select((o, i) => new object[]
 			{
 				o.Id,
-				o.Date.ToString("dd/M/yyyy"),
+				o.Date.ToShortDateString(),
 				o.Clerk,
 				o.Address.Name,
 				o.Cancelled,
-				o.RetailSum,
-				o.DiscountSum,
-				o.Sum,
+				o.RetailSum.ToString("0.00"),
+				o.DiscountSum.ToString("0.00"),
+				o.Sum.ToString("0.00"),
 			});
 
 			var table = BuildTable(rows, headers, columnGrops);
@@ -66,6 +66,45 @@ namespace AnalitF.Net.Client.Models.Print
 						},
 					}
 				});
+			table.RowGroups[0].Rows.Add(new TableRow {
+					Cells = {
+						new TableCell(new Paragraph(new Run("Наличными: ")) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							ColumnSpan = 7,
+							TextAlignment = TextAlignment.Right
+						},
+						new TableCell(new Paragraph(new Run(_checks.Sum(x => x.Payment - x.Charge).ToString("0.00"))) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							TextAlignment = TextAlignment.Center
+						},
+					}
+				});
+			table.RowGroups[0].Rows.Add(new TableRow {
+					Cells = {
+						new TableCell(new Paragraph(new Run("Картой: ")) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							ColumnSpan = 7,
+							TextAlignment = TextAlignment.Right
+						},
+						new TableCell(new Paragraph(new Run(_checks.Sum(x => x.PaymentByCard).ToString("0.00"))) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							TextAlignment = TextAlignment.Center
+						},
+					}
+				});
+
 		}
 	}
 }

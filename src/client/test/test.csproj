@@ -322,6 +322,7 @@
     <Compile Include="Unit\ViewModels\CatalogFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
+    <Compile Include="Unit\ViewModels\CheckoutFixture.cs" />
     <Compile Include="Unit\ViewModels\JunkOffers.cs" />
     <Compile Include="Unit\ViewModels\OrderDetailsFixture.cs" />
     <Compile Include="Unit\ViewModels\OrderLines.cs" />

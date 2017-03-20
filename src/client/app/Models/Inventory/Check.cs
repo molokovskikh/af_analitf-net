@@ -86,6 +86,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		/// Сдача, руб
 		/// </summary>
 		public virtual decimal Charge { get; set; }
+		public virtual decimal PaymentByCard { get; set; }
 		public virtual decimal Sum => RetailSum - DiscountSum;
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal DiscountSum { get; set; }
@@ -160,6 +161,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 					},
 					new LineBreak(),
 					new Run($"Наличными = {Payment:C}") {
+						FontSize = 10,
+					},
+					new LineBreak(),
+					new Run($"Картой = {PaymentByCard:C}") {
 						FontSize = 10,
 					},
 					new LineBreak(),

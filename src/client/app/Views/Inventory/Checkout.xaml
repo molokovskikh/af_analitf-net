@@ -38,6 +38,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Label Grid.Row="0" Grid.Column="0" Style="{StaticResource Header}">Сдача</Label>
 		<Label Grid.Row="0" Grid.Column="1" Style="{StaticResource Header}">К оплате</Label>
@@ -45,5 +46,7 @@
 		<Label Grid.Row="1" Grid.Column="1" Style="{StaticResource Value}" Name="Sum" />
 		<Label Grid.Row="2" Grid.Column="0" Style="{StaticResource Header}">Наличные</Label>
 		<TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource Input}" Name="Amount" />
+		<Label Grid.Row="3" Grid.Column="0" Style="{StaticResource Header}">Картой</Label>
+		<TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource Input}" Name="CardAmount" />
 	</Grid>
 </UserControl>

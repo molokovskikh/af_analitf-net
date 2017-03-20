@@ -223,7 +223,8 @@ namespace AnalitF.Net.Client.Helpers
 					}
 				},
 				{ "InFrozenOrders", Background(Colors.Gray) },
-				{ "Confirmed", Background(Colors.Green) },
+				{ nameof(CheckLine.Confirmed), Background(Colors.LightGreen) },
+				{ nameof(CheckLine.NotConfirmed), Background(Colors.LightYellow) },
 			};
 		}
 

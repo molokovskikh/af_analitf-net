@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
@@ -20,12 +21,42 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			InitFields();
 			Lines = new ReactiveCollection<CheckLine>();
 			Warning = new InlineEditWarning(Scheduler, Manager);
+			OnCloseDisposable.Add(SearchBehavior = new SearchBehavior(Env));
+			SearchBehavior.ActiveSearchTerm.Where(x => !String.IsNullOrEmpty(x))
+				.Subscribe(x => Coroutine.BeginExecute(Enter().GetEnumerator()));
 		}
 
-		public NotifyValue<string> Input { get; set; }
+		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
 		public InlineEditWarning Warning { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			var lines = Shell.SessionContext.GetValueOrDefault(GetType().Name + "." + nameof(Lines)) as ReactiveCollection<CheckLine>;
+			if (lines != null) {
+				Lines.AddRange(lines);
+			}
+			Shell.SessionContext[GetType().Name + "." + nameof(Lines)] = null;
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+
+			if (close) {
+				if (Lines.Count > 0) {
+					Shell.SessionContext[GetType().Name + "." + nameof(Lines)] = Lines;
+				}
+			}
+		}
+
+		public void Clear()
+		{
+			Lines.Clear();
+		}
 
 		// Закрыть чек Enter
 		public IEnumerable<IResult> Close()
@@ -36,14 +67,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			var checkout = new Checkout(Lines.Sum(x => x.RetailSum));
 			yield return new DialogResult(checkout);
-			var charge = checkout.Change.Value.GetValueOrDefault();
-			var payment = checkout.Amount.Value.GetValueOrDefault();
-
+			var check = new Check(User, Address, Lines, CheckType.SaleBuyer);
+			check.Charge = checkout.Change.Value.GetValueOrDefault();
+			check.Payment = checkout.Amount.Value.GetValueOrDefault();
+			check.PaymentByCard = checkout.CardAmount.Value.GetValueOrDefault();
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
-				var check = new Check(User, Address, Lines, CheckType.SaleBuyer);
-				check.Payment = payment;
-				check.Charge = charge;
 				using (var trx = s.BeginTransaction()) {
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
@@ -71,11 +100,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Enter()
 		{
-			var inputValue = Input.Value;
+			var inputValue = SearchBehavior.ActiveSearchTerm.Value;
 			if (String.IsNullOrEmpty(inputValue))
 				yield break;
 
-			Input.Value = "";
+			SearchBehavior.ActiveSearchTerm.Value = null;
 			if (inputValue.Length > 8 && inputValue.All(x => char.IsDigit(x))) {
 				foreach (var result in BarcodeScanned(inputValue)) {
 					yield return result;
@@ -98,8 +127,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var exists = Lines.FirstOrDefault(x => x.Stock.Id == item.Id);
 			if (exists != null) {
 				exists.Quantity = item.Ordered.Value;
+				CurrentLine.Value = exists;
 			} else {
-				Lines.Add(new CheckLine(item, item.Ordered.Value));
+				var checkLine = new CheckLine(item, item.Ordered.Value);
+				Lines.Add(checkLine);
+				CurrentLine.Value = checkLine;
 			}
 		}
 
@@ -108,8 +140,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var exists = Lines.FirstOrDefault(x => x.Stock.Id == item.Id);
 			if (exists != null) {
 				exists.Quantity = 1;
+				CurrentLine.Value = exists;
 			} else {
-				Lines.Add(new CheckLine(item, 1));
+				var line = new CheckLine(item, 1);
+				Lines.Add(line);
+				CurrentLine.Value = line;
 			}
 		}
 
@@ -139,9 +174,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Updated()
 		{
-			if (CurrentLine.Value.Quantity > CurrentLine.Value.Stock.Quantity) {
-				Warning.Show(Common.Tools.Message.Warning($"Заказ превышает остаток на складе, товар будет заказан в количестве {CurrentLine.Value.Stock.Quantity}"));
-				CurrentLine.Value.Quantity = CurrentLine.Value.Stock.Quantity;
+			var stockQuantity = CurrentLine.Value.Stock.Quantity;
+			if (CurrentLine.Value.Quantity > stockQuantity) {
+				Warning.Show(Common.Tools.Message.Warning($"Заказ превышает остаток на складе, товар будет заказан в количестве {stockQuantity}"));
+				CurrentLine.Value.Quantity = stockQuantity;
 			}
 		}
 

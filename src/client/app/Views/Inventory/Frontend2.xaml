@@ -6,6 +6,7 @@
 	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	mc:Ignorable="d"
 	d:DesignHeight="300" d:DesignWidth="300">
 	<UserControl.Resources>
@@ -20,10 +21,15 @@
 
 	<Grid>
 		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<controls:DataGrid2 Grid.Row="0" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
+		<StackPanel Orientation="Horizontal" Grid.Row="0">
+			<Button Focusable="False" Name="Clear" MinWidth="100" Padding="3">Очистить (F3)</Button>
+		</StackPanel>
+		<controls:DataGrid2 Grid.Row="1" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Штрих-Код" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
@@ -32,17 +38,22 @@
 				<controls:DataGridTextColumnEx Header="Срок годности" Binding="{Binding Exp, StringFormat=d}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Подтверждено" Binding="{Binding ConfirmedQuantity}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding RetailSum}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 		<ContentControl Focusable="False" x:Name="Warning" Grid.Row="0" />
-		<Grid Grid.Row="1">
+		<Grid Grid.Row="2">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="3*" />
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
-			<TextBox Grid.Row="0" Grid.Column="0" Name="Input" Style="{StaticResource Input}" />
-			<Button Focusable="False" Grid.Column="1" Name="Close">Закрыть чек</Button>
+			<TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource Input}"
+				x:Name="SearchText"
+				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+				caliburn:SearchBinder.Grid="Lines"/>
+			<Button Focusable="False" Grid.Column="1" Name="Close">Закрыть чек (F7)</Button>
 		</Grid>
+		<StackPanel Grid.Row="3" Name="Legend" />
 	</Grid>
 </UserControl>
