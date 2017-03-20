@@ -32,8 +32,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 				var actions = Session.Connection
 					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
- 							new { lastSync })
+ 						new { lastSync })
 					.ToArray();
+
 				using (var zip = new ZipFile()) {
 					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
 					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions));
