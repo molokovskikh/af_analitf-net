@@ -30,7 +30,7 @@
 				Visibility="{Binding IsRejected, Converter={StaticResource BoolToCollapsed}}">
 				Показать забраковку
 			</Button>
-			<Button Name="ShowRejectsOnStock" Margin="4"
+			<Button Name="ShowRejectedOnStock" Margin="4"
 				Visibility="{Binding IsRejectedOnStock, Converter={StaticResource BoolToCollapsed}}">
 				Показать забраковку на складе
 			</Button>
