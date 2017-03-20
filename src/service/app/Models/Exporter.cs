@@ -1826,7 +1826,8 @@ select Id as ServerId,
 	SupplySum,
 	AddressId,
 	Payment,
-	Charge
+	Charge,
+	PaymentByCard
 from Inventory.Checks c
 where c.Timestamp > ?lastSync
 	and c.UserId <> ?userId
@@ -1872,8 +1873,7 @@ select l.CheckId as ServerDocId,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.Exp,
-	l.Period,
-	l.PaymentByCard
+	l.Period
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
