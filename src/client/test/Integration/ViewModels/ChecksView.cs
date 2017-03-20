@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			session.DeleteEach<Check>();
 
-			var check = new Check(user, address, settings.NumberPrefix, Enumerable.Empty<CheckLine>(), CheckType.CheckReturn)
+			var check = new Check(user, address, Enumerable.Empty<CheckLine>(), CheckType.CheckReturn)
 			{
 				Date = DateTime.Today.AddDays(-7),
 				ChangeOpening = DateTime.Today.AddDays(-7),

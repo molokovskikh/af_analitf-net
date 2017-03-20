@@ -19,13 +19,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<UnpackingLine>();
 		}
 
-		public UnpackingDoc(Address address, string numberprefix)
+		public UnpackingDoc(Address address, User user)
 			: this()
 		{
 			Date = DateTime.Now;
 			Address = address;
 			UpdateStat();
-			_numberprefix = numberprefix;
+			_numberprefix = user.Id.ToString() + "-";
 			_new = true;
 		}
 

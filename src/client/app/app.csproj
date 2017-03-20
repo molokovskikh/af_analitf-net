@@ -195,7 +195,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsFormsIntegration" />
     <Reference Include="WpfAnimatedGif">
       <HintPath>..\..\..\packages\WpfAnimatedGif.1.4.13\lib\net\WpfAnimatedGif.dll</HintPath>
       <Private>True</Private>
@@ -245,13 +244,6 @@
     <Compile Include="Controls\Preview.cs" />
     <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
-    <Compile Include="Controls\WinFormDataGrid.cs" />
-    <Compile Include="Controls\WinFormGrid.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\WinFormGrid.Designer.cs">
-      <DependentUpon>WinFormGrid.cs</DependentUpon>
-    </Compile>
     <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
@@ -446,7 +438,7 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
-    <Compile Include="ViewModels\SelectFromCatalog.cs" />
+    <Compile Include="ViewModels\AddWaybillLineFromCatalog.cs" />
     <Compile Include="ViewModels\Dialogs\Login.cs" />
     <Compile Include="ViewModels\Dialogs\PrintSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
@@ -483,7 +475,6 @@
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
     <Compile Include="ViewModels\Dialogs\RegistryDocSettings.cs" />
-    <Compile Include="ViewModels\Dialogs\WinFormDataGridConfig.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
@@ -562,8 +553,8 @@
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SelectFromCatalog.xaml.cs">
-      <DependentUpon>SelectFromCatalog.xaml</DependentUpon>
+    <Compile Include="Views\AddWaybillLineFromCatalog.xaml.cs">
+      <DependentUpon>AddWaybillLineFromCatalog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\CatalogChooser.xaml.cs">
       <DependentUpon>CatalogChooser.xaml</DependentUpon>
@@ -620,9 +611,6 @@
     </Compile>
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\WinFormDataGridConfig.xaml.cs">
-      <DependentUpon>WinFormDataGridConfig.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\EditDefectSeries.xaml.cs">
       <DependentUpon>EditDefectSeries.xaml</DependentUpon>
@@ -921,7 +909,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SelectFromCatalog.xaml">
+    <Page Include="Views\AddWaybillLineFromCatalog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -976,10 +964,6 @@
     <Page Include="Views\Dialogs\DocModel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\WinFormDataGridConfig.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Dialogs\EditDefectSeries.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -1459,11 +1443,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <ShareFiles Include="..\..\..\lib\libmysqld\**\*.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Controls\WinFormGrid.resx">
-      <DependentUpon>WinFormGrid.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <Target Name="BeforeBuild">
     <Copy SkipUnchangedFiles="True" SourceFiles="@(ShareFiles)" DestinationFiles="@(ShareFiles->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />

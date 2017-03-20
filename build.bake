@@ -1,4 +1,4 @@
-﻿import Boo.Lang.PatternMatching
+import Boo.Lang.PatternMatching
 import System
 import System.Collections
 import System.Reflection

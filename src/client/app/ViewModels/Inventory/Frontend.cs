@@ -252,7 +252,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
 
-				var check = new Check(User, Address, Settings.Value.NumberPrefix, Lines, checkType);
+				var check = new Check(User, Address, Lines, checkType);
 
 				check.Payment = payment;
 				check.Charge = charge;
@@ -380,7 +380,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			srcStock.Quantity += CurrentLine.Value.Quantity;
 			Lines.Remove(CurrentLine.Value);
 
-			var doc = new UnpackingDoc(Address, Settings.Value.NumberPrefix);
+			var doc = new UnpackingDoc(Address, User);
 			var uline = new UnpackingLine(srcStock, settings.Multiplicity);
 			doc.Lines.Add(uline);
 			doc.UpdateStat();

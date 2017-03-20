@@ -24,8 +24,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 	[TestFixture]
 	public class CatalogOfferFixture : BaseViewFixture
 	{
-		
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Open_shell()
 		{
 			var view = new ShellView();
@@ -33,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			ViewModelBinder.Bind(shell, view, null);
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Check_view()
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -47,7 +46,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.That(item.AsText(), Is.EqualTo("test"));
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Rebuild_styles()
 		{
 			StyleHelper.Reset();
@@ -78,7 +77,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			}
 		}
 
-		[Test Ignore("тест конфликтует с WinForm.DataGridView")]
+		[Test]
 		public void Disable_clipboard()
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -89,6 +88,5 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Offers");
 			Assert.AreEqual(DataGridClipboardCopyMode.None, grid.ClipboardCopyMode);
 		}
-		
 	}
 }

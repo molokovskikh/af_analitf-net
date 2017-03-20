@@ -21,13 +21,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<WriteoffLine>();
 		}
 
-		public WriteoffDoc(Address address, string numberprefix)
+		public WriteoffDoc(Address address, User user)
 			: this()
 		{
 			
 			Date = DateTime.Now;
 			Address = address;
-			_numberprefix = numberprefix;
+			_numberprefix = user.Id.ToString() + "-";
 			_new = true;
 		}
 

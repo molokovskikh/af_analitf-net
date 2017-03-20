@@ -28,9 +28,16 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				ReservedQuantity = 0,
 				SupplyQuantity = 5
 			};
+
+			User User = session?.Query<User>()?.FirstOrDefault()
+				?? new User
+				{
+					SupportHours = "будни: с 07:00 до 19:00",
+					SupportPhone = "тел.: 473-260-60-00",
+				};
 			localSession.Save(stock);
 
-			var doc = new InventoryDoc(address, settings.NumberPrefix);
+			var doc = new InventoryDoc(address, User);
 			doc.Lines.Add(new InventoryLine(doc, stock, 1, localSession));
 			doc.UpdateStat();
 			doc.Post();
@@ -61,7 +68,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			waybill.Stock(localSession);
 			Assert.AreEqual(DocStatus.Posted, waybill.Status);
 
-			var check = new Check(localSession.Query<User>().First(), address, settings.NumberPrefix, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
+			var check = new Check(localSession.Query<User>().First(), address, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
 			check.Lines.Each(x => x.Doc = check);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);

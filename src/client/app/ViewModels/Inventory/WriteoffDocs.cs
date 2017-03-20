@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Address == null)
 				yield break;
-			var doc = new WriteoffDoc(Address, Settings.Value.NumberPrefix);
+			var doc = new WriteoffDoc(Address, User);
 			yield return new DialogResult(new CreateWriteoffDoc(doc));
 			Session.Save(doc);
 			Update();

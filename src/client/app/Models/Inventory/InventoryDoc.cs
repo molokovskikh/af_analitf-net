@@ -28,11 +28,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<InventoryLine>();
 		}
 
-		public InventoryDoc(Address address, string numberprefix)
+		public InventoryDoc(Address address, User user)
 			: this()
 		{
 			Date = DateTime.Now;
-			_numberprefix = numberprefix;
+			_numberprefix = user.Id.ToString() + "-";
 			Address = address;
 			_new = true;
 		}

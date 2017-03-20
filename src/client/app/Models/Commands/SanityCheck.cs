@@ -285,6 +285,10 @@ namespace AnalitF.Net.Client.Models.Commands
 							alters.Add(String.Format("alter table {0} drop index {1};", tableMeta.Name, index.Name));
 					}
 
+					if (table.Name.Match("Orders")) {
+						alters.Add("update Orders o left join Prices p on o.PriceId = p.PriceId set SavePriceDate = ifnull(p.PriceDate, o.CreatedOn);");
+					}
+
 					if (alters.Count > 0) {
 						foreach (var alter in alters) {
 							try {

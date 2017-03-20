@@ -38,7 +38,7 @@ using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
-using AnalitF.Net.Client.Controls;
+
 namespace AnalitF.Net.Client.ViewModels
 {
 	/// <summary>
@@ -316,15 +316,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (close) {
-				foreach (var grid in GetWinFormDataGrids(GetView()))
-				{
-					grid.SaveColumnOrder();
-				}
-
 				Save();
 				TableSettings.SaveView(GetView());
 				Dispose();
-
 			}
 
 			if (!close) {
@@ -343,23 +337,6 @@ namespace AnalitF.Net.Client.ViewModels
 			return dependencyObject.LogicalDescendants().OfType<DataGrid>()
 				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
 		}
-
-		protected IEnumerable<DataGrid> GetDataGrids(object view)
-		{
-			var dependencyObject = view as DependencyObject;
-			if (dependencyObject == null)
-				return Enumerable.Empty<DataGrid>();
-			return dependencyObject.LogicalDescendants().OfType<DataGrid>();
-		}
-
-		private IEnumerable<WinFormDataGrid> GetWinFormDataGrids(object view)
-		{
-			var dependencyObject = view as DependencyObject;
-			if (dependencyObject == null)
-				return Enumerable.Empty<WinFormDataGrid>();
-			return dependencyObject.LogicalDescendants().OfType<WinFormDataGrid>();
-		}
-
 		protected IEnumerable<IResult> Preview(string name, BaseDocument doc)
 		{
 			var docSettings = doc.Settings;
@@ -387,7 +364,6 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var grid in GetControls(GetView())) {
 				RestoreView(grid, temporaryTableSettings);
 			}
-
 		}
 		private void RestoreView(DataGrid dataGrid, Dictionary<string, List<ColumnSettings>> storage)
 		{
@@ -487,12 +463,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (!SkipRestoreTable)
 				TableSettings.RestoreView(view);
-
-			foreach (var grid in GetWinFormDataGrids(view))
-			{
-				grid.SetColumnOrder();
-			}
-
 		}
 
 		//для тестов
@@ -731,13 +701,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new GridConfig(grid));
 		}
 
-		public IResult ConfigureGrid(WinFormDataGrid grid)
-		{
-			return new DialogResult(new WinFormDataGridConfig(grid));
-		}
-
 		public virtual IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
-
 		{
 			return Env.RxQuery(select, CloseCancellation.Token);
 		}
@@ -769,22 +733,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var view = GetView();
 			if (view == null)
 				return null;
-			if (((FrameworkElement)view).Descendants<DataGrid>()
-				.FirstOrDefault(g => g.Name == name) != null)
-			{
-				return ((FrameworkElement)view).Descendants<DataGrid>()
+			return ((FrameworkElement)view).Descendants<DataGrid>()
 				.First(g => g.Name == name)
 				.Items
 				.OfType<T>().ToArray();
-			}
-			if (((FrameworkElement)view).Descendants<WinFormDataGrid>()
-					.FirstOrDefault(g => g.Name == name) != null)
-			{
-				return ((FrameworkElement)view).Descendants<WinFormDataGrid>()
-				.First(g => g.Name == name)
-				.GetItems<T>();
-			}
-			return null;
 		}
 
 		protected void InitFields()

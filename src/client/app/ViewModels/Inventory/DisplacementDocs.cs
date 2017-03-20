@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Address == null)
 				yield break;
-			var doc = new DisplacementDoc(Address, Settings.Value.NumberPrefix);
+			var doc = new DisplacementDoc(Address, User);
 			yield return new DialogResult(new CreateDisplacementDoc(doc));
 			Session.Save(doc);
 			Update();

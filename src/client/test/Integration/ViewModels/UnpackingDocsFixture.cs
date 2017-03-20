@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			session.DeleteEach<UnpackingDoc>();
 
-			doc = new UnpackingDoc(address, settings.NumberPrefix);
+			doc = new UnpackingDoc(address, user);
 			session.Save(doc);
 		}
 

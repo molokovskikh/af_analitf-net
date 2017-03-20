@@ -20,12 +20,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<ReassessmentLine>();
 		}
 
-		public ReassessmentDoc(Address address, string numberprefix)
+		public ReassessmentDoc(Address address, User user)
 			: this()
 		{
 			Date = DateTime.Now;
 			Address = address;
-			_numberprefix = numberprefix;
+			_numberprefix = user.Id.ToString() + "-";
 			_new = true;
 		}
 

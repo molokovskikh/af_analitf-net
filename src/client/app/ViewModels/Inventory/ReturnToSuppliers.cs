@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (Address == null)
 				yield break;
 
-			var doc = new ReturnDoc(Address, Settings.Value.NumberPrefix);
+			var doc = new ReturnDoc(Address, User);
 
 			yield return new DialogResult(new CreateReturnToSupplier(doc));
 			Session.Save(doc);

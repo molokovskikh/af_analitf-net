@@ -184,12 +184,6 @@ namespace AnalitF.Net.Client.Models
 			set { _password = value?.Trim(); }
 		}
 
-		public virtual string NumberPrefix
-		{
-			get { return _numberprefix; }
-			set { _numberprefix = value?.Trim(); }
-		}
-
 		//в жизни часы клиента и сервера не будут совпадать
 		//обновления по часам клиента
 		public virtual DateTime LastSync { get; set; }

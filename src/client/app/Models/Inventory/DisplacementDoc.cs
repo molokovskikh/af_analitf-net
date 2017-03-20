@@ -31,10 +31,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<DisplacementLine>();
 		}
 
-		public DisplacementDoc(Address address, string numberprefix)
+		public DisplacementDoc(Address address, User user)
 			: this()
 		{
-			_numberprefix = numberprefix;
+			_numberprefix = user.Id.ToString() + "-";
 			_new = true;
 			Address = address;
 			Date = DateTime.Now;

@@ -24,13 +24,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 
-		public ReturnDoc(Address address, string numberprefix)
+		public ReturnDoc(Address address, User user)
 			: this()
 		{
 			Address = address;
 			Date = DateTime.Now;
 			Status = DocStatus.NotPosted;
-			_numberprefix = numberprefix;
+			_numberprefix = user.Id.ToString() + "-";
 			_new = true;
 			UpdateStat();
 		}

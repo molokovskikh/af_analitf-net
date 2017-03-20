@@ -142,12 +142,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 					_confirmedQuantity = value;
 					OnPropertyChanged();
 					OnPropertyChanged(nameof(Confirmed));
+					OnPropertyChanged(nameof(NotConfirmed));
 				}
 			}
 		}
 
-		[Ignore, Style]
+		[Ignore, Style(Description = "Подтверждена")]
 		public virtual bool Confirmed => ConfirmedQuantity == Quantity;
+
+		[Ignore, Style(Description = "Не подтверждена")]
+		public virtual bool NotConfirmed => ConfirmedQuantity != Quantity;
 
 		public virtual StockAction UpdateStock(Stock stock)
 		{
