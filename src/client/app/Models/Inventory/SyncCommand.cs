@@ -110,8 +110,7 @@ where Timestamp > @lastSync and IsCreatedByUser = 0");
 				var import = Configure(new ImportCommand(dir) {
 					Strict = false
 				});
-				var ListAdresesBeforeImport = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-				import.ImportTables(ListAdresesBeforeImport);
+				import.ImportTables();
 				Settings.LastSync = newLastSync;
 				Settings.ServerLastSync = DateTime.Parse(File.ReadAllText(Path.Combine(dir, "server-timestamp")));
 			}

@@ -147,7 +147,8 @@ create temporary table UpdatedWaybills (
 	DownloadId int unsigned not null,
 	primary key(DownloadId));")
 				.ExecuteUpdate();
-			ImportTables(adresesBeforeImport, new [] { "UpdatedWaybills" });
+			ImportTables(new [] { "UpdatedWaybills" });
+			ChangeAdress(adresesBeforeImport);
 			Session.CreateSQLQuery(@"
 update Waybills w
 join UpdatedWaybills u on u.DownloadId = w.Id
@@ -326,7 +327,7 @@ drop temporary table ExistsCatalogs;")
 			settings.ApplyChanges(Session);
 		}
 
-		public void ImportTables(List<Address> adresesBeforeImport, string[] tmpTables = null)
+		public void ImportTables(string[] tmpTables = null)
 		{
 			Log.Info("Начинаю импорт");
 			var ordered =
@@ -352,7 +353,6 @@ drop temporary table ExistsCatalogs;")
 					throw new Exception($"Не могу импортировать {table.Item1}", e);
 				}
 			}
-			ChangeAdress(adresesBeforeImport);
 			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
 		}
 

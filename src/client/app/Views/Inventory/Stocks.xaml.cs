@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -22,6 +24,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 		public Stocks()
 		{
 			InitializeComponent();
+			StyleHelper.ApplyStyles(typeof(Stock), Items, Application.Current.Resources, Legend);
 		}
 	}
 }

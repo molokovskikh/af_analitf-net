@@ -361,6 +361,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual RejectStatus RejectStatus { get; set; }
 		public virtual uint? RejectId { get; set; }
 
+		[Style(Description = "Забракованная позиция")]
+		public virtual bool IsReject => RejectStatus == RejectStatus.Defective;
+
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 
 		public static IQueryable<Stock> AvailableStocks(IStatelessSession session, Address address = null)
