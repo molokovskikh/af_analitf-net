@@ -92,7 +92,7 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class ShellViewModel : BaseShell, IDisposable
 	{
-		private ManualResetEventSlim startSync = new ManualResetEventSlim();
+		private Subject<object> startSync = new Subject<object>();
 		private WindowManager windowManager;
 		private ISession session;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
@@ -1194,7 +1194,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void SyncInventory()
 		{
-			startSync.Set();
+			startSync.OnNext(new object());
 		}
 
 		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)
