@@ -120,7 +120,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
 			CurrentItem.Value.BeforeDelete(Session);
-			await Env.Query(s => s.Delete(CurrentItem.Value));
+			await Env.Query(s => {
+				foreach (var line in CurrentItem.Value.Lines) {
+					// если сток создавался вместе со строкой и пустой - можно удалить
+					if (line.StockIsNew && line.Stock.Quantity == 0 && line.Stock.ReservedQuantity == 0)
+						s.Delete(line.Stock);
+				}
+				s.Delete(CurrentItem.Value);
+			});
 			Update();
 		}
 
@@ -139,6 +146,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Value.Status = doc.Status;
 			CurrentItem.Refresh();
 			Update();
+			Bus.SendMessage(nameof(InventoryDoc), "db");
+			Bus.SendMessage(nameof(Stock), "db");
 		}
 
 		public void UnPost()
@@ -152,6 +161,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Value.Status = doc.Status;
 			CurrentItem.Refresh();
 			Update();
+			Bus.SendMessage(nameof(InventoryDoc), "db");
+			Bus.SendMessage(nameof(Stock), "db");
 		}
 
 		public void EnterItem()

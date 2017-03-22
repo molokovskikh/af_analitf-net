@@ -37,6 +37,8 @@ namespace AnalitF.Net.Client.Views.Dialogs
 					Stock_Quantity.IsReadOnly = false;
 					Stock_RetailCost.IsReadOnly = false;
 					Stock_RetailMarkup.IsReadOnly = false;
+				} else if (model.EditMode == ViewModels.Dialogs.EditStock.Mode.EditAll) {
+					this.Descendants<TextBox>().Each(x => x.IsReadOnly = false);
 				} else {
 					Stock_Quantity.IsReadOnly = true;
 				}

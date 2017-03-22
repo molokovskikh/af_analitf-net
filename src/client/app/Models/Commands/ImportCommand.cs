@@ -481,6 +481,12 @@ where p.IsSynced = 1 or p.PriceId is null;";
 				})
 					.ToArray();
 			}
+			if (dbTable.Name.Match("InventoryLines")) {
+				ignored = ignored.Concat(new[] {
+					"StockIsNew"
+				})
+					.ToArray();
+			}
 			if (dbTable.Name.Match("Orders")) {
 				ignored = ignored.Concat(new[] {
 					"DisplayId",

@@ -345,7 +345,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal SupplySumWithoutNds => SupplyQuantity * SupplierCostWithoutNds.GetValueOrDefault();
 		public virtual decimal? RetailSum => Quantity * RetailCost;
 		public virtual string Vmn { get; set; }
-		public virtual string Gtd { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
 

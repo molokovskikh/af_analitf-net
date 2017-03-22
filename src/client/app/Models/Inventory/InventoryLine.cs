@@ -4,18 +4,19 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class InventoryLine : BaseStock, IEditableObject
+	public class InventoryLine : BaseStock
 	{
 		public InventoryLine()
 		{
 		}
 
-		public InventoryLine(Stock stock, decimal quantity, ISession session)
+		public InventoryLine(Stock stock, decimal quantity, ISession session, bool stockIsNew = false)
 		{
 			Stock.Copy(stock, this);
 			Id = 0;
 			Stock = stock;
 			Quantity = quantity;
+			StockIsNew = stockIsNew;
 			session.Save(Stock.InventoryDoc(quantity));
 		}
 
@@ -33,6 +34,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock Stock { get; set; }
 
+		// признак, что соотв сток был создан при создании этой строки, иначе сток уже был
+		public virtual bool StockIsNew { get; set; }
+
 		public virtual void UpdateQuantity(decimal oldQuantity, ISession session)
 		{
 			// с поставки наружу
@@ -41,16 +45,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 			session.Save(Stock.InventoryDoc(Quantity));
 		}
 
-		public virtual void BeginEdit()
-		{
-		}
+		//public virtual void BeginEdit()
+		//{
+		//}
 
-		public virtual void EndEdit()
-		{
-		}
+		//public virtual void EndEdit()
+		//{
+		//}
 
-		public virtual void CancelEdit()
-		{
-		}
+		//public virtual void CancelEdit()
+		//{
+		//}
 	}
 }
