@@ -186,6 +186,37 @@ where l.{name}DocId is null
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
 			}
+			//
+			string sql = @"insert into Inventory.stockactions " +
+							"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
+							" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum, Version)" +
+							"values (?userId, '" + action.Timestamp.ToString("yyyy-MM-dd hh:mm:ss") + "', " +
+									"'" + action.DisplayDoc + "', " +
+									"'" + action.NumberDoc + "', " +
+									"'" + action.FromIn + "', " +
+									"'" + action.OutTo + "', " +
+									(int)action.ActionType + ", " +
+									(int)action.TypeChange + ", " +
+									action.ClientStockId + ", " +
+									(action.SourceStockId != null ? action.SourceStockId.ToString() : " null ") + ", " +
+									(action.SourceStockVersion != null ? action.SourceStockVersion.ToString() : " null ") + ", " +
+									action.Quantity.ToString().Replace(',', '.') + ", " +
+									(action.RetailCost != null ? action.RetailCost.ToString().Replace(',', '.') : " null ") + ", " +
+									(action.RetailMarkup != null ? action.RetailMarkup.ToString().Replace(',', '.') : " null ") + ", " +
+									(action.DiscountSum != null ? action.DiscountSum.ToString().Replace(',', '.') : " null ") + ", " +
+									 action.Version + ");";
+			MySqlCommand cmd = new MySqlCommand(sql);
+			cmd.Parameters.AddWithValue("userId", CurrentUser.Id);
+			cmd.Connection = (MySqlConnection)Session.Connection;
+			cmd.Prepare();
+			try
+			{
+				cmd.ExecuteNonQuery();
+			}
+			catch (Exception e)
+			{
+				throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
+			}
 		}
 	}
 }

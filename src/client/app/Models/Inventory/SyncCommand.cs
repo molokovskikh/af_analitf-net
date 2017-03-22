@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 				using (var zip = new ZipFile()) {
 					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
-					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions));
+					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions), System.Text.Encoding.UTF8);
 
 					WriteSql(zip, disposable, "check-lines", @"
 select l.*
