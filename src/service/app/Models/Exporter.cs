@@ -1809,6 +1809,7 @@ where s.Timestamp > ?lastSync
 				var addressIds = "(" + Addresses.Implode(x => x.Id) + ")";
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	CheckType,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(ChangeOpening, @@session.time_zone,'+00:00') as ChangeOpening,
@@ -1826,7 +1827,8 @@ select Id as ServerId,
 	SupplySum,
 	AddressId,
 	Payment,
-	Charge
+	Charge,
+	PaymentByCard
 from Inventory.Checks c
 where c.Timestamp > ?lastSync
 	and c.UserId <> ?userId
@@ -1872,7 +1874,8 @@ select l.CheckId as ServerDocId,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.Exp,
-	l.Period
+	l.Period,
+	l.DocId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
@@ -1884,6 +1887,7 @@ where c.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
@@ -1939,6 +1943,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -1980,7 +1985,8 @@ select l.Quantity,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.InventoryDocId as ServerDocId,
-	l.Exp
+	l.Exp,
+	l.DocId
 from Inventory.InventoryLines l
 	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
 where d.Timestamp > ?lastSync
@@ -1992,6 +1998,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2050,6 +2057,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
@@ -2106,6 +2114,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2161,6 +2170,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,

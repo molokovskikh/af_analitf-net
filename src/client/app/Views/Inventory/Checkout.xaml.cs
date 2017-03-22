@@ -27,15 +27,11 @@ namespace AnalitF.Net.Client.Views.Inventory
 				if (Model == null)
 					return;
 
-				Model.Change.Subscribe(x => {
-					if (x == null)
-						Change.Content = x;
-					else
-						Change.Content = Math.Abs(x.Value);
-					if (x < 0)
-						Change.Foreground = Brushes.Red;
-					else
+				Model.IsValid.Subscribe(x => {
+					if (x)
 						Change.ClearValue(Label.ForegroundProperty);
+					else
+						Change.Foreground = Brushes.Red;
 				});
 			};
 		}

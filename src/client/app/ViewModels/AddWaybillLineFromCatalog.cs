@@ -11,9 +11,9 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class SelectFromCatalog : BaseScreen, ICancelable
+	public class AddWaybillLineFromCatalog : BaseScreen, ICancelable
 	{
-		public SelectFromCatalog()
+		public AddWaybillLineFromCatalog()
 		{
 			InitFields();
 			DisplayName = "Добавление из каталога";
@@ -25,7 +25,9 @@ namespace AnalitF.Net.Client.ViewModels
 			IsOkEnabled.Value = false;
 			CurrentCatalog.Changed()
 				.Merge(CurrentProducer.Changed())
-				.Subscribe(_ => IsOkEnabled.Value = CurrentCatalog.Value != null && CurrentProducer.Value != null);
+				.Merge(SupplierCost.Changed())
+				.Merge(Quantity.Changed())
+				.Subscribe(_ => IsOkEnabled.Value = CurrentCatalog.Value != null && CurrentProducer.Value != null && SupplierCost.Value > 0 && Quantity.Value > 0);
 		}
 
 		public bool WasCancelled { get; private set; }
@@ -38,6 +40,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsProducerOpen { get; set; }
 		public NotifyValue<Producer> CurrentProducer { get; set; }
 		public NotifyValue<string> ProducerTerm { get; set; }
+
+		public NotifyValue<decimal> SupplierCost { get; set; }
+		public NotifyValue<int> Quantity { get; set; }
 
 		public NotifyValue<bool> IsOkEnabled { get; set; }
 

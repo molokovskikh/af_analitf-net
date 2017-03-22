@@ -14,7 +14,7 @@
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 		<KeyBinding Gesture="Ctrl+L" Command="caliburn:Commands.InvokeViewModel" CommandParameter="Tags" />
-		<KeyBinding Gesture="Ctrl+K" Command="caliburn:Commands.InvokeViewModel" CommandParameter="SelectFromCatalog" />
+		<KeyBinding Gesture="Ctrl+K" Command="caliburn:Commands.InvokeViewModel" CommandParameter="AddFromCatalog" />
 	</UserControl.InputBindings>
 
 	<Grid Name="MainGrid">
@@ -146,6 +146,9 @@
 
 		<StackPanel Grid.Row="3" Style="{StaticResource FilterPanel}"
 			Visibility="{Binding Waybill.IsCreatedByUser, Converter={StaticResource BoolToCollapsed}}">
+			<Button Style="{StaticResource FilterElement}"
+				Name="AddFromCatalog" ToolTip="Добавить строку из каталога (Ctrl+K)"
+				Visibility="{Binding User.IsStockEnabled, Converter={StaticResource BoolToCollapsed}}">Добавить из каталога</Button>
 			<Button Style="{StaticResource FilterElement}"
 				Command="ApplicationCommands.Delete"
 				ToolTip="Удалить строку (Del)">Удалить строку</Button>

@@ -53,11 +53,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public IResult Search()
 		{
-			if (string.IsNullOrEmpty(SearchText.Value) || SearchText.Value.Length < 3)
+			var value = SearchText.Value;
+			if (string.IsNullOrEmpty(value) || value.Length < 3)
 				return HandledResult.Skip();
 
-			ActiveSearchTerm.Value = SearchText.Value;
+			//мы должны обнулить а затем записать что бы избежать срабатывания таймера
 			SearchText.Value = "";
+			ActiveSearchTerm.Value = value;
 			return HandledResult.Handled();
 		}
 

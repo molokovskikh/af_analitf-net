@@ -48,6 +48,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 		}
 
+		public virtual Check Doc { get; set; }
+
 		public virtual uint Id { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
 		public virtual uint? ServerDocId { get; set; }
@@ -140,17 +142,21 @@ namespace AnalitF.Net.Client.Models.Inventory
 					_confirmedQuantity = value;
 					OnPropertyChanged();
 					OnPropertyChanged(nameof(Confirmed));
+					OnPropertyChanged(nameof(NotConfirmed));
 				}
 			}
 		}
 
-		[Ignore, Style]
+		[Ignore, Style(Description = "Подтверждена")]
 		public virtual bool Confirmed => ConfirmedQuantity == Quantity;
+
+		[Ignore, Style(Description = "Не подтверждена")]
+		public virtual bool NotConfirmed => ConfirmedQuantity != Quantity;
 
 		public virtual StockAction UpdateStock(Stock stock)
 		{
 			stock.Quantity -= Quantity;
-			return new StockAction(ActionType.Sale, stock, Quantity);
+			return new StockAction(ActionType.Sale, ActionTypeChange.Minus, stock, Doc, Quantity, DiscontSum);
 		}
 	}
 }

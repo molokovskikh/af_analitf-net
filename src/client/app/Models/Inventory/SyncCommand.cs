@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Config;
@@ -32,7 +35,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 				var actions = Session.Connection
 					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
-						new { lastSync })
+ 						new { lastSync })
 					.ToArray();
 
 				using (var zip = new ZipFile()) {
@@ -110,8 +113,7 @@ where Timestamp > @lastSync and IsCreatedByUser = 0");
 				var import = Configure(new ImportCommand(dir) {
 					Strict = false
 				});
-				var ListAdresesBeforeImport = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-				import.ImportTables(ListAdresesBeforeImport);
+				import.ImportTables();
 				Settings.LastSync = newLastSync;
 				Settings.ServerLastSync = DateTime.Parse(File.ReadAllText(Path.Combine(dir, "server-timestamp")));
 			}
@@ -141,18 +143,17 @@ where Timestamp > @lastSync and IsCreatedByUser = 0");
 		}
 
 		public static async Task Start(Config.Config config,
-			ManualResetEventSlim startEvent,
+			Subject<object> startEvent,
 			CancellationToken token,
 			NotifyValue<User> user)
 		{
 			while (!token.IsCancellationRequested) {
-				await TaskEx.WhenAny(TaskEx.Delay(TimeSpan.FromSeconds(30), token), TaskEx.Run(() => startEvent.Wait()));
+				await TaskEx.WhenAny(TaskEx.Delay(TimeSpan.FromSeconds(30), token), startEvent.Take(1).ToTask(token));
 				if (token.IsCancellationRequested)
 					return;
 				if (user.Value?.IsStockEnabled == false)
 					continue;
 
-				startEvent.Reset();
 				try {
 					using (var sync = new SyncCommand()) {
 						sync.InitSession();

@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
@@ -11,9 +12,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Sum = sum;
 			WasCancelled = true;
-			Change = new NotifyValue<decimal?>();
-			Amount = new NotifyValue<decimal?>(sum);
-			Amount.Select(x => x - Sum).Subscribe(Change);
+			BaseScreen.InitFields(this);
+			Amount.Value = sum;
+			Amount.CombineLatest(CardAmount, (x, y) => Abs(x + y.GetValueOrDefault() - Sum)).Subscribe(Change);
+			Amount.CombineLatest(CardAmount, (x, y) => x.GetValueOrDefault() + y.GetValueOrDefault() >= sum
+				&& y.GetValueOrDefault() <= sum
+				&& !(x.GetValueOrDefault() > sum && y.GetValueOrDefault() > 0))
+				.Subscribe(IsValid);
 			DisplayName = "Введите сумму оплаты";
 		}
 
@@ -21,10 +26,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public decimal Sum { get; set; }
 		public NotifyValue<decimal?> Change { get; set; }
 		public NotifyValue<decimal?> Amount { get; set; }
+		public NotifyValue<decimal?> CardAmount { get; set; }
+		public NotifyValue<bool> IsValid { get; set; }
+
+		public decimal? Abs(decimal? value)
+		{
+			if (value == null)
+				return null;
+			return Math.Abs(value.Value);
+		}
 
 		public void OK()
 		{
-			if (Amount.Value.GetValueOrDefault() < Sum) {
+			if (!IsValid) {
 				return;
 			}
 			WasCancelled = false;

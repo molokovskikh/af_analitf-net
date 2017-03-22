@@ -11,20 +11,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
 	/// <summary>
-	/// Interaction logic for Stocks.xaml
+	/// Логика взаимодействия для StockAssortmentView.xaml
 	/// </summary>
-	public partial class Stocks : UserControl
+	public partial class StockAssortmentView : UserControl
 	{
-		public Stocks()
+		public StockAssortmentView()
 		{
 			InitializeComponent();
-			StyleHelper.ApplyStyles(typeof(Stock), Items, Application.Current.Resources, Legend);
 		}
 	}
 }

@@ -652,24 +652,25 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 #endif
 
-		public IEnumerable<IResult> SelectFromCatalog()
+		public IEnumerable<IResult> AddFromCatalog()
 		{
-			var line = CurrentLine.Value as WaybillLine;
-			if (!Waybill.IsCreatedByUser || line?.CatalogId != null)
+			if (!Waybill.IsCreatedByUser || !User.IsStockEnabled)
 				yield break;
-			var dlg = new SelectFromCatalog();
+			var dlg = new AddWaybillLineFromCatalog();
 			yield return new DialogResult(dlg);
 			if (dlg.WasCancelled)
 				yield break;
-			if (line == null) {
-				line = new WaybillLine(Waybill);
-				Lines.Value.AddNewItem(line);
-			}
-			line.CatalogId = dlg.CurrentCatalog.Value.Id;
-			line.ProductId = Session.Query<Product>().FirstOrDefault(r => r.CatalogId == line.CatalogId)?.Id;
-			line.Product = dlg.CurrentCatalog.Value.FullName;
-			line.ProducerId = dlg.CurrentProducer.Value.Id;
-			line.Producer = dlg.CurrentProducer.Value.Name;
+			var line = new WaybillLine(Waybill) {
+				CatalogId = dlg.CurrentCatalog.Value.Id,
+				ProductId = Session.Query<Product>().FirstOrDefault(r => r.CatalogId == dlg.CurrentCatalog.Value.Id)?.Id,
+				Product = dlg.CurrentCatalog.Value.FullName,
+				ProducerId = dlg.CurrentProducer.Value.Id,
+				Producer = dlg.CurrentProducer.Value.Name,
+				SupplierCost = dlg.SupplierCost.Value,
+				Quantity = dlg.Quantity.Value
+			};
+			CurrentLine.Value = Lines.Value.AddNewItem(line);
+			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
 		}
 	}
 }

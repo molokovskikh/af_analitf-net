@@ -53,8 +53,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			env.RxQuery(s => s.Get<Catalog>(catalogId))
 				.Subscribe(x => Name = x?.FullName);
 			env.RxQuery(s => {
-				var sql = "select * from Stocks where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0";
-				var items = s.Connection.Query<OrderedStock>(sql, new { catalogId, addressId = address.Id })
+				var sql = "select * from Stocks where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0 and RejectStatus <> @status";
+				var items = s.Connection.Query<OrderedStock>(sql, new { catalogId,
+						addressId = address.Id,
+						status = RejectStatus.Defective
+					})
 					.OrderBy(x => x.Exp)
 					.ToList();
 				foreach (var item in items) {

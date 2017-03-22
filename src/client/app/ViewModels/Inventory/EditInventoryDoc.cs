@@ -90,7 +90,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
-				var line = new InventoryLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+
+				var line = new InventoryLine(Doc, Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -113,7 +115,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				stock.Quantity = 0;
 				stock.Status = StockStatus.InTransit;
 				Session.Save(stock);
-				var line = new InventoryLine(stock, quantity, Session, true);
+				var line = new InventoryLine(Doc, stock, quantity, Session, true);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -167,7 +169,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			// с поставки наружу
 			var stock = CurrentLine.Value.Stock;
-			Session.Save(stock.CancelInventoryDoc(CurrentLine.Value.Quantity));
+			Session.Save(stock.CancelInventoryDoc(Doc, CurrentLine.Value.Quantity));
 			// если сток создавался вместе со строкой и пустой - можно удалить
 			if (CurrentLine.Value.StockIsNew && stock.Quantity == 0 && stock.ReservedQuantity == 0)
 				Session.Delete(stock);
@@ -176,15 +178,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Lines.Remove(CurrentLine.Value);
 			Save();
 		}
-
-		//public void UpdateQuantity(InventoryLine line, decimal oldQuantity)
-		//{
-		//	if (Session == null)
-		//		return;
-		//	line.UpdateQuantity(oldQuantity, Session);
-		//	Doc.UpdateStat();
-		//	Save();
-		//}
 
 		public void Post()
 		{

@@ -99,13 +99,13 @@ namespace AnalitF.Net.Client.Views
 				Binding = new Binding("Product"),
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
 				SortDirection = ListSortDirection.Ascending,
-				IsReadOnly = true
+				IsReadOnly = model.User.IsStockEnabled
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Производитель",
 				Binding = new Binding("Producer"),
 				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
-				IsReadOnly = true
+				IsReadOnly = model.User.IsStockEnabled
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Страна",
@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.Views
 				Generator = (c, i) => new ContentControl { Style = (Style)FindResource("DownloadLink") }
 			});
 			if (model.Waybill.IsCreatedByUser == true) {
-				lines.CanUserAddRows = true;
+				lines.CanUserAddRows = !model.User.IsStockEnabled;
 				lines.CanUserDeleteRows = true;
 				lines.Columns.Add(new CustomDataGridColumn {
 					Header = "ЖНВЛС",

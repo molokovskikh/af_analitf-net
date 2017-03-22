@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls.Behaviors;
@@ -21,7 +22,15 @@ namespace AnalitF.Net.Client.Views.Inventory
 			InitializeComponent();
 
 			Loaded += (sender, args) => {
-				Input.Focus();
+				DataGridHelper.Focus(Lines);
+			};
+			KeyDown += (sender, args) => {
+				if (args.Key == Key.F7) {
+					Execute(Model.Close());
+				}
+				if (args.Key == Key.F3) {
+					Model.Clear();
+				}
 			};
 
 			DataContextChanged += (sender, args) => {
@@ -31,17 +40,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 				handler.Barcode.Subscribe(x => Execute(Model.BarcodeScanned(x)));
 			};
 
-			Input.KeyDown += (sender, args) => {
-				if (args.Key == Key.Enter) {
-					Execute(Model.Enter());
-				}
-			};
-
-			Lines.KeyDown += (sender, args) => {
-				if (args.Key == Key.Delete)
-					Model.Lines.RemoveAll(Lines.SelectedItems.Cast<CheckLine>());
-			};
 			new Editable().Attach(Lines);
+			StyleHelper.ApplyStyles(typeof(CheckLine), Lines, Application.Current.Resources, Legend);
 		}
 
 		private void Execute(IEnumerable<IResult> enumerable)

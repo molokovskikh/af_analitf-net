@@ -15,23 +15,49 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Проведен")] Posted
 	}
 
-	public class InventoryDoc : BaseNotify, IEditableObject, IDataErrorInfo2
+	public class InventoryDoc : BaseNotify, IEditableObject, IDataErrorInfo2, IStockDocument
 	{
 		private DocStatus _status;
+		private bool _new;
+		private uint _id;
+		private string _numberprefix;
+		private string _numberdoc;
 
 		public InventoryDoc()
 		{
 			Lines = new List<InventoryLine>();
 		}
 
-		public InventoryDoc(Address address)
+		public InventoryDoc(Address address, User user)
 			: this()
 		{
 			Date = DateTime.Now;
+			_numberprefix = user.Id.ToString() + "-";
 			Address = address;
+			_new = true;
 		}
 
-		public virtual uint Id { get; set; }
+		public virtual uint Id
+		{
+			get { return _id; }
+			set
+			{
+				_id = value;
+				if (_new)
+					NumberDoc = _numberprefix + Id.ToString("d8");
+			}
+		}
+		public virtual string DisplayName { get { return "Инвентаризация"; } }
+		public virtual string NumberDoc
+		{
+			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
+			set { _numberdoc = value; }
+		}
+		public virtual string FromIn
+		{ get { return string.Empty; } }
+		public virtual string OutTo
+		{ get { return string.Empty; } }
+
 		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
@@ -112,7 +138,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			// с поставки наружу
 			foreach (var line in Lines)
-				session.Save(line.Stock.CancelInventoryDoc(line.Quantity));
+				session.Save(line.Stock.CancelInventoryDoc(this, line.Quantity));
 		}
 
 		public virtual void UpdateStat()

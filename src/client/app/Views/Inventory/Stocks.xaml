@@ -27,6 +27,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Menu Grid.Row="0">
 			<MenuItem Header="Приходные документы">
@@ -115,5 +116,6 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 		<ContentControl x:Name="QuickSearch" Grid.Row="2" Grid.Column="0" caliburn:QuickSearchBehavior.GridRef="{x:Reference Items}"/>
+		<StackPanel Grid.Row="4" Name="Legend" />
 	</Grid>
 </UserControl>
