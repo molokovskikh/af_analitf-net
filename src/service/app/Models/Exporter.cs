@@ -1966,6 +1966,7 @@ where d.Timestamp > ?lastSync
 select l.Quantity,
 	l.Period,
 	l.StockId,
+	l.StockIsNew,
 	l.Barcode,
 	l.Product,
 	l.ProductId,
