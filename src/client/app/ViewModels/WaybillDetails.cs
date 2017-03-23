@@ -127,6 +127,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> CanStock { get; set; }
 		public NotifyValue<bool> CanToEditable { get; set; }
 		public NotifyValue<bool> CanEditSum { get; set; }
+		public NotifyValue<bool> CanAddFromCatalog { get; set; }
 
 		private void Calculate()
 		{
@@ -157,6 +158,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(Waybill.ObservableForProperty(m => (object)m.IsCreatedByUser))
 				.Select(_ => !User.IsStockEnabled && Waybill.Status == DocStatus.NotPosted && !Waybill.IsCreatedByUser)
 				.Subscribe(CanToEditable);
+
+			Waybill.ObservableForProperty(m => (object) m.Status, skipInitial: false)
+				.Merge(Waybill.ObservableForProperty(m => (object) m.IsCreatedByUser))
+				.Select(_ => Waybill.Status == DocStatus.NotPosted && Waybill.IsCreatedByUser)
+				.Subscribe(CanAddFromCatalog);
 
 			if (Waybill.IsNew)
 			{
@@ -654,7 +660,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> AddFromCatalog()
 		{
-			if (!Waybill.IsCreatedByUser || !User.IsStockEnabled)
+			if (!User.IsStockEnabled || !CanAddFromCatalog)
 				yield break;
 			var dlg = new AddWaybillLineFromCatalog();
 			yield return new DialogResult(dlg);

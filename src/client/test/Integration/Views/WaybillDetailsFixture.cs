@@ -83,5 +83,32 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 			WpfTestHelper.CleanSafeError();
 		}
+
+		[Test]
+		public void Check_add_from_catalog_enabling()
+		{
+			user.IsStockEnabled = true;
+			session.Save(user);
+			var waybill = new Waybill(address, session.Query<Supplier>().First());
+			waybill.IsCreatedByUser = true;
+			session.Save(waybill);
+
+			WpfTestHelper.WithWindow2(async w => {
+				var model = new WaybillDetails(waybill.Id);
+				var view = (WaybillDetailsView)Bind(model);
+				w.Content = view;
+
+				await view.WaitLoaded();
+				var addButton = view.Descendants<Button>().First(b => b.Name == "AddFromCatalog");
+				Assert.IsTrue(addButton.Visibility == Visibility.Visible);
+				Assert.IsTrue(addButton.IsEnabled);
+
+				view.Descendants<Button>().First(b => b.Name == "Stock")
+					.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+				Assert.IsTrue(addButton.Visibility == Visibility.Visible);
+				Assert.IsFalse(addButton.IsEnabled);
+			});
+			WpfTestHelper.CleanSafeError();
+		}
 	}
 }
