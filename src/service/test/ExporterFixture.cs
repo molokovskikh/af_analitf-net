@@ -221,6 +221,14 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Export_sent_orders()
+		{
+			exporter.ExportSentOrders(new ulong[0]);
+			var files = ListResult();
+			Assert.AreEqual("SentOrders.meta.txt, SentOrders.txt, SentOrderLines.meta.txt, SentOrderLines.txt", files);
+		}
+
+		[Test]
 		public void Do_not_export_waybill_files()
 		{
 			user.SendWaybills = false;
