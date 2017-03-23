@@ -1734,9 +1734,10 @@ select oh.RowId as ServerId,
 	oh.PriceCode as PriceId,
 	oh.RegionCode as RegionId,
 	oh.ClientAddition as Comment,
-	ifnull(p.PriceName, oh.PriceName) as SavePriceName
+	s.Name as SavePriceName
 from Orders.OrdersHead oh
-left join UserSettings.Prices p on oh.PriceCode = p.PriceCode
+	inner join Usersettings.PricesData pd on oh.PriceCode = pd.PriceCode
+	inner join Customers.Suppliers s on pd.FirmCode = s.Id
 {condition}";
 			Export(Result, sql, "SentOrders", truncate: false, parameters: new { userId = user.Id });
 
