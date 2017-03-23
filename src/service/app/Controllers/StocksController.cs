@@ -186,27 +186,29 @@ where l.{name}DocId is null
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
 			}
-			//
 			string sql = @"insert into Inventory.stockactions " +
-							"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
-							" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum, Version)" +
-							"values (?userId, '" + action.Timestamp.ToString("yyyy-MM-dd hh:mm:ss") + "', " +
-									"'" + action.DisplayDoc + "', " +
-									"'" + action.NumberDoc + "', " +
-									"'" + action.FromIn + "', " +
-									"'" + action.OutTo + "', " +
-									(int)action.ActionType + ", " +
-									(int)action.TypeChange + ", " +
-									action.ClientStockId + ", " +
-									(action.SourceStockId != null ? action.SourceStockId.ToString() : " null ") + ", " +
-									(action.SourceStockVersion != null ? action.SourceStockVersion.ToString() : " null ") + ", " +
-									action.Quantity.ToString().Replace(',', '.') + ", " +
-									(action.RetailCost != null ? action.RetailCost.ToString().Replace(',', '.') : " null ") + ", " +
-									(action.RetailMarkup != null ? action.RetailMarkup.ToString().Replace(',', '.') : " null ") + ", " +
-									(action.DiscountSum != null ? action.DiscountSum.ToString().Replace(',', '.') : " null ") + ", " +
-									 action.Version + ");";
+					"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
+					" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum, Version)" +
+					" values (?userId, ?Timestamp, ?DisplayDoc, ?NumberDoc, ?FromIn, ?OutTo, ?ActionType, ?TypeChange, " +
+					" ?ClientStockId, ?SourceStockId, ?SourceStockVersion, ?Quantity, ?RetailCost, ?RetailMarkup, " +
+					" ?DiscountSum, ?Version);";
 			MySqlCommand cmd = new MySqlCommand(sql);
 			cmd.Parameters.AddWithValue("userId", CurrentUser.Id);
+			cmd.Parameters.AddWithValue("Timestamp", action.Timestamp.ToLocalTime());
+			cmd.Parameters.AddWithValue("DisplayDoc", action.DisplayDoc);
+			cmd.Parameters.AddWithValue("NumberDoc", action.NumberDoc);
+			cmd.Parameters.AddWithValue("FromIn", action.FromIn);
+			cmd.Parameters.AddWithValue("OutTo", action.OutTo);
+			cmd.Parameters.AddWithValue("ActionType", (int)action.ActionType);
+			cmd.Parameters.AddWithValue("TypeChange", (int)action.TypeChange);
+			cmd.Parameters.AddWithValue("ClientStockId", action.ClientStockId);
+			cmd.Parameters.AddWithValue("SourceStockId", action.SourceStockId);
+			cmd.Parameters.AddWithValue("SourceStockVersion", action.SourceStockVersion);
+			cmd.Parameters.AddWithValue("Quantity", action.Quantity);
+			cmd.Parameters.AddWithValue("RetailCost", action.RetailCost);
+			cmd.Parameters.AddWithValue("RetailMarkup", action.RetailMarkup);
+			cmd.Parameters.AddWithValue("DiscountSum", action.DiscountSum);
+			cmd.Parameters.AddWithValue("Version", action.Version);
 			cmd.Connection = (MySqlConnection)Session.Connection;
 			cmd.Prepare();
 			try
