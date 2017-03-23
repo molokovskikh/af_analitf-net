@@ -2882,6 +2882,40 @@ where a.Enabled = 1
 	and u.Id = ?userId
 	and s.Timestamp > ?lastSync";
 			Export(Result, sql, "stocks", false, new {userId = user.Id, lastSync});
+			ExportStockActions(lastSync);
+		}
+
+		public void ExportStockActions(DateTime lastSync)
+		{
+			var sql = @"
+			select
+				null Id,
+				sa.Timestamp,
+				sa.DisplayDoc,
+				sa.NumberDoc,
+				sa.FromIn,
+				sa.OutTo,
+				sa.ActionType,
+				sa.TypeChange,
+				sa.ClientStockId,
+				sa.SourceStockId,
+				sa.SourceStockVersion,
+				sa.Quantity,
+				sa.RetailCost,
+				sa.RetailMarkup,
+				sa.DiscountSum,
+				sa.Version
+			from Inventory.StockActions sa
+				join Inventory.Stocks s on s.Id =sa.SourceStockId
+					join Customers.Addresses a on a.Id = s.AddressId
+						join Customers.UserAddresses ua on ua.Addressid = a.Id
+							join Customers.Users u on u.Id = ua.UserId
+				left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
+					left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
+			where a.Enabled = 1
+				and u.Id = ?userId
+				and sa.Timestamp > ?lastSync";
+			Export(Result, sql, "stockactions", false, new { userId = user.Id, lastSync });
 		}
 	}
 
