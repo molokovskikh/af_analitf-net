@@ -74,7 +74,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			//Assert
 			Assert.AreEqual(stock.Id, resultStock.Id);
-			Assert.AreEqual(resultStock.Status, StockStatus.InTransit);
 		}
 
 		/// <summary>

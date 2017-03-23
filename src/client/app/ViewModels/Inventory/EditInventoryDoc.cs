@@ -34,7 +34,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			DisplayName = "Редактирование документа Излишки";
 			InitDoc(Session.Load<InventoryDoc>(id));
-			Lines = new ReactiveCollection<InventoryLine>(Doc.Lines);
 		}
 
 		public InventoryDoc Doc { get; set; }
@@ -64,6 +63,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public override void Update()
 		{
 			Session.Refresh(Doc);
+			Lines = new ReactiveCollection<InventoryLine>(Doc.Lines);
+			Refresh();
 		}
 
 		private void InitDoc(InventoryDoc doc)
@@ -131,7 +132,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			// если создан новый сток - отдаём редактировать сток, все поля
 			if (line.StockIsNew) {
 				var stock = line.Stock;
-				// поменяли местами, чтоб редактировать
+				// поменяли местами, чтоб редактировать количество
 				var reservedQuantity = stock.ReservedQuantity;
 				stock.ReservedQuantity = stock.Quantity;
 				stock.Quantity = reservedQuantity;
@@ -162,7 +163,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			Doc.UpdateStat();
 			Save();
-			Refresh();
+			Update();
 		}
 
 		public void Delete()

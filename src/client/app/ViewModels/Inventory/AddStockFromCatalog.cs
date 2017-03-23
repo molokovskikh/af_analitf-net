@@ -122,7 +122,6 @@ order by Score, {p.Name}")
 
 		public void OK()
 		{
-			//_session.Save(Item);
 			WasCancelled = false;
 			TryClose();
 		}

@@ -27,26 +27,6 @@ namespace AnalitF.Net.Client.Views.Inventory
 		public EditInventoryDoc()
 		{
 			InitializeComponent();
-			//DataContextChanged += OnDataContextChanged;
-
-			//Lines.BeginningEdit += (sender, args) =>
-			//{
-			//	Lines.Tag = ((InventoryLine)args.Row.Item).Quantity;
-			//};
-
-			//Lines.RowEditEnding += (sender, args) => {
-			//	var line = (InventoryLine)args.Row.Item;
-			//	var oldQuantity = (decimal)Lines.Tag;
-			//	model.UpdateQuantity(line, oldQuantity);
-			//};
 		}
-
-		//private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs args)
-		//{
-		//	model = DataContext as ViewModels.Inventory.EditInventoryDoc;
-		//	if (model == null)
-		//		return;
-		//	DataContextChanged -= OnDataContextChanged;
-		//}
 	}
 }

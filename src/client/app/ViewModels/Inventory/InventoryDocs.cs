@@ -120,6 +120,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (!Confirm("Удалить выбранный документ?"))
 				return;
 			CurrentItem.Value.BeforeDelete(Session);
+			Session.Flush();
 			await Env.Query(s => {
 				foreach (var line in CurrentItem.Value.Lines) {
 					// если сток создавался вместе со строкой и пустой - можно удалить
