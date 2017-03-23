@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			user.IsStockEnabled = true;
 			session.Save(user);
-			var waybill = Fixture<LocalWaybill>().Waybill;
+			var waybill = new Waybill(address, session.Query<Supplier>().First());
 			waybill.IsCreatedByUser = true;
 			session.Save(waybill);
 
