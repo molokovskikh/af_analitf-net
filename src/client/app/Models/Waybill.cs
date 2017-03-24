@@ -420,8 +420,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Stock(ISession session)
 		{
-			Status = DocStatus.Posted;
-			Timestamp = DateTime.Now;
 			var lines = Lines.Where(x => x.Quantity > 0).ToArray();
 			var stockActions = new List<StockAction>();
 			foreach (var line in lines) {
@@ -441,6 +439,10 @@ namespace AnalitF.Net.Client.Models
 				action.ClientStockId = action.SrcStock.Id;
 			}
 			session.SaveEach(stockActions);
+			//обновление даты должно быть как можно ближе к сохранению что бы избежать конкурентной синхронизации
+			Status = DocStatus.Posted;
+			Timestamp = DateTime.Now;
+			session.Flush();
 			return true;
 		}
 	}
