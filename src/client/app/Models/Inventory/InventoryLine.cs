@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using NHibernate;
-using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -11,19 +10,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 		}
 
-		public InventoryLine(InventoryDoc doc, Stock stock, decimal quantity, ISession session)
+		public InventoryLine(Stock stock, decimal quantity, ISession session)
 		{
 			Stock.Copy(stock, this);
 			Id = 0;
 			Stock = stock;
 			Quantity = quantity;
-			Doc = doc;
-			session.Save(Stock.InventoryDoc(Doc, quantity));
+			session.Save(Stock.InventoryDoc(quantity));
 		}
 
 		public virtual uint Id { get; set; }
-
-		public virtual InventoryDoc Doc { get; set; }
 
 		public virtual uint? ServerDocId { get; set; }
 
@@ -40,9 +36,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual void UpdateQuantity(decimal oldQuantity, ISession session)
 		{
 			// с поставки наружу
-			session.Save(Stock.CancelInventoryDoc(Doc, oldQuantity));
+			session.Save(Stock.CancelInventoryDoc(oldQuantity));
 			// снаружи в поставку
-			session.Save(Stock.InventoryDoc(Doc, Quantity));
+			session.Save(Stock.InventoryDoc(Quantity));
 		}
 
 		public virtual void BeginEdit()

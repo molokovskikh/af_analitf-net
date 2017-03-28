@@ -29,15 +29,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		NotDefective,
 	}
 
-	public interface IStockDocument
-	{
-		uint Id { get; set; }
-		string NumberDoc { get; }
-		string DisplayName { get; }
-		string FromIn { get; }
-		string OutTo { get; }
-	}
-
 	public class BaseStock : BaseNotify
 	{
 		public virtual string Barcode { get; set; }
@@ -375,66 +366,66 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 		// продажа, из резерва наружу
-		public virtual StockAction ApplyReserved(IStockDocument doc, decimal quantity)
+		public virtual StockAction ApplyReserved(decimal quantity)
 		{
 			ReservedQuantity -= quantity;
-			return new StockAction(ActionType.Sale, ActionTypeChange.Minus, this, doc, quantity);
+			return new StockAction(ActionType.Sale, this, quantity);
 		}
 
 		// возврат поставщику, из резерва наружу
-		public virtual StockAction ReturnToSupplier(IStockDocument doc, decimal quantity)
+		public virtual StockAction ReturnToSupplier(decimal quantity)
 		{
 			ReservedQuantity -= quantity;
-			return new StockAction(ActionType.ReturnToSupplier, ActionTypeChange.Minus, this, doc, quantity);
+			return new StockAction(ActionType.ReturnToSupplier, this, quantity);
 		}
 
 		// отмена возврат поставщику, снаружи в резерв
-		public virtual StockAction CancelReturnToSupplier(IStockDocument doc, decimal quantity)
+		public virtual StockAction CancelReturnToSupplier(decimal quantity)
 		{
 			ReservedQuantity += quantity;
-			return new StockAction(ActionType.CancelReturnToSupplier, ActionTypeChange.Plus, this, doc, quantity);
+			return new StockAction(ActionType.CancelReturnToSupplier, this, quantity);
 		}
 
 		// инвентаризация, снаружи в поставку
-		public virtual StockAction InventoryDoc(IStockDocument doc, decimal quantity)
+		public virtual StockAction InventoryDoc(decimal quantity)
 		{
 			ReservedQuantity += quantity;
-			return new StockAction(ActionType.InventoryDoc, ActionTypeChange.Plus, this, doc, quantity);
+			return new StockAction(ActionType.InventoryDoc, this, quantity);
 		}
 
 		// отмена инвентаризации, с поставки наружу
-		public virtual StockAction CancelInventoryDoc(IStockDocument doc, decimal quantity)
+		public virtual StockAction CancelInventoryDoc(decimal quantity)
 		{
 			ReservedQuantity -= quantity;
-			return new StockAction(ActionType.CancelInventoryDoc, ActionTypeChange.Minus, this, doc, quantity);
+			return new StockAction(ActionType.CancelInventoryDoc, this, quantity);
 		}
 
 		// Перемещение между складами. С резерва наружу, на др склад
-		public virtual StockAction DisplacementTo(IStockDocument doc, decimal quantity)
+		public virtual StockAction DisplacementTo(decimal quantity)
 		{
 			ReservedQuantity -= quantity;
-			return new StockAction(ActionType.DisplacementTo, ActionTypeChange.Minus, this, doc, quantity);
+			return new StockAction(ActionType.DisplacementTo, this, quantity);
 		}
 
 		// отмена перемещения между складами. Снаружи с др. склада в резерв
-		public virtual StockAction CancelDisplacementTo(IStockDocument doc, decimal quantity)
+		public virtual StockAction CancelDisplacementTo(decimal quantity)
 		{
 			ReservedQuantity += quantity;
-			return new StockAction(ActionType.CancelDisplacementTo, ActionTypeChange.Plus, this, doc, quantity);
+			return new StockAction(ActionType.CancelDisplacementTo, this, quantity);
 		}
 
 		// Перемещение между складами. Снаружи с др. склада в поставку
-		public virtual StockAction DisplacementFrom(IStockDocument doc, decimal quantity)
+		public virtual StockAction DisplacementFrom(decimal quantity)
 		{
 			ReservedQuantity += quantity;
-			return new StockAction(ActionType.DisplacementFrom, ActionTypeChange.Plus, this, doc, quantity);
+			return new StockAction(ActionType.DisplacementFrom, this, quantity);
 		}
 
 		// отмена перемещения между складами. С поставки наружу на др. склад
-		public virtual StockAction CancelDisplacementFrom(IStockDocument doc, decimal quantity)
+		public virtual StockAction CancelDisplacementFrom(decimal quantity)
 		{
 			ReservedQuantity -= quantity;
-			return new StockAction(ActionType.CancelDisplacementFrom, ActionTypeChange.Minus, this, doc, quantity);
+			return new StockAction(ActionType.CancelDisplacementFrom, this, quantity);
 		}
 
 		// из резерва на склад

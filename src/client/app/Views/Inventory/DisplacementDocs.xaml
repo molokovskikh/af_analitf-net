@@ -54,7 +54,7 @@
     </WrapPanel>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items">
       <DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding NumberDoc}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
         <controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
         <controls:DataGridTextColumnEx Header="Отправитель" Binding="{Binding AddressName}" Width="*" />
         <controls:DataGridTextColumnEx Header="Получатель" Binding="{Binding DstAddressName}" Width="*" />

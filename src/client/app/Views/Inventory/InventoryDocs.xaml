@@ -62,7 +62,7 @@
 
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items" IsReadOnly="False">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding NumberDoc}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" IsReadOnly="True"/>
 				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" IsReadOnly="False" />
 				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" IsReadOnly="True"/>
 				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" IsReadOnly="True"/>

@@ -452,7 +452,6 @@
     <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReturnToSupplier.cs" />
     <Compile Include="ViewModels\Inventory\CreateWriteoffDoc.cs" />
-    <Compile Include="ViewModels\Inventory\StockAssortmentViewModel.cs" />
     <Compile Include="ViewModels\Inventory\Tags.cs" />
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
@@ -675,9 +674,6 @@
     </Compile>
     <Compile Include="Views\Inventory\CreateWriteoffDoc.xaml.cs">
       <DependentUpon>CreateWriteoffDoc.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Inventory\StockAssortmentView.xaml.cs">
-      <DependentUpon>StockAssortmentView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\StockChooser.xaml.cs">
       <DependentUpon>StockChooser.xaml</DependentUpon>
@@ -1068,10 +1064,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\CreateWriteoffDoc.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Inventory\StockAssortmentView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

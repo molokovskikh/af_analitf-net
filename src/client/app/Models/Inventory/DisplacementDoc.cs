@@ -19,23 +19,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		End
 	}
 
-	public class DisplacementDoc : BaseStatelessObject, IDataErrorInfo2, IStockDocument
+	public class DisplacementDoc : BaseStatelessObject, IDataErrorInfo2
 	{
-		private bool _new;
-		private uint _id;
-		private string _numberprefix;
-		private string _numberdoc;
-
 		public DisplacementDoc()
 		{
 			Lines = new List<DisplacementLine>();
 		}
 
-		public DisplacementDoc(Address address, User user)
+		public DisplacementDoc(Address address)
 			: this()
 		{
-			_numberprefix = user.Id.ToString() + "-";
-			_new = true;
 			Address = address;
 			Date = DateTime.Now;
 			Status = DisplacementDocStatus.NotPosted;
@@ -44,32 +37,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		private DisplacementDocStatus _status;
 
-		public override uint Id
-		{
-			get { return _id; }
-			set
-			{
-				_id = value;
-				if (_new)
-					NumberDoc = _numberprefix + Id.ToString("d8");
-			}
-		}
-		public virtual string DisplayName { get { return "Накладная перемещения"; } }
-		public virtual string NumberDoc
-		{
-			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
-			set { _numberdoc = value; }
-		}
-		public virtual string FromIn
-		{
-			get
-			{
-				return string.Empty;
-			}
-		}
-		public virtual string OutTo
-		{ get { return DstAddressName; } }
-
+		public override uint Id { get; set; }
 		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
@@ -132,8 +100,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Status = DisplacementDocStatus.Posted;
 			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
-				session.Save(line.SrcStock.DisplacementTo(this, line.Quantity));
-				session.Save(line.DstStock.DisplacementFrom(this, line.Quantity));
+				session.Save(line.SrcStock.DisplacementTo(line.Quantity));
+				session.Save(line.DstStock.DisplacementFrom(line.Quantity));
 			}
 		}
 
@@ -142,8 +110,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = null;
 			Status = DisplacementDocStatus.NotPosted;
 			foreach (var line in Lines) {
-				session.Save(line.SrcStock.CancelDisplacementTo(this, line.Quantity));
-				session.Save(line.DstStock.CancelDisplacementFrom(this, line.Quantity));
+				session.Save(line.SrcStock.CancelDisplacementTo(line.Quantity));
+				session.Save(line.DstStock.CancelDisplacementFrom(line.Quantity));
 			}
 		}
 

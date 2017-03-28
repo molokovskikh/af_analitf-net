@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Address == null)
 				yield break;
-			var doc = new InventoryDoc(Address, User);
+			var doc = new InventoryDoc(Address);
 			yield return new DialogResult(new CreateInventoryDoc(doc));
 			Session.Save(doc);
 			Update();

@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.Models
 	//на текущий момент эта модель может представлять как заголовок накладной так и заголовок отказа
 	//однако существует отдельная модель для заголовка отказа
 	//что бы можно было создать отдельную модель для общего отображения а модели развести по своим углам
-	public class Waybill : BaseStatelessObject, IDataErrorInfo2, IStockDocument
+	public class Waybill : BaseStatelessObject, IDataErrorInfo2
 	{
 		private ILog _log = LogManager.GetLogger(typeof(Waybill));
 
@@ -53,7 +53,6 @@ namespace AnalitF.Net.Client.Models
 		private Rounding? _rounding;
 		private DocStatus _status;
 		private bool _isCreatedByUser;
-		private string _numberprefix;
 
 		public Waybill()
 		{
@@ -83,23 +82,6 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public override uint Id { get; set; }
-		public virtual string DisplayName { get { return "Приходная накладная"; } }
-		public virtual string NumberDoc
-		{
-			get
-			{
-				return Id.ToString("d8"); ;
-			}
-		}
-		public virtual string FromIn
-		{
-			get
-			{
-				return SupplierName;
-			}
-		}
-		public virtual string OutTo
-		{ get { return string.Empty; } }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual string ProviderDocumentId { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
@@ -428,7 +410,7 @@ namespace AnalitF.Net.Client.Models
 				line.Stock.Status = StockStatus.Available;
 				line.Stock.RetailCost = line.RetailCost;
 				line.Stock.RetailMarkup = line.RetailMarkup;
-				stockActions.Add(new StockAction(ActionType.Stock, ActionTypeChange.Plus, line.Stock, this, line.Quantity.GetValueOrDefault()) {
+				stockActions.Add(new StockAction(ActionType.Stock, line.Stock, line.Quantity.GetValueOrDefault()) {
 					RetailCost = line.RetailCost,
 					RetailMarkup = line.RetailMarkup,
 					SrcStock = line.Stock,

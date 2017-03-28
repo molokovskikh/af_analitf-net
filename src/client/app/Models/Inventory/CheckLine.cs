@@ -48,8 +48,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 		}
 
-		public virtual Check Doc { get; set; }
-
 		public virtual uint Id { get; set; }
 		public virtual uint? WaybillLineId { get; set; }
 		public virtual uint? ServerDocId { get; set; }
@@ -156,7 +154,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual StockAction UpdateStock(Stock stock)
 		{
 			stock.Quantity -= Quantity;
-			return new StockAction(ActionType.Sale, ActionTypeChange.Minus, stock, Doc, Quantity, DiscontSum);
+			return new StockAction(ActionType.Sale, stock, Quantity);
 		}
 	}
 }

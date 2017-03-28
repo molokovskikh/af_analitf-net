@@ -7,49 +7,23 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class ReassessmentDoc : BaseNotify, IDataErrorInfo2, IStockDocument
+	public class ReassessmentDoc : BaseNotify, IDataErrorInfo2
 	{
 		private DocStatus _status;
-		private bool _new;
-		private uint _id;
-		private string _numberprefix;
-		private string _numberdoc;
 
 		public ReassessmentDoc()
 		{
 			Lines = new List<ReassessmentLine>();
 		}
 
-		public ReassessmentDoc(Address address, User user)
+		public ReassessmentDoc(Address address)
 			: this()
 		{
 			Date = DateTime.Now;
 			Address = address;
-			_numberprefix = user.Id.ToString() + "-";
-			_new = true;
 		}
 
-		public virtual uint Id
-		{
-			get { return _id; }
-			set
-			{
-				_id = value;
-				if (_new)
-					NumberDoc = _numberprefix + Id.ToString("d8");
-			}
-		}
-		public virtual string DisplayName { get { return "Переоценка"; } }
-		public virtual string NumberDoc
-		{
-			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
-			set { _numberdoc = value; }
-		}
-		public virtual string FromIn
-		{ get { return string.Empty; } }
-		public virtual string OutTo
-		{ get { return string.Empty; } }
-
+		public virtual uint Id { get; set; }
 		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }
@@ -90,10 +64,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Status = DocStatus.Posted;
 			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
-				session.Save(line.SrcStock.ApplyReserved(this, line.Quantity));
+				session.Save(line.SrcStock.ApplyReserved(line.Quantity));
 
 				line.DstStock.Quantity += line.Quantity;
-				session.Save(line.DstStock.ApplyReserved(this, line.Quantity));
+				session.Save(line.DstStock.ApplyReserved(line.Quantity));
 			}
 		}
 
