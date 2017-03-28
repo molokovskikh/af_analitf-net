@@ -649,8 +649,6 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"Properties",
 				"Nds",
 				"OriginalJunk",
-				"RetailMarkup",
-				"RetailPrice"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -687,9 +685,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.EAN13,
 				o.Properties,
 				o.Nds,
-				o.Junk,
-				0,
-				0
+				o.Junk
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
