@@ -95,7 +95,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				" InventoryDocs.txt, InventoryLines.meta.txt, InventoryLines.txt, LoadedDocuments.meta.txt," +
 				" LoadedDocuments.txt, ReassessmentDocs.meta.txt, ReassessmentDocs.txt, ReassessmentLines.meta.txt," +
 				" ReassessmentLines.txt, ReturnDocs.meta.txt, ReturnDocs.txt, ReturnLines.meta.txt, ReturnLines.txt," +
-				" stockactions.meta.txt, stockactions.txt," +
 				" stocks.meta.txt, stocks.txt, UnpackingDocs.meta.txt, UnpackingDocs.txt, UnpackingLines.meta.txt," +
 				" UnpackingLines.txt, UpdatedWaybills.meta.txt, UpdatedWaybills.txt, WriteoffDocs.meta.txt," +
 				" WriteoffDocs.txt, WriteoffLines.meta.txt, WriteoffLines.txt", files);
