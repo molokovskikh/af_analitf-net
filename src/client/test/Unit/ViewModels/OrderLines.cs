@@ -111,10 +111,10 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			model.CurrentLine.Value = model.Lines.Value[0];
 
 			model.CurrentLine.Value.RetailMarkup = 20;
-			Assert.AreEqual(352.93m, model.CurrentLine.Value.RetailPrice);
-			model.CurrentLine.Value.RetailPrice = 353;
+			Assert.AreEqual(352.93m, model.CurrentLine.Value.RetailCost);
+			model.CurrentLine.Value.RetailCost = 353;
 			Assert.AreEqual(20.02m, model.CurrentLine.Value.RetailMarkup);
-			Assert.AreEqual(353m, model.CurrentLine.Value.RetailPrice);
+			Assert.AreEqual(353m, model.CurrentLine.Value.RetailCost);
 
 			Close(model);
 			model.TryClose();

@@ -218,6 +218,8 @@ namespace AnalitF.Net.Client.Models
 		public PriceComposedId MinPrice;
 
 		public bool OriginalJunk;
+		public decimal? RetailCost;
+		public decimal? RetailMarkup;
 	}
 #endif
 

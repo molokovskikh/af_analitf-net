@@ -113,6 +113,10 @@ where l.RequestId = :id;")
 							try {
 								var item = order.AddOrderItem(offer, sourceItem.Count);
 								item.CostWithDelayOfPayment = ((float?)sourceItem.ResultCost).GetValueOrDefault(item.CostWithDelayOfPayment);
+								if (rules.SendRetailMarkup) {
+									item.RetailCost = sourceItem.RetailCost;
+									item.RetailMarkup = sourceItem.RetailMarkup;
+								}
 								if (sourceItem.MinCost != null) {
 									item.LeaderInfo = new OrderItemLeadersInfo {
 										OrderItem = item,

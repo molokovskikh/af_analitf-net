@@ -76,8 +76,7 @@
 			</Grid>
 		</StackPanel>
 
-		<c:MainControllerWrap Grid.Row="2">
-		<c:DataGrid2 x:Name="Lines"
+		<c:DataGrid2 x:Name="Lines" Grid.Row="2"
 			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]" AutoGenerateColumns="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}"
@@ -121,9 +120,9 @@
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
 					SortMemberPath="SortQuantity" TextAlignment="Right"
 					IsReadOnly="True"/>
-				<c:DataGridTextColumnEx Width="65" Header="Розничная наценка" Binding="{Binding RetailMarkup}"
+				<c:DataGridTextColumnEx Width="65" Header="Розничная наценка" Binding="{Binding RetailMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}"
 					TextAlignment="Right" IsReadOnly="False"/>
-				<c:DataGridTextColumnEx Width="65" Header="Розничная цена" Binding="{Binding RetailPrice}"
+				<c:DataGridTextColumnEx Width="65" Header="Розничная цена" Binding="{Binding RetailCost, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}"
 					TextAlignment="Right" IsReadOnly="False"/>
 				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
 					CellStyle="{StaticResource CountColumn}"
@@ -135,7 +134,6 @@
 					IsReadOnly="True"/>
 			</DataGrid.Columns>
 		</c:DataGrid2>
-		</c:MainControllerWrap>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 

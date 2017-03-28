@@ -41,15 +41,18 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected override UpdateResult Execute()
 		{
 			var updateResult = UpdateResult.OK;
+			var user = Session.Query<User>().First();
 			Progress.OnNext(new Progress("Соединение", 100, 0));
 			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
 			Progress.OnNext(new Progress("Отправка заказов", 0, 50));
 			var orders = Session.Query<Order>().ReadyToSend(address).ToList();
 			Log.InfoFormat("Попытка отправить заказы, всего заказов к отправке {0}", orders.Count);
+			var specialMarkupProducts = SpecialMarkupCatalog.Load(Session.Connection);
 			try {
 				foreach (var order in orders) {
 					Log.InfoFormat("Попытка отправки заказа {0} по прайсу {1} ({2}) от {3} с кол-вом позиций {4}",
 						order.Id, order.PriceName, order.Price.Id.PriceId, order.Price.PriceDate, order.Lines.Count);
+					order.Lines.Each(x => x.CalculateRetailCost(Settings.Markups, specialMarkupProducts, user));
 				}
 			}
 			catch(Exception e) {
@@ -85,9 +88,6 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			Progress.OnNext(new Progress("Отправка заказов", 100, 100));
 
-			var settings = Session.Query<Settings>().First();
-			var user = Session.Query<User>().First();
-
 			if (rejectedOrders.Any()) {
 				//если мы получили заказ без номера заказа с сервера значит он не принят
 				//тк включена опция предзаказа и есть проблемы с другими заказами
@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				updateResult = UpdateResult.NotReload;
 			}
 			if (sentOrders.Length > 0) {
-				if (settings.PrintOrdersAfterSend) {
+				if (Settings.PrintOrdersAfterSend) {
 					Results.Add(new PrintResult("Отправленные заказы", sentOrders.Select(o => {
 						var lines = o.Lines.ToList();
 						if (SortComparer != null)
@@ -124,7 +124,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 				if (user.SaveOrders) {
 					try {
-						var dir = settings.InitAndMap("Orders");
+						var dir = Settings.InitAndMap("Orders");
 						foreach (var sentOrder in sentOrders) {
 							var name = Path.Combine(dir, sentOrder.ServerId + ".txt");
 							using(var writer = new StreamWriter(name, false, Encoding.Default)) {

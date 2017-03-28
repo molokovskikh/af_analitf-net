@@ -9,7 +9,6 @@ using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
 using NHibernate;
-using NPOI.SS.Formula.Functions;
 using System.ComponentModel;
 
 namespace AnalitF.Net.Client.Models
@@ -19,10 +18,11 @@ namespace AnalitF.Net.Client.Models
 		private uint count;
 		private string comment;
 		private bool _inFrozenOrders;
+		private decimal? _retailCost;
+		private decimal? _retailMarkup;
 
 		public OrderLine()
 		{
-			PropertyChanged += CalculateRetailData;
 		}
 
 		public OrderLine(Order order, Offer offer, uint count)
@@ -33,32 +33,6 @@ namespace AnalitF.Net.Client.Models
 			Count = count;
 			OptimalFactor = offer.ResultCost - offer.LeaderCost;
 			Junk = offer.Junk;
-			PropertyChanged += CalculateRetailData;
-		}
-
-		private bool retailPriceChanged;
-		private bool retailMarkupChanged;
-		private void CalculateRetailData(object sender, PropertyChangedEventArgs args)
-		{
-			if (args.PropertyName == "RetailMarkup") {
-				if (retailPriceChanged)
-					retailPriceChanged = false;
-				else {
-					var retailPrice = Math.Round(MixedCost * (1m + (RetailMarkup ?? 0) / 100m), 2);
-					retailMarkupChanged = retailPrice != RetailPrice;
-					RetailPrice = retailPrice;
-				}
-			}
-			else if (args.PropertyName == "RetailPrice") {
-				if (retailMarkupChanged)
-					retailMarkupChanged = false;
-				else {
-					var markup = (RetailPrice ?? 0) - MixedCost;
-					var retailMarkup = markup > 0 && MixedCost > 0 ? Math.Round(markup * 100 / MixedCost, 2) : (decimal?)null;
-					retailPriceChanged = retailMarkup != RetailMarkup;
-					RetailMarkup = retailMarkup;
-				}
-			}
 		}
 
 		public virtual uint Id { get; set; }
@@ -140,6 +114,38 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual bool IsEditByUser { get; set; }
+
+		public virtual decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				if (_retailMarkup != value) {
+					IsEditByUser = true;
+					_retailMarkup = value;
+					_retailCost = GetRetailCost(value.GetValueOrDefault());
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(RetailCost));
+				}
+			}
+		}
+
+		public virtual decimal? RetailCost
+		{
+			get { return _retailCost; }
+			set
+			{
+				if (_retailCost != value) {
+					IsEditByUser = true;
+					_retailCost = value;
+					_retailMarkup = Math.Round((RetailCost.GetValueOrDefault() - MixedCost) / MixedCost * 100, 2);
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(RetailMarkup));
+				}
+			}
+		}
+
 		[Style("Order.AddressName")]
 		public virtual bool IsCurrentAddress => Order.IsCurrentAddress;
 
@@ -187,7 +193,6 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged("Sum");
 				OnPropertyChanged("ResultSum");
 				OnPropertyChanged("MixedSum");
-				OnPropertyChanged("RetailPrice");
 			}
 		}
 
@@ -478,6 +483,20 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 			return builder.ToString();
+		}
+
+		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups,
+			IList<uint> specialMarkupProducts,
+			User user)
+		{
+			Configure(user);
+			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
+			if (IsEditByUser)
+				return;
+			if (!Order.IsAddressExists())
+				return;
+			RetailMarkup = MarkupConfig.Calculate(markups, this, user, Order.Address);
+			RetailCost = GetRetailCost(RetailMarkup.Value);
 		}
 	}
 }

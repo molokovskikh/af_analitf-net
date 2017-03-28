@@ -18,6 +18,7 @@ using ReactiveUI;
 using Common.Tools;
 using System.Windows.Controls;
 using Caliburn.Micro;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -192,6 +193,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (Order.Value == null) {
 				IsSuccessfulActivated = false;
 				return;
+			}
+			if (Order.Value is Order) {
+				((Order)Order.Value).Lines.Each(x => x.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User));
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
 				var sentLines = (IList<SentOrderLine>) Order.Value.Lines;

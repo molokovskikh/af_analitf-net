@@ -11,7 +11,6 @@ namespace AnalitF.Net.Client.Models
 {
 	public abstract class BaseOffer : BaseNotify
 	{
-		private decimal? _retailCost;
 		protected bool HideCost;
 
 		public BaseOffer()
@@ -137,64 +136,14 @@ namespace AnalitF.Net.Client.Models
 				return NullableHelper.Round((Cost / (ProducerCost * (nds / 100 + 1)) - 1) * 100, 2);
 			}
 		}
-
-		private decimal? _retailMarkup;
-
-		public virtual decimal? RetailMarkup
-		{
-			get { return _retailMarkup; }
-			set
-			{
-				if (_retailMarkup == value)
-					return;
-				_retailMarkup = value;
-				OnPropertyChanged();
-			}
-		}
-
-		private decimal? _retailPrice;
-		public virtual decimal? RetailPrice {
-			get { return _retailPrice; }
-			set
-			{
-				if (_retailPrice == value)
-					return;
-				_retailPrice = value;
-				OnPropertyChanged();
-			}
-		}
-
 		//поля для сортировки
 		[IgnoreDataMember]
 		public virtual uint? SortQuantity => NullableConvert.ToUInt32(Quantity);
-
-		[Ignore]
-		public virtual decimal? RetailCost
-		{
-			get { return _retailCost; }
-			set
-			{
-				_retailCost = value;
-				OnPropertyChanged();
-			}
-		}
 
 		public virtual BuyingMatrixStatus BuyingMatrixType { get; set; }
 
 		[Ignore]
 		public virtual bool IsSpecialMarkup { get; set; }
-
-		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups,
-			IList<uint> specialMarkupProducts,
-			User user, Address address)
-		{
-			Configure(user);
-			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
-			RetailMarkup = MarkupConfig.Calculate(markups, this, user, address);
-			var cost =  HideCost ? GetResultCost() : Cost;
-			RetailCost = Math.Round(cost * (1 + (RetailMarkup ?? 0) / 100), 2);
-			RetailPrice = RetailCost;
-		}
 
 		public virtual void Configure(User user)
 		{
@@ -218,5 +167,11 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public abstract decimal GetResultCost();
+
+		protected decimal GetRetailCost(decimal markup)
+		{
+			var cost = HideCost ? GetResultCost() : Cost;
+			return Math.Round(cost * (1 + markup / 100), 2);
+		}
 	}
 }

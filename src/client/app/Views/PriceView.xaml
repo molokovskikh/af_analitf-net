@@ -38,8 +38,7 @@
 			</TextBlock>
 		</StackPanel>
 
-		<c:MainControllerWrap Grid.Row="1" Grid.Column="0">
-		<c:DataGrid2  x:Name="Prices"
+		<c:DataGrid2 x:Name="Prices" Grid.Row="1" Grid.Column="0"
 			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}" VerticalAlignment="Top">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="75*"
@@ -68,7 +67,6 @@
 					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
-		</c:MainControllerWrap>
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" Grid.Column="0" caliburn:QuickSearchBehavior.GridRef="{x:Reference Prices}"/>
 
