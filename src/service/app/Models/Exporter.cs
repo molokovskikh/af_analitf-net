@@ -1806,6 +1806,7 @@ where s.Timestamp > ?lastSync
 				var addressIds = "(" + Addresses.Implode(x => x.Id) + ")";
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	CheckType,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(ChangeOpening, @@session.time_zone,'+00:00') as ChangeOpening,
@@ -1870,7 +1871,8 @@ select l.CheckId as ServerDocId,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.Exp,
-	l.Period
+	l.Period,
+ 	l.DocId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
@@ -1882,6 +1884,7 @@ where c.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
@@ -1937,6 +1940,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -1978,7 +1982,8 @@ select l.Quantity,
 	l.VitallyImportant,
 	l.SupplyQuantity,
 	l.InventoryDocId as ServerDocId,
-	l.Exp
+	l.Exp,
+ 	l.DocId
 from Inventory.InventoryLines l
 	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
 where d.Timestamp > ?lastSync
@@ -1990,6 +1995,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2048,6 +2054,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
@@ -2104,6 +2111,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2159,6 +2167,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2869,6 +2878,41 @@ where a.Enabled = 1
 	and u.Id = ?userId
 	and s.Timestamp > ?lastSync";
 			Export(Result, sql, "stocks", false, new {userId = user.Id, lastSync});
+		}
+
+		public void ExportStockActions(DateTime lastSync)
+		{
+			var sql = @"
+ 			select
+ 				null Id,
+ 				convert_tz(sa.Timestamp, @@session.time_zone,'+00:00') as Timestamp,
+ 				sa.DisplayDoc,
+ 				sa.NumberDoc,
+ 				sa.FromIn,
+ 				sa.OutTo,
+ 				sa.ActionType,
+ 				sa.TypeChange,
+ 				sa.ClientStockId,
+ 				sa.SourceStockId,
+ 				sa.SourceStockVersion,
+ 				sa.Quantity,
+ 				sa.RetailCost,
+	
+ 				sa.RetailMarkup,
+ 				sa.DiscountSum,
+ 				sa.Version
+ 			from Inventory.StockActions sa
+ 				join Inventory.Stocks s on s.Id =sa.SourceStockId
+ 					join Customers.Addresses a on a.Id = s.AddressId
+ 						join Customers.UserAddresses ua on ua.Addressid = a.Id
+ 							join Customers.Users u on u.Id = ua.UserId
+ 				left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
+ 					left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
+ 			where a.Enabled = 1
+ 				and u.Id = ?userId
+ 				and sa.Timestamp > ?lastSync
+ 				and  (sa.UserId <> ?userId or ?lastSync < '01.01.2000')";
+			Export(Result, sql, "stockactions", false, new { userId = user.Id, lastSync });
 		}
 	}
 
