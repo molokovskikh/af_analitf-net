@@ -55,6 +55,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Clear()
 		{
+			//Возврат на остаток пока только продажа так как возврат в данной ветке не реализован
+			Lines.Each(x => x.Stock.Quantity += x.Quantity);
 			Lines.Clear();
 		}
 
@@ -118,7 +120,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(stockChooser, resizable: true);
 			var ordered = stockChooser.Items.Value.Where(x => x.Ordered > 0).ToList();
 			foreach(var item in ordered) {
-				UpdateOrAddStock(item);
+				var inputQuantity = new InputQuantity(item, true);
+				yield return new DialogResult(inputQuantity, resizable: false);
+				UpdateOrAddStock(inputQuantity.Stock.Value);
 			}
 		}
 
@@ -161,7 +165,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield break;
 			}
 			if (stocks.Length == 1) {
-				AddStock(stocks[0]);
+				var inputQuantity1 = new InputQuantity(stocks[0], true);
+				yield return new DialogResult(inputQuantity1, resizable: false);
+				UpdateOrAddStock(inputQuantity1.Stock.Value);
 				yield break;
 			}
 
@@ -169,7 +175,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			model.Name = $"Укажите срок годности - {stocks[0].Product}";
 			yield return new DialogResult(model);
 			var first = stocks.First(x => x.Exp == model.CurrentExp);
-			AddStock(first);
+			var inputQuantity = new InputQuantity(first, true);
+			yield return new DialogResult(inputQuantity, resizable: false);
+			UpdateOrAddStock(inputQuantity.Stock.Value);
 		}
 
 		public void Updated()
@@ -185,6 +193,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (CurrentLine.Value?.Quantity == 0)
 				Lines.Remove(CurrentLine.Value);
+		}
+
+
+		// Распаковка Ctrl+U
+		public IEnumerable<IResult> Unpack()
+		{
+			var srcStock = CurrentLine.Value.Stock;
+			if (srcStock.Unpacked)
+
+				yield break;
+
+			//Возврат на остаток пока только продажа так как возврат в данной ветке не реализован
+			srcStock.Quantity += CurrentLine.Value.Quantity;
+
+			var inputQuantity = new InputQuantity((OrderedStock)srcStock, false);
+			yield return new DialogResult(inputQuantity, resizable: false);
+
+			srcStock.Quantity += CurrentLine.Value.Quantity;
+			Lines.Remove(CurrentLine.Value);
+			var line = new CheckLine(inputQuantity.Stock, inputQuantity.Stock.Value.Ordered.Value);
+			Lines.Add(line);
+			CurrentLine.Value = line;
 		}
 	}
 }
