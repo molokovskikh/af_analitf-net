@@ -142,9 +142,6 @@ namespace AnalitF.Net.Client.Models
 			Waybills = new List<WaybillSettings>();
 			ModePKU = ModePKU.Warning;
 			RegistryDoc = new RegistryDocumentSettings();
-#if DEBUG
-			TabbedUI = true;
-#endif
 		}
 
 		public virtual int Id { get; set; }
