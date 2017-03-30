@@ -227,7 +227,13 @@ namespace AnalitF.Net.Client.Models
 
 		public string CodeCr;
 
+		public uint? ProductId;
+
+		public uint? CatalogId;
+
 		public string ProductName;
+
+		public uint? ProducerId;
 
 		public string ProducerName;
 

@@ -47,7 +47,10 @@ namespace AnalitF.Net.Service.Controllers
 					if (payloadStream == null) {
 						var items = requestMeta.BatchItems.Select(i => new OrderBatchItem(i.ProductName, i.ProducerName, i.Quantity) {
 							Code = i.Code,
+							ProductId = i.ProductId,
+							CatalogId = i.CatalogId,
 							CodeCr = i.CodeCr,
+							ProducerId = i.ProducerId,
 							SupplierDeliveryId = i.SupplierDeliveryId,
 							ServiceValues = i.ServiceValues,
 							Priority = i.Priority,
