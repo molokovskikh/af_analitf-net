@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}},
 				{"SentOrderLines", new [] {
 					//локальные поля
-					"Id", "Comment", "OrderId", "Exp", "Properties", "BuyingMatrixType"
+					"Id", "Comment", "OrderId", "Exp", "Properties", "BuyingMatrixType", "IsEditByUser"
 				}},
 				{"SentOrders", new [] {
 					//локальные поля

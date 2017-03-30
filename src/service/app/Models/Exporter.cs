@@ -1765,7 +1765,9 @@ select ol.RowId as ServerId,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
 	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
-	ol.Junk as OriginalJunk
+	ol.Junk as OriginalJunk,
+	ol.RetailCost,
+	ol.RetailMarkup
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
