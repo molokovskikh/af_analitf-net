@@ -16,7 +16,6 @@ using System.Collections.ObjectModel;
 using System.Printing;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using AnalitF.Net.Client.ViewModels.Offers;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -30,20 +29,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			IsView = true;
 		}
 
-		public EditInventoryDoc(InventoryDoc doc)
-			: this()
-		{
-			DisplayName = "Новый документ Излишки";
-			InitDoc(doc);
-			Lines.AddRange(doc.Lines);
-		}
-
 		public EditInventoryDoc(uint id)
 			: this()
 		{
 			DisplayName = "Редактирование документа Излишки";
 			InitDoc(Session.Load<InventoryDoc>(id));
-			Lines.AddRange(Doc.Lines);
 		}
 
 		public InventoryDoc Doc { get; set; }
@@ -54,6 +44,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
+		public NotifyValue<bool> CanEnterLines { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -72,6 +63,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public override void Update()
 		{
 			Session.Refresh(Doc);
+			Lines = new ReactiveCollection<InventoryLine>(Doc.Lines);
+			Refresh();
 		}
 
 		private void InitDoc(InventoryDoc doc)
@@ -81,19 +74,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var editOrDelete = docStatus
 				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.NotPosted);
 			editOrDelete.Subscribe(CanDelete);
+			editOrDelete.Subscribe(CanEnterLines);
 			docStatus.Subscribe(x => CanAdd.Value = x.Value == DocStatus.NotPosted);
 			docStatus.Subscribe(x => CanAddFromCatalog.Value = x.Value == DocStatus.NotPosted);
 			docStatus.Select(x => x.Value == DocStatus.NotPosted).Subscribe(CanPost);
 			docStatus.Select(x => x.Value == DocStatus.Posted).Subscribe(CanUnPost);
 		}
 
+		// добавляет количество к существующему товарному остатку
 		public IEnumerable<IResult> Add()
 		{
 			while (true) {
 				var search = new StockSearch();
 				yield return new DialogResult(search, resizable: true);
-				var edit = new EditStock(search.CurrentItem)
-				{
+				var edit = new EditStock(search.CurrentItem) {
 					EditMode = EditStock.Mode.EditQuantity
 				};
 				yield return new DialogResult(edit);
@@ -105,16 +99,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 		}
 
+		// создает новый товарный остаток
 		public IEnumerable<IResult> AddFromCatalog()
 		{
 			while (true) {
 				var search = new AddStockFromCatalog(Session, Address);
 				yield return new DialogResult(search);
 				var edit = new EditStock(search.Item) {
-					EditMode = EditStock.Mode.EditQuantity
+					EditMode = EditStock.Mode.EditAll
 				};
 				yield return new DialogResult(edit);
-				var line = new InventoryLine(Doc, Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity, Session);
+				var stock = edit.Stock;
+				var quantity = stock.Quantity;
+				stock.Quantity = 0;
+				stock.Status = StockStatus.InTransit;
+				Session.Save(stock);
+				var line = new InventoryLine(Doc, stock, quantity, Session, true);
 				Lines.Add(line);
 				Doc.Lines.Add(line);
 				Doc.UpdateStat();
@@ -122,22 +122,59 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 		}
 
+		public IEnumerable<IResult> EnterLines()
+		{
+			if (!CanEnterLines.Value)
+				yield break;
+			var line = CurrentLine.Value;
+			// если создан новый сток - отдаём редактировать сток, все поля
+			if (line.StockIsNew) {
+				var stock = line.Stock;
+				// поменяли местами, чтоб редактировать количество
+				var reservedQuantity = stock.ReservedQuantity;
+				stock.ReservedQuantity = stock.Quantity;
+				stock.Quantity = reservedQuantity;
+				yield return new DialogResult(new EditStock(stock) {
+					EditMode = EditStock.Mode.EditAll
+				});
+				var id = line.Id;
+				Stock.Copy(stock, line);
+				line.Id = id;
+				// поменяли обратно
+				reservedQuantity = stock.ReservedQuantity;
+				stock.ReservedQuantity = stock.Quantity;
+				stock.Quantity = reservedQuantity;
+			}
+			// если используется существующий сток - редактировать только количество
+			else {
+				var oldQuantity = line.Quantity;
+				var stock = line.Stock;
+				stock.Quantity = oldQuantity;
+				yield return new DialogResult(new EditStock(stock) {
+					EditMode = EditStock.Mode.EditQuantity
+				});
+				var newQuantity = stock.Quantity;
+				// сбросили изменения
+				Session.Refresh(stock);
+				line.Quantity = newQuantity;
+				line.UpdateQuantity(oldQuantity, Session);
+			}
+			Doc.UpdateStat();
+			Save();
+			Update();
+		}
+
 		public void Delete()
 		{
 			// с поставки наружу
-			Session.Save(CurrentLine.Value.Stock.CancelInventoryDoc(Doc, CurrentLine.Value.Quantity));
+			var stock = CurrentLine.Value.Stock;
+			Session.Save(stock.CancelInventoryDoc(Doc, CurrentLine.Value.Quantity));
+			// если сток создавался вместе со строкой и пустой - можно удалить
+			if (CurrentLine.Value.StockIsNew && stock.Quantity == 0 && stock.ReservedQuantity == 0)
+				Session.Delete(stock);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
 			Lines.Remove(CurrentLine.Value);
-			Save();
-		}
-
-		public void UpdateQuantity(InventoryLine line, decimal oldQuantity)
-		{
-			if (Session == null)
-				return;
-			line.UpdateQuantity(oldQuantity, Session);
-			Doc.UpdateStat();
 			Save();
 		}
 

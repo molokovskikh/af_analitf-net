@@ -73,16 +73,16 @@
 			<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Name="Doc_Comment" HorizontalAlignment="Right" Margin="0, 5, 5, 0" Width="300"/>
 		</Grid>
 
-		<controls:DataGrid2 Grid.Row="2" x:Name="Lines" IsReadOnly="{Binding CanUnPost.Value}">
+		<controls:DataGrid2 Grid.Row="2" x:Name="Lines">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Серия" Binding="{Binding SerialNumber}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Срок годности" Binding="{Binding Period}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Штрихкод" Binding="{Binding Barcode}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" IsReadOnly="False"/>
-				<controls:DataGridTextColumnEx Header="Цена розничная с НДС" Binding="{Binding RetailCost}" Width="*" IsReadOnly="True"/>
-				<controls:DataGridTextColumnEx Header="Сумма розничная с НДС" Binding="{Binding RetailSum}" Width="*" IsReadOnly="True"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnSerialNumber" Header="Серия" Binding="{Binding SerialNumber}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnPeriod" Header="Срок годности" Binding="{Binding Period}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnBarcode" Header="Штрихкод" Binding="{Binding Barcode}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnQuantity" Header="Кол-во" Binding="{Binding Quantity}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnRetailCost" Header="Цена розничная с НДС" Binding="{Binding RetailCost}" Width="*"/>
+				<controls:DataGridTextColumnEx x:Name="ClmnRetailSum" Header="Сумма розничная с НДС" Binding="{Binding RetailSum}" Width="*"/>
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>
