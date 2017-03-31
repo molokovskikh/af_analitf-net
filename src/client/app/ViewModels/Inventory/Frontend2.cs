@@ -76,6 +76,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				using (var trx = s.BeginTransaction()) {
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
+					Lines.Each(x => x.Doc = check);
 					foreach (var line in check.Lines) {
 						var stock = s.Get<Stock>(line.Stock.Id);
 						s.Insert(line.UpdateStock(stock));

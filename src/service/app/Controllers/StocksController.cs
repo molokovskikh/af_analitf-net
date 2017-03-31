@@ -150,6 +150,7 @@ where l.{name}DocId is null
 			using (var exporter = new Exporter(Session, Config, new RequestLog(CurrentUser, request, GetType().Name))) {
 				exporter.Prefix = Guid.NewGuid().ToString();
 				exporter.ExportStocks(lastSync);
+				exporter.ExportStockActions(lastSync);
 				exporter.Result.Add(new UpdateData("server-timestamp") {
 					Content = serverTimestamp.ToString("O")
 				});
@@ -185,6 +186,40 @@ where l.{name}DocId is null
 				Session.Save(source);
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
+			}
+
+			string sql = @"insert into Inventory.stockactions " +
+		"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
+		" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum)" +
+		" values (?userId, ?Timestamp, ?DisplayDoc, ?NumberDoc, ?FromIn, ?OutTo, ?ActionType, ?TypeChange, " +
+		" ?ClientStockId, ?SourceStockId, ?SourceStockVersion, ?Quantity, ?RetailCost, ?RetailMarkup, " +
+		" ?DiscountSum);";
+
+			MySqlCommand cmd = new MySqlCommand(sql);
+			cmd.Parameters.AddWithValue("userId", CurrentUser.Id);
+			cmd.Parameters.AddWithValue("Timestamp", action.Timestamp.ToLocalTime());
+			cmd.Parameters.AddWithValue("DisplayDoc", action.DisplayDoc);
+			cmd.Parameters.AddWithValue("NumberDoc", action.NumberDoc);
+			cmd.Parameters.AddWithValue("FromIn", action.FromIn);
+			cmd.Parameters.AddWithValue("OutTo", action.OutTo);
+			cmd.Parameters.AddWithValue("ActionType", (int)action.ActionType);
+			cmd.Parameters.AddWithValue("TypeChange", (int)action.TypeChange);
+			cmd.Parameters.AddWithValue("ClientStockId", action.ClientStockId);
+			cmd.Parameters.AddWithValue("SourceStockId", action.SourceStockId);
+			cmd.Parameters.AddWithValue("SourceStockVersion", action.SourceStockVersion);
+			cmd.Parameters.AddWithValue("Quantity", action.Quantity);
+			cmd.Parameters.AddWithValue("RetailCost", action.RetailCost);
+			cmd.Parameters.AddWithValue("RetailMarkup", action.RetailMarkup);
+			cmd.Parameters.AddWithValue("DiscountSum", action.DiscountSum);
+			cmd.Connection = (MySqlConnection)Session.Connection;
+			cmd.Prepare();
+			try
+			{
+				cmd.ExecuteNonQuery();
+			}
+			catch (Exception e)
+			{
+				throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
 			}
 		}
 	}

@@ -6,24 +6,50 @@ using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class UnpackingDoc : BaseNotify
+	public class UnpackingDoc : BaseNotify, IStockDocument
 	{
 		private DocStatus _status;
+		private bool _new;
+		private uint _id;
+		private string _numberprefix;
+		private string _numberdoc;
 
 		public UnpackingDoc()
 		{
 			Lines = new List<UnpackingLine>();
 		}
 
-		public UnpackingDoc(Address address)
+		public UnpackingDoc(Address address, User user)
 			: this()
 		{
 			Date = DateTime.Now;
 			Address = address;
+			_numberprefix = user.Id.ToString() + "-";
+			_new = true;
 			UpdateStat();
 		}
 
-		public virtual uint Id { get; set; }
+		public virtual uint Id
+		{
+			get { return _id; }
+			set
+			{
+				_id = value;
+				if (_new)
+					NumberDoc = _numberprefix + Id.ToString("d8");
+			}
+		}
+		public virtual string DisplayName { get { return "Распаковка"; } }
+		public virtual string NumberDoc
+		{
+			get { return !String.IsNullOrEmpty(_numberdoc) ? _numberdoc : Id.ToString("d8"); }
+			set { _numberdoc = value; }
+		}
+		public virtual string FromIn
+		{ get { return string.Empty; } }
+		public virtual string OutTo
+		{ get { return "Покупатель"; } }
+
 		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
 		public virtual DateTime Date { get; set; }

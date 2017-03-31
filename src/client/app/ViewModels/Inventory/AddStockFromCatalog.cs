@@ -56,20 +56,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Catalogs = CatalogTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
 				.Select(t => RxQuery(s => {
-					if (String.IsNullOrEmpty(t))
+					// при threshold = 1 возвращается около 88 тыс строк на ввод "а"
+					var threshold = 2;
+					if (String.IsNullOrEmpty(t) || t.Length < threshold)
 						return new List<Catalog>();
 					if (CurrentCatalog.Value != null && CurrentCatalog.Value.FullName == t) {
 						return Catalogs.Value;
 					}
-
+					// union distinct работает с полностью одинаковыми строками, здесь они разные из-за поля Score
 					return s.CreateSQLQuery(@"
 (select {c.*}, 0 as Score
 from Catalogs c
 where c.Fullname like :term)
-union distinct
+union
 (select {c.*}, 1 as Score
 from Catalogs c
-where c.Fullname like :fullterm)
+where c.Fullname like :fullterm and c.Fullname not like :term)
 order by Score, {c.FullName}")
 						.AddEntity("c", typeof(Catalog))
 						.SetParameter("term", t + "%")
@@ -98,10 +100,10 @@ order by Score, {c.FullName}")
 (select {p.*}, 0 as Score
 from Producers p
 where p.Name like :term)
-union distinct
+union
 (select {p.*}, 1 as Score
 from Producers p
-where p.Name like :fullterm)
+where p.Name like :fullterm and p.Name not like :term)
 order by Score, {p.Name}")
 						.AddEntity("p", typeof(Producer))
 						.SetParameter("term", t + "%")
@@ -120,7 +122,6 @@ order by Score, {p.Name}")
 
 		public void OK()
 		{
-			_session.Save(Item);
 			WasCancelled = false;
 			TryClose();
 		}

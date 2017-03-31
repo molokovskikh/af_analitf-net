@@ -78,6 +78,7 @@ namespace AnalitF.Net.Client.ViewModels
 				var sql = (string)loggingEvent.MessageObject;
 				if (Sql.Value.Length > limit)
 					Sql.Value = "";
+				// BasicFormatter выбрасывает исключение при попытке форматировать некоторые запросы, например, вида "(select a from b)"
 				Sql.Value = new BasicFormatter().Format(SqlProcessor.ExtractArguments(sql)) + Environment.NewLine + Sql.Value;
 				if (Stack)
 					Sql.Value = new StackTrace() + Environment.NewLine + Sql.Value;
