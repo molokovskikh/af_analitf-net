@@ -12,5 +12,8 @@ namespace AnalitF.Net.Client.Models
 
 		//в отображении не участвует, используется для очистки удаленных записей
 		public virtual bool Hidden { get; set; }
+
+		public virtual string Name { get; set; }
+
 	}
 }
