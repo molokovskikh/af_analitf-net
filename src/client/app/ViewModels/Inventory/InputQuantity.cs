@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			InitFields();
 			Quantity.Value = null;
 			Multiplicity.Value = null;
-			Stock.Value = stock;
+			SrcStock.Value = stock;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
 			WasCancelled = true;
@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			InitFields();
 			Quantity.Value = null;
 			Multiplicity.Value = null;
-			Stock.Value = Session.Connection
+			SrcStock.Value = Session.Connection
 				.Query<OrderedStock>("select * from Stocks where Id = @Id", new { stock.Id })
 				.First();
 			var env = Config.Env.Current;
@@ -37,7 +37,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public NotifyValue<uint?> Quantity { get; set; }
 		public NotifyValue<uint?> Multiplicity { get; set; }
-		public NotifyValue<OrderedStock> Stock { get; set; }
+		public NotifyValue<OrderedStock> SrcStock { get; set; }
+		public NotifyValue<OrderedStock> DstStock { get; set; }
 		public InlineEditWarning Warning { get; set; }
 		public bool WasCancelled { get; set; }
 
@@ -53,7 +54,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Warning.Show(Common.Tools.Message.Warning($"Не указано количество в упаковке"));
 				return;
 			}
-			if (Stock.Value.Unpacked)
+			if (SrcStock.Value.Unpacked)
 			{
 				Warning.Show(Common.Tools.Message.Warning($"Данная партия уже распакована"));
 				return;
@@ -64,17 +65,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			}
 
-			var doc = new UnpackingDoc(Address, User);
-			var uline = new UnpackingLine(Stock.Value, (int)Multiplicity.Value);
-			doc.Lines.Add(uline);
-			doc.UpdateStat();
-			doc.Post();
-			Session.Save(doc);
-			Session.Flush();
+			//var doc = new UnpackingDoc(Address, User);
+			//var uline = new UnpackingLine(Stock.Value, (int)Multiplicity.Value);
+			//doc.Lines.Add(uline);
+			//doc.UpdateStat();
+			//doc.Post();
+			//Session.Save(doc);
+			//Session.Flush();
 
-			Stock.Value = (OrderedStock)uline.DstStock;
 
-			Stock.Value.Ordered = Quantity.Value;
+			//Stock.Copy(srcStock.Value, this);
+			var dstStock = SrcStock.Value.Copy();
+			dstStock.Unpacked = true;
+			dstStock.Quantity = dstStock.Multiplicity = (int)Multiplicity.Value;
+			if (SrcStock.Value.RetailCost.HasValue)
+				dstStock.RetailCost = getPriceForUnit(SrcStock.Value.RetailCost.Value, dstStock.Multiplicity);
+
+			if (SrcStock.Value.SupplierCost.HasValue)
+				dstStock.SupplierCost = getPriceForUnit(SrcStock.Value.SupplierCost.Value, dstStock.Multiplicity);
+
+			DstStock.Value = (OrderedStock)dstStock;
+			DstStock.Value.Ordered = Quantity.Value;
 			WasCancelled = false;
 			TryClose();
 		}
@@ -88,6 +99,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			Committed();
 			base.TryClose();
+		}
+
+		private decimal getPriceForUnit(decimal price, int multiplicity)
+		{
+			return Math.Floor(price * 100 / multiplicity) / 100;
 		}
 	}
 }

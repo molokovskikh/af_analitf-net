@@ -24,12 +24,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			OnCloseDisposable.Add(SearchBehavior = new SearchBehavior(Env));
 			SearchBehavior.ActiveSearchTerm.Where(x => !String.IsNullOrEmpty(x))
 				.Subscribe(x => Coroutine.BeginExecute(Enter().GetEnumerator()));
+			UnPackStoks = new Dictionary<Stock, Stock>();
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
 		public InlineEditWarning Warning { get; set; }
+		public Dictionary<Stock, Stock> UnPackStoks { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -56,6 +58,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Clear()
 		{
 			Lines.Clear();
+			UnPackStoks.Clear();
 		}
 
 		// Закрыть чек Enter
@@ -77,6 +80,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
 					Lines.Each(x => x.Doc = check);
+
+					if (UnPackStoks.Count > 0)
+					{
+						UnpackingDoc UnPackDoc = new UnpackingDoc(Address, User);
+						foreach (KeyValuePair<Stock, Stock> k in UnPackStoks)
+						{
+							var uline = new UnpackingLine(k.Value, k.Key);
+							UnPackDoc.Lines.Add(uline);
+						}
+						UnPackDoc.UpdateStat();
+						UnPackDoc.Post();
+						Session.Save(UnPackDoc);
+						Session.Flush();
+					}
 					foreach (var line in check.Lines) {
 						var stock = s.Get<Stock>(line.Stock.Id);
 						s.Insert(line.UpdateStock(stock));
@@ -97,6 +114,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		private void Reset()
 		{
 			Lines.Clear();
+			UnPackStoks.Clear();
 		}
 
 		public IEnumerable<IResult> Enter()
@@ -185,7 +203,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Committed()
 		{
 			if (CurrentLine.Value?.Quantity == 0)
+			{
+				UnPackStoks.Remove(CurrentLine.Value.Stock);
 				Lines.Remove(CurrentLine.Value);
+			}
 		}
 
 		// Распаковка Ctrl+U
@@ -200,8 +221,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			var inputQuantity = new InputQuantity((OrderedStock)srcStock);
 			yield return new DialogResult(inputQuantity, resizable: false);
-
-			var line = new CheckLine(inputQuantity.Stock, inputQuantity.Stock.Value.Ordered.Value);
+			var line = new CheckLine(inputQuantity.DstStock, inputQuantity.DstStock.Value.Ordered.Value);
+			UnPackStoks.Add(inputQuantity.DstStock, srcStock);
 			Lines.Add(line);
 			CurrentLine.Value = line;
 		}
