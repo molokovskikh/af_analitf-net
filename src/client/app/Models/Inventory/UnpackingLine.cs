@@ -34,7 +34,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public UnpackingLine(Stock srcStock, Stock dstStock)
 		{
-			//Quantity = dstStock.Multiplicity;
 			DstStock = dstStock;
 
 			SrcQuantity = 1;
