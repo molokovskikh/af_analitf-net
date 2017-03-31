@@ -119,10 +119,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(stockChooser, resizable: true);
 			var ordered = stockChooser.Items.Value.Where(x => x.Ordered > 0).ToList();
 			foreach(var item in ordered) {
-				var inputQuantity = new InputQuantity(item, true);
-				yield return new DialogResult(inputQuantity, resizable: false);
-				if (!inputQuantity.WasCancelled)
-					UpdateOrAddStock(inputQuantity.Stock.Value);
+					UpdateOrAddStock(item);
 			}
 		}
 
@@ -165,23 +162,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield break;
 			}
 			if (stocks.Length == 1) {
-				var inputQuantity1 = new InputQuantity(stocks[0], true);
-				yield return new DialogResult(inputQuantity1, resizable: false);
-				if (!inputQuantity1.WasCancelled)
-				{
-					UpdateOrAddStock(inputQuantity1.Stock.Value);
+					AddStock(stocks[0]);
 					yield break;
-				}
 			}
 
 			var model = new ExpSelector(stocks.Select(x => x.Exp.GetValueOrDefault()).Distinct().OrderBy(x => x).ToArray());
 			model.Name = $"Укажите срок годности - {stocks[0].Product}";
 			yield return new DialogResult(model);
 			var first = stocks.First(x => x.Exp == model.CurrentExp);
-			var inputQuantity = new InputQuantity(first, true);
-			yield return new DialogResult(inputQuantity, resizable: false);
-			if (!inputQuantity.WasCancelled)
-				UpdateOrAddStock(inputQuantity.Stock.Value);
+				AddStock(first);
 		}
 
 		public void Updated()
@@ -199,7 +188,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Lines.Remove(CurrentLine.Value);
 		}
 
-
 		// Распаковка Ctrl+U
 		public IEnumerable<IResult> Unpack()
 		{
@@ -208,11 +196,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 				yield break;
 
-			var inputQuantity = new InputQuantity((OrderedStock)srcStock, false);
+			Lines.Remove(CurrentLine.Value);
+
+			var inputQuantity = new InputQuantity((OrderedStock)srcStock);
 			yield return new DialogResult(inputQuantity, resizable: false);
 
-			srcStock.Quantity += CurrentLine.Value.Quantity;
-			Lines.Remove(CurrentLine.Value);
 			var line = new CheckLine(inputQuantity.Stock, inputQuantity.Stock.Value.Ordered.Value);
 			Lines.Add(line);
 			CurrentLine.Value = line;

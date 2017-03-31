@@ -11,85 +11,69 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class InputQuantity : BaseScreen
 	{
-		public InputQuantity(OrderedStock stock, bool unpackingVisible)
+		public InputQuantity(OrderedStock stock)
 		{
 			InitFields();
-			Quantity.Value = stock.Ordered.Value;
+			Quantity.Value = null;
 			Multiplicity.Value = null;
-			Unpacking.Value = false;
 			Stock.Value = stock;
-			UnpackingVisible.Value = unpackingVisible;
-			Unpacking.Value = !unpackingVisible;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
 			WasCancelled = true;
 		}
 
-		public InputQuantity(Stock stock, bool unpackingVisible)
+		public InputQuantity(Stock stock)
 		{
 			InitFields();
-			Quantity.Value = 1;
+			Quantity.Value = null;
 			Multiplicity.Value = null;
-			Unpacking.Value = false;
 			Stock.Value = Session.Connection
 				.Query<OrderedStock>("select * from Stocks where Id = @Id", new { stock.Id })
 				.First();
-			UnpackingVisible.Value = unpackingVisible;
-			Unpacking.Value = !unpackingVisible;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
 			WasCancelled = true;
 		}
 
-		public NotifyValue<uint> Quantity { get; set; }
+		public NotifyValue<uint?> Quantity { get; set; }
 		public NotifyValue<uint?> Multiplicity { get; set; }
-		public NotifyValue<bool> Unpacking { get; set; }
-		public NotifyValue<bool> UnpackingVisible { get; set; }
 		public NotifyValue<OrderedStock> Stock { get; set; }
 		public InlineEditWarning Warning { get; set; }
 		public bool WasCancelled { get; set; }
 
 		public void OK()
 		{
-			if (Unpacking)
+			if (Quantity.Value == null)
 			{
-				if (Multiplicity.Value == null)
-				{
-					Warning.Show(Common.Tools.Message.Warning($"Не указано количество в упаковке"));
-					return;
-				}
-				if (Stock.Value.Unpacked)
-				{
-					Warning.Show(Common.Tools.Message.Warning($"Данная партия уже распакована"));
-					return;
-				}
-				if (Quantity.Value > Multiplicity.Value)
-				{
-					Warning.Show(Common.Tools.Message.Warning($"Заказ превышает количества в упаковке," +
-						$"\nтовар будет заказан в количестве {Multiplicity.Value}"));
-					Quantity.Value = (uint)Multiplicity.Value;
-				}
-
-				var doc = new UnpackingDoc(Address);
-				var uline = new UnpackingLine(Stock.Value, (int)Multiplicity.Value);
-				doc.Lines.Add(uline);
-				doc.UpdateStat();
-				doc.Post();
-				Session.Save(doc);
-				Session.Flush();
-
-				Stock.Value = (OrderedStock)uline.DstStock;
+				Warning.Show(Common.Tools.Message.Warning($"Не указано количество"));
+				return;
 			}
-			else
+			if (Multiplicity.Value == null)
 			{
-				var stockQuantity = Stock.Value.Quantity;
-				if (Quantity.Value > stockQuantity)
-				{
-					Warning.Show(Common.Tools.Message.Warning($"Заказ превышает остаток на складе," +
-						$"\nтовар будет заказан в количестве {stockQuantity}"));
-					Quantity.Value = (uint)stockQuantity;
-				}
+				Warning.Show(Common.Tools.Message.Warning($"Не указано количество в упаковке"));
+				return;
 			}
+			if (Stock.Value.Unpacked)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"Данная партия уже распакована"));
+				return;
+			}
+			if (Quantity.Value > Multiplicity.Value)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"Заказ превышает количество в упаковке,"));
+				return;
+			}
+
+			var doc = new UnpackingDoc(Address, User);
+			var uline = new UnpackingLine(Stock.Value, (int)Multiplicity.Value);
+			doc.Lines.Add(uline);
+			doc.UpdateStat();
+			doc.Post();
+			Session.Save(doc);
+			Session.Flush();
+
+			Stock.Value = (OrderedStock)uline.DstStock;
+
 			Stock.Value.Ordered = Quantity.Value;
 			WasCancelled = false;
 			TryClose();
