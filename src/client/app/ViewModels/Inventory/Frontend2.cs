@@ -55,8 +55,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Clear()
 		{
-			//Возврат на остаток пока только продажа так как возврат в данной ветке не реализован
-			Lines.Each(x => x.Stock.Quantity += x.Quantity);
 			Lines.Clear();
 		}
 
@@ -122,7 +120,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			foreach(var item in ordered) {
 				var inputQuantity = new InputQuantity(item, true);
 				yield return new DialogResult(inputQuantity, resizable: false);
-				UpdateOrAddStock(inputQuantity.Stock.Value);
+				if (!inputQuantity.WasCancelled)
+					UpdateOrAddStock(inputQuantity.Stock.Value);
 			}
 		}
 
@@ -167,8 +166,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (stocks.Length == 1) {
 				var inputQuantity1 = new InputQuantity(stocks[0], true);
 				yield return new DialogResult(inputQuantity1, resizable: false);
-				UpdateOrAddStock(inputQuantity1.Stock.Value);
-				yield break;
+				if (!inputQuantity1.WasCancelled)
+				{
+					UpdateOrAddStock(inputQuantity1.Stock.Value);
+					yield break;
+				}
 			}
 
 			var model = new ExpSelector(stocks.Select(x => x.Exp.GetValueOrDefault()).Distinct().OrderBy(x => x).ToArray());
@@ -177,7 +179,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var first = stocks.First(x => x.Exp == model.CurrentExp);
 			var inputQuantity = new InputQuantity(first, true);
 			yield return new DialogResult(inputQuantity, resizable: false);
-			UpdateOrAddStock(inputQuantity.Stock.Value);
+			if (!inputQuantity.WasCancelled)
+				UpdateOrAddStock(inputQuantity.Stock.Value);
 		}
 
 		public void Updated()
@@ -203,9 +206,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (srcStock.Unpacked)
 
 				yield break;
-
-			//Возврат на остаток пока только продажа так как возврат в данной ветке не реализован
-			srcStock.Quantity += CurrentLine.Value.Quantity;
 
 			var inputQuantity = new InputQuantity((OrderedStock)srcStock, false);
 			yield return new DialogResult(inputQuantity, resizable: false);

@@ -63,6 +63,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				foreach (var item in items) {
 					if (item.Exp != null)
 						item.Exp = item.Exp.Value.ToLocalTime();
+					item.Address = address;
 					item.Ordered = (uint?)lines.FirstOrDefault(x => x.Id == item.Id)?.Quantity;
 				}
 				return items;

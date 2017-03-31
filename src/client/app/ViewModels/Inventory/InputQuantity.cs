@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public InputQuantity(OrderedStock stock, bool unpackingVisible)
 		{
 			InitFields();
-			Quantity.Value = 1;
+			Quantity.Value = stock.Ordered.Value;
 			Multiplicity.Value = null;
 			Unpacking.Value = false;
 			Stock.Value = stock;
@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Unpacking.Value = !unpackingVisible;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
+			WasCancelled = true;
 		}
 
 		public InputQuantity(Stock stock, bool unpackingVisible)
@@ -37,6 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Unpacking.Value = !unpackingVisible;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
+			WasCancelled = true;
 		}
 
 		public NotifyValue<uint> Quantity { get; set; }
