@@ -49,9 +49,13 @@ namespace AnalitF.Net.Client.Models.Commands
 					//может передаваться а может и нет
 					"SkipRestore", "IsLoaded"
 				}},
+				{"OrderLines", new [] {
+					//локальные поля
+					"IsEditByUser", "RetailMarkup", "RetailCost"
+				}},
 				{"SentOrderLines", new [] {
 					//локальные поля
-					"Id", "Comment", "OrderId", "Exp", "Properties", "BuyingMatrixType"
+					"Id", "Comment", "OrderId", "Exp", "Properties", "BuyingMatrixType", "IsEditByUser"
 				}},
 				{"SentOrders", new [] {
 					//локальные поля

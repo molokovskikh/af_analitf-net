@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 5);
 			Assert.AreEqual(stock.SupplyQuantity, 5);
 
-			var line = new InventoryLine(stock, 3, session);
+			var line = new InventoryLine(doc, stock, 3, session);
 			doc.Lines.Add(line);
 			session.Save(doc);
 			session.Flush();
@@ -84,6 +84,55 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 5);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
 			Assert.AreEqual(stock.SupplyQuantity, 5);
+		}
+
+		// для стоков, заново создаваемых из каталога
+		[Test]
+		public void Doc_Flow_with_new_stock()
+		{
+			stock.Quantity = stock.ReservedQuantity = stock.SupplyQuantity = 0;
+			stock.Status = StockStatus.InTransit;
+			session.Update(stock);
+			session.Flush();
+			// новый пустой сток
+			Assert.AreEqual(stock.Quantity, 0);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+
+			var line = new InventoryLine(doc, stock, 3, session, true);
+			doc.Lines.Add(line);
+			session.Save(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 0);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(line.Quantity, 3);
+
+			doc.Post();
+			session.Save(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 3);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(line.Quantity, 3);
+			Assert.AreEqual(stock.Status, StockStatus.Available);
+
+			//Если мы снова откроем документ, то получим что было до закрытия
+			doc.UnPost();
+			session.Save(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 0);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(line.Quantity, 3);
+			Assert.AreEqual(stock.Status, StockStatus.InTransit);
+
+			//Если документ будет удален то на складе получим - Папаверин 5 шт, 0 шт в поставке
+			doc.BeforeDelete(session);
+			session.Delete(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 0);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 0);
 		}
 	}
 }

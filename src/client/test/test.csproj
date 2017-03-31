@@ -150,6 +150,8 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Integration\Commands\SyncFixture.cs" />
     <Compile Include="Integration\ViewModels\InputQuantityFixture.cs" />
+    <Compile Include="Integration\ViewModels\ClassStockAssortmentFixture.cs" />
+    <Compile Include="Integration\ViewModels\Frontend2Fixture.cs" />
     <Compile Include="Integration\ViewModels\ShelfLifeFixture.cs" />
     <Compile Include="Fixtures\CreateUser.cs" />
     <Compile Include="Integration\ViewModels\EditInventoryDocFixture.cs" />

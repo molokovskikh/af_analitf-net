@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			EditStock,
 			EditQuantity,
 			EditRetailCostAndQuantity,
+			EditAll,
 		}
 
 		public EditStock()

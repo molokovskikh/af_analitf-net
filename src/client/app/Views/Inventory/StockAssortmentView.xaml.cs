@@ -1,6 +1,4 @@
-﻿using AnalitF.Net.Client.Controls.Behaviors;
-using AnalitF.Net.Client.Models.Inventory;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,18 +11,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Diadoc.Api.Proto.Documents;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
 	/// <summary>
-	/// Interaction logic for EditInventory.xaml
+	/// Логика взаимодействия для StockAssortmentView.xaml
 	/// </summary>
-	public partial class EditInventoryDoc : UserControl
+	public partial class StockAssortmentView : UserControl
 	{
-		private ViewModels.Inventory.EditInventoryDoc model;
-
-		public EditInventoryDoc()
+		public StockAssortmentView()
 		{
 			InitializeComponent();
 		}

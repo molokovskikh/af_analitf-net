@@ -144,8 +144,8 @@
 							<TextBox Name="Stock_Category" Width="120" IsReadOnly="True" />
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
-							<Label Content="Сертификат" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-							<TextBox Name="Stock_Certificate" Width="165" />
+							<Label Content="Сертификаты" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+							<TextBox Name="Stock_Certificates" Width="165" />
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="ВМН" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
@@ -163,7 +163,7 @@
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="Серия" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
-							<TextBox Name="Stock_Seria" Width="120" />
+							<TextBox Name="Stock_SerialNumber" Width="120" />
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="Срок годности" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
@@ -181,7 +181,7 @@
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="ГТД" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
-							<TextBox Name="Stock_Gtd" Width="120" />
+							<TextBox Name="Stock_BillOfEntryNumber" Width="120" />
 						</StackPanel>
 						<StackPanel Margin="5 0 0 0">
 							<Label Content="Дата прихода" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>

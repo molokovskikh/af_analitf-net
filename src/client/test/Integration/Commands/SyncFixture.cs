@@ -28,10 +28,18 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				ReservedQuantity = 0,
 				SupplyQuantity = 5
 			};
+
+			User User = session?.Query<User>()?.FirstOrDefault()
+				?? new User
+				{
+					SupportHours = "будни: с 07:00 до 19:00",
+					SupportPhone = "тел.: 473-260-60-00",
+				};
+
 			localSession.Save(stock);
 
-			var doc = new InventoryDoc(address);
-			doc.Lines.Add(new InventoryLine(stock, 1, localSession));
+			var doc = new InventoryDoc(address, User);
+			doc.Lines.Add(new InventoryLine(doc, stock, 1, localSession));
 			doc.UpdateStat();
 			doc.Post();
 			localSession.Save(doc);
@@ -47,6 +55,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Stock_waybill()
 		{
 			localSession.Connection.Execute(@"delete from Stocks; delete from StockActions;");
+			session.Connection.Execute(@"delete from inventory.StockActions;");
+			Run(new SyncCommand());
 			var fixture = new CreateWaybill();
 			Fixture(fixture);
 
@@ -60,8 +70,11 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			waybill.Stock(localSession);
 			Assert.AreEqual(DocStatus.Posted, waybill.Status);
+			var actions = localSession.Connection.Query<StockAction>("select * from StockActions").ToArray();
+			Assert.AreEqual(33, actions.Length);
 
 			var check = new Check(localSession.Query<User>().First(), address, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
+			check.Lines.Each(x => x.Doc = check);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);
 			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock)));
@@ -70,6 +83,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			session.Clear();
 			var stocks = session.Query<Service.Models.Inventory.Stock>().Where(x => x.WaybillId == fixture.Waybill.Log.Id).ToList();
 			var updatedStock = stocks.First(x => x.Id == waybill.Lines[0].Stock.ServerId);
+			actions = localSession.Connection.Query<StockAction>("select * from StockActions").ToArray();
+			Assert.AreEqual(34, actions.Length);
 			Assert.AreEqual(0, updatedStock.Quantity, $"stock id = {updatedStock.Id}");
 			Assert.AreEqual(33, stocks.Count);
 			foreach (var stock in stocks) {
@@ -82,12 +97,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.First();
 			Assert.AreEqual(1, postedCount, $"downloadid = {fixture.Waybill.Log.Id}");
 
-
 			//повторная попытка что бы проверить на ошибку избыточной синхронизации
 			Run(new SyncCommand());
 			session.Clear();
 			var stockCount = session.Query<Service.Models.Inventory.Stock>().Count(x => x.WaybillId == fixture.Waybill.Log.Id);
 			updatedStock = stocks.First(x => x.Id == waybill.Lines[0].Stock.ServerId);
+			actions = localSession.Connection.Query<StockAction>("select * from StockActions").ToArray();
+			Assert.AreEqual(34, actions.Length);
 			Assert.AreEqual(0, updatedStock.Quantity, $"stock id = {updatedStock.Id}");
 			Assert.AreEqual(33, stockCount);
 		}

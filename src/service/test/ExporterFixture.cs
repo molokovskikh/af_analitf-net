@@ -221,6 +221,14 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Export_stockactions()
+		{
+			exporter.ExportStockActions(DateTime.Today.ToLocalTime());
+			var files = ListResult();
+			Assert.AreEqual($"stockactions.meta.txt, stockactions.txt", files);
+		}
+
+		[Test]
 		public void Export_sent_orders()
 		{
 			exporter.ExportSentOrders(new ulong[0]);
