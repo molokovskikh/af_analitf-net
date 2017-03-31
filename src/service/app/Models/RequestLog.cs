@@ -253,13 +253,11 @@ namespace AnalitF.Net.Service.Models
 								log.Error($"Произошла ошибка при обработке запроса {jobId}", e);
 							job.Faulted(e);
 						}
-						finally {
-							using (var logTrx = logSession.BeginTransaction()) {
-								job.Completed();
-								logSession.Save(job);
-								logSession.Flush();
-								logTrx.Commit();
-							}
+						using (var logTrx = logSession.BeginTransaction()) {
+							job.Completed();
+							logSession.Save(job);
+							logSession.Flush();
+							logTrx.Commit();
 						}
 					}
 				}

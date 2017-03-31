@@ -390,7 +390,7 @@ select u.Id,
 	rcs.AllowDelayOfPayment as IsDelayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
-	?lastSync as LastSync,
+	convert_tz(?lastSync, @@session.time_zone,'+00:00') as LastSync,
 	rcs.SaveOrders,
 	case
 		when uup.MessageShowCount > 0 then uup.Message

@@ -44,6 +44,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			restoreUser = false;
 			userId = localSession.Query<User>().Select(x => x.Id).First();
 			DbHelper.RestoreData(localSession);
+			FileHelper.InitDir(clientConfig.TmpDir);
 		}
 
 		[TearDown]
@@ -62,6 +63,25 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				user.UseAdjustmentOrders = false;
 			}
 			session.Flush();
+		}
+
+		[Test]
+		public void Load_only_changed()
+		{
+			var user = localSession.Query<User>().First();
+			user.LastSync = null;
+			var command = new UpdateCommand {Clean = false};
+			Run(command);
+			var totalSize = new DirectoryInfo(clientConfig.UpdateTmpDir).GetFiles().Sum(x => x.Length);
+			Assert.That(totalSize, Is.GreaterThan(1*1024*1024));
+			Assert.AreEqual(UpdateResult.OK, Run(command));
+			FileHelper.InitDir(clientConfig.TmpDir);
+
+			command = new UpdateCommand {Clean = false};
+			Assert.AreEqual(UpdateResult.OK, Run(command));
+			//тк ничего не изменило мы должны передать только метаданные
+			totalSize = new DirectoryInfo(clientConfig.UpdateTmpDir).GetFiles().Sum(x => x.Length);
+			Assert.That(totalSize, Is.LessThan(20*1024));
 		}
 
 		[Test]
