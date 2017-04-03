@@ -507,7 +507,8 @@ task "deploy:announce":
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	client.UploadString("$url/issues.json", content)
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
-	Cp(setupBin, Globals.FtpRoot, true)
+	ImpersonateIfNeeded(Globals):
+		Cp(setupBin, Globals.FtpRoot, true)
 
 desc """
 делает текущий релиз релизом по умолчанию - отправляет обновление всем клиента
