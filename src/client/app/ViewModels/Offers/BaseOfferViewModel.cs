@@ -387,7 +387,7 @@ where c.Id = ?";
 			if (NeedToCalculateDiff)
 				CalculateDiff(offers);
 
-			CalculateRetailCost(offers);
+			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, Address));
 			if (Settings.Value.WarnIfOrderedYesterday) {
 				var addressId = Address.Id;
 				RxQuery(s => s.CreateSQLQuery(@"select ProductId
@@ -403,11 +403,6 @@ group by l.ProductId")
 					.ToList())
 					.Subscribe(x => Address.YesterdayOrderedProductIds = x, CloseCancellation.Token);
 			}
-		}
-
-		private void CalculateRetailCost(IEnumerable<Offer> offers)
-		{
-			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, Address));
 		}
 
 		private void CalculateDiff(IEnumerable<Offer> offers)

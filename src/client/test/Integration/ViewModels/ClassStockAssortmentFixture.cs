@@ -72,4 +72,5 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(model.StockActions.Value.Count, Is.GreaterThan(0));
 		}
 	}
+
 }

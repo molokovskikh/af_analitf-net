@@ -24,7 +24,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public WriteoffDoc(Address address, User user)
 			: this()
 		{
-			
 			Date = DateTime.Now;
 			Address = address;
 			_numberprefix = user.Id.ToString() + "-";
@@ -36,6 +35,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			get { return _id; }
 			set
 			{
+
 				_id = value;
 				if (_new)
 					NumberDoc = _numberprefix + Id.ToString("d8");

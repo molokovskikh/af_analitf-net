@@ -9,7 +9,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 		}
 
-		public StockAction(ActionType action, ActionTypeChange typechange,  Stock stock, 
+		public StockAction(ActionType action, ActionTypeChange typechange, Stock stock,
 			IStockDocument doc, decimal quantity, decimal? discountsum = null)
 		{
 			ActionType = action;
@@ -19,20 +19,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SourceStockVersion = stock.ServerVersion;
 			Quantity = quantity;
 			SrcStock = stock;
+			Timestamp = DateTime.Now;
 			DisplayDoc = doc.DisplayName;
 			NumberDoc = doc.NumberDoc;
 			FromIn = doc.FromIn;
 			OutTo = doc.OutTo;
 			RetailCost = stock.RetailCost;
 			RetailMarkup = stock.RetailMarkup;
-			DiscountSum = TypeChange == ActionTypeChange.Minus 
+			DiscountSum = TypeChange == ActionTypeChange.Minus
 						&& discountsum != null ? -discountsum : discountsum;
-			Timestamp = DateTime.Now;
-			Version = 0;
 		}
 
 		public virtual uint Id { get; set; }
-
 		[Ignore]
 		public virtual string Document
 		{
@@ -89,6 +87,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 					return RetailSumm;
 			}
 		}
+
 		[Ignore]
 		public virtual Stock DstStock { get; set; }
 

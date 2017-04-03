@@ -390,7 +390,7 @@ select u.Id,
 	rcs.AllowDelayOfPayment as IsDelayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
-	?lastSync as LastSync,
+	convert_tz(?lastSync, @@session.time_zone,'+00:00') as LastSync,
 	rcs.SaveOrders,
 	case
 		when uup.MessageShowCount > 0 then uup.Message
@@ -649,8 +649,6 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"Properties",
 				"Nds",
 				"OriginalJunk",
-				"RetailMarkup",
-				"RetailPrice"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -687,9 +685,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.EAN13,
 				o.Properties,
 				o.Nds,
-				o.Junk,
-				0,
-				0
+				o.Junk
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -1504,8 +1500,6 @@ where a.MailId in ({ids.Implode()})";
 						"Junk",
 						"BarCode",
 						"OriginalJunk",
-						"RetailMarkup",
-						"RetailPrice"
 					},
 					items
 						.Select(i => new object[] {
@@ -1547,8 +1541,6 @@ where a.MailId in ({ids.Implode()})";
 							i.EAN13,
 							//оригинальная уценка
 							i.Junk,
-							0,
-							0
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1680,9 +1672,7 @@ select l.ExportId as ExportOrderId,
 	ol.Cost,
 	oh.RegionCode as RegionId,
 	ol.CoreId as OfferId,
-	ol.Junk as OriginalJunk,
-	cast(0 as decimal(8,2)) as RetailMarkup,
-	cast(0 as decimal(8,2)) as RetailPrice
+	ol.Junk as OriginalJunk
 from Logs.PendingOrderLogs l
 	join Orders.OrdersList ol on ol.OrderId = l.OrderId
 		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
@@ -1778,8 +1768,8 @@ select ol.RowId as ServerId,
 	ol.Cost,
 	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
 	ol.Junk as OriginalJunk,
-	cast(0 as decimal(8, 2)) as RetailMarkup,
-	cast(0 as decimal(8, 2)) as RetailPrice
+	ol.RetailCost,
+	ol.RetailMarkup
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
@@ -1805,14 +1795,14 @@ from Inventory.StockedWaybills s
 	join Logs.DocumentSendLogs l on l.DocumentId = s.DownloadId
 where s.Timestamp > ?lastSync
 	and l.UserId = ?userId
-	and s.UserId <> ?userId";
+	and not s.UserId <=> ?userId";
 				Export(Result, sql, "UpdatedWaybills", truncate: true,
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 
 				var addressIds = "(" + Addresses.Implode(x => x.Id) + ")";
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	CheckType,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(ChangeOpening, @@session.time_zone,'+00:00') as ChangeOpening,
@@ -1834,7 +1824,7 @@ select Id as ServerId,
 	PaymentByCard
 from Inventory.Checks c
 where c.Timestamp > ?lastSync
-	and c.UserId <> ?userId
+	and not c.UserId <=> ?userId
 	and c.AddressId in {addressIds}";
 				Export(Result, sql, "Checks",
 					truncate: false,
@@ -1878,11 +1868,11 @@ select l.CheckId as ServerDocId,
 	l.SupplyQuantity,
 	l.Exp,
 	l.Period,
-	l.DocId
+ 	l.DocId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
-	and c.UserId <> ?userId
+	and not c.UserId <=> ?userId
 	and c.AddressId in {addressIds}";
 				Export(Result, sql, "CheckLines",
 					truncate: false,
@@ -1890,7 +1880,7 @@ where c.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
@@ -1902,7 +1892,7 @@ select Id as ServerId,
 	Error
 from Inventory.DisplacementDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "DisplacementDocs",
 					truncate: false,
@@ -1938,7 +1928,7 @@ select l.WaybillLineId,
 from Inventory.DisplacementLines l
 	join Inventory.DisplacementDocs d on d.Id = l.DisplacementDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "DisplacementLines",
 					truncate: false,
@@ -1946,7 +1936,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -1958,7 +1948,7 @@ select Id as ServerId,
 	Comment
 from Inventory.InventoryDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "InventoryDocs",
 					truncate: false,
@@ -1968,6 +1958,7 @@ where d.Timestamp > ?lastSync
 select l.Quantity,
 	l.Period,
 	l.StockId,
+	l.StockIsNew,
 	l.Barcode,
 	l.Product,
 	l.ProductId,
@@ -1989,11 +1980,11 @@ select l.Quantity,
 	l.SupplyQuantity,
 	l.InventoryDocId as ServerDocId,
 	l.Exp,
-	l.DocId
+ 	l.DocId
 from Inventory.InventoryLines l
 	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "InventoryLines",
 					truncate: false,
@@ -2001,7 +1992,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2015,7 +2006,7 @@ select Id as ServerId,
 	Error
 from Inventory.ReassessmentDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReassessmentDocs",
 					truncate: false,
@@ -2052,7 +2043,7 @@ select l.Exp,
 from Inventory.ReassessmentLines l
 	join Inventory.ReassessmentDocs d on d.Id = l.ReassessmentDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReassessmentLines",
 					truncate: false,
@@ -2060,7 +2051,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	Status,
@@ -2074,7 +2065,7 @@ select Id as ServerId,
 	Error
 from Inventory.ReturnDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReturnDocs",
 					truncate: false,
@@ -2109,7 +2100,7 @@ select l.WaybillLineId,
 from Inventory.ReturnLines l
 	join Inventory.ReturnDocs d on d.Id = l.ReturnDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReturnLines",
 					truncate: false,
@@ -2117,7 +2108,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2128,7 +2119,7 @@ select Id as ServerId,
 	LinesCount
 from Inventory.UnpackingDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "UnpackingDocs",
 					truncate: false,
@@ -2165,7 +2156,7 @@ select l.Quantity,
 from Inventory.UnpackingLines l
 	join Inventory.UnpackingDocs d on d.Id = l.UnpackingDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "UnpackingLines",
 					truncate: false,
@@ -2173,7 +2164,7 @@ where d.Timestamp > ?lastSync
 
 				sql = $@"
 select Id as ServerId,
-	NumberDoc,
+ 	NumberDoc,
 	convert_tz(Date, @@session.time_zone,'+00:00') as Date,
 	convert_tz(CloseDate, @@session.time_zone,'+00:00') as CloseDate,
 	AddressId,
@@ -2187,7 +2178,7 @@ select Id as ServerId,
 	Error
 from Inventory.WriteoffDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "WriteoffDocs",
 					truncate: false,
@@ -2222,7 +2213,7 @@ select l.WaybillLineId,
 from Inventory.WriteoffLines l
 	join Inventory.WriteoffDocs d on d.Id = l.WriteoffDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "WriteoffLines",
 					truncate: false,
@@ -2884,39 +2875,40 @@ where a.Enabled = 1
 	and u.Id = ?userId
 	and s.Timestamp > ?lastSync";
 			Export(Result, sql, "stocks", false, new {userId = user.Id, lastSync});
-			ExportStockActions(lastSync);
 		}
 
 		public void ExportStockActions(DateTime lastSync)
 		{
 			var sql = @"
-			select
-				null Id,
-				sa.Timestamp,
-				sa.DisplayDoc,
-				sa.NumberDoc,
-				sa.FromIn,
-				sa.OutTo,
-				sa.ActionType,
-				sa.TypeChange,
-				sa.ClientStockId,
-				sa.SourceStockId,
-				sa.SourceStockVersion,
-				sa.Quantity,
-				sa.RetailCost,
-				sa.RetailMarkup,
-				sa.DiscountSum,
-				sa.Version
-			from Inventory.StockActions sa
-				join Inventory.Stocks s on s.Id =sa.SourceStockId
-					join Customers.Addresses a on a.Id = s.AddressId
-						join Customers.UserAddresses ua on ua.Addressid = a.Id
-							join Customers.Users u on u.Id = ua.UserId
-				left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
-					left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
-			where a.Enabled = 1
-				and u.Id = ?userId
-				and sa.Timestamp > ?lastSync";
+ 			select
+ 				null Id,
+ 				convert_tz(sa.Timestamp, @@session.time_zone,'+00:00') as Timestamp,
+ 				sa.DisplayDoc,
+ 				sa.NumberDoc,
+ 				sa.FromIn,
+ 				sa.OutTo,
+ 				sa.ActionType,
+ 				sa.TypeChange,
+ 				sa.ClientStockId,
+ 				sa.SourceStockId,
+ 				sa.SourceStockVersion,
+ 				sa.Quantity,
+ 				sa.RetailCost,
+	
+ 				sa.RetailMarkup,
+ 				sa.DiscountSum,
+ 				sa.Version
+ 			from Inventory.StockActions sa
+ 				join Inventory.Stocks s on s.Id =sa.SourceStockId
+ 					join Customers.Addresses a on a.Id = s.AddressId
+ 						join Customers.UserAddresses ua on ua.Addressid = a.Id
+ 							join Customers.Users u on u.Id = ua.UserId
+ 				left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
+ 					left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
+ 			where a.Enabled = 1
+ 				and u.Id = ?userId
+ 				and sa.Timestamp > ?lastSync
+ 				and  (sa.UserId <> ?userId or ?lastSync < '01.01.2000')";
 			Export(Result, sql, "stockactions", false, new { userId = user.Id, lastSync });
 		}
 	}

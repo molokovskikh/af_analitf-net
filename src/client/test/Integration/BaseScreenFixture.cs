@@ -3,6 +3,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Integration
@@ -22,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 
 			shell.ShowCatalog();
-			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(2), shell.NavigationStack.Implode());
 			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
 			Assert.AreEqual(shell.ActiveItem, catalog);
 		}

@@ -33,14 +33,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 			using (var zipStream = File.Open(Cleaner.TmpFile(), FileMode.Open)) {
 				var lastSync = Settings.LastSync.ToUniversalTime();
 
-				var actions = Session.Connection
-					.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
- 						new { lastSync })
-					.ToArray();
-
 				using (var zip = new ZipFile()) {
-					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
-					zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions), System.Text.Encoding.UTF8);
+						var actions = Session.Connection
+							.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
+								new { lastSync })
+							.ToArray();
+					if (actions.Length > 0) {
+						zip.AddEntry("stock-actions", JsonConvert.SerializeObject(actions), System.Text.Encoding.UTF8);
+					}
 
 					WriteSql(zip, disposable, "check-lines", @"
 select l.*
@@ -96,6 +96,7 @@ select Id, Timestamp
 from Waybills
 where Timestamp > @lastSync and IsCreatedByUser = 0");
 
+					zip.AddEntry("server-timestamp", Settings.ServerLastSync.ToString("O"));
 					zip.Save(zipStream);
 				}
 				zipStream.Position = 0;
@@ -136,6 +137,8 @@ where Timestamp > @lastSync and IsCreatedByUser = 0");
 			var adaper = new MySqlDataAdapter(cmd);
 			var table = new DataTable("data");
 			adaper.Fill(table);
+			if (table.Rows.Count == 0)
+				return;
 			table.Constraints.Clear();
 			table.WriteXml(stream, XmlWriteMode.WriteSchema);
 			stream.Position = 0;

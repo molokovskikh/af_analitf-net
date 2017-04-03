@@ -59,7 +59,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SaleType = SaleType.FullCost;
 			Lines.AddEach(lines);
 			UpdateStat();
-
 		}
 
 		public Check()

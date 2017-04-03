@@ -15,6 +15,9 @@ namespace AnalitF.Net.Client.Models
 			Comment = orderLine.Comment;
 			ResultCost = orderLine.ResultCost;
 			ServerId = orderLine.ExportId;
+			RetailCost = orderLine.RetailCost;
+			RetailMarkup = orderLine.RetailMarkup;
+			IsEditByUser = orderLine.IsEditByUser;
 		}
 
 		public virtual uint Id { get; set; }
@@ -28,6 +31,12 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Comment { get; set; }
 
 		public virtual decimal ResultCost { get; set; }
+
+		public virtual bool IsEditByUser { get; set; }
+
+		public virtual decimal? RetailCost { get; set; }
+
+		public virtual decimal? RetailMarkup { get; set; }
 
 		public virtual decimal MixedCost => HideCost ? ResultCost : Cost;
 

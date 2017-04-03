@@ -169,7 +169,7 @@
         </MenuItem>
         <MenuItem Header="Товарные запасы" cal:Message.Attach="ShowInventory" />
 		<MenuItem Header="Ассортимент товаров" cal:Message.Attach="ShowStockAssortment" />
-	</MenuItem>
+      </MenuItem>
 
       <MenuItem Header="Справка">
 				<MenuItem Header="О программе..." cal:Message.Attach="ShowAbout" />

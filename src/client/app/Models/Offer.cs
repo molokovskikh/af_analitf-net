@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.RightsManagement;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
-using log4net;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -71,11 +68,13 @@ namespace AnalitF.Net.Client.Models
 
 	public class Offer : BaseOffer, IInlineEditable
 	{
+		private decimal? _retailCost;
 		private decimal? _diff;
 		private uint? orderCount;
 		private decimal? prevOrderAvgCost;
 		private decimal? prevOrderAvgCount;
 		private OrderLine orderLine;
+		private decimal? _retailMarkup;
 
 		public Offer()
 		{
@@ -141,23 +140,14 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal LeaderCost { get; set; }
 
 		[Style("ResultLeaderPrice.RegionName", "ResultLeaderPrice.Name", Description = "Прайс-лист - лидер")]
-		public virtual bool Leader
-		{
-			get { return LeaderCost == ResultCost || LeaderPrice == Price; }
-		}
+		public virtual bool Leader => LeaderCost == ResultCost || LeaderPrice == Price;
 
 		[Style(Description = "Препарат запрещен к заказу", Priority = 1)]
-		public virtual bool IsForbidden
-		{
-			get { return BuyingMatrixType == BuyingMatrixStatus.Denied; }
-		}
+		public virtual bool IsForbidden => BuyingMatrixType == BuyingMatrixStatus.Denied;
 
 		//подсвечиваем колонки, нужно что бы работал функционал приоритета что бы перекрывался цветом IsForbidden
 		[Style("OrderCount", "OrderLine.ResultSum")]
-		public virtual bool OrderMark
-		{
-			get { return true; }
-		}
+		public virtual bool OrderMark => true;
 
 		[Ignore]
 		public virtual OrderLine OrderLine
@@ -182,10 +172,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Ignore]
-		public virtual decimal? Diff
-		{
-			get { return _diff; }
-		}
+		public virtual decimal? Diff => _diff;
 
 		//поле для отображения сгруппированные данных
 		//оно здесь потому что PropertyGroupDescription
@@ -243,6 +230,32 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual bool StatLoaded { get; set; }
+
+		[Ignore]
+		public virtual decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				if (_retailMarkup != value) {
+					_retailMarkup = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		[Ignore]
+		public virtual decimal? RetailCost
+		{
+			get { return _retailCost; }
+			set
+			{
+				if (_retailCost != value) {
+					_retailCost = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		[Style("ProductSynonym", "ProducerSynonym", Description = "Неосновной поставщик", Name = "NotBase")]
 		public virtual bool IsNotBase => Price.NotBase;
@@ -348,10 +361,7 @@ namespace AnalitF.Net.Client.Models
 		/// <summary>
 		/// Результирующая цена, цена поставщика + корректировка назначенная аптекой
 		/// </summary>
-		public virtual decimal ResultCost
-		{
-			get { return GetResultCost(Price); }
-		}
+		public virtual decimal ResultCost => GetResultCost(Price);
 
 		public override decimal GetResultCost()
 		{
@@ -379,5 +389,14 @@ namespace AnalitF.Net.Client.Models
 			return query.Where(o => o.BuyingMatrixType != BuyingMatrixStatus.Denied && !o.Price.IsOrderDisabled);
 		}
 
+		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups,
+			IList<uint> specialMarkupProducts,
+			User user, Address address)
+		{
+			Configure(user);
+			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
+			RetailMarkup = MarkupConfig.Calculate(markups, this, user, address);
+			RetailCost = GetRetailCost(RetailMarkup.Value);
+		}
 	}
 }

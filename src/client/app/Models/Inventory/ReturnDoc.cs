@@ -8,7 +8,6 @@ using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-
 	public class ReturnDoc : BaseStatelessObject, IDataErrorInfo2, IStockDocument
 	{
 		private bool _new;
@@ -16,13 +15,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private string _numberprefix;
 		private string _numberdoc;
 
-
 		public ReturnDoc()
-
 		{
 			Lines = new List<ReturnLine>();
 		}
-
 
 		public ReturnDoc(Address address, User user)
 			: this()

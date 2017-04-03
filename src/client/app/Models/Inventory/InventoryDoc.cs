@@ -114,8 +114,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Timestamp = SystemTime.Now();
 			Status = DocStatus.Posted;
 			// с поставки на склад
-			foreach (var line in Lines)
+			foreach (var line in Lines) {
 				line.Stock.Incoming(line.Quantity);
+				// если сток создан вместе со строкой - меняется статус, иначе - остаётся какой был
+				if (line.StockIsNew)
+					line.Stock.Status = StockStatus.Available;
+			}
 		}
 
 		public virtual void UnPost()
@@ -123,8 +127,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = null;
 			Status = DocStatus.NotPosted;
 			// со склада в поставку
-			foreach (var line in Lines)
+			foreach (var line in Lines) {
+				if (line.StockIsNew)
+					line.Stock.Status = StockStatus.InTransit;
 				line.Stock.CancelIncoming(line.Quantity);
+			}
 		}
 
 		public virtual void BeforeDelete(ISession session)

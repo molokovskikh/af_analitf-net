@@ -206,7 +206,7 @@ namespace AnalitF.Net.Service.Test
 
 			exporter.ExportDocs();
 			var files = ListResult();
-			Assert.AreEqual($"stocks.meta.txt, stocks.txt, stockactions.meta.txt, stockactions.txt, UpdatedWaybills.meta.txt, UpdatedWaybills.txt," +
+			Assert.AreEqual($"stocks.meta.txt, stocks.txt, UpdatedWaybills.meta.txt, UpdatedWaybills.txt," +
 				" Checks.meta.txt, Checks.txt, CheckLines.meta.txt, CheckLines.txt, DisplacementDocs.meta.txt," +
 				" DisplacementDocs.txt, DisplacementLines.meta.txt, DisplacementLines.txt, InventoryDocs.meta.txt," +
 				" InventoryDocs.txt, InventoryLines.meta.txt, InventoryLines.txt, ReassessmentDocs.meta.txt," +
@@ -218,6 +218,14 @@ namespace AnalitF.Net.Service.Test
 				" WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt," +
 				" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
 				" LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
+		}
+
+		[Test]
+		public void Export_stockactions()
+		{
+			exporter.ExportStockActions(DateTime.Today.ToLocalTime());
+			var files = ListResult();
+			Assert.AreEqual($"stockactions.meta.txt, stockactions.txt", files);
 		}
 
 		[Test]
@@ -235,7 +243,7 @@ namespace AnalitF.Net.Service.Test
 			CreateWaybillWithFile();
 			exporter.ExportDocs();
 			var files = ListResult();
-			Assert.AreEqual("stocks.meta.txt, stocks.txt, stockactions.meta.txt, stockactions.txt," +
+			Assert.AreEqual("stocks.meta.txt, stocks.txt," +
 				" UpdatedWaybills.meta.txt, UpdatedWaybills.txt," +
 				" Checks.meta.txt, Checks.txt, CheckLines.meta.txt, CheckLines.txt, DisplacementDocs.meta.txt," +
 				" DisplacementDocs.txt, DisplacementLines.meta.txt, DisplacementLines.txt, InventoryDocs.meta.txt," +

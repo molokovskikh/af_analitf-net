@@ -150,6 +150,7 @@ where l.{name}DocId is null
 			using (var exporter = new Exporter(Session, Config, new RequestLog(CurrentUser, request, GetType().Name))) {
 				exporter.Prefix = Guid.NewGuid().ToString();
 				exporter.ExportStocks(lastSync);
+				exporter.ExportStockActions(lastSync);
 				exporter.Result.Add(new UpdateData("server-timestamp") {
 					Content = serverTimestamp.ToString("O")
 				});
@@ -186,12 +187,14 @@ where l.{name}DocId is null
 			} else {
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
 			}
+
 			string sql = @"insert into Inventory.stockactions " +
-					"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
-					" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum, Version)" +
-					" values (?userId, ?Timestamp, ?DisplayDoc, ?NumberDoc, ?FromIn, ?OutTo, ?ActionType, ?TypeChange, " +
-					" ?ClientStockId, ?SourceStockId, ?SourceStockVersion, ?Quantity, ?RetailCost, ?RetailMarkup, " +
-					" ?DiscountSum, ?Version);";
+		"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
+		" ClientStockId, SourceStockId,SourceStockVersion, Quantity, RetailCost, RetailMarkup, DiscountSum)" +
+		" values (?userId, ?Timestamp, ?DisplayDoc, ?NumberDoc, ?FromIn, ?OutTo, ?ActionType, ?TypeChange, " +
+		" ?ClientStockId, ?SourceStockId, ?SourceStockVersion, ?Quantity, ?RetailCost, ?RetailMarkup, " +
+		" ?DiscountSum);";
+
 			MySqlCommand cmd = new MySqlCommand(sql);
 			cmd.Parameters.AddWithValue("userId", CurrentUser.Id);
 			cmd.Parameters.AddWithValue("Timestamp", action.Timestamp.ToLocalTime());
@@ -208,7 +211,6 @@ where l.{name}DocId is null
 			cmd.Parameters.AddWithValue("RetailCost", action.RetailCost);
 			cmd.Parameters.AddWithValue("RetailMarkup", action.RetailMarkup);
 			cmd.Parameters.AddWithValue("DiscountSum", action.DiscountSum);
-			cmd.Parameters.AddWithValue("Version", action.Version);
 			cmd.Connection = (MySqlConnection)Session.Connection;
 			cmd.Prepare();
 			try

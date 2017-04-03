@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var offer = model.CurrentOffer.Value;
 			model.ShowCatalog();
 
-			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(1));
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(3), shell.NavigationStack.Implode());
 
 			var offerModel = (CatalogOfferViewModel)shell.ActiveItem;
 			scheduler.Start();
@@ -57,8 +57,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.ShowCatalogWithMnnFilter();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;
-			Assert.AreEqual(1, shell.NavigationStack.Count(), shell.NavigationStack.Implode());
-			Assert.AreEqual(model, shell.NavigationStack.Last());
+			Assert.AreEqual(3, shell.NavigationStack.Count(), shell.NavigationStack.Implode());
+			//он должен быть предпоследним
+			Assert.AreEqual(model, shell.NavigationStack.ToArray()[1]);
 			Assert.That(catalog.FilterByMnn, Is.True);
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Value.Name.Mnn));
 		}

@@ -239,10 +239,8 @@
     <Compile Include="Controls\Behaviors\CustomMenu.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
-    <Compile Include="Controls\MainControllerWrap.cs" />
     <Compile Include="Controls\LegendPanel.cs" />
     <Compile Include="Controls\Preview.cs" />
-    <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
     <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
@@ -446,6 +444,7 @@
     <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
     <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
     <Compile Include="ViewModels\Inventory\Frontend2.cs" />
+    <Compile Include="ViewModels\Inventory\StockAssortmentViewModel.cs" />
     <Compile Include="ViewModels\Inventory\StockChooser.cs" />
     <Compile Include="ViewModels\Inventory\ShelfLife.cs" />
     <Compile Include="ViewModels\Inventory\AddStockFromCatalog.cs" />
@@ -454,7 +453,6 @@
     <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReturnToSupplier.cs" />
     <Compile Include="ViewModels\Inventory\CreateWriteoffDoc.cs" />
-    <Compile Include="ViewModels\Inventory\StockAssortmentViewModel.cs" />
     <Compile Include="ViewModels\Inventory\Tags.cs" />
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
@@ -680,7 +678,7 @@
     </Compile>
     <Compile Include="Views\Inventory\StockAssortmentView.xaml.cs">
       <DependentUpon>StockAssortmentView.xaml</DependentUpon>
-	</Compile>
+    </Compile>
     <Compile Include="Views\Inventory\StockChooser.xaml.cs">
       <DependentUpon>StockChooser.xaml</DependentUpon>
     </Compile>

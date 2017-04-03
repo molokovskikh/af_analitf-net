@@ -781,16 +781,16 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new Inventory.Stocks());
 		}
 
-		public void ShowStockAssortment()
-		{
-			NavigateRoot(new StockAssortmentViewModel());
-		}
-
 		public bool CanShowFrontend => Settings.Value.LastUpdate != null;
 
 		public void ShowFrontend()
 		{
 			NavigateRoot(new Inventory.Frontend2());
+		}
+
+		public void ShowStockAssortment()
+		{
+			NavigateRoot(new StockAssortmentViewModel());
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;

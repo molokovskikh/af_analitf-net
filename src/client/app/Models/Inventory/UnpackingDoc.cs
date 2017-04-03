@@ -24,9 +24,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Date = DateTime.Now;
 			Address = address;
-			UpdateStat();
 			_numberprefix = user.Id.ToString() + "-";
 			_new = true;
+			UpdateStat();
 		}
 
 		public virtual uint Id

@@ -23,20 +23,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public decimal ReservedQuantity { get; set; }
 	}
 
-	public class StockEx
-	{
-		public Stock Stock { get; set; }
-		public WaybillLine WaybillLine { get; set; }
-	}
-
 	public class StockAssortmentViewModel : BaseScreen
 	{
 		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 		public NotifyValue<List<AddressStock>> AddressStock { get; set; }
 		public NotifyValue<AddressStock> CurrentAddressStock { get; set; }
-		public NotifyValue<List<StockEx>> Stocks { get; set; }
-		public NotifyValue<StockEx> CurrentStock { get; set; }
+		public NotifyValue<List<Stock>> Stocks { get; set; }
+		public NotifyValue<Stock> CurrentStock { get; set; }
 		public NotifyValue<List<StockAction>> StockActions { get; set; }
 		public NotifyValue<StockAction> CurrentStockAction { get; set; }
 
@@ -63,18 +57,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnInitialize();
 
 			RxQuery(s => {
-					return s.Query<Catalog>()
-							.Join(s.Query<Stock>(),
-								catalog => catalog.Id,
-								stock => stock.ProductId,
-								(catalog, stock) => new { catalog, stock })
-							.Where(p => p.stock.Status == StockStatus.Available)
-							.Select(c => c.catalog)
-							.OrderBy(c => c.Name)
-							.Distinct()
-							.ToArray()
-							.ToList();
-				}).Subscribe(Catalogs);
+				return s.Query<Catalog>()
+						.Join(s.Query<Stock>(),
+							catalog => catalog.Id,
+							stock => stock.ProductId,
+							(catalog, stock) => new { catalog, stock })
+						.Where(p => p.stock.Status == StockStatus.Available)
+						.Select(c => c.catalog)
+						.OrderBy(c => c.Name)
+						.Distinct()
+						.ToArray()
+						.ToList();
+			}).Subscribe(Catalogs);
 
 			Catalogs
 				.Changed()
@@ -86,7 +80,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			CurrentCatalog
 				.Changed()
-				.Select(_=>RxQuery(LoadAddressStock))
+				.Select(_ => RxQuery(LoadAddressStock))
 				.Switch()
 				.Subscribe(AddressStock, CloseCancellation.Token);
 
@@ -109,7 +103,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
 				.Subscribe(_ =>
 				{
-					CurrentStock.Value = (Stocks.Value ?? Enumerable.Empty<StockEx>()).FirstOrDefault();
+					CurrentStock.Value = (Stocks.Value ?? Enumerable.Empty<Stock>()).FirstOrDefault();
 				});
 
 			CurrentStock
@@ -135,7 +129,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public static List<AddressStock> LoadAddressStock(IStatelessSession session, SimpleMRUCache cache,
 			Settings settings, Catalog Catalog)
 		{
-			if (Catalog == null )
+			if (Catalog == null)
 				return new List<AddressStock>();
 			var query = session.Query<Stock>()
 				.Where(p => p.Status == StockStatus.Available)
@@ -150,25 +144,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				}).ToList();
 		}
 
-		public List<StockEx> LoadStoks(IStatelessSession session)
+		public List<Stock> LoadStoks(IStatelessSession session)
 		{
 			return LoadStoks(session, Cache, Settings.Value, CurrentAddressStock.Value, CurrentCatalog.Value);
 		}
 
-		public static List<StockEx> LoadStoks(IStatelessSession session, SimpleMRUCache cache,
+		public static List<Stock> LoadStoks(IStatelessSession session, SimpleMRUCache cache,
 			Settings settings, AddressStock AddressStock, Catalog Catalog)
 		{
 			if (AddressStock == null)
-				return new List<StockEx>();
+				return new List<Stock>();
 			var query = session.Query<Stock>()
 				.Fetch(x => x.Address)
-				//.Fetch(x => x.WaybillLine)
-				.Where(x => x.Status == StockStatus.Available)
-				.Where(x => x.ProductId == Catalog.Id)
-				.Join(session.Query<WaybillLine>(),
-							stock => stock.WaybillLineId,
-							waybillLine => waybillLine.Id,
-							(stock, waybillLine) => new StockEx { Stock = stock, WaybillLine = waybillLine });
+			   .Where(x => x.Status == StockStatus.Available)
+				.Where(x => x.ProductId == Catalog.Id);
 			return query
 			.ToList();
 
@@ -180,12 +169,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 		public static List<StockAction> LoadStockActions(IStatelessSession session, SimpleMRUCache cache,
-			Settings settings, StockEx Stock)
+			Settings settings, Stock Stock)
 		{
 			if (Stock == null)
 				return new List<StockAction>();
 			var query = session.Query<StockAction>()
-				.Where(x => x.ClientStockId == Stock.Stock.Id);
+				.Where(x => x.ClientStockId == Stock.Id);
 			return query
 			.ToList();
 
