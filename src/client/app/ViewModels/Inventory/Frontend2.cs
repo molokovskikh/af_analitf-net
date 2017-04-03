@@ -217,14 +217,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 				yield break;
 
-			Lines.Remove(CurrentLine.Value);
-
 			var inputQuantity = new InputQuantity((OrderedStock)srcStock);
 			yield return new DialogResult(inputQuantity, resizable: false);
-			var line = new CheckLine(inputQuantity.DstStock, inputQuantity.DstStock.Value.Ordered.Value);
-			UnPackStoks.Add(inputQuantity.DstStock, srcStock);
-			Lines.Add(line);
-			CurrentLine.Value = line;
+			if (!inputQuantity.WasCancelled)
+			{
+				Lines.Remove(CurrentLine.Value);
+
+				var line = new CheckLine(inputQuantity.DstStock, inputQuantity.DstStock.Value.Ordered.Value);
+				UnPackStoks.Add(inputQuantity.DstStock, srcStock);
+				Lines.Add(line);
+				CurrentLine.Value = line;
+			}
 		}
 	}
 }
