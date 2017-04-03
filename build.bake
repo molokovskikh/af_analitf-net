@@ -45,6 +45,8 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 
 	user = ReadUserConfig("User")
 	password = ReadUserConfig("Password")
+	unless String.IsNullOrEmpty(user):
+		user = "analit\\" + user
 	if String.IsNullOrEmpty(user) or String.IsNullOrEmpty(password):
 		user, password = AskCredentials("user for $hostsArg:")
 	psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
