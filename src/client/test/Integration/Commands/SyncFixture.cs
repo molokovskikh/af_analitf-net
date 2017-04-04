@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			check.Lines.Each(x => x.Doc = check);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);
-			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock)));
+			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock, CheckType.SaleBuyer)));
 
 			Run(new SyncCommand());
 			session.Clear();
