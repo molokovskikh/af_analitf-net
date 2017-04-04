@@ -1,0 +1,122 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.Models.Results;
+using NHibernate;
+using NHibernate.Linq;
+
+namespace AnalitF.Net.Client.ViewModels.Inventory
+{
+	public class AddDefectusLine : BaseScreen, ICancelable
+	{
+		public AddDefectusLine()
+		{
+			DisplayName = "Добавление из каталога";
+			Item = new DefectusLine() {
+				Threshold	= 0,
+				OrderQuantity = 0,
+			};
+
+			CurrentCatalog = new NotifyValue<Product>();
+			CatalogTerm = new NotifyValue<string>();
+
+			ProducerTerm = new NotifyValue<string>();
+			CurrentProducer = new NotifyValue<Producer>();
+			WasCancelled = true;
+		}
+
+		public bool WasCancelled { get; private set; }
+		public DefectusLine Item { get; set; }
+		public NotifyValue<List<Product>> Catalogs { get; set; }
+		public NotifyValue<Product> CurrentCatalog { get; set; }
+		public NotifyValue<string> CatalogTerm { get; set; }
+		public NotifyValue<bool> IsCatalogOpen { get; set; }
+
+		public NotifyValue<List<Producer>> Producers { get; set; }
+		public NotifyValue<bool> IsProducerOpen { get; set; }
+		public NotifyValue<Producer> CurrentProducer { get; set; }
+		public NotifyValue<string> ProducerTerm { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			Catalogs = CatalogTerm
+				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
+				.Select(t => RxQuery(s => {
+					var threshold = 2;
+					if (String.IsNullOrEmpty(t) || t.Length < threshold)
+						return new List<Product>();
+					if (CurrentCatalog.Value != null && CurrentCatalog.Value.Name == t) {
+						return Catalogs.Value;
+					}
+					return s.CreateSQLQuery(@"
+(select {p.*}, 0 as Score
+from Products p
+where p.Name like :term)
+union
+(select {p.*}, 1 as Score
+from Products p
+where p.Name like :fullterm and p.Name not like :term)
+order by Score, {p.Name}")
+						.AddEntity("p", typeof(Product))
+						.SetParameter("term", t + "%")
+						.SetParameter("fullterm", "%" + t + "%")
+						.List<Product>()
+						.ToList();
+				}))
+				.Switch()
+				.ToValue(CloseCancellation);
+			IsCatalogOpen = Catalogs.Select(v => v != null && v.Count > 0).Where(v => v).ToValue();
+			CurrentCatalog.Subscribe(v => {
+				if (v == null)
+					return;
+				Item.ProductId = v.Id;
+				Item.CatalogId = v.CatalogId;
+				Item.Product = v.Name;
+			});
+
+			Producers = ProducerTerm
+				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
+				.Select(t => RxQuery(s => {
+					if (String.IsNullOrEmpty(t))
+						return s.Query<Producer>().OrderBy(x => x.Name).ToList();
+					if (CurrentProducer.Value != null && CurrentProducer.Value.Name == t)
+						return Producers.Value;
+
+					CurrentProducer.Value = null;
+					return s.CreateSQLQuery(@"
+(select {p.*}, 0 as Score
+from Producers p
+where p.Name like :term)
+union
+(select {p.*}, 1 as Score
+from Producers p
+where p.Name like :fullterm and p.Name not like :term)
+order by Score, {p.Name}")
+						.AddEntity("p", typeof(Producer))
+						.SetParameter("term", t + "%")
+						.SetParameter("fullterm", "%" + t + "%")
+						.List<Producer>()
+						.ToList();
+				}))
+				.Switch()
+				.ToValue(CloseCancellation);
+			IsProducerOpen = Producers.Select(v => v != null && v.Count > 1).Where(v => v).ToValue();
+			CurrentProducer.Subscribe(v => {
+				Item.Producer = (v != null && v.Id > 0) ? v.Name : string.Empty;
+				Item.ProducerId=(v != null && v.Id > 0) ? v.Id : (uint?)null;
+			});
+		}
+
+		public void OK()
+		{
+			WasCancelled = false;
+			TryClose();
+		}
+	}
+}
