@@ -228,7 +228,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Checks()
 		{
-			Shell.Navigate(new Checks());
+			Shell.Navigate(new Checks(false));
 		}
 
 		public void InventoryDocs()

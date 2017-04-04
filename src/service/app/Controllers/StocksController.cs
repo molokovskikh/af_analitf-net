@@ -176,6 +176,8 @@ where l.{name}DocId is null
 			}
 			if (action.ActionType == ActionType.Sale)
 				source.Quantity -= action.Quantity;
+			else if (action.ActionType == ActionType.CheckReturn)
+				source.Quantity += action.Quantity;
 			else if (action.ActionType == ActionType.Stock) {
 				source.ClientPrimaryKey = action.ClientStockId;
 				source.CreatedByUser = CurrentUser;

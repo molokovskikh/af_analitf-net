@@ -907,7 +907,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Checks()
 		{
-			NavigateRoot(new Checks());
+			NavigateRoot(new Checks(false));
 		}
 
 		public void InventoryDocs()
