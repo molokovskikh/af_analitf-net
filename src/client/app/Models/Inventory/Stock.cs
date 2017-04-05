@@ -8,7 +8,6 @@ using NHibernate;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Print;
 using System.Globalization;
-using AnalitF.Net.Client.Controls.Behaviors;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -543,5 +542,4 @@ namespace AnalitF.Net.Client.Models.Inventory
 			return Id.GetHashCode();
 		}
 	}
-
 }

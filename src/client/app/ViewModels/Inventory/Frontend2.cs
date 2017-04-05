@@ -87,21 +87,25 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			check.Payment = checkout.Amount.Value.GetValueOrDefault();
 			check.PaymentByCard = checkout.CardAmount.Value.GetValueOrDefault();
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
+			UnpackingDoc UnPackDoc = null;
+			if (Lines.Where(x => x.SourceStock != null).Count() > 0)
+			{
+				UnPackDoc = new UnpackingDoc(Address, User);
+				foreach (var line in check.Lines)
+				{
+					if (line.SourceStock != null)
+					{
+						var uline = new UnpackingLine(line.SourceStock, line.Stock);
+						UnPackDoc.Lines.Add(uline);
+					}
+				}
+				UnPackDoc.UpdateStat();
+				UnPackDoc.Post();
+			}
 			Env.Query(s => {
 				using (var trx = s.BeginTransaction()) {
 					if (Lines.Where(x => x.SourceStock != null).Count() > 0)
 					{
-						UnpackingDoc UnPackDoc = new UnpackingDoc(Address, User);
-						foreach (var line in check.Lines)
-						{
-							if (line.SourceStock != null)
-							{
-								var uline = new UnpackingLine(line.SourceStock, line.Stock);
-								UnPackDoc.Lines.Add(uline);
-							}
-						}
-						UnPackDoc.UpdateStat();
-						UnPackDoc.Post();
 						foreach (var uline in UnPackDoc.Lines)
 						{
 							s.Insert("AnalitF.Net.Client.Models.Inventory.Stock", uline.DstStock);
@@ -161,7 +165,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(stockChooser, resizable: true);
 			var ordered = stockChooser.Items.Value.Where(x => x.Ordered > 0).ToList();
 			foreach(var item in ordered) {
-					UpdateOrAddStock(item);
+				UpdateOrAddStock(item);
 			}
 		}
 
@@ -213,15 +217,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield break;
 			}
 			if (stocks.Length == 1) {
-					AddStock(stocks[0]);
-					yield break;
+				AddStock(stocks[0]);
+				yield break;
 			}
 
 			var model = new ExpSelector(stocks.Select(x => x.Exp.GetValueOrDefault()).Distinct().OrderBy(x => x).ToArray());
 			model.Name = $"Укажите срок годности - {stocks[0].Product}";
 			yield return new DialogResult(model);
 			var first = stocks.First(x => x.Exp == model.CurrentExp);
-				AddStock(first);
+			AddStock(first);
 		}
 
 		public void Updated()

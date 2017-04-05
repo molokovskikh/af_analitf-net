@@ -73,10 +73,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var dialog1 = ((Checkout)((DialogResult)result.Current).Model);
 			dialog1.Amount.Value = 10;
 			result.MoveNext();
+
 			session.Clear();
 			var loadstock = session.Query<Stock>().Where(x => x.Id == dstStock.Id).First();
 			Assert.AreEqual(loadstock.Quantity, 6 - 2);
 			Assert.AreEqual(loadstock.Multiplicity, 6);
+
 		}
 	}
 }

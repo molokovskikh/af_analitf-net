@@ -30,10 +30,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 			if (checkType == CheckType.SaleBuyer && stock.Quantity < quantity)
 				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Quantity}");
 			Stock = stock;
-			if (checkType == CheckType.SaleBuyer)
-				Stock.Quantity -= quantity;
-			else if (checkType == CheckType.CheckReturn)
-				Stock.Quantity += quantity;
+			//if (checkType == CheckType.SaleBuyer)
+			//	Stock.Quantity -= quantity;
+			//else if (checkType == CheckType.CheckReturn)
+			//	Stock.Quantity += quantity;
 			CopyFromStock(stock);
 			Quantity = quantity;
 		}

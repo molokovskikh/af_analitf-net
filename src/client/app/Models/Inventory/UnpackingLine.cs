@@ -39,9 +39,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SrcRetailCost = srcStock.RetailCost;
 			srcStock.Reserve(1);
 			SrcStock = srcStock;
-			
 		}
-
 
 		public virtual uint Id { get; set; }
 
