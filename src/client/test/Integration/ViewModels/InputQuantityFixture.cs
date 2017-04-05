@@ -54,7 +54,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var line = new CheckLine(stock, 3, CheckType.SaleBuyer);
 			model.Lines.Add(line);
 			model.CurrentLine.Value = line;
-			Assert.AreEqual(stock.Quantity, 7);
 
 			var result = model.Unpack().GetEnumerator();
 			result.MoveNext();
