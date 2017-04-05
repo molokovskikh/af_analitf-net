@@ -12,6 +12,7 @@ using Common.NHibernate;
 using Common.Tools;
 using AnalitF.Net.Client.Models.Results;
 using NHibernate.Linq;
+using System.Threading;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -100,7 +101,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//добавляем строку на 3 упаковки
 			var line = new CheckLine(stock, 3);
 			model.Lines.Add(line);
-
+			model.checkType = CheckType.SaleBuyer;
 			// Оплата по чеку
 			var result = model.Close().GetEnumerator();
 			result.MoveNext();
@@ -115,6 +116,54 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(loadstock.Quantity, 2);
 			Assert.AreEqual(check.Sum, 3);
 			Assert.AreEqual(check.Status, Status.Closed);
+		}
+
+		[Test]
+		public void ReturnCheck()
+		{
+			//На складе есть Папаверин в количестве 5шт.
+			Assert.AreEqual(stock.Quantity, 5);
+
+			//добавляем строку на 3 упаковки
+			var line = new CheckLine(stock, 3);
+			model.Lines.Add(line);
+			model.checkType = CheckType.SaleBuyer;
+			// Оплата по чеку
+			var result = model.Close().GetEnumerator();
+			result.MoveNext();
+			var dialog = ((Checkout)((DialogResult)result.Current).Model);
+
+			dialog.Amount.Value = 10;
+			result.MoveNext();
+			// после оплаты на складе остается 2
+			var check = session.Query<Check>().First();
+			var loadstock = session.Query<Stock>().Where(x => x.Id == stock.Id).First();
+			Assert.AreEqual(loadstock.Quantity, 2);
+			Assert.AreEqual(check.Sum, 3);
+			Assert.AreEqual(check.Status, Status.Closed);
+
+			// Возврат
+			var resultreturn = model.ReturnCheck().GetEnumerator();
+			resultreturn.MoveNext();
+			var dialogchecks = ((Checks)((DialogResult)resultreturn.Current).Model);
+			dialogchecks.CurrentItem.Value = check;
+			dialogchecks.DialogCancelled = false;
+			resultreturn.MoveNext();
+			//dialogchecks = ((Checks)((DialogResult)result.Current).Model);
+
+
+			result = model.Close().GetEnumerator();
+
+			result.MoveNext();
+			dialog = ((Checkout)((DialogResult)result.Current).Model);
+			
+
+			dialog.Amount.Value = 10;
+			result.MoveNext();
+
+			session.Clear();
+			var returnstock = session.Query<Stock>().Where(x => x.Id == stock.Id).First();
+			Assert.AreEqual(returnstock.Quantity, 5);
 		}
 	}
 }

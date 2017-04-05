@@ -1868,7 +1868,8 @@ select l.CheckId as ServerDocId,
 	l.SupplyQuantity,
 	l.Exp,
 	l.Period,
- 	l.DocId
+ 	l.DocId,
+	l.StockId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync

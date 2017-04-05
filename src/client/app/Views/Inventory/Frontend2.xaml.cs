@@ -31,6 +31,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 				if (args.Key == Key.F3) {
 					Model.Clear();
 				}
+				if (args.Key == Key.F4)
+				{
+					Execute(Model.ReturnCheck());
+				}
 			};
 
 			DataContextChanged += (sender, args) => {
