@@ -6,12 +6,11 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
-using NHibernate;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class AddDefectusLine : BaseScreen, ICancelable
+	public class AddDefectusLine : BaseScreen2, ICancelable
 	{
 		public AddDefectusLine()
 		{
@@ -45,9 +44,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 
-			Catalogs = CatalogTerm
+			CatalogTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
-				.Select(t => RxQuery(s => {
+				.SelectMany(t => RxQuery(s => {
 					var threshold = 2;
 					if (String.IsNullOrEmpty(t) || t.Length < threshold)
 						return new List<Product>();
@@ -69,9 +68,10 @@ order by Score, {p.Name}")
 						.List<Product>()
 						.ToList();
 				}))
-				.Switch()
-				.ToValue(CloseCancellation);
-			IsCatalogOpen = Catalogs.Select(v => v != null && v.Count > 0).Where(v => v).ToValue();
+				.Subscribe(Catalogs, CloseCancellation.Token);
+
+			Catalogs.Subscribe(x => IsCatalogOpen.Value = x != null && x.Count > 0);
+
 			CurrentCatalog.Subscribe(v => {
 				if (v == null)
 					return;
@@ -80,14 +80,13 @@ order by Score, {p.Name}")
 				Item.Product = v.Name;
 			});
 
-			Producers = ProducerTerm
+			ProducerTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
-				.Select(t => RxQuery(s => {
+				.SelectMany(t => RxQuery(s => {
 					if (String.IsNullOrEmpty(t))
 						return s.Query<Producer>().OrderBy(x => x.Name).ToList();
 					if (CurrentProducer.Value != null && CurrentProducer.Value.Name == t)
 						return Producers.Value;
-
 					CurrentProducer.Value = null;
 					return s.CreateSQLQuery(@"
 (select {p.*}, 0 as Score
@@ -104,12 +103,13 @@ order by Score, {p.Name}")
 						.List<Producer>()
 						.ToList();
 				}))
-				.Switch()
-				.ToValue(CloseCancellation);
-			IsProducerOpen = Producers.Select(v => v != null && v.Count > 1).Where(v => v).ToValue();
+				.Subscribe(Producers, CloseCancellation.Token);
+
+			Producers.Subscribe(x => IsProducerOpen.Value = x != null && x.Count > 1);
+
 			CurrentProducer.Subscribe(v => {
 				Item.Producer = (v != null && v.Id > 0) ? v.Name : string.Empty;
-				Item.ProducerId=(v != null && v.Id > 0) ? v.Id : (uint?)null;
+				Item.ProducerId = (v != null && v.Id > 0) ? v.Id : (uint?)null;
 			});
 		}
 

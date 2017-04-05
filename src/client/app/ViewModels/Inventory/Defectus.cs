@@ -6,9 +6,11 @@ using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using System;
-using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Client.ViewModels.Parts;
+using Dapper;
+using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -33,15 +35,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnInitialize();
 			Bus.Listen<string>("reload").Cast<object>()
 				.Merge(DbReloadToken)
-				.Subscribe(_ => Update(), CloseCancellation.Token);
+				.SelectMany(_ => RxQuery(LoadItems))
+				.Subscribe(Items, CloseCancellation.Token);
 		}
 
-		public override void Update()
+		protected override async void OnDeactivate(bool close)
+		{
+			await Env.Query(s => s.UpdateEach(Items.Value.Where(x => x.IsDirty)));
+			base.OnDeactivate(close);
+		}
+
+		public List<DefectusLine> LoadItems(IStatelessSession session)
 		{
 			if (Address == null)
-				Items.Value = new List<DefectusLine>();
+				return new List<DefectusLine>();
 			// возвращает остатки по текущему адресу
-			Items.Value = Session.CreateSQLQuery(@"
+			return session.CreateSQLQuery(@"
 select IFNULL(SUM(s.Quantity), 0) as {d.Quantity}, {d.*}
 from defectuslines d
 left outer join stocks s on s.ProductId = d.ProductId and s.AddressId = :address
@@ -58,19 +67,23 @@ order by d.Product")
 			while (true) {
 				var search = new AddDefectusLine();
 				yield return new DialogResult(search);
-				Session.Save(search.Item);
-				Session.Flush();
-				Update();
+				SaveDefectusLine(search.Item);
 			}
 		}
 
-		public async Task Delete()
+		private async void SaveDefectusLine(DefectusLine line)
+		{
+			await Env.Query(s => s.Insert(line));
+			Update();
+		}
+
+		public async void Delete()
 		{
 			await Env.Query(s => s.Delete(CurrentItem.Value));
 			Update();
 		}
 
-		public IEnumerable<IResult> Post()
+		private async void SaveBatchLines()
 		{
 			// должны быть настройки автозаказа MultiAddressSource = false
 			var lines = Items.Value
@@ -89,10 +102,14 @@ order by d.Product")
  				Status = ItemToOrderStatus.NotOrdered,
 			 }).ToList();
 
-			foreach (var line in lines)
-				Session.Save(line);
-			Session.Flush();
+			await Env.Query(s => s.InsertEach(lines));
 			Bus.SendMessage(nameof(BatchLine), "db");
+		}
+
+
+		public IEnumerable<IResult> Post()
+		{
+			SaveBatchLines();
 			return Shell.Batch(mode: BatchMode.ReloadUnordered);
 		}
 	}
