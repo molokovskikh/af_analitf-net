@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.ComponentModel;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
@@ -30,6 +31,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint OrderQuantity { get; set; }
 
 		public virtual decimal Quantity { get; set; }
+
+		public virtual bool IsValid => ProductId > 0 && CatalogId > 0 && !String.IsNullOrEmpty(Product);
 
 		public virtual void BeginEdit()
 		{

@@ -8,8 +8,6 @@ using Caliburn.Micro;
 using System;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Client.ViewModels.Parts;
-using Dapper;
 using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -67,6 +65,8 @@ order by d.Product")
 			while (true) {
 				var search = new AddDefectusLine();
 				yield return new DialogResult(search);
+				if (!search.Item.IsValid)
+					continue;
 				SaveDefectusLine(search.Item);
 			}
 		}
@@ -103,7 +103,8 @@ order by d.Product")
 			 }).ToList();
 
 			await Env.Query(s => s.InsertEach(lines));
-			Bus.SendMessage(nameof(BatchLine), "db");
+			//Bus.SendMessage(nameof(BatchLine), "db");
+			Update();
 		}
 
 

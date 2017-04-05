@@ -73,21 +73,22 @@ order by Score, {p.Name}")
 			Catalogs.Subscribe(x => IsCatalogOpen.Value = x != null && x.Count > 0);
 
 			CurrentCatalog.Subscribe(v => {
-				if (v == null)
-					return;
-				Item.ProductId = v.Id;
-				Item.CatalogId = v.CatalogId;
-				Item.Product = v.Name;
+				Item.ProductId = (v != null && v.Id > 0) ? v.Id : 0;
+				Item.CatalogId = (v != null && v.CatalogId > 0) ? v.CatalogId : 0;
+				Item.Product = (v != null && v.Id > 0) ? v.Name : string.Empty;
 			});
 
 			ProducerTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
+				.Do(t => {
+					if (String.IsNullOrEmpty(t))
+						CurrentProducer.Value = null;
+				})
 				.SelectMany(t => RxQuery(s => {
 					if (String.IsNullOrEmpty(t))
 						return s.Query<Producer>().OrderBy(x => x.Name).ToList();
 					if (CurrentProducer.Value != null && CurrentProducer.Value.Name == t)
 						return Producers.Value;
-					CurrentProducer.Value = null;
 					return s.CreateSQLQuery(@"
 (select {p.*}, 0 as Score
 from Producers p
@@ -105,7 +106,7 @@ order by Score, {p.Name}")
 				}))
 				.Subscribe(Producers, CloseCancellation.Token);
 
-			Producers.Subscribe(x => IsProducerOpen.Value = x != null && x.Count > 1);
+			Producers.Subscribe(x => IsProducerOpen.Value = x != null && x.Count > 0);
 
 			CurrentProducer.Subscribe(v => {
 				Item.Producer = (v != null && v.Id > 0) ? v.Name : string.Empty;
