@@ -37,6 +37,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			addDefectusLine.Item = defectusLine;
 			addDefectusLine.OK();
 			addSeq.MoveNext();
+			scheduler.Start();
 			var resultLine = model.Items.Value[0];
 
 			//Assert
