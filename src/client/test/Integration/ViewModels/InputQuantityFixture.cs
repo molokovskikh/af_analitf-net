@@ -48,6 +48,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				CatalogId = 1,
 				Exp = SystemTime.Now()
 			};
+			session.Save(stock);
+			session.Flush();
 			//добавляем строку на 3 упаковки
 			var line = new CheckLine(stock, 3, CheckType.SaleBuyer);
 			model.Lines.Add(line);

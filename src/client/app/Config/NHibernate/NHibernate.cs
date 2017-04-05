@@ -339,6 +339,13 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
 
+			mapper.Class<OrderedStock>(m => {
+				m.Table("Stocks");
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Property(x => x.RetailCost, p => p.Access(Accessor.Field));
+				m.Property(x => x.RetailMarkup, p => p.Access(Accessor.Field));
+			});
+
 			mapper.Class<Stock>(m => {
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
 				m.Property(x => x.RetailCost, p => p.Access(Accessor.Field));

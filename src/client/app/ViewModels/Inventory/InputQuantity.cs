@@ -64,17 +64,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Warning.Show(Common.Tools.Message.Warning($"Заказ превышает количество в упаковке,"));
 				return;
 			}
-
-			//var doc = new UnpackingDoc(Address, User);
-			//var uline = new UnpackingLine(Stock.Value, (int)Multiplicity.Value);
-			//doc.Lines.Add(uline);
-			//doc.UpdateStat();
-			//doc.Post();
-			//Session.Save(doc);
-			//Session.Flush();
-
-
-			//Stock.Copy(srcStock.Value, this);
 			var dstStock = SrcStock.Value.Copy();
 			dstStock.Unpacked = true;
 			dstStock.Quantity = dstStock.Multiplicity = (int)Multiplicity.Value;

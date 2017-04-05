@@ -8,6 +8,7 @@ using NHibernate;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Print;
 using System.Globalization;
+using AnalitF.Net.Client.Controls.Behaviors;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -540,6 +541,37 @@ namespace AnalitF.Net.Client.Models.Inventory
 			if (Id == 0)
 				return base.GetHashCode();
 			return Id.GetHashCode();
+		}
+	}
+
+
+	public class OrderedStock : Stock, IInlineEditable
+	{
+		private uint? _ordered;
+
+		[Ignore]
+		public virtual uint? Ordered
+		{
+			get { return _ordered; }
+			set
+			{
+				if (_ordered != value)
+				{
+					_ordered = value;
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(OrderedSum));
+				}
+			}
+		}
+
+		[Ignore]
+		public virtual decimal? OrderedSum => RetailCost * Ordered;
+
+		[Ignore]
+		public virtual uint Value
+		{
+			get { return Ordered.GetValueOrDefault(); }
+			set { Ordered = value > 0 ? (uint?)value : null; }
 		}
 	}
 }

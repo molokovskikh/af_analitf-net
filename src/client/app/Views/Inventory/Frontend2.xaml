@@ -47,12 +47,14 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="3*" />
 				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 			<TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource Input}"
 				x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				caliburn:SearchBinder.Grid="Lines"/>
-			<Button Focusable="False" Grid.Column="1" Name="Close">Закрыть чек (F7)</Button>
+			<Button Focusable="False" Grid.Column="1" Name="Unpack">Распаковать (Ctrl+U)</Button>
+			<Button Focusable="False" Grid.Column="2" Name="Close">Закрыть чек (F7)</Button>
 		</Grid>
 		<StackPanel Grid.Row="3" Name="Legend" />
 	</Grid>

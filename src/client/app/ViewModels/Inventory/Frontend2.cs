@@ -24,14 +24,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			OnCloseDisposable.Add(SearchBehavior = new SearchBehavior(Env));
 			SearchBehavior.ActiveSearchTerm.Where(x => !String.IsNullOrEmpty(x))
 				.Subscribe(x => Coroutine.BeginExecute(Enter().GetEnumerator()));
-			UnPackStoks = new Dictionary<Stock, Stock>();
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
 		public InlineEditWarning Warning { get; set; }
-		public Dictionary<Stock, Stock> UnPackStoks { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -58,7 +56,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Clear()
 		{
 			Lines.Clear();
-			UnPackStoks.Clear();
 		}
 
 		// Закрыть чек Enter
@@ -80,19 +77,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
 					Lines.Each(x => x.Doc = check);
-
-					if (UnPackStoks.Count > 0)
+					if (Lines.Where(x => x.SourceStock != null).Count() > 0)
 					{
 						UnpackingDoc UnPackDoc = new UnpackingDoc(Address, User);
-						foreach (KeyValuePair<Stock, Stock> k in UnPackStoks)
+						foreach (var line in check.Lines)
 						{
-							var uline = new UnpackingLine(k.Value, k.Key);
-							UnPackDoc.Lines.Add(uline);
+							if (line.SourceStock != null)
+							{
+								var uline = new UnpackingLine(line.SourceStock, line.Stock);
+								UnPackDoc.Lines.Add(uline);
+							}
 						}
 						UnPackDoc.UpdateStat();
 						UnPackDoc.Post();
-						Session.Save(UnPackDoc);
-						Session.Flush();
+						foreach (var uline in UnPackDoc.Lines)
+						{
+							s.Insert(uline.DstStock);
+							s.Update(uline.SrcStock);
+							s.Insert(uline);
+						}
+						s.Insert(UnPackDoc);
 					}
 					foreach (var line in check.Lines) {
 						var stock = s.Get<Stock>(line.Stock.Id);
@@ -114,7 +118,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		private void Reset()
 		{
 			Lines.Clear();
-			UnPackStoks.Clear();
 		}
 
 		public IEnumerable<IResult> Enter()
@@ -203,10 +206,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Committed()
 		{
 			if (CurrentLine.Value?.Quantity == 0)
-			{
-				UnPackStoks.Remove(CurrentLine.Value.Stock);
 				Lines.Remove(CurrentLine.Value);
-			}
 		}
 
 		// Распаковка Ctrl+U
@@ -217,14 +217,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 				yield break;
 
-			var inputQuantity = new InputQuantity((OrderedStock)srcStock);
+			var inputQuantity = new InputQuantity(srcStock);
 			yield return new DialogResult(inputQuantity, resizable: false);
 			if (!inputQuantity.WasCancelled)
 			{
 				Lines.Remove(CurrentLine.Value);
 
-				var line = new CheckLine(inputQuantity.DstStock, inputQuantity.DstStock.Value.Ordered.Value);
-				UnPackStoks.Add(inputQuantity.DstStock, srcStock);
+				var line = new CheckLine(inputQuantity.DstStock, inputQuantity.SrcStock, inputQuantity.DstStock.Value.Ordered.Value);
 				Lines.Add(line);
 				CurrentLine.Value = line;
 			}

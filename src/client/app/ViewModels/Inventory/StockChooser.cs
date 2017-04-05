@@ -14,31 +14,6 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class OrderedStock : Stock, IInlineEditable
-	{
-		private uint? _ordered;
-
-		public uint? Ordered
-		{
-			get { return _ordered; }
-			set
-			{
-				if (_ordered != value) {
-					_ordered = value;
-					OnPropertyChanged();
-					OnPropertyChanged(nameof(OrderedSum));
-				}
-			}
-		}
-
-		public decimal? OrderedSum => RetailCost * Ordered;
-
-		public uint Value
-		{
-			get { return Ordered.GetValueOrDefault(); }
-			set { Ordered = value > 0 ? (uint?)value : null; }
-		}
-	}
 
 	public class StockChooser : Screen, ICancelable, IEditor
 	{
