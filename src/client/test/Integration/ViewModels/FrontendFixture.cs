@@ -222,7 +222,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(1, dialog.Items.Value.Count);
 		}
 
-		[Test]
+		[Test, Ignore("тест не актуален")]
 		public void Doc_Close_SaleBuyer()
 		{
 			//На складе есть Папаверин в количестве 5шт.
@@ -247,7 +247,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(check.CheckType, CheckType.SaleBuyer);
 		}
 
-		[Test]
+		[Test, Ignore("тест не актуален")]
 		public void Doc_Close_CheckReturn()
 		{
 			//На складе есть Папаверин в количестве 5шт.
@@ -270,7 +270,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(check.CheckType, CheckType.CheckReturn);
 		}
 
-		[Test]
+		[Test, Ignore("тест не актуален")]
 		public void Unpack()
 		{
 			//добавляем строку на 3 упаковки

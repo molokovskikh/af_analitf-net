@@ -10,6 +10,7 @@ using Caliburn.Micro;
 using ReactiveUI;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -20,6 +21,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			DisplayName = "Регистрация продаж";
 			InitFields();
 			Lines = new ReactiveCollection<CheckLine>();
+			CheckLinesForReturn = new List<CheckLine>();
 			Warning = new InlineEditWarning(Scheduler, Manager);
 			OnCloseDisposable.Add(SearchBehavior = new SearchBehavior(Env));
 			SearchBehavior.ActiveSearchTerm.Where(x => !String.IsNullOrEmpty(x))
@@ -30,10 +32,23 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
 		public InlineEditWarning Warning { get; set; }
+		public NotifyValue<string> Status { get; set; }
+		public CheckType? checkType { get; set; }
+		private List<CheckLine> CheckLinesForReturn { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			Lines.Changed.Subscribe(_ => {
+				if (Lines.Count > 0)
+					Status.Value = (checkType == CheckType.SaleBuyer ? "Открыт чек продажи" : "Открыт возврат по чеку");
+				else
+				{
+					Status.Value = "";
+					CheckLinesForReturn.Clear();
+					checkType = null;
+				}
+			});
 
 			var lines = Shell.SessionContext.GetValueOrDefault(GetType().Name + "." + nameof(Lines)) as ReactiveCollection<CheckLine>;
 			if (lines != null) {
@@ -67,7 +82,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			var checkout = new Checkout(Lines.Sum(x => x.RetailSum));
 			yield return new DialogResult(checkout);
-			var check = new Check(User, Address, Lines, CheckType.SaleBuyer);
+			var check = new Check(User, Address, Lines, (CheckType)checkType);
 			check.Charge = checkout.Change.Value.GetValueOrDefault();
 			check.Payment = checkout.Amount.Value.GetValueOrDefault();
 			check.PaymentByCard = checkout.CardAmount.Value.GetValueOrDefault();
@@ -100,7 +115,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					}
 					foreach (var line in check.Lines) {
 						var stock = s.Get<Stock>(line.Stock.Id);
-						s.Insert(line.UpdateStock(stock));
+						s.Insert(line.UpdateStock(stock, (CheckType)checkType));
 						s.Insert(line);
 						s.Update(stock);
 					}
@@ -126,6 +141,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (String.IsNullOrEmpty(inputValue))
 				yield break;
 
+			if (checkType == CheckType.CheckReturn)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"При открытом документе возврат, подбор не возможен"));
+				yield break;
+			}
 			SearchBehavior.ActiveSearchTerm.Value = null;
 			if (inputValue.Length > 8 && inputValue.All(x => char.IsDigit(x))) {
 				foreach (var result in BarcodeScanned(inputValue)) {
@@ -146,6 +166,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void UpdateOrAddStock(OrderedStock item)
 		{
+			if (checkType == null)
+				checkType = CheckType.SaleBuyer;
 			var exists = Lines.FirstOrDefault(x => x.Stock.Id == item.Id);
 			if (exists != null) {
 				exists.Quantity = item.Ordered.Value;
@@ -159,6 +181,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void AddStock(Stock item)
 		{
+			if (checkType == null)
+				checkType = CheckType.SaleBuyer;
 			var exists = Lines.FirstOrDefault(x => x.Stock.Id == item.Id);
 			if (exists != null) {
 				exists.Quantity = 1;
@@ -172,6 +196,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> BarcodeScanned(string barcode)
 		{
+			if (checkType == CheckType.CheckReturn)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"При открытом документе возврат, сканирование не возможено"));
+				yield break;
+			}
 			var line = Lines.FirstOrDefault(x => x.Barcode == barcode && !x.Confirmed);
 			if (line != null) {
 				line.ConfirmedQuantity++;
@@ -196,10 +225,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Updated()
 		{
-			var stockQuantity = CurrentLine.Value.Stock.Quantity;
-			if (CurrentLine.Value.Quantity > stockQuantity) {
-				Warning.Show(Common.Tools.Message.Warning($"Заказ превышает остаток на складе, товар будет заказан в количестве {stockQuantity}"));
-				CurrentLine.Value.Quantity = stockQuantity;
+			if (checkType == CheckType.SaleBuyer)
+			{
+				var stockQuantity = CurrentLine.Value.Stock.Quantity;
+				if (CurrentLine.Value.Quantity > stockQuantity)
+				{
+					Warning.Show(Common.Tools.Message.Warning(
+						$"Заказ превышает остаток на складе, товар будет заказан в количестве {stockQuantity}"));
+					CurrentLine.Value.Quantity = stockQuantity;
+				}
+			}
+			if (checkType == CheckType.CheckReturn)
+			{
+				var stockQuantity = CheckLinesForReturn
+					.Where(x => x.Stock.Id == CurrentLine.Value.Stock.Id)
+					.First().Quantity;
+				if (CurrentLine.Value.Quantity > stockQuantity)
+				{
+					Warning.Show(Common.Tools.Message.Warning(
+						$"Количество возврата превышает проданное, товар будет возвращен в количестве {stockQuantity}"));
+					CurrentLine.Value.Quantity = stockQuantity;
+				}
 			}
 		}
 
@@ -226,6 +272,37 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				var line = new CheckLine(inputQuantity.DstStock, inputQuantity.SrcStock, inputQuantity.DstStock.Value.Ordered.Value);
 				Lines.Add(line);
 				CurrentLine.Value = line;
+			}
+		}
+
+		public IEnumerable<IResult> ReturnCheck()
+		{
+			if (checkType == CheckType.SaleBuyer)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"При открытом документе продажи, возврат не возможен"));
+				yield break;
+			}
+			var Checks = new Checks(true);
+			yield return new DialogResult(Checks, resizable: true);
+			if (!Checks.DialogCancelled && Checks.CurrentItem != null)
+			{
+				if (((Check)Checks.CurrentItem).CheckType == CheckType.CheckReturn)
+				{
+					Warning.Show(Common.Tools.Message.Warning($"По документу возврат, возврат не возможен"));
+					yield break;
+				}
+				checkType = CheckType.CheckReturn;
+				CheckLinesForReturn = Session.Query<CheckLine>()
+					.Where(x => x.CheckId == ((Check)Checks.CurrentItem).Id)
+					.Fetch(x => x.Stock)
+					.ToList();
+
+				foreach (var line in CheckLinesForReturn)
+				{
+					var checkLine = new CheckLine(line.Stock, (uint)line.Quantity, CheckType.CheckReturn);
+					Lines.Add(checkLine);
+					CurrentLine.Value = checkLine;
+				}
 			}
 		}
 	}

@@ -54,8 +54,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 	public class Checks : BaseScreen2, IPrintable
 	{
+
 		public Checks()
 		{
+			Dialog = false;
+			DialogCancelled = true;
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
 			ChangeDate.Value = DateTime.Today;
@@ -76,6 +79,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			});
 		}
 
+		public Checks(bool dialog):this()
+		{
+			Dialog = dialog;
+			DialogCancelled = true;
+		}
+
 		public List<ChecksStat> Stat { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
@@ -85,6 +94,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<List<Check>> Items { get; set; }
 		public NotifyValue<Check> CurrentItem { get; set; }
 		public AddressSelector AddressSelector { get; set; }
+		public bool Dialog { get; set; }
+		public bool DialogCancelled { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -126,9 +137,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void EnterItem()
 		{
-			if (CurrentItem.Value == null)
-				return;
-			Shell.Navigate(new CheckDetails(CurrentItem.Value.Id));
+			if (Dialog)
+			{
+				if (CurrentItem.Value == null)
+					return;
+				DialogCancelled = false;
+				TryClose();
+			}
+			else
+			{
+				if (CurrentItem.Value == null)
+					return;
+				Shell.Navigate(new CheckDetails(CurrentItem.Value.Id));
+			}
 		}
 
 		protected override void OnDeactivate(bool close)

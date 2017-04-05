@@ -30,10 +30,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 			if (checkType == CheckType.SaleBuyer && stock.Quantity < quantity)
 				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Quantity}");
 			Stock = stock;
-			if (checkType == CheckType.SaleBuyer)
-				Stock.Quantity -= quantity;
-			else if (checkType == CheckType.CheckReturn)
-				Stock.Quantity += quantity;
+			//if (checkType == CheckType.SaleBuyer)
+			//	Stock.Quantity -= quantity;
+			//else if (checkType == CheckType.CheckReturn)
+			//	Stock.Quantity += quantity;
 			CopyFromStock(stock);
 			Quantity = quantity;
 		}
@@ -113,7 +113,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual bool Other { get; set; }
 		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
 
-		[Ignore]
 		public virtual Stock Stock { get; set; }
 
 		[Ignore]
@@ -167,10 +166,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Ignore, Style(Description = "Не подтверждена")]
 		public virtual bool NotConfirmed => ConfirmedQuantity != Quantity;
 
-		public virtual StockAction UpdateStock(Stock stock)
+		public virtual StockAction UpdateStock(Stock stock, CheckType checkType)
 		{
-			stock.Quantity -= Quantity;
-			return new StockAction(ActionType.Sale, ActionTypeChange.Minus, stock, Doc, Quantity, DiscontSum);
+			if (checkType == CheckType.SaleBuyer)
+			{
+				stock.Quantity -= Quantity;
+				return new StockAction(ActionType.Sale, ActionTypeChange.Minus, stock, Doc, Quantity, DiscontSum);
+			}
+			else
+			{
+				stock.Quantity += Quantity;
+				return new StockAction(ActionType.CheckReturn, ActionTypeChange.Plus, stock, Doc, Quantity, DiscontSum);
+			}
 		}
 	}
 }

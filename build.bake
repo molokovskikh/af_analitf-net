@@ -45,6 +45,8 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 
 	user = ReadUserConfig("User")
 	password = ReadUserConfig("Password")
+	unless String.IsNullOrEmpty(user):
+		user = "analit\\" + user
 	if String.IsNullOrEmpty(user) or String.IsNullOrEmpty(password):
 		user, password = AskCredentials("user for $hostsArg:")
 	psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
@@ -416,46 +418,47 @@ task "test:binary":
 	try:
 		testId = "26307"
 		testPassword = "TkGJEQUX"
-		unless Globals.Maybe.CheckUrl:
+		if Globals.Maybe.testRelease:
+			unless Globals.Maybe.CheckUrl:
+				proj = "src/service/app/app.csproj"
+				name, output, _ = GetBuildConfig(Globals, proj)
+				bin = FileSet("**/$name.dll", BaseDirectory: output).First()
+				assembly = AssemblyDefinition.ReadAssembly(bin)
+				version = assembly.Name.Version.ToString()
+				Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
 			proj = "src/service/app/app.csproj"
 			name, output, _ = GetBuildConfig(Globals, proj)
+
 			bin = FileSet("**/$name.dll", BaseDirectory: output).First()
 			assembly = AssemblyDefinition.ReadAssembly(bin)
 			version = assembly.Name.Version.ToString()
-			Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
-		proj = "src/service/app/app.csproj"
-		name, output, _ = GetBuildConfig(Globals, proj)
-
-		bin = FileSet("**/$name.dll", BaseDirectory: output).First()
-		assembly = AssemblyDefinition.ReadAssembly(bin)
-		version = assembly.Name.Version.ToString()
-		done = false
-		count = 0
-		while not done:
-			try:
-				count++
-				if count > 20:
-					raise "Не удалось дождаться версии $version"
-				using client = WebClient():
-					client.Credentials = NetworkCredential(testId, testPassword)
-					serviceVersion = client.DownloadString(Globals.CheckUrl)
-					done = serviceVersion == version
-				unless done:
-					print "Для сервиса ${Global.CheckUrl} ожидаю версию $version получил $serviceVersion"
-					print "Жду обновления"
+			done = false
+			count = 0
+			while not done:
+				try:
+					count++
+					if count > 20:
+						raise "Не удалось дождаться версии $version"
+					using client = WebClient():
+						client.Credentials = NetworkCredential(testId, testPassword)
+						serviceVersion = client.DownloadString(Globals.CheckUrl)
+						done = serviceVersion == version
+					unless done:
+						print "Для сервиса ${Global.CheckUrl} ожидаю версию $version получил $serviceVersion"
+						print "Жду обновления"
+						Thread.Sleep(1000)
+				except e:
+					if count > 20:
+						raise
+					print "Жду обновления ${Globals.CheckUrl}"
+					print e.Message
 					Thread.Sleep(1000)
-			except e:
-				if count > 20:
-					raise
-				print "Жду обновления ${Globals.CheckUrl}"
-				print e.Message
-				Thread.Sleep(1000)
-		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
+			Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 
-		target = Path.GetFullPath("./src/client/test.release/test.release.csproj")
-		projectFile = GetProjects("assets/full.sln").First({x| String.Equals(x, target, StringComparison.OrdinalIgnoreCase)})
-		BuildCore(Globals, projectFile, {})
-		TestProject(projectFile, CheckExitCode: true).Test("--stoponerror --verbose --full --test test.release.AppFixture")
+			target = Path.GetFullPath("./src/client/test.release/test.release.csproj")
+			projectFile = GetProjects("assets/full.sln").First({x| String.Equals(x, target, StringComparison.OrdinalIgnoreCase)})
+			BuildCore(Globals, projectFile, {})
+			TestProject(projectFile, CheckExitCode: true).Test("--stoponerror --verbose --full --test test.release.AppFixture")
 
 		targetChannel = Configuration.Maybe.targetChannel or "beta"
 		CopyUpdateBin(targetChannel, "output/updater/")
@@ -504,7 +507,8 @@ task "deploy:announce":
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	client.UploadString("$url/issues.json", content)
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
-	Cp(setupBin, Globals.FtpRoot, true)
+	ImpersonateIfNeeded(Globals):
+		Cp(setupBin, Globals.FtpRoot, true)
 
 desc """
 делает текущий релиз релизом по умолчанию - отправляет обновление всем клиента

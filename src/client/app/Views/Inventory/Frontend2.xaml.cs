@@ -35,6 +35,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 				{
 					Execute(Model.Unpack());
 				}
+				if (args.Key == Key.F4)
+				{
+					Execute(Model.ReturnCheck());
+				}
 			};
 
 			DataContextChanged += (sender, args) => {

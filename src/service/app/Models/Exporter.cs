@@ -390,7 +390,7 @@ select u.Id,
 	rcs.AllowDelayOfPayment as IsDelayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
-	?lastSync as LastSync,
+	convert_tz(?lastSync, @@session.time_zone,'+00:00') as LastSync,
 	rcs.SaveOrders,
 	case
 		when uup.MessageShowCount > 0 then uup.Message
@@ -1793,7 +1793,7 @@ from Inventory.StockedWaybills s
 	join Logs.DocumentSendLogs l on l.DocumentId = s.DownloadId
 where s.Timestamp > ?lastSync
 	and l.UserId = ?userId
-	and s.UserId <> ?userId";
+	and not s.UserId <=> ?userId";
 				Export(Result, sql, "UpdatedWaybills", truncate: true,
 					parameters: new { userId = user.Id, lastSync = data.LastUpdateAt });
 
@@ -1822,7 +1822,7 @@ select Id as ServerId,
 	PaymentByCard
 from Inventory.Checks c
 where c.Timestamp > ?lastSync
-	and c.UserId <> ?userId
+	and not c.UserId <=> ?userId
 	and c.AddressId in {addressIds}";
 				Export(Result, sql, "Checks",
 					truncate: false,
@@ -1866,11 +1866,12 @@ select l.CheckId as ServerDocId,
 	l.SupplyQuantity,
 	l.Exp,
 	l.Period,
- 	l.DocId
+ 	l.DocId,
+	l.StockId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync
-	and c.UserId <> ?userId
+	and not c.UserId <=> ?userId
 	and c.AddressId in {addressIds}";
 				Export(Result, sql, "CheckLines",
 					truncate: false,
@@ -1890,7 +1891,7 @@ select Id as ServerId,
 	Error
 from Inventory.DisplacementDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "DisplacementDocs",
 					truncate: false,
@@ -1926,7 +1927,7 @@ select l.WaybillLineId,
 from Inventory.DisplacementLines l
 	join Inventory.DisplacementDocs d on d.Id = l.DisplacementDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "DisplacementLines",
 					truncate: false,
@@ -1946,7 +1947,7 @@ select Id as ServerId,
 	Comment
 from Inventory.InventoryDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "InventoryDocs",
 					truncate: false,
@@ -1982,7 +1983,7 @@ select l.Quantity,
 from Inventory.InventoryLines l
 	join Inventory.InventoryDocs d on d.Id = l.InventoryDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "InventoryLines",
 					truncate: false,
@@ -2004,7 +2005,7 @@ select Id as ServerId,
 	Error
 from Inventory.ReassessmentDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReassessmentDocs",
 					truncate: false,
@@ -2041,7 +2042,7 @@ select l.Exp,
 from Inventory.ReassessmentLines l
 	join Inventory.ReassessmentDocs d on d.Id = l.ReassessmentDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReassessmentLines",
 					truncate: false,
@@ -2063,7 +2064,7 @@ select Id as ServerId,
 	Error
 from Inventory.ReturnDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReturnDocs",
 					truncate: false,
@@ -2098,7 +2099,7 @@ select l.WaybillLineId,
 from Inventory.ReturnLines l
 	join Inventory.ReturnDocs d on d.Id = l.ReturnDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "ReturnLines",
 					truncate: false,
@@ -2117,7 +2118,7 @@ select Id as ServerId,
 	LinesCount
 from Inventory.UnpackingDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "UnpackingDocs",
 					truncate: false,
@@ -2154,7 +2155,7 @@ select l.Quantity,
 from Inventory.UnpackingLines l
 	join Inventory.UnpackingDocs d on d.Id = l.UnpackingDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "UnpackingLines",
 					truncate: false,
@@ -2176,7 +2177,7 @@ select Id as ServerId,
 	Error
 from Inventory.WriteoffDocs d
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "WriteoffDocs",
 					truncate: false,
@@ -2211,7 +2212,7 @@ select l.WaybillLineId,
 from Inventory.WriteoffLines l
 	join Inventory.WriteoffDocs d on d.Id = l.WriteoffDocId
 where d.Timestamp > ?lastSync
-	and d.UserId <> ?userId
+	and not d.UserId <=> ?userId
 	and d.AddressId in {addressIds}";
 				Export(Result, sql, "WriteoffLines",
 					truncate: false,
