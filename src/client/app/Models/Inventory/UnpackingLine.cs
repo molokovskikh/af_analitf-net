@@ -35,7 +35,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public UnpackingLine(Stock srcStock, Stock dstStock)
 		{
 			DstStock = dstStock;
-
 			SrcQuantity = 1;
 			SrcRetailCost = srcStock.RetailCost;
 			srcStock.Reserve(1);

@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SrcStock.Value = Session.Connection
 				.Query<OrderedStock>("select * from Stocks where Id = @Id", new { stock.Id })
 				.First();
+			SrcStock.Value.Address = stock.Address;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
 			WasCancelled = true;

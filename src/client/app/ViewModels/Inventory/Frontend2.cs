@@ -89,9 +89,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 			Env.Query(s => {
 				using (var trx = s.BeginTransaction()) {
-					s.Insert(check);
-					Lines.Each(x => x.CheckId = check.Id);
-					Lines.Each(x => x.Doc = check);
 					if (Lines.Where(x => x.SourceStock != null).Count() > 0)
 					{
 						UnpackingDoc UnPackDoc = new UnpackingDoc(Address, User);
@@ -113,6 +110,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						}
 						s.Insert(UnPackDoc);
 					}
+					s.Insert(check);
+					Lines.Each(x => x.CheckId = check.Id);
+					Lines.Each(x => x.Doc = check);
 					foreach (var line in check.Lines) {
 						var stock = s.Get<Stock>(line.Stock.Id);
 						s.Insert(line.UpdateStock(stock, (CheckType)checkType));
@@ -127,6 +127,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}).Wait();
 			Bus.SendMessage(nameof(Stock), "db");
 			Bus.SendMessage(nameof(Check), "db");
+			Bus.SendMessage(nameof(UnpackingDoc), "db");
 			Reset();
 		}
 
@@ -258,17 +259,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		// Распаковка Ctrl+U
 		public IEnumerable<IResult> Unpack()
 		{
+			if (checkType == CheckType.CheckReturn)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"Распаковка при возврате не возможена"));
+				yield break;
+			}
 			var srcStock = CurrentLine.Value.Stock;
+			if (srcStock == null)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"Не определен товар для распаковки"));
+				yield break;
+			}
 			if (srcStock.Unpacked)
-
 				yield break;
 
-			var inputQuantity = new InputQuantity(srcStock);
+			var inputQuantity = new InputQuantity((OrderedStock)srcStock);
 			yield return new DialogResult(inputQuantity, resizable: false);
 			if (!inputQuantity.WasCancelled)
 			{
 				Lines.Remove(CurrentLine.Value);
-
+				checkType = CheckType.SaleBuyer;
 				var line = new CheckLine(inputQuantity.DstStock, inputQuantity.SrcStock, inputQuantity.DstStock.Value.Ordered.Value);
 				Lines.Add(line);
 				CurrentLine.Value = line;
