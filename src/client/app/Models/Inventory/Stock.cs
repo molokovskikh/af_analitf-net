@@ -2,6 +2,7 @@
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
+using System.Diagnostics;
 using AnalitF.Net.Client.Config.NHibernate;
 using Common.Tools;
 using NHibernate;
@@ -75,6 +76,20 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public Stock()
 		{
 			DocumentDate = DateTime.Now;
+		}
+
+		public Stock(ISession session, Product product, Address address, StockStatus status, decimal? retailCost = null)
+		{
+			Product = session.Load<Catalog>(product.CatalogId).FullName;
+			Address = address;
+			ProductId = product.Id;
+			CatalogId = product.CatalogId;
+			Status = status;
+			if (status == StockStatus.Available)
+				Debug.Assert(retailCost != null);
+			RetailCost = retailCost;
+			Quantity = 1;
+			SupplyQuantity = 1;
 		}
 
 		public Stock(Waybill waybill, WaybillLine line, ISession session)

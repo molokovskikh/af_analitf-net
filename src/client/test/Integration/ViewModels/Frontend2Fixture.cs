@@ -43,53 +43,47 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			};
 			stateless.Insert(stock);
 
-			var stockForList = new Stock()
+			var product1 = GetProduct("АЦЕТИЛСАЛИЦИЛОВАЯ КИСЛОТА табл. 0.5 г N10");
+			var stockForList = new Stock(session, product1, address, StockStatus.Available, 133)
 			{
-				Product = "Аспирин 1",
-				Status = StockStatus.Available,
-				Address = address,
-				RetailCost = 133,
 				Quantity = 5,
-				ReservedQuantity = 0,
 				Barcode = "4605635002748",
-				ProductId = 3,
 				Exp = SystemTime.Now()
 			};
 			stateless.Insert(stockForList);
 
-			stockForList = new Stock()
+			var product2 = GetProduct("АЦЕТИЛСАЛИЦИЛОВАЯ КИСЛОТА табл. 0.5г N20");
+			stockForList = new Stock(session, product2, address, StockStatus.Available, 132)
 			{
-				Product = "Аспирин 2",
-				Status = StockStatus.Available,
-				Address = address,
-				RetailCost = 132,
 				Quantity = 5,
-				ReservedQuantity = 0,
 				Barcode = "4605635002748",
-				ProductId = 2,
 				Exp = SystemTime.Now()
 			};
 			stateless.Insert(stockForList);
 
+			var products = new [] {
+				GetProduct("АСПИРИН БАЙЕР табл. 100мг N20"),
+				GetProduct("АСПИРИН БАЙЕР табл. 500 мг N10"),
+				GetProduct("АСПИРИН БАЙЕР табл. 500 мг N10"),
+			};
 			for (int i = 0; i < 3; i++)
 			{
-				stockForList = new Stock()
+				stockForList = new Stock(session, products[i], address, StockStatus.Available, 132)
 				{
-					Exp = SystemTime.Now().AddDays(-i),
-					Product = $"Аспирин 0{i}",
-					Status = StockStatus.Available,
 					Address = address,
-					RetailCost = 132,
 					Quantity = 2 + i,
-					ReservedQuantity = 0,
-					Barcode = "4030855000890",
-					ProductId = Convert.ToUInt32(4 + (i == 1 ? 0 : i)) //нужен один повтор
 				};
 				stateless.Insert(stockForList);
 			}
 
 			session.DeleteEach<Check>();
 			session.Flush();
+		}
+
+		private Product GetProduct(string name)
+		{
+			var catalog = session.Query<Catalog>().First(x => x.FullName == name);
+			return session.Query<Product>().First(x => x.CatalogId == catalog.Id);
 		}
 
 		[Test]
@@ -149,14 +143,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			dialogchecks.CurrentItem.Value = check;
 			dialogchecks.DialogCancelled = false;
 			resultreturn.MoveNext();
-			//dialogchecks = ((Checks)((DialogResult)result.Current).Model);
-
 
 			result = model.Close().GetEnumerator();
 
 			result.MoveNext();
 			dialog = ((Checkout)((DialogResult)result.Current).Model);
-			
+
 
 			dialog.Amount.Value = 10;
 			result.MoveNext();
@@ -164,6 +156,22 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Clear();
 			var returnstock = session.Query<Stock>().Where(x => x.Id == stock.Id).First();
 			Assert.AreEqual(returnstock.Quantity, 5);
+		}
+
+		[Test]
+		public void Sell_only_available_stock()
+		{
+			var product = GetProduct("АСПИРИН-С БАЙЕР табл. шип. N10");
+			var transitStock = new Stock(session, product, address, StockStatus.InTransit);
+			stateless.Insert(transitStock);
+			CatalogChooser dialog = null;
+			manager.DialogOpened.Subscribe(x => {
+				dialog = (CatalogChooser)x;
+				scheduler.Start();
+			});
+			model.SearchBehavior.ActiveSearchTerm.Value = "АСП";
+			Assert.That(dialog.Items.Value.Count, Is.GreaterThan(0));
+			Assert.That(dialog.Items.Value.Select(x => x.CatalogId), Does.Not.Contains(product.CatalogId));
 		}
 	}
 }
