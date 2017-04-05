@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model = Open(new Frontend2());
 		}
 
-		[Test]
+		[Test, Ignore("тест недоработан")]
 		public void Unpack()
 		{
 			stock = new OrderedStock()
@@ -48,13 +48,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				CatalogId = 1,
 				Exp = SystemTime.Now()
 			};
-			session.Save(stock);
+			session.Save("AnalitF.Net.Client.Models.Inventory.Stock", stock);
 			session.Flush();
 			//добавляем строку на 3 упаковки
 			var line = new CheckLine(stock, 3, CheckType.SaleBuyer);
 			model.Lines.Add(line);
 			model.CurrentLine.Value = line;
-			//Assert.AreEqual(stock.Quantity, 7);
+			Assert.AreEqual(stock.Quantity, 7);
 
 			var result = model.Unpack().GetEnumerator();
 			result.MoveNext();

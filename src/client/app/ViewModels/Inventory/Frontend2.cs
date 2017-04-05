@@ -104,8 +104,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						UnPackDoc.Post();
 						foreach (var uline in UnPackDoc.Lines)
 						{
-							s.Insert(uline.DstStock);
-							s.Update(uline.SrcStock);
+							s.Insert("AnalitF.Net.Client.Models.Inventory.Stock", uline.DstStock);
+							s.Update("AnalitF.Net.Client.Models.Inventory.Stock", uline.SrcStock);
 							s.Insert(uline);
 						}
 						s.Insert(UnPackDoc);

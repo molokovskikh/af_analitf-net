@@ -11,10 +11,41 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Dapper;
 using NHibernate.Linq;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
+	public class OrderedStock : Stock, IInlineEditable
+	{
+		private uint? _ordered;
 
+		[Ignore]
+		public virtual uint? Ordered
+		{
+			get { return _ordered; }
+
+			set
+			{
+				if (_ordered != value)
+				{
+					_ordered = value;
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(OrderedSum));
+				}
+			}
+		}
+
+		[Ignore]
+		public virtual decimal? OrderedSum => RetailCost * Ordered;
+
+		[Ignore]
+		public virtual uint Value
+		{
+			get { return Ordered.GetValueOrDefault(); }
+			set { Ordered = value > 0 ? (uint?)value : null; }
+		}
+	}
+	  
 	public class StockChooser : Screen, ICancelable, IEditor
 	{
 		public StockChooser(uint catalogId, IList<CheckLine> lines, Address address)
