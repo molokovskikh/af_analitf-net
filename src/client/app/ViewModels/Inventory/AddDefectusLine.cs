@@ -19,12 +19,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Threshold	= 0,
 				OrderQuantity = 0,
 			};
-
-			CurrentCatalog = new NotifyValue<Product>();
-			CatalogTerm = new NotifyValue<string>();
-
-			ProducerTerm = new NotifyValue<string>();
-			CurrentProducer = new NotifyValue<Producer>();
 			WasCancelled = true;
 		}
 

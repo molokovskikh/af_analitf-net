@@ -27,7 +27,7 @@
 			IsEditable="True"
 			x:Name="CatalogProducts"
 			Width="300"
-			DisplayMemberPath="FullName">
+			DisplayMemberPath="Name">
 			<ComboBox.ItemsPanel>
 				<ItemsPanelTemplate>
 					<VirtualizingStackPanel />

@@ -43,12 +43,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void OK()
 		{
-			if (EditMode == Mode.EditQuantity || EditMode == Mode.EditRetailCostAndQuantity) {
-				if (Stock.Quantity <= 0) {
-					Manager.Error("Поле 'Количество' должно быть заполнено");
-					return;
-				}
-			}
+			if (!IsValide(Stock))
+				return;
 			WasCancelled = false;
 			TryClose();
 		}

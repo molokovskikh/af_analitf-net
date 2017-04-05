@@ -2,22 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
-using NHibernate;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class AddStockFromCatalog : BaseScreen, ICancelable
+	public class AddStockFromCatalog : BaseScreen2, ICancelable
 	{
-
-		private Producer emptyProducer = new Producer(Consts.AllProducerLabel);
-		private ISession _session;
-
-		public AddStockFromCatalog(ISession session, Address address)
+		public AddStockFromCatalog(Address address)
 		{
 			DisplayName = "Добавление из каталога";
 			Item = new Stock() {
@@ -27,20 +22,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				SupplyQuantity = 1,
 				Address=address
 			};
-
-			CurrentCatalog = new NotifyValue<Catalog>();
-			CatalogTerm = new NotifyValue<string>();
-
-			ProducerTerm = new NotifyValue<string>();
-			CurrentProducer = new NotifyValue<Producer>(emptyProducer);
 			WasCancelled = true;
-			_session = session;
 		}
 
 		public bool WasCancelled { get; private set; }
 		public Stock Item { get; set; }
-		public NotifyValue<List<Catalog>> Catalogs { get; set; }
-		public NotifyValue<Catalog> CurrentCatalog { get; set; }
+		public NotifyValue<List<Product>> Catalogs { get; set; }
+		public NotifyValue<Product> CurrentCatalog { get; set; }
 		public NotifyValue<string> CatalogTerm { get; set; }
 		public NotifyValue<bool> IsCatalogOpen { get; set; }
 
@@ -53,50 +41,54 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 
-			Catalogs = CatalogTerm
+			CatalogTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
-				.Select(t => RxQuery(s => {
-					// при threshold = 1 возвращается около 88 тыс строк на ввод "а"
+				.SelectMany(t => RxQuery(s => {
 					var threshold = 2;
 					if (String.IsNullOrEmpty(t) || t.Length < threshold)
-						return new List<Catalog>();
-					if (CurrentCatalog.Value != null && CurrentCatalog.Value.FullName == t) {
+						return new List<Product>();
+					if (CurrentCatalog.Value != null && CurrentCatalog.Value.Name == t)
+					{
 						return Catalogs.Value;
 					}
-					// union distinct работает с полностью одинаковыми строками, здесь они разные из-за поля Score
 					return s.CreateSQLQuery(@"
-(select {c.*}, 0 as Score
-from Catalogs c
-where c.Fullname like :term)
+(select {p.*}, 0 as Score
+from Products p
+where p.Name like :term)
 union
-(select {c.*}, 1 as Score
-from Catalogs c
-where c.Fullname like :fullterm and c.Fullname not like :term)
-order by Score, {c.FullName}")
-						.AddEntity("c", typeof(Catalog))
+(select {p.*}, 1 as Score
+from Products p
+where p.Name like :fullterm and p.Name not like :term)
+order by Score, {p.Name}")
+						.AddEntity("p", typeof(Product))
 						.SetParameter("term", t + "%")
 						.SetParameter("fullterm", "%" + t + "%")
-						.List<Catalog>()
+						.List<Product>()
 						.ToList();
 				}))
-				.Switch()
-				.ToValue(CloseCancellation);
-			IsCatalogOpen = Catalogs.Select(v => v != null && v.Count > 0).Where(v => v).ToValue();
+				.Subscribe(Catalogs, CloseCancellation.Token);
+
+			Catalogs.Subscribe(x => IsCatalogOpen.Value = x != null && x.Count > 0);
+
 			CurrentCatalog.Subscribe(v => {
-				Item.CatalogId =(v != null && v.Id > 0) ? v.Id : (uint?)null;
-				Item.Product = (v != null && v.Id > 0) ? v.FullName : string.Empty;
+				Item.ProductId = (v != null && v.Id > 0) ? v.Id : (uint?)null;
+				Item.CatalogId = (v != null && v.CatalogId > 0) ? v.CatalogId : (uint?)null;
+				Item.Product = (v != null && v.Id > 0) ? v.Name : string.Empty;
 			});
 
-			Producers = ProducerTerm
+
+			ProducerTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
-				.Select(t => RxQuery(s => {
+				.Do(t => {
 					if (String.IsNullOrEmpty(t))
-						return new List<Producer> {emptyProducer};
+						CurrentProducer.Value = null;
+				})
+				.SelectMany(t => RxQuery(s => {
+					if (String.IsNullOrEmpty(t))
+						return s.Query<Producer>().OrderBy(x => x.Name).ToList();
 					if (CurrentProducer.Value != null && CurrentProducer.Value.Name == t)
 						return Producers.Value;
-
-					CurrentProducer.Value = null;
-					var items = s.CreateSQLQuery(@"
+					return s.CreateSQLQuery(@"
 (select {p.*}, 0 as Score
 from Producers p
 where p.Name like :term)
@@ -108,20 +100,26 @@ order by Score, {p.Name}")
 						.AddEntity("p", typeof(Producer))
 						.SetParameter("term", t + "%")
 						.SetParameter("fullterm", "%" + t + "%")
-						.List<Producer>();
-					return new[] {emptyProducer}.Concat(items).ToList();
+						.List<Producer>()
+						.ToList();
 				}))
-				.Switch()
-				.ToValue(CloseCancellation);
-			IsProducerOpen = Producers.Select(v => v != null && v.Count > 1).Where(v => v).ToValue();
+				.Subscribe(Producers, CloseCancellation.Token);
+
+			Producers.Subscribe(x => IsProducerOpen.Value = x != null && x.Count > 0);
+
 			CurrentProducer.Subscribe(v => {
 				Item.Producer = (v != null && v.Id > 0) ? v.Name : string.Empty;
-				Item.ProducerId=(v != null && v.Id > 0) ? v.Id : (uint?)null;
+				Item.ProducerId = (v != null && v.Id > 0) ? v.Id : (uint?)null;
 			});
 		}
 
 		public void OK()
 		{
+			var error = Item["Product"];
+			if (!string.IsNullOrEmpty(error)) {
+				Manager.Warning(error);
+				return;
+			}
 			WasCancelled = false;
 			TryClose();
 		}

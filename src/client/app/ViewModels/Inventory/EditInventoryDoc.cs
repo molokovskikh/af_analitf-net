@@ -103,7 +103,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> AddFromCatalog()
 		{
 			while (true) {
-				var search = new AddStockFromCatalog(Session, Address);
+				var search = new AddStockFromCatalog(Address);
 				yield return new DialogResult(search);
 				var edit = new EditStock(search.Item) {
 					EditMode = EditStock.Mode.EditAll
@@ -182,6 +182,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!Doc.Lines.Any()) {
 				Manager.Warning("Пустой документ не может быть проведен");
+				return;
+			}
+			if (Doc.Lines.Any(x => x.RetailSum <= 0)) {
+				Manager.Warning("Нельзя провести документ с остатками без розничной цены");
 				return;
 			}
 			Doc.Post();
