@@ -21,18 +21,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Items = new List<HelpItem> {
 				new HelpItem("F1", "Вызов справки"),
-				new HelpItem("F2", "Поиск по коду"),
-				new HelpItem("F3", "Поиск по штрих-коду"),
-				new HelpItem("F4", "Оплата/Возврат"),
-				new HelpItem("F5", "Сменить тип оплаты"),
-				new HelpItem("F6", "Поиск товара по наименованию"),
-				new HelpItem("F7", "Поиск товара по цене"),
-				new HelpItem("Esc", "Очистить поле количество"),
-				new HelpItem("Enter", "Закрыть"),
-				new HelpItem("* (NUM)", "Перенести содержимое поля ввода в поле количество"),
-				new HelpItem("Alt + Delete", "Отменить чек"),
-				new HelpItem("Ctrl + Q", "Редактирование количества"),
-				new HelpItem("Ctrl + R", "Распаковка"),
+				new HelpItem("F3", "Очистить"),
+				new HelpItem("F4", "Возврат"),
+				new HelpItem("F7", "Закрыть чек")
 			};
 			DisplayName = "Справка";
 		}

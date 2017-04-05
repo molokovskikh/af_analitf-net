@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
@@ -29,12 +30,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 select c.Id as CatalogId, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant
 from Catalogs c
 	join CatalogNames cn on cn.Id = c.NameId
-		join ( select CatalogId from Stocks where AddressId = @addressId and Quantity > 0 group by CatalogId ) s on s.CatalogId = c.Id
+		join (
+			select CatalogId
+			from Stocks
+			where AddressId = @addressId and Quantity > 0
+				and Status = @stockStatus
+				and RetailCost > 0
+			group by CatalogId
+		) s on s.CatalogId = c.Id
 where cn.Name like @term or c.Form like @term
 order by cn.Name, c.Form";
 					return s.Connection.Query<CatalogDisplayItem>(sql, new {
 						term = "%" + SearchBehavior.ActiveSearchTerm.Value + "%",
-						addressId = address.Id
+						addressId = address.Id,
+						stockStatus = StockStatus.Available
 					}).ToList();
 				}))
 				.Switch()
