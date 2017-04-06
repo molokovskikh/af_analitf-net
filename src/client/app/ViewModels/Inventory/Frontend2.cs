@@ -20,6 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			DisplayName = "Регистрация продаж";
 			InitFields();
+			Status.Value = "Готов к работе(F1 для справки)";
 			Lines = new ReactiveCollection<CheckLine>();
 			CheckLinesForReturn = new List<CheckLine>();
 			Warning = new InlineEditWarning(Scheduler, Manager);
@@ -44,7 +45,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					Status.Value = (checkType == CheckType.SaleBuyer ? "Открыт чек продажи" : "Открыт возврат по чеку");
 				else
 				{
-					Status.Value = "";
+					Status.Value = "Готов к работе(F1 для справки)";
 					CheckLinesForReturn.Clear();
 					checkType = null;
 				}
@@ -318,6 +319,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					CurrentLine.Value = checkLine;
 				}
 			}
+		}
+
+		// Вызов справки	F1
+		public IEnumerable<IResult> Help()
+		{
+			yield return new DialogResult(new Help());
 		}
 	}
 }
