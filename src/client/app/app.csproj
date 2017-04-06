@@ -300,6 +300,7 @@
     <Compile Include="Models\Inventory\DisplacementDoc.cs" />
     <Compile Include="Models\Inventory\InventoryLine.cs" />
     <Compile Include="Models\Inventory\ReassessmentLine.cs" />
+    <Compile Include="Models\Inventory\DefectusLine.cs" />
     <Compile Include="Models\Inventory\UnpackingDoc.cs" />
     <Compile Include="Models\Inventory\ReturnDoc.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
@@ -441,6 +442,7 @@
     <Compile Include="ViewModels\Dialogs\PrintSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Inventory\AddDefectusLine.cs" />
     <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
     <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
     <Compile Include="ViewModels\Inventory\Frontend2.cs" />
@@ -454,6 +456,7 @@
     <Compile Include="ViewModels\Inventory\CreateReassessmentDoc.cs" />
     <Compile Include="ViewModels\Inventory\CreateReturnToSupplier.cs" />
     <Compile Include="ViewModels\Inventory\CreateWriteoffDoc.cs" />
+    <Compile Include="ViewModels\Inventory\Defectus.cs" />
     <Compile Include="ViewModels\Inventory\Tags.cs" />
     <Compile Include="ViewModels\Inventory\GoodsMovement.cs" />
     <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
@@ -554,6 +557,9 @@
     </Compile>
     <Compile Include="Views\AddWaybillLineFromCatalog.xaml.cs">
       <DependentUpon>AddWaybillLineFromCatalog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\AddDefectusLine.xaml.cs">
+      <DependentUpon>AddDefectusLine.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\CatalogChooser.xaml.cs">
       <DependentUpon>CatalogChooser.xaml</DependentUpon>
@@ -685,6 +691,9 @@
     </Compile>
     <Compile Include="Views\Inventory\StockChooser.xaml.cs">
       <DependentUpon>StockChooser.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Defectus.xaml.cs">
+      <DependentUpon>Defectus.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Tags.xaml.cs">
       <DependentUpon>Tags.xaml</DependentUpon>
@@ -955,6 +964,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\AddDefectusLine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\Inventory\CatalogChooser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1086,6 +1099,10 @@
     <Page Include="Views\Inventory\StockChooser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Defectus.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\Tags.xaml">
       <Generator>MSBuild:Compile</Generator>

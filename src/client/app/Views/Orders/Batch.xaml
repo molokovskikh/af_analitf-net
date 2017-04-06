@@ -50,6 +50,7 @@
 			<Button Name="ShowCatalog" Style="{StaticResource FilterElement}">В каталог (F2)</Button>
 			<Button Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterElement}">Синонимы (Ctrl+N)</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="Upload">Загрузить</Button>
+			<Button Style="{StaticResource FilterElement}" x:Name="Defectus">Дефектура</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="UploadAndSaveUnordered">Загрузить с сохранением не заказанного</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="ReloadUnordered">Обработать не заказанное</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="Reload">Обработать с учетом лимитов</Button>

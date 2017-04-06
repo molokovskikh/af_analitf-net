@@ -10,23 +10,20 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class AddStockFromCatalog : BaseScreen2, ICancelable
+	public class AddDefectusLine : BaseScreen2, ICancelable
 	{
-		public AddStockFromCatalog(Address address)
+		public AddDefectusLine()
 		{
 			DisplayName = "Добавление из каталога";
-			Item = new Stock() {
-				Status = StockStatus.Available,
-				Quantity = 1,
-				ReservedQuantity = 0,
-				SupplyQuantity = 1,
-				Address=address
+			Item = new DefectusLine() {
+				Threshold	= 0,
+				OrderQuantity = 0,
 			};
 			WasCancelled = true;
 		}
 
 		public bool WasCancelled { get; private set; }
-		public Stock Item { get; set; }
+		public DefectusLine Item { get; set; }
 		public NotifyValue<List<Product>> Catalogs { get; set; }
 		public NotifyValue<Product> CurrentCatalog { get; set; }
 		public NotifyValue<string> CatalogTerm { get; set; }
@@ -47,8 +44,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					var threshold = 2;
 					if (String.IsNullOrEmpty(t) || t.Length < threshold)
 						return new List<Product>();
-					if (CurrentCatalog.Value != null && CurrentCatalog.Value.Name == t)
-					{
+					if (CurrentCatalog.Value != null && CurrentCatalog.Value.Name == t) {
 						return Catalogs.Value;
 					}
 					return s.CreateSQLQuery(@"
@@ -71,11 +67,10 @@ order by Score, {p.Name}")
 			Catalogs.Subscribe(x => IsCatalogOpen.Value = x != null && x.Count > 0);
 
 			CurrentCatalog.Subscribe(v => {
-				Item.ProductId = (v != null && v.Id > 0) ? v.Id : (uint?)null;
-				Item.CatalogId = (v != null && v.CatalogId > 0) ? v.CatalogId : (uint?)null;
+				Item.ProductId = (v != null && v.Id > 0) ? v.Id : 0;
+				Item.CatalogId = (v != null && v.CatalogId > 0) ? v.CatalogId : 0;
 				Item.Product = (v != null && v.Id > 0) ? v.Name : string.Empty;
 			});
-
 
 			ProducerTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
@@ -115,11 +110,6 @@ order by Score, {p.Name}")
 
 		public void OK()
 		{
-			var error = Item["Product"];
-			if (!string.IsNullOrEmpty(error)) {
-				Manager.Warning(error);
-				return;
-			}
 			WasCancelled = false;
 			TryClose();
 		}

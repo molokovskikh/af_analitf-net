@@ -141,6 +141,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Manager.Warning("Пустой документ не может быть проведен");
 				return;
 			}
+			if (doc.Lines.Any(x => x.RetailSum <= 0)) {
+				Manager.Warning("Нельзя провести документ с остатками без розничной цены");
+				return;
+			}
 			doc.Post();
 			Session.Update(doc);
 			Session.Flush();

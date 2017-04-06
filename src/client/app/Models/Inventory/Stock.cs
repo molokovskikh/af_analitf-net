@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Period { get; set; }
 	}
 
-	public class Stock : BaseStock
+	public class Stock : BaseStock, IDataErrorInfo2
 	{
 		private decimal? _retailCost;
 		private decimal? _retailMarkup;
@@ -555,6 +555,24 @@ namespace AnalitF.Net.Client.Models.Inventory
 			if (Id == 0)
 				return base.GetHashCode();
 			return Id.GetHashCode();
+		}
+
+		public virtual string[] FieldsForValidate => new[] { nameof(Product), nameof(Quantity), nameof(RetailCost) };
+
+		public virtual string Error { get; }
+
+		public virtual string this[string columnName]
+		{
+			get
+			{
+				if (columnName == nameof(Product) && (string.IsNullOrEmpty(Product) || !ProductId.HasValue || ProductId.Value <= 0 || !CatalogId.HasValue || CatalogId.Value <= 0))
+					return "Поле 'Наименование' должно быть заполнено";
+				if (columnName == nameof(Quantity) && Quantity <= 0)
+					return "Количество должно быть больше нуля";
+				if (columnName == nameof(RetailCost) && (!RetailCost.HasValue || RetailCost <= 0))
+					return "Розничная цена должна быть больше нуля";
+				return null;
+			}
 		}
 	}
 }

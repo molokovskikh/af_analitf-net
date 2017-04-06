@@ -247,7 +247,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				request.BatchItems = lines.Select(l => new BatchItem {
 					Code = l.Code,
 					CodeCr = l.CodeCr,
+					ProductId = l.ProductId,
+					CatalogId = l.CatalogId,
 					ProductName = l.ProductSynonym,
+					ProducerId = l.ProducerId,
 					ProducerName = l.ProducerSynonym,
 					Quantity = l.Quantity,
 					SupplierDeliveryId = l.SupplierDeliveryId,

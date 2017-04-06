@@ -973,15 +973,17 @@ where c.UpdateTime > ?lastSync";
 
 			if (cumulative) {
 				sql = @"
-select Id, CatalogId, Hidden
-from Catalogs.Products
-where Hidden = 0";
+select p.Id, p.CatalogId, p.Hidden, substr(concat_ws(' ', c.Name, p.Properties), 1, 255) as Name
+from Catalogs.Products p
+inner join Catalogs.Catalog c on c.Id = p.CatalogId
+where p.Hidden = 0";
 				CachedExport(Result, sql, "Products");
 			} else {
 				sql = @"
-select Id, CatalogId, Hidden
-from Catalogs.Products
-where Hidden = 0 and UpdateTime > ?lastSync";
+select p.Id, p.CatalogId, p.Hidden, substr(concat_ws(' ', c.Name, p.Properties), 1, 255) as Name
+from Catalogs.Products p
+inner join Catalogs.Catalog c on c.Id = p.CatalogId
+where p.Hidden = 0 and p.UpdateTime > ?lastSync";
 				Export(Result, sql, "Products", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 

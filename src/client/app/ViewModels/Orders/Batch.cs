@@ -389,6 +389,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			ReportLines.Recalculate();
 		}
 
+		public void Defectus()
+		{
+			Shell.NavigateRoot(new Inventory.Defectus());
+		}
+
 		public IEnumerable<IResult> Reload()
 		{
 			return Shell.Batch();
