@@ -31,6 +31,7 @@
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -38,9 +39,11 @@
 		
 		<StackPanel Orientation="Horizontal" Grid.Row="0">
 			<Button Focusable="False" Name="Clear" MinWidth="100" Padding="3">Очистить (F3)</Button>
-			<Label Grid.Row="0" Name="Status"  Style="{StaticResource Status}" />
+			<Button Focusable="False" MinWidth="100" Padding="3" Name="ReturnCheck">Возврат(F4)</Button>
+			<Button Focusable="False"  MinWidth="100" Padding="3" Name="Unpack">Распаковать (Ctrl+U)</Button>
 		</StackPanel>
-		<controls:DataGrid2 Grid.Row="1" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
+		<Label Grid.Row="1" Name="Status" Style="{StaticResource Status}" />
+		<controls:DataGrid2 Grid.Row="2" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Штрих-Код" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
@@ -54,19 +57,17 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 		<ContentControl Focusable="False" x:Name="Warning" Grid.Row="0" />
-		<Grid Grid.Row="2">
+		<Grid Grid.Row="3">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="3*" />
-				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 			<TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource Input}"
 				x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				caliburn:SearchBinder.Grid="Lines"/>
-			<Button Focusable="False" Grid.Column="1" Name="ReturnCheck">Возврат(F4)</Button>
-			<Button Focusable="False" Grid.Column="2" Name="Close">Закрыть чек (F7)</Button>
+			<Button Focusable="False" Grid.Column="1" Name="Close">Закрыть чек (F7)</Button>
 		</Grid>
-		<StackPanel Grid.Row="3" Name="Legend" />
+		<StackPanel Grid.Row="4" Name="Legend" />
 	</Grid>
 </UserControl>

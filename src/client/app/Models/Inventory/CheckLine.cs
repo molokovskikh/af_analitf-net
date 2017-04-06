@@ -48,6 +48,17 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 		}
 
+		public CheckLine(Stock stock, Stock sourceStock, uint quantity)
+		{
+			WaybillLineId = stock.WaybillLineId;
+			if (stock.Quantity < quantity)
+				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Quantity}");
+			Stock = stock;
+			SourceStock = sourceStock;
+			CopyFromStock(stock);
+			Quantity = quantity;
+		}
+
 		public virtual Check Doc { get; set; }
 
 		public virtual uint Id { get; set; }
@@ -103,6 +114,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
 
 		public virtual Stock Stock { get; set; }
+
+		[Ignore]
+		public virtual Stock SourceStock { get; set; }
 
 		public virtual void CopyToStock(Stock stock)
 		{
