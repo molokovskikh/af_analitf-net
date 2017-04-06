@@ -40,6 +40,7 @@
 		<StackPanel Orientation="Horizontal" Grid.Row="0">
 			<Button Focusable="False" Name="Clear" MinWidth="100" Padding="3">Очистить (F3)</Button>
 			<Button Focusable="False" MinWidth="100" Padding="3" Name="ReturnCheck">Возврат(F4)</Button>
+			<Button Focusable="False"  MinWidth="100" Padding="3" Name="Unpack">Распаковать (Ctrl+U)</Button>
 		</StackPanel>
 		<Label Grid.Row="1" Name="Status" Style="{StaticResource Status}" />
 		<controls:DataGrid2 Grid.Row="2" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
@@ -60,7 +61,6 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="3*" />
 				<ColumnDefinition Width="*" />
-
 			</Grid.ColumnDefinitions>
 			<TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource Input}"
 				x:Name="SearchText"

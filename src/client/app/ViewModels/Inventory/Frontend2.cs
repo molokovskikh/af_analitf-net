@@ -88,8 +88,33 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			check.Payment = checkout.Amount.Value.GetValueOrDefault();
 			check.PaymentByCard = checkout.CardAmount.Value.GetValueOrDefault();
 			var waybillSettings = Settings.Value.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
+			UnpackingDoc UnPackDoc = null;
+			if (Lines.Where(x => x.SourceStock != null).Count() > 0)
+			{
+				UnPackDoc = new UnpackingDoc(Address, User);
+				foreach (var line in check.Lines)
+				{
+					if (line.SourceStock != null)
+					{
+						var uline = new UnpackingLine(line.SourceStock, line.Stock);
+						UnPackDoc.Lines.Add(uline);
+					}
+				}
+				UnPackDoc.UpdateStat();
+				UnPackDoc.Post();
+			}
 			Env.Query(s => {
 				using (var trx = s.BeginTransaction()) {
+					if (Lines.Where(x => x.SourceStock != null).Count() > 0)
+					{
+						foreach (var uline in UnPackDoc.Lines)
+						{
+							s.Insert("AnalitF.Net.Client.Models.Inventory.Stock", uline.DstStock);
+							s.Update("AnalitF.Net.Client.Models.Inventory.Stock", uline.SrcStock);
+							s.Insert(uline);
+						}
+						s.Insert(UnPackDoc);
+					}
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);
 					Lines.Each(x => x.Doc = check);
@@ -107,6 +132,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}).Wait();
 			Bus.SendMessage(nameof(Stock), "db");
 			Bus.SendMessage(nameof(Check), "db");
+			Bus.SendMessage(nameof(UnpackingDoc), "db");
 			Reset();
 		}
 
@@ -235,6 +261,35 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Lines.Remove(CurrentLine.Value);
 		}
 
+		// Распаковка Ctrl+U
+		public IEnumerable<IResult> Unpack()
+		{
+			if (checkType == CheckType.CheckReturn)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"Распаковка при возврате не возможена"));
+				yield break;
+			}
+			var srcStock = CurrentLine.Value.Stock;
+			if (srcStock == null)
+			{
+				Warning.Show(Common.Tools.Message.Warning($"Не определен товар для распаковки"));
+				yield break;
+			}
+			if (srcStock.Unpacked)
+				yield break;
+
+			var inputQuantity = new InputQuantity((OrderedStock)srcStock);
+			yield return new DialogResult(inputQuantity, resizable: false);
+			if (!inputQuantity.WasCancelled)
+			{
+				Lines.Remove(CurrentLine.Value);
+				checkType = CheckType.SaleBuyer;
+				var line = new CheckLine(inputQuantity.DstStock, inputQuantity.SrcStock, inputQuantity.DstStock.Value.Ordered.Value);
+				Lines.Add(line);
+				CurrentLine.Value = line;
+			}
+		}
+
 		public IEnumerable<IResult> ReturnCheck()
 		{
 			if (checkType == CheckType.SaleBuyer)
@@ -264,8 +319,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					CurrentLine.Value = checkLine;
 				}
 			}
-
-
 		}
 
 		// Вызов справки	F1

@@ -11,6 +11,7 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Dapper;
 using NHibernate.Linq;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -18,12 +19,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		private uint? _ordered;
 
-		public uint? Ordered
+		[Ignore]
+		public virtual uint? Ordered
 		{
 			get { return _ordered; }
+
 			set
 			{
-				if (_ordered != value) {
+				if (_ordered != value)
+				{
 					_ordered = value;
 					OnPropertyChanged();
 					OnPropertyChanged(nameof(OrderedSum));
@@ -31,15 +35,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 		}
 
-		public decimal? OrderedSum => RetailCost * Ordered;
+		[Ignore]
+		public virtual decimal? OrderedSum => RetailCost * Ordered;
 
-		public uint Value
+		[Ignore]
+		public virtual uint Value
 		{
 			get { return Ordered.GetValueOrDefault(); }
 			set { Ordered = value > 0 ? (uint?)value : null; }
 		}
 	}
-
+	  
 	public class StockChooser : Screen, ICancelable, IEditor
 	{
 		public StockChooser(uint catalogId, IList<CheckLine> lines, Address address)
@@ -68,6 +74,7 @@ where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
 				foreach (var item in items) {
 					if (item.Exp != null)
 						item.Exp = item.Exp.Value.ToLocalTime();
+					item.Address = address;
 					item.Ordered = (uint?)lines.FirstOrDefault(x => x.Id == item.Id)?.Quantity;
 				}
 				return items;

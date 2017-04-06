@@ -444,6 +444,7 @@
     <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
     <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
     <Compile Include="ViewModels\Inventory\Frontend2.cs" />
+    <Compile Include="ViewModels\Inventory\InputQuantity.cs" />
     <Compile Include="ViewModels\Inventory\StockAssortmentViewModel.cs" />
     <Compile Include="ViewModels\Inventory\StockChooser.cs" />
     <Compile Include="ViewModels\Inventory\ShelfLife.cs" />
@@ -654,6 +655,9 @@
     </Compile>
     <Compile Include="Views\Inventory\ExpSelector.xaml.cs">
       <DependentUpon>ExpSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\InputQuantity.xaml.cs">
+      <DependentUpon>InputQuantity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ShelfLife.xaml.cs">
       <DependentUpon>ShelfLife.xaml</DependentUpon>
@@ -1040,6 +1044,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\ExpSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\InputQuantity.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

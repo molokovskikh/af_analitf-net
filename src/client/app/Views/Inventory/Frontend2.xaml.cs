@@ -35,6 +35,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 				if (args.Key == Key.F3) {
 					Model.Clear();
 				}
+				if (args.Key == Key.U && ((Keyboard.Modifiers & ModifierKeys.Control) != 0))
+				{
+					Execute(Model.Unpack());
+				}
 				if (args.Key == Key.F4)
 				{
 					Execute(Model.ReturnCheck());

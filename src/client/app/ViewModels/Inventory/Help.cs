@@ -23,6 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				new HelpItem("F1", "Вызов справки"),
 				new HelpItem("F3", "Очистить"),
 				new HelpItem("F4", "Возврат"),
+				new HelpItem("Ctrl+U", "РАспаковать"),
 				new HelpItem("F7", "Закрыть чек")
 			};
 			DisplayName = "Справка";
