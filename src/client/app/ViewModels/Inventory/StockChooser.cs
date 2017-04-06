@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			set { Ordered = value > 0 ? (uint?)value : null; }
 		}
 	}
-	  
+
 	public class StockChooser : Screen, ICancelable, IEditor
 	{
 		public StockChooser(uint catalogId, IList<CheckLine> lines, Address address)
@@ -56,8 +56,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
 
-			env.RxQuery(s => s.Get<Catalog>(catalogId))
-				.Subscribe(x => Name = x?.FullName);
+			env.RxQuery(s => s.Get<Catalog>(catalogId)?.FullName)
+				.Subscribe(Name);
 			env.RxQuery(s => {
 				var sql = @"select * from Stocks
 where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
@@ -81,7 +81,7 @@ where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
 			}).Do(_ => IsLoading.Value = false).Subscribe(Items);
 		}
 
-		public string Name { get; set; }
+		public NotifyValue<string> Name { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
 		public NotifyValue<List<OrderedStock>> Items { get; set;}
 		public NotifyValue<OrderedStock> CurrentItem { get; set; }
