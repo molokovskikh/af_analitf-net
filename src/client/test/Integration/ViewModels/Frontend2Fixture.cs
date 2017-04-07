@@ -23,11 +23,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		private Stock stock;
 
+		private BarcodeProducts BarcodeProduct;
+
 		[SetUp]
 		public void Setup()
 		{
 			settings.Waybills.Add(new WaybillSettings(user, address));
 			session.DeleteEach<Stock>();
+			session.DeleteEach<BarcodeProducts>();
 			model = Open(new Frontend2());
 			stock = new Stock()
 			{
@@ -75,6 +78,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				};
 				stateless.Insert(stockForList);
 			}
+
+			BarcodeProduct = new BarcodeProducts()
+			{
+				Product = product1,
+				Producer = session.Query<Producer>().First(),
+				Barcode = "30"
+			};
+			stateless.Insert(BarcodeProduct);
 
 			session.DeleteEach<Check>();
 			session.Flush();
@@ -172,6 +183,33 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.SearchBehavior.ActiveSearchTerm.Value = "АСП";
 			Assert.That(dialog.Items.Value.Count, Is.GreaterThan(0));
 			Assert.That(dialog.Items.Value.Select(x => x.CatalogId), Does.Not.Contains(product.CatalogId));
+		}
+
+		[Test]
+		public void FreeSale()
+		{
+			settings.FreeSale = true;
+			var result = model.BarcodeScanned("30").GetEnumerator();
+			result.MoveNext();
+			var dialog = ((InputQuantityRetailCost)((DialogResult)result.Current).Model);
+			dialog.Quantity.Value = 2;
+			dialog.RetailCost.Value = 20;
+			dialog.OK();
+			result.MoveNext();
+			Assert.AreEqual(model.CurrentLine.Value.BarcodeProduct, BarcodeProduct);
+
+			var resultClose = model.Close().GetEnumerator();
+			resultClose.MoveNext();
+			var dialogClose = ((Checkout)((DialogResult)resultClose.Current).Model);
+			dialogClose.Amount.Value = 10;
+			resultClose.MoveNext();
+
+			var check = session.Query<Check>().First();
+			Assert.AreEqual(check.Sum, 40);
+			Assert.AreEqual(check.Status, Status.Closed);
+			Assert.AreEqual(check.Lines[0].Stock, null);
+			Assert.AreEqual(check.Lines[0].BarcodeProduct, BarcodeProduct);
+
 		}
 	}
 }

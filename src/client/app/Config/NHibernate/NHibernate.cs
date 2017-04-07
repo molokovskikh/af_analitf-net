@@ -112,6 +112,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			Index<Catalog>(r => r.Name);
 			Index<Drug>(r => r.EAN);
 			Index<BarCode>(r => r.Value);
+			Index<BarcodeProducts>(x => x.Barcode);
 
 			mapper.Class<Drug>(x => x.Id(y => y.DrugId));
 			mapper.Class<Settings>(m => {

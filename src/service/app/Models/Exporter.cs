@@ -1005,6 +1005,26 @@ where p.UpdateTime > ?lastSync";
 				Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
+			if (cumulative)
+			{
+				sql = @"
+					select bp.Id, bp.ProductId, bp.ProducerId, bp.Barcode
+					from Catalogs.barcodeproducts bp";
+				CachedExport(Result, sql, "barcodeproducts");
+			}
+			else
+			{
+				sql = @"
+					select l.barcodeproductId as Id, l.ProductId, l.ProducerId, l.Barcode
+						from logs.barcodeproductLogs l
+						where l.LogTime >= ?lastSync and l.Operation = 2
+					union
+					select bp.Id, bp.ProductId, bp.ProducerId, bp.Barcode
+						from Catalogs.barcodeproducts bp
+					where bp.UpdateTime > ?lastSync";
+				Export(Result, sql, "barcodeproducts", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
+
 			var lastFormalization = session.CreateSQLQuery(@"
 select if(LastFormalization > PriceDate, LastFormalization, PriceDate)
 from usersettings.priceitems i
@@ -1869,7 +1889,8 @@ select l.CheckId as ServerDocId,
 	l.Exp,
 	l.Period,
  	l.DocId,
-	l.StockId
+	l.StockId,
+	l.BarcodeProductId
 from Inventory.CheckLines l
 	join Inventory.Checks c on c.Id = l.CheckId
 where c.Timestamp > ?lastSync

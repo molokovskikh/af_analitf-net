@@ -289,6 +289,7 @@
     <Compile Include="Models\AddressConfig.cs" />
     <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\AwaitedItem.cs" />
+    <Compile Include="Models\BarcodeProducts.cs" />
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\BaseStatelessObject.cs" />
     <Compile Include="Models\BatchLine.cs" />
@@ -447,6 +448,7 @@
     <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
     <Compile Include="ViewModels\Inventory\Frontend2.cs" />
     <Compile Include="ViewModels\Inventory\InputQuantity.cs" />
+    <Compile Include="ViewModels\Inventory\InputQuantityRetailCost.cs" />
     <Compile Include="ViewModels\Inventory\StockAssortmentViewModel.cs" />
     <Compile Include="ViewModels\Inventory\StockChooser.cs" />
     <Compile Include="ViewModels\Inventory\ShelfLife.cs" />
@@ -664,6 +666,9 @@
     </Compile>
     <Compile Include="Views\Inventory\InputQuantity.xaml.cs">
       <DependentUpon>InputQuantity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\InputQuantityRetailCost.xaml.cs">
+      <DependentUpon>InputQuantityRetailCost.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ShelfLife.xaml.cs">
       <DependentUpon>ShelfLife.xaml</DependentUpon>
@@ -1061,6 +1066,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\InputQuantity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\InputQuantityRetailCost.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -59,6 +59,21 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 		}
 
+		public CheckLine(BarcodeProducts barcodeProduct, uint quantity, decimal retailCost)
+		{
+			BarcodeProduct = barcodeProduct;
+			Barcode = barcodeProduct.Barcode;
+			Product = barcodeProduct.Product.Name;
+			ProductId = barcodeProduct.Product.Id;
+			CatalogId = barcodeProduct.Product.CatalogId;
+			Producer = barcodeProduct.Producer.Name;
+			ProducerId = barcodeProduct.Producer.Id;
+			Quantity = quantity;
+			RetailCost = retailCost;
+		}
+
+		public virtual BarcodeProducts BarcodeProduct { get; set; }
+
 		public virtual Check Doc { get; set; }
 
 		public virtual uint Id { get; set; }
