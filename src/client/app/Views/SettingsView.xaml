@@ -504,11 +504,16 @@
 					<CheckBox x:Name="Settings_GroupWaybillsBySupplier">
 						Группировать файлы накладных по поставщику
 					</CheckBox>
+					<CheckBox x:Name="Settings_FreeSale">
+						Свободная продажа
+					</CheckBox>
+				
 					<TextBlock>
 						<Hyperlink Command="caliburn:Commands.NavigateUri" NavigateUri="http://stat.analit.net/ci/">
 							Сервер управления
 						</Hyperlink>
 					</TextBlock>
+					
 
 					<Label>Папка для сохранения накладных:</Label>
 					<Grid IsEnabled="{Binding IsWaybillDirEnabled.Value}">

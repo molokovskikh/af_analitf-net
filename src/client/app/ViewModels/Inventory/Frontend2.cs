@@ -119,10 +119,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					Lines.Each(x => x.CheckId = check.Id);
 					Lines.Each(x => x.Doc = check);
 					foreach (var line in check.Lines) {
-						var stock = s.Get<Stock>(line.Stock.Id);
-						s.Insert(line.UpdateStock(stock, (CheckType)checkType));
+						if (line.Stock != null)
+						{
+							var stock = s.Get<Stock>(line.Stock.Id);
+							s.Insert(line.UpdateStock(stock, (CheckType)checkType));
+							s.Update(stock);
+						}
 						s.Insert(line);
-						s.Update(stock);
+						
 					}
 					trx.Commit();
 				}
@@ -200,6 +204,23 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 		}
 
+		private void AddBarcodeProduct(BarcodeProducts item, uint quantity, decimal retailCost)
+		{
+			if (checkType == null)
+				checkType = CheckType.SaleBuyer;
+			var exists = Lines.FirstOrDefault(x => x.BarcodeProduct.Id == item.Id && x.RetailCost == retailCost);
+			if (exists != null)
+			{
+				exists.Quantity += quantity;
+			}
+			else
+			{
+				var line = new CheckLine(item, quantity, retailCost);
+				Lines.Add(line);
+				CurrentLine.Value = line;
+			}
+		}
+
 		public IEnumerable<IResult> BarcodeScanned(string barcode)
 		{
 			if (checkType == CheckType.CheckReturn)
@@ -214,8 +235,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			var stocks = Env.Query(s => Stock.AvailableStocks(s, Address).Where(x => x.Barcode == barcode).ToArray()).Result;
 			if (stocks.Length == 0) {
-				Manager.Warning($"Товар с кодом {barcode} не найден");
-				yield break;
+				if (Settings.Value.FreeSale)
+				{
+					BarcodeProducts BarcodeProduct = Session.Query<BarcodeProducts>()
+						.Where(x => x.Barcode == barcode).FirstOrDefault();
+					if (BarcodeProduct != null)
+					{
+						var inputQuantity = new InputQuantityRetailCost(BarcodeProduct);
+						yield return new DialogResult(inputQuantity, resizable: false);
+						if (!inputQuantity.WasCancelled)
+						{
+							AddBarcodeProduct(inputQuantity.BarcodeProduct.Value, 
+								(uint)inputQuantity.Quantity.Value, (decimal)inputQuantity.RetailCost.Value);
+							yield break;
+						}
+					}
+				}
+				else
+				{
+					Manager.Warning($"Товар с кодом {barcode} не найден");
+					yield break;
+				}
 			}
 			if (stocks.Length == 1) {
 				AddStock(stocks[0]);

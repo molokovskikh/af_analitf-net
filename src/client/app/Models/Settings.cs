@@ -129,6 +129,7 @@ namespace AnalitF.Net.Client.Models
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
 			ConfirmDeleteOldOrders = true;
+			FreeSale = true;
 			DeleteOrdersOlderThan = 35;
 			ConfirmDeleteOldWaybills = true;
 			DeleteWaybillsOlderThan = 150;
@@ -207,6 +208,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual int DeleteOrdersOlderThan { get; set; }
 
 		public virtual bool ConfirmDeleteOldWaybills { get; set; }
+
+		public virtual bool FreeSale { get; set; }
 
 		public virtual int DeleteWaybillsOlderThan { get; set; }
 
