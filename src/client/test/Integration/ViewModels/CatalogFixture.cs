@@ -228,6 +228,31 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Assert.IsTrue(name.IsPKU, name.ToString());
 		}
 
+		[Test]
+		public void Filter_by_category()
+		{						
+			Assert.That(catalogModel.Filtercategory.Length, Is.GreaterThan(0));
+
+			for (int numb = 1; numb < catalogModel.Filtercategory.Length; numb++)
+			{
+				var catid = catalogModel.Filtercategory[numb].Id;
+				catalogModel.CurrentFiltercategory = catalogModel.Filtercategory.First(x => x.Id == catid);
+				Assert.IsTrue(catalogModel.CurrentFiltercategory != null);
+				scheduler.Start();
+				if (nameViewModel.CatalogNames.Value.Count > 0)
+					foreach (CatalogName name in nameViewModel.CatalogNames.Value){
+						nameViewModel.CurrentCatalogName.Value = name;
+						scheduler.Start();
+						var count = 0;
+						if (nameViewModel.Catalogs.Value.Count > 0)
+							foreach (Catalog cat in nameViewModel.Catalogs.Value){
+								if (cat.Category.Id == catid) count++;
+							}
+						Assert.IsTrue(count > 0);
+					}
+			}			
+		}
+
 		private void ApplyMnnFilter()
 		{
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Mnn != null);

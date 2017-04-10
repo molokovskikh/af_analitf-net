@@ -44,6 +44,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Other { get; set; }
 
+		public virtual Category Category { get; set; }
+
 		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
 
 		public virtual string PKU

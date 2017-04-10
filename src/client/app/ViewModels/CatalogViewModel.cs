@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
@@ -17,6 +18,7 @@ using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
 using Common.Tools;
+using Dapper;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -69,6 +71,22 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 	}
 
+	public class FiltercategoryDeclaration
+	{
+		public uint Id { get; set; }
+		public string Name { get; set; }
+
+		public FiltercategoryDeclaration(uint id, string name)
+		{
+			Name = name;
+			Id = id;
+		}
+		public override string ToString()
+		{
+			return Name;
+		}
+	}
+
 	[DataContract]
 	public class CatalogViewModel : BaseScreen
 	{
@@ -81,16 +99,45 @@ namespace AnalitF.Net.Client.ViewModels
 		private CatalogViewMode mode;
 		private List<Catalog> _catalogList;
 
+		private FiltercategoryDeclaration currentFiltercategory = null;
+
+		public bool IsLoadingCategory = true;
+
+		public async Task LoadCategory()
+		{
+			IsLoadingCategory = true;
+			List<Category> ListCategory = new List<Category>();
+			try{
+				ListCategory = await Env.Query(s => s.Query<Category>().ToList());
+			}
+			finally{
+				ListCategory.Insert(0, new Category()
+				{
+					Id = 0,
+					Name = "Все",
+					GroupId = 0
+				});
+				Filtercategory = (from c in ListCategory select new FiltercategoryDeclaration
+						(c.Id, c.Name.Substring(0, 1).ToUpper() + c.Name.Substring(1, c.Name.Length - 1).ToLower())).ToArray();
+				NotifyOfPropertyChange("Filtercategory");
+				CurrentFiltercategory = Filtercategory[0];
+				ListCategory.Clear();
+				IsLoadingCategory = false;
+			}
+		}
+
 		public CatalogViewModel()
 		{
 			ViewOffersByCatalog = true;
 			ViewOffersByCatalogEnabled = Settings.Select(s => s.CanViewOffersByCatalogName).ToValue();
 
-			this.ObservableForProperty(m => m.Mode).Subscribe(x => {
+			this.ObservableForProperty(m => m.Mode).Subscribe(x =>
+			{
 				CatalogSelectorVisible.Value = Mode == CatalogViewMode.CatalogSelector;
 				AddToAwaitedVisible.Value = Mode == CatalogViewMode.Basic;
 				ShowAwaitedVisible.Value = Mode == CatalogViewMode.Basic;
 			});
+
 
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new[] {
@@ -258,6 +305,26 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public FiltercategoryDeclaration[] Filtercategory { get; set; }
+
+		public FiltercategoryDeclaration CurrentFiltercategory
+		{
+			get { return currentFiltercategory; }
+			set
+			{
+				var nullfiltr = currentFiltercategory == null;
+				currentFiltercategory = value;
+				if (!nullfiltr) FilterByMnn = false;
+				NotifyOfPropertyChange("CurrentFiltercategory");
+				NotifyOfPropertyChange("FilterDescription");
+				if (!nullfiltr){
+					var save = CurrentFilter; //Для переотображения
+					CurrentFilter = null;
+					CurrentFilter = save;
+				}
+			}
+		}
+
 		public FilterDeclaration[] Filters { get; set; }
 
 		public FilterDeclaration CurrentFilter
@@ -383,17 +450,25 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void NavigateBackward()
 		{
-			if (FilterByMnn) {
+			if (FilterByMnn){
 				FilterByMnn = false;
 				return;
 			}
 
-			if (!CurrentFilter.Name.Match("Все")) {
+			var ret = false;
+			if ((CurrentFiltercategory!=null)&&(CurrentFiltercategory.Id != 0)){
+				CurrentFiltercategory = Filtercategory[0];
+				ret = true;
+			}
+
+			if(!CurrentFilter.Name.Match("Все")){
 				CurrentFilter = Filters[0];
 				return;
 			}
 
-			if (Mode == CatalogViewMode.CatalogSelector) {
+			if (ret) return;
+
+			if (Mode == CatalogViewMode.CatalogSelector){
 				TryClose();
 				return;
 			}
@@ -423,13 +498,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		protected override void OnInitialize()
+	async protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
 			Ad.Value = Shell.Config.LoadAd("2block.gif");
 			if (ActiveItem != null)
 				ActiveItem.Shell = Shell;
+      // Загрузка таблицы Category
+			await LoadCategory();
 		}
 
 		protected override void OnActivate()

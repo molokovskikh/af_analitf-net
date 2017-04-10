@@ -295,6 +295,7 @@
     <Compile Include="Models\BatchLine.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\Category.cs" />
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
