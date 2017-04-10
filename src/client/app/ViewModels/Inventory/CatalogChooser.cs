@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public CatalogChooser(string term, Address address)
 		{
 			BaseScreen.InitFields(this);
-			DisplayName = "Выберете товар";
+			DisplayName = "Выберите товар";
 			WasCancelled = true;
 			var env = Config.Env.Current;
 			SearchBehavior = new SearchBehavior(env);

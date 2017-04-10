@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public StockChooser(uint catalogId, IList<CheckLine> lines, Address address)
 		{
 			BaseScreen.InitFields(this);
-			DisplayName = "Выберете товар";
+			DisplayName = "Выберите товар";
 			IsLoading.Value = true;
 			var env = Config.Env.Current;
 			Warning = new InlineEditWarning(env.Scheduler, null);
