@@ -12,7 +12,7 @@ using Common.NHibernate;
 using Common.Tools;
 using AnalitF.Net.Client.Models.Results;
 using NHibernate.Linq;
-using System.Threading;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		private Frontend2 model;
 
 		private Stock stock;
-
+		private Catalog catalog;
 		private BarcodeProducts BarcodeProduct;
 
 		[SetUp]
@@ -32,9 +32,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.DeleteEach<Stock>();
 			session.DeleteEach<BarcodeProducts>();
 			model = Open(new Frontend2());
+			catalog = session.Query<Catalog>().First();
 			stock = new Stock()
 			{
-				Product = "Папаверин",
+				Product = catalog.FullName,
+				CatalogId = catalog.Id,
 				Status = StockStatus.Available,
 				Address = address,
 				RetailCost = 1,
@@ -64,7 +66,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			};
 			stateless.Insert(stockForList);
 
-			var products = new [] {
+			var products = new[] {
 				GetProduct("АСПИРИН БАЙЕР табл. 100мг N20"),
 				GetProduct("АСПИРИН БАЙЕР табл. 500 мг N10"),
 				GetProduct("АСПИРИН БАЙЕР табл. 500 мг N10"),
@@ -176,7 +178,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var transitStock = new Stock(session, product, address, StockStatus.InTransit);
 			stateless.Insert(transitStock);
 			CatalogChooser dialog = null;
-			manager.DialogOpened.Subscribe(x => {
+			manager.DialogOpened.Subscribe(x =>
+			{
 				dialog = (CatalogChooser)x;
 				scheduler.Start();
 			});
@@ -210,6 +213,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(check.Lines[0].Stock, null);
 			Assert.AreEqual(check.Lines[0].BarcodeProduct, BarcodeProduct);
 
+		}
+
+		[Test]
+		public void CheckCurentCatalog()
+		{
+			//добавляем строку на 3 упаковки
+			var line = new CheckLine(stock, 3);
+			model.CurrentLine.Value = line;
+			model.Lines.Add(line);
+			model.checkType = CheckType.SaleBuyer;
+			scheduler.AdvanceByMs(2000);
+			
 		}
 	}
 }
