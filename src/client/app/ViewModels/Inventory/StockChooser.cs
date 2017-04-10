@@ -81,16 +81,10 @@ where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
 				return items;
 			}).Do(_ => IsLoading.Value = false).Subscribe(Items);
 
-			CurrentItem
-				.SelectMany(x => Env.RxQuery(s => {
-					if (x == null)
-						return null;
-					return s.Query<Catalog>()
+			CurrentCatalog.Value = Session.Query<Catalog>()
 					.Fetch(c => c.Name)
 					.ThenFetch(n => n.Mnn)
 					.FirstOrDefault(c => c.Id == catalogId);
-				}))
-				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 		}
 
 		public NotifyValue<string> Name { get; set; }

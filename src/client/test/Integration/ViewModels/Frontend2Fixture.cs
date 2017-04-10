@@ -13,6 +13,7 @@ using Common.Tools;
 using AnalitF.Net.Client.Models.Results;
 using NHibernate.Linq;
 using ReactiveUI.Testing;
+using AnalitF.Net.Client.ViewModels.Inventory;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -38,6 +39,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Product = catalog.FullName,
 				CatalogId = catalog.Id,
 				Status = StockStatus.Available,
+				RejectStatus = RejectStatus.NotDefective,
 				Address = address,
 				RetailCost = 1,
 				Quantity = 5,
@@ -218,13 +220,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void CheckCurentCatalog()
 		{
-			//добавляем строку на 3 упаковки
 			var line = new CheckLine(stock, 3);
 			model.CurrentLine.Value = line;
 			model.Lines.Add(line);
 			model.checkType = CheckType.SaleBuyer;
 			scheduler.AdvanceByMs(2000);
-			
+			Assert.AreEqual(catalog.Id, model.CurrentCatalog.Value.Id);
+
+			var CatalogChooser = new CatalogChooser("упа", stock.Address);
+			scheduler.AdvanceByMs(2000);
+			Assert.AreEqual(catalog.Id, CatalogChooser.CurrentCatalog.Value.Id);
+			CatalogChooser.TryClose();
+
+			var stockChooser = new StockChooser(catalog.Id, model.Lines, stock.Address);
+			Assert.AreEqual(catalog.Id, stockChooser.CurrentCatalog.Value.Id);
+			stockChooser.TryClose();
 		}
 	}
 }
