@@ -19,14 +19,17 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		private List<Message> messages;
 		private bool confirm;
 		private string confirmMessage;
+		private User user;
 
 		[SetUp]
 		public void Setup()
 		{
 			confirm = false;
 			confirmMessage = "";
-			settings = new Settings();
+			settings = new Settings() {Rounding = Rounding.None};
 			address = new Address("Тестовый адрес доставки");
+			user = new User();
+			settings.Waybills.Add(new WaybillSettings(user, address));
 			offer = new Offer {
 				Price = new Price(),
 				Cost = 53.1m
@@ -281,25 +284,35 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Calculate_retail_cost_based_on_result_cost()
 		{
-			var user = new User();
 			user.IsDelayOfPaymentEnabled = true;
 
 			offer.Price.CostFactor = 1.2m;
 			settings.Markups.Add(new MarkupConfig(address, 0, 1000, 20));
-			offer.CalculateRetailCost(settings.Markups, new List<uint>(),  user, address);
-			Assert.AreEqual(76.46, offer.RetailCost);
+			offer.CalculateRetailCost(settings, new List<uint>(),  user, address);
+			Assert.AreEqual(76.46m, offer.RetailCost);
 		}
 
 		[Test]
 		public void Calculate_retail_cost_on_nds18()
 		{
-			var user = new User();
 			//ндс имеет приоритет
 			offer.NDS = 18;
 			offer.VitallyImportant = true;
 			settings.Markups.Add(new MarkupConfig(address, 0, 1000, 37, MarkupType.Nds18));
-			offer.CalculateRetailCost(settings.Markups, new List<uint>(), user, address);
-			Assert.AreEqual(72.75, offer.RetailCost);
+			offer.CalculateRetailCost(settings, new List<uint>(), user, address);
+			Assert.AreEqual(72.75m, offer.RetailCost);
+		}
+
+		[Test]
+		public void Calculate_retail_cost_for_VI()
+		{
+			offer.VitallyImportant = true;
+			settings.Markups.Add(new MarkupConfig(address, 0, 1000, 20, MarkupType.VitallyImportant));
+			offer.CalculateRetailCost(settings, new List<uint>(), user, address);
+			Assert.AreEqual(63.72m, offer.RetailCost);
+			offer.ProducerCost = 40;
+			offer.CalculateRetailCost(settings, new List<uint>(), user, address);
+			Assert.AreEqual(61.9m, offer.RetailCost);
 		}
 
 		[Test]

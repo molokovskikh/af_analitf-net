@@ -67,6 +67,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				addresses = new[] { address };
 			}
 			var settings = new Settings(addresses);
+			addresses.Each(r => settings.Waybills.Add(new WaybillSettings(user, r)));
 			shell.CurrentAddress.Value = address;
 			shell.Addresses = addresses.ToList();
 

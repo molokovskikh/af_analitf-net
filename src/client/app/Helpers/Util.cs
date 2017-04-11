@@ -236,6 +236,22 @@ namespace AnalitF.Net.Client.Helpers
 			return value != null ? value.Value.ToString("0.00") : "";
 		}
 
+		public static decimal? Round(decimal? value, Rounding rounding)
+		{
+			if (rounding != Rounding.None) {
+				var @base = 10;
+				var factor = 1;
+				if (rounding == Rounding.To1_00) {
+					@base = 1;
+				} else if (rounding == Rounding.To0_50) {
+					factor = 5;
+				}
+				var normalized = (int?) (value * @base);
+				return (normalized - normalized % factor) / (decimal) @base;
+			}
+			return value;
+		}
+
 		public static Dictionary<string, string> ParseSubject(X509Certificate2 c)
 		{
 			List<Char> accum = new List<char>();

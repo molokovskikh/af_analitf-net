@@ -225,6 +225,8 @@ namespace AnalitF.Net.Client.Helpers
 				{ "InFrozenOrders", Background(Colors.Gray) },
 				{ nameof(CheckLine.Confirmed), Background(Colors.LightGreen) },
 				{ nameof(CheckLine.NotConfirmed), Background(Colors.LightYellow) },
+				{ "IsVIPriceCalcFromProducer", Background(Colors.LightGray) },
+				{ "IsVIPriceCalcFromSupplier", Background(Colors.LemonChiffon)},
 			};
 		}
 

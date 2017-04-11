@@ -184,15 +184,39 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual bool IsSpecialMarkup { get; set; }
 
-		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups,
+		[Ignore]
+		public virtual WaybillSettings WaybillSettings { get; set; }
+		private decimal TaxFactor =>
+			WaybillSettings.Taxation == Taxation.Envd
+					&& (VitallyImportant && !WaybillSettings.IncludeNdsForVitallyImportant
+						|| !VitallyImportant && !WaybillSettings.IncludeNds)
+				? 1m
+				: (1 + NDS.GetValueOrDefault(10) / 100m);
+
+		public virtual MarkupType GetMarkupType()
+		{
+			if (IsSpecialMarkup)
+				return MarkupType.Special;
+			var markupType = VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			if (NDS == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost.GetValueOrDefault() == 0))
+				markupType = MarkupType.Nds18;
+			return markupType;
+		}
+
+		public virtual void CalculateRetailCost(
+			Settings settings,
 			IList<uint> specialMarkupProducts,
 			User user, Address address)
 		{
 			Configure(user);
 			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
-			RetailMarkup = MarkupConfig.Calculate(markups, this, user, address);
-			var cost =  HideCost ? GetResultCost() : Cost;
-			RetailCost = Math.Round(cost * (1 + (RetailMarkup ?? 0) / 100), 2);
+			WaybillSettings = settings.Waybills.FirstOrDefault(r => r.BelongsToAddress == address);
+			RetailMarkup = MarkupConfig.Calculate(settings.Markups, this, user, address);
+			var type = GetMarkupType();
+			var cost = HideCost ? GetResultCost() : Cost;
+			var baseCost = type == MarkupType.VitallyImportant && ProducerCost.HasValue ? ProducerCost.Value : cost;
+			var taxFactor = type == MarkupType.VitallyImportant && ProducerCost.HasValue && !HideCost ? TaxFactor : 1m;
+			RetailCost = Util.Round(NullableHelper.Round(cost + baseCost * (RetailMarkup ?? 0) / 100 * taxFactor, 2), settings.Rounding);
 			RetailPrice = RetailCost;
 		}
 
@@ -218,5 +242,10 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public abstract decimal GetResultCost();
+
+		[Style("RetailCost", Description = "Расчёт от цены поставщика")]
+		public virtual bool IsVIPriceCalcFromSupplier => VitallyImportant && !ProducerCost.HasValue;
+		[Style("RetailCost", Description = "Расчёт от цены производителя")]
+		public virtual bool IsVIPriceCalcFromProducer => VitallyImportant && ProducerCost.HasValue;
 	}
 }

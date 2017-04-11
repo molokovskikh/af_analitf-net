@@ -538,29 +538,11 @@ namespace AnalitF.Net.Client.Models
 			if (IsMigration)
 				rawCost = value;
 			else
-				rawCost = Round(value);
+				rawCost = Util.Round(value, Waybill.Rounding ?? Waybill?.Settings.Rounding ?? Rounding.To0_10);
 			return RoundCost(value);
 		}
 
-		private decimal? RoundCost(decimal? value) => Round(NullableHelper.Round(value, 2));
-
-		private decimal? Round(decimal? value)
-		{
-			var rounding = Waybill.Rounding ?? Waybill?.Settings.Rounding ?? Rounding.To0_10;
-			if (rounding != Rounding.None) {
-				var @base = 10;
-				var factor = 1;
-				if (rounding == Rounding.To1_00) {
-					@base = 1;
-				}
-				else if (rounding == Rounding.To0_50) {
-					@factor = 5;
-				}
-				var normalized = (int?)(value * @base);
-				return (normalized - normalized % factor) / (decimal)@base;
-			}
-			return value;
-		}
+		private decimal? RoundCost(decimal? value) => Util.Round(NullableHelper.Round(value, 2), Waybill.Rounding ?? Waybill?.Settings.Rounding ?? Rounding.To0_10);
 
 		public virtual void BeginEdit()
 		{

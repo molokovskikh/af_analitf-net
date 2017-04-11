@@ -142,13 +142,7 @@ namespace AnalitF.Net.Client.Models
 			if (address == null)
 				return 0;
 
-			var type = MarkupType.Over;
-			if (offer.NDS == 18)
-				type = MarkupType.Nds18;
-			else if (offer.VitallyImportant)
-				type = MarkupType.VitallyImportant;
-			if (offer.IsSpecialMarkup)
-				type = MarkupType.Special;
+			var type = offer.GetMarkupType();
 
 			var cost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
 
