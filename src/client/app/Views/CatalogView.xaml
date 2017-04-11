@@ -26,6 +26,10 @@
 			</Grid.ColumnDefinitions>
 
 			<StackPanel Grid.Column="0" Style="{StaticResource FilterPanel}">
+
+				<ComboBox Style="{StaticResource Filter}" x:Name="Filtercategory" DisplayMemberPath="Name" Width="251"> 
+				</ComboBox>
+				
 				<ComboBox Style="{StaticResource Filter}" x:Name="Filters" DisplayMemberPath="Name"></ComboBox>
 
 				<ToggleButton x:Name="FilterByMnn">
