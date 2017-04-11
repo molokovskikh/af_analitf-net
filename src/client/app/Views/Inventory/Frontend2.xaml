@@ -42,7 +42,7 @@
 		</Grid.RowDefinitions>
 		
 		<StackPanel Orientation="Horizontal" Grid.Row="0">
-			<Button Focusable="False" Name="ShowDescription" MinWidth="100" Padding="3">Описание (Пробел)</Button>
+			<Button Focusable="False" Name="ShowDescription" MinWidth="100" Padding="3">Описание (Ctrl+D)</Button>
 			<Button Focusable="False" Name="Clear" MinWidth="100" Padding="3">Очистить (F3)</Button>
 			<Button Focusable="False" MinWidth="100" Padding="3" Name="ReturnCheck">Возврат(F4)</Button>
 			<Button Focusable="False"  MinWidth="100" Padding="3" Name="Unpack">Распаковать (Ctrl+U)</Button>

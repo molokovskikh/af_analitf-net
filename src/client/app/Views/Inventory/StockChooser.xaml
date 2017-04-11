@@ -63,7 +63,7 @@
 				<Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">Наименование:</Label>
 				<Label Grid.Row="0" Grid.Column="2" Content="{Binding CurrentItem.Value.Product}"
 				FontWeight="Bold" />
-				<Button Grid.Row="1" Grid.Column="0" Name="ShowDescription">Описание (F1)</Button>
+				<Button Grid.Row="1" Grid.Column="0" Name="ShowDescription">Описание (Ctrl+D)</Button>
 				<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">МНН:</Label>
 				<Label Grid.Row="1" Grid.Column="2" Content="{Binding CurrentCatalog.Value.Name.Mnn}"
 				FontWeight="Bold" />

@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public Help()
 		{ 
 			Items = new List<HelpItem> {
-				new HelpItem("Пробел", "Описание товара"),
+				new HelpItem("Ctrl+D", "Описание товара"),
 				new HelpItem("F1", "Вызов справки"),
 				new HelpItem("F3", "Очистить"),
 				new HelpItem("F4", "Возврат"),

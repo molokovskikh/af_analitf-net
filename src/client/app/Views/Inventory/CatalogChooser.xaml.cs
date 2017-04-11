@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 			InitializeComponent();
 			KeyDown += (sender, args) =>
 			{
-				if (args.Key == Key.F1)
+				if (args.Key == Key.D && ((Keyboard.Modifiers & ModifierKeys.Control) != 0))
 				{
 					Model.ShowDescription();
 				}
