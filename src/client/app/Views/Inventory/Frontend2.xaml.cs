@@ -25,6 +25,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 				DataGridHelper.Focus(Lines);
 			};
 			KeyDown += (sender, args) => {
+				if (args.Key == Key.D && ((Keyboard.Modifiers & ModifierKeys.Control) != 0))
+				{
+					Model.ShowDescription();
+				}
 				if (args.Key == Key.F1)
 				{
 					Execute(Model.Help());

@@ -9,10 +9,12 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Dapper;
+using NHibernate.Linq;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class CatalogChooser : Screen, ICancelable
+	public class CatalogChooser : BaseScreen, ICancelable
 	{
 		public CatalogChooser(string term, Address address)
 		{
@@ -53,12 +55,25 @@ order by cn.Name, c.Form";
 			Items.Subscribe(_ => {
 				CurrentItem.Value = (Items.Value ?? Enumerable.Empty<CatalogDisplayItem>()).FirstOrDefault();
 			});
+
+			CurrentItem
+				.SelectMany(x => Env.RxQuery(s => {
+					if (x == null)
+						return null;
+					var catalogId = x.CatalogId;
+					return s.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.ThenFetch(n => n.Mnn)
+						.FirstOrDefault(c => c.Id == catalogId);
+				}))
+				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
 		public NotifyValue<List<CatalogDisplayItem>> Items { get; set;}
 		public NotifyValue<CatalogDisplayItem> CurrentItem { get; set; }
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
 		public bool WasCancelled { get; set; }
 
@@ -68,6 +83,13 @@ order by cn.Name, c.Form";
 				return;
 			WasCancelled = false;
 			TryClose();
+		}
+
+		public void ShowDescription()
+		{
+			if (!(CurrentCatalog.Value.Name?.Description != null))
+				return;
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}
 	}
 }

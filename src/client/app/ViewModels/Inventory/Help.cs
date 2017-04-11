@@ -18,8 +18,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	public class Help : Screen
 	{
 		public Help()
-		{
+		{ 
 			Items = new List<HelpItem> {
+				new HelpItem("Ctrl+D", "Описание товара"),
 				new HelpItem("F1", "Вызов справки"),
 				new HelpItem("F3", "Очистить"),
 				new HelpItem("F4", "Возврат"),

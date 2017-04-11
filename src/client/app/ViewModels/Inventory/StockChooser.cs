@@ -12,6 +12,7 @@ using Caliburn.Micro;
 using Dapper;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -46,7 +47,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 	}
 
-	public class StockChooser : Screen, ICancelable, IEditor
+	public class StockChooser : BaseScreen, ICancelable, IEditor
 	{
 		public StockChooser(uint catalogId, IList<CheckLine> lines, Address address)
 		{
@@ -79,6 +80,11 @@ where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
 				}
 				return items;
 			}).Do(_ => IsLoading.Value = false).Subscribe(Items);
+
+			CurrentCatalog.Value = Session.Query<Catalog>()
+					.Fetch(c => c.Name)
+					.ThenFetch(n => n.Mnn)
+					.FirstOrDefault(c => c.Id == catalogId);
 		}
 
 		public NotifyValue<string> Name { get; set; }
@@ -87,6 +93,7 @@ where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
 		public NotifyValue<OrderedStock> CurrentItem { get; set; }
 		public InlineEditWarning Warning { get; set; }
 		public bool WasCancelled { get; set; }
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
 		public void EnterItem()
 		{
@@ -116,6 +123,13 @@ where CatalogId = @catalogId and AddressId = @addressId and Quantity > 0
 		{
 			Committed();
 			base.TryClose();
+		}
+
+		public void ShowDescription()
+		{
+			if (!(CurrentCatalog.Value.Name?.Description != null))
+				return;
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}
 	}
 }

@@ -20,10 +20,19 @@ namespace AnalitF.Net.Client.Views.Inventory
 	/// </summary>
 	public partial class StockChooser : UserControl
 	{
+		public ViewModels.Inventory.StockChooser Model => DataContext as ViewModels.Inventory.StockChooser;
+
 		public StockChooser()
 		{
 			InitializeComponent();
 			new Editable().Attach(Items);
+			KeyDown += (sender, args) =>
+			{
+				if (args.Key == Key.D && ((Keyboard.Modifiers & ModifierKeys.Control) != 0))
+				{
+					Model.ShowDescription();
+				}
+			};
 		}
 	}
 }

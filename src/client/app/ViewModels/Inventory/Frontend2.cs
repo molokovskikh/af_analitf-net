@@ -11,6 +11,8 @@ using ReactiveUI;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate.Linq;
+using AnalitF.Net.Client.ViewModels.Dialogs;
+
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -36,6 +38,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<string> Status { get; set; }
 		public CheckType? checkType { get; set; }
 		private List<CheckLine> CheckLinesForReturn { get; set; }
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
+		public NotifyValue<decimal> CheckSum { get; set; }
+		public NotifyValue<decimal> DiscontSum { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -49,6 +54,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					CheckLinesForReturn.Clear();
 					checkType = null;
 				}
+				CheckSum.Value = Lines.Sum(x => x.RetailSum);
+				DiscontSum.Value = Lines.Sum(x => x.DiscontSum);
 			});
 
 			var lines = Shell.SessionContext.GetValueOrDefault(GetType().Name + "." + nameof(Lines)) as ReactiveCollection<CheckLine>;
@@ -56,6 +63,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Lines.AddRange(lines);
 			}
 			Shell.SessionContext[GetType().Name + "." + nameof(Lines)] = null;
+
+			CurrentLine
+				.SelectMany(x => Env.RxQuery(s => {
+					if (x == null)
+						return null;
+					var catalogId = x.CatalogId;
+					return s.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.ThenFetch(n => n.Mnn)
+						.FirstOrDefault(c => c.Id == catalogId);
+				}))
+				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -293,6 +312,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					CurrentLine.Value.Quantity = stockQuantity;
 				}
 			}
+			CheckSum.Value = Lines.Sum(x => x.RetailSum);
+			DiscontSum.Value = Lines.Sum(x => x.DiscontSum);
 		}
 
 		public void Committed()
@@ -365,6 +386,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> Help()
 		{
 			yield return new DialogResult(new Help());
+		}
+
+		public void ShowDescription()
+		{
+			if (!(CurrentCatalog.Value.Name?.Description != null))
+				return;
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -8,9 +9,19 @@ namespace AnalitF.Net.Client.Views.Inventory
 	/// </summary>
 	public partial class CatalogChooser : UserControl
 	{
+		public ViewModels.Inventory.CatalogChooser Model => DataContext as ViewModels.Inventory.CatalogChooser;
+
 		public CatalogChooser()
 		{
 			InitializeComponent();
+			KeyDown += (sender, args) =>
+			{
+				if (args.Key == Key.D && ((Keyboard.Modifiers & ModifierKeys.Control) != 0))
+				{
+					Model.ShowDescription();
+				}
+			};
+
 		}
 	}
 }

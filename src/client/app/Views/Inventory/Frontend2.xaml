@@ -8,7 +8,7 @@
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	mc:Ignorable="d"
-	d:DesignHeight="300" d:DesignWidth="300">
+	d:DesignHeight="300" d:DesignWidth="500">
 	<UserControl.Resources>
 		<Style x:Key="Status" TargetType="Label">
 			<Setter Property="FontSize" Value="20" />
@@ -18,6 +18,10 @@
 			<Setter Property="Foreground" Value="#2A27FE" />
 			<Setter Property="VerticalContentAlignment" Value="Center" />
 			<Setter Property="HorizontalContentAlignment" Value="Center" />
+		</Style>
+		<Style x:Key="Display" TargetType="Label">
+			<Setter Property="FontSize" Value="16" />
+			<Setter Property="FontWeight" Value="Bold" />
 		</Style>
 		<Style x:Key="Input" TargetType="TextBox">
 			<Setter Property="FontSize" Value="30" />
@@ -38,11 +42,61 @@
 		</Grid.RowDefinitions>
 		
 		<StackPanel Orientation="Horizontal" Grid.Row="0">
+			<Button Focusable="False" Name="ShowDescription" MinWidth="100" Padding="3">Описание (Ctrl+D)</Button>
 			<Button Focusable="False" Name="Clear" MinWidth="100" Padding="3">Очистить (F3)</Button>
 			<Button Focusable="False" MinWidth="100" Padding="3" Name="ReturnCheck">Возврат(F4)</Button>
 			<Button Focusable="False"  MinWidth="100" Padding="3" Name="Unpack">Распаковать (Ctrl+U)</Button>
 		</StackPanel>
-		<Label Grid.Row="1" Name="Status" Style="{StaticResource Status}" />
+		<Grid Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<Label Grid.Row="0" Grid.ColumnSpan="5" Name="Status" Style="{StaticResource Status}" />
+			<Label Foreground="Green" Grid.Row="1" Grid.Column="0" FontWeight="Bold" FontSize="16"
+				Visibility="{Binding Path=CurrentCatalog.Value.VitallyImportant, Converter={StaticResource BoolToCollapsed}, FallbackValue=Hidden}">
+				ЖНВЛС
+			</Label>
+			<Grid  Grid.Row="2" Grid.Column="0" >
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<Label Foreground="Red" Grid.Column="0" FontWeight="Bold" FontSize="16"
+					Visibility="{Binding Path=CurrentCatalog.Value.MandatoryList, Converter={StaticResource BoolToCollapsed}, FallbackValue=Hidden}">
+					Обяз. список
+				</Label>
+				<Label Foreground="Red" Grid.Column="1" FontWeight="Bold" FontSize="16"
+					Visibility="{Binding Path=CurrentCatalog.Vulue.IsPKU, Converter={StaticResource BoolToCollapsed}, FallbackValue=Hidden}"
+					Content="{Binding CurrentCatalog.Vulue.PKU}"/>
+			</Grid>
+			<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"
+				   Style="{StaticResource Display}">Наименование:</Label>
+			<Label Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"
+				   Style="{StaticResource Display}">МНН:</Label>
+			<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" Name="ProductName"
+				   Style="{StaticResource Display}"
+				   Content="{Binding CurrentLine.Value.Product}"/>
+			<Label Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"
+				   Style="{StaticResource Display}"
+				    Content="{Binding CurrentCatalog.Value.Name.Mnn}"/>
+			<Label Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left"
+				   Style="{StaticResource Display}">Сумма чека:</Label>
+			<Label Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left"
+				   Style="{StaticResource Display}">Сумма скидки:</Label>
+			<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" 
+				   Name="CheckSum" Style="{StaticResource Display}"/>
+			<Label Grid.Row="2" Grid.Column="4" HorizontalAlignment="Right"
+				   Name="DiscontSum" Style="{StaticResource Display}"/>
+		</Grid>
 		<controls:DataGrid2 Grid.Row="2" Grid.Column="0" x:Name="Lines" FontSize="20" behaviors:Editable.Editor="{Binding .}">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Штрих-Код" Binding="{Binding Barcode}" Width="*" />
