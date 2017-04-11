@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -42,6 +43,32 @@ namespace AnalitF.Net.Client.Models.Print
 			return border;
 		}
 
+		private BitmapImage MakeBarcode(string barcode, int width, int height)
+		{
+			BitmapImage result = null;
+			if (barcode?.Length != 13)
+				return result;
+			// не любая строка из 13 цифр является валидным штрихкодом, как валидировать - неизвестно				
+			try
+			{
+				using (var barcodeImage = Barcode.DoEncode(TYPE.EAN13, barcode, false, width, height)) {
+					using (var stream = new MemoryStream()) {
+						barcodeImage.Save(stream, ImageFormat.Bmp);
+						stream.Position = 0;
+						result = new BitmapImage();
+						result.BeginInit();
+						result.CacheOption = BitmapCacheOption.OnLoad;
+						result.StreamSource = stream;
+						result.EndInit();
+					}
+				}
+			}
+			catch
+			{
+			}
+			return result;
+		}
+
 		private FrameworkElement Normal(TagPrintable line)
 		{
 			var panel = new Grid
@@ -54,35 +81,34 @@ namespace AnalitF.Net.Client.Models.Print
 					new ColumnDefinition()
 				},
 				RowDefinitions = {
-					new RowDefinition(),
-					new RowDefinition { Height = GridLength.Auto },
-					new RowDefinition { Height = GridLength.Auto },
-					new RowDefinition { Height = GridLength.Auto },
-					new RowDefinition { Height = GridLength.Auto },
+					new RowDefinition { Height = new GridLength(16, GridUnitType.Pixel) },
+					new RowDefinition { Height = new GridLength(26, GridUnitType.Pixel) },
+					new RowDefinition { Height = new GridLength(8, GridUnitType.Pixel) },
+					new RowDefinition { Height = new GridLength(8, GridUnitType.Pixel) },
+					new RowDefinition { Height = new GridLength(8, GridUnitType.Pixel) },
 				}
 			};
 
-			if (line.Barcode?.Length == 13) {
-				var img = new Barcode().Encode(TYPE.EAN13, line.Barcode, 100, 18);
-				ImageSource imageSource;
-				using (var stream = new MemoryStream()) {
-					img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-					stream.Position = 0;
-					imageSource = BitmapFrame.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-				}
-				var barcode = new Image {
-					Source = imageSource,
+			var barcode = MakeBarcode(line.Barcode, 100, 16);
+			if (barcode != null) {
+				var img = new Image() {
+					Source = barcode,
 				};
-				barcode.SetValue(Grid.ColumnSpanProperty, 2);
-				panel.Children.Add(barcode);
+				img.SetValue(Grid.ColumnSpanProperty, 2);
+				panel.Children.Add(img);
 			}
 
 			var label1 = new TextBlock
 			{
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
-				FontSize = 9,
+				VerticalAlignment = VerticalAlignment.Center,
+				FontSize = 8,
 				Text = line.Product,
+				Margin = new Thickness(0),
+				Padding = new Thickness(0),
+				LineHeight = 8,
+				LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
 			};
 			label1.SetValue(Grid.RowProperty, 1);
 			label1.SetValue(Grid.ColumnSpanProperty, 2);
@@ -92,16 +118,20 @@ namespace AnalitF.Net.Client.Models.Print
 			{
 				FontSize = 7,
 				Text = line.Barcode,
+				Margin = new Thickness(0),
+				Padding = new Thickness(0),
 			};
 			label2.SetValue(Grid.RowProperty, 2);
 			panel.Children.Add(label2);
 
 			var label3 = new Label
 			{
-				FontSize = 14,
+				FontSize = 12,
 				FontWeight = FontWeights.Bold,
 				Content = line.RetailCost?.ToString("0.00"),
 				HorizontalAlignment = HorizontalAlignment.Right,
+				Margin = new Thickness(0),
+				Padding = new Thickness(0),
 			};
 			label3.SetValue(Grid.RowProperty, 2);
 			label3.SetValue(Grid.ColumnProperty, 1);
@@ -112,6 +142,8 @@ namespace AnalitF.Net.Client.Models.Print
 			{
 				FontSize = 7,
 				Text = line.SerialNumber,
+				Margin = new Thickness(0),
+				Padding = new Thickness(0),
 			};
 			label4.SetValue(Grid.RowProperty, 3);
 			panel.Children.Add(label4);
@@ -119,7 +151,9 @@ namespace AnalitF.Net.Client.Models.Print
 			var label5 = new TextBlock
 			{
 				Text = line.ProviderDocumentId,
-				FontSize = 7
+				FontSize = 7,
+				Margin = new Thickness(0),
+				Padding = new Thickness(0),
 			};
 			label5.SetValue(Grid.RowProperty, 4);
 			panel.Children.Add(label5);
@@ -129,6 +163,8 @@ namespace AnalitF.Net.Client.Models.Print
 				FontSize = 7,
 				Text = line.DocumentDate.ToShortDateString(),
 				HorizontalAlignment = HorizontalAlignment.Right,
+				Margin = new Thickness(0),
+				Padding = new Thickness(0),
 			};
 			label6.SetValue(Grid.RowProperty, 4);
 			label6.SetValue(Grid.ColumnProperty, 1);
