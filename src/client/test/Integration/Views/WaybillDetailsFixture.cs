@@ -91,6 +91,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			session.Save(user);
 			var waybill = new Waybill(address, session.Query<Supplier>().First());
 			waybill.IsCreatedByUser = true;
+			var line = new WaybillLine(waybill) { Quantity = 1 };
+			waybill.Lines.Add(line);
 			session.Save(waybill);
 
 			WpfTestHelper.WithWindow2(async w => {
