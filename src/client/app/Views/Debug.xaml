@@ -34,5 +34,17 @@
 				<RadioButton GroupName="WindowSize" Click="Set800x600">800x600</RadioButton>
 			</StackPanel>
 		</TabItem>
+		<TabItem Header="SQL">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<TextBox Grid.Row="0" Height="200" Name="SQL" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" KeyDown="SQL_OnKeyDown" />
+				<DataGrid AutoGenerateColumns="True" Grid.Row="1" Name="Output"></DataGrid>
+				<TextBlock IsHitTestVisible="False" Grid.Row="1" Name="SqlError" TextWrapping="Wrap"></TextBlock>
+			</Grid>
+		</TabItem>
+
 	</TabControl>
 </UserControl>
