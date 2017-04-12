@@ -619,6 +619,10 @@ namespace AnalitF.Net.Client.ViewModels
 		/// </summary>
 		/// <returns>true - правильно заполнена, false - неправильно</returns>
 		private bool CheckWaybill()	{
+			if (Lines.Value.Count == 0) {
+				Manager.Warning("Пустой документ не может быть проведен");
+				return false;
+			}
 			if (Lines.Value.OfType<WaybillLine>().Any(l => !l.Quantity.HasValue || (l.Quantity.HasValue && l.Quantity == 0))) {
 				Manager.Notify("Пожалуйста, введите количество в поле 'Заказ'");
 				return false;
