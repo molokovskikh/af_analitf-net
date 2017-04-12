@@ -7,7 +7,7 @@
 						Background="#FFFBFBFB"
 						BorderThickness="1"
 						Padding="4" Margin="25,5,25,5"
-						Visibility="{Binding Visible.Value, Converter={StaticResource BoolToHidden}}">
+						Visibility="{Binding Visible.Value, Converter={StaticResource BoolToCollapsed}}">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
