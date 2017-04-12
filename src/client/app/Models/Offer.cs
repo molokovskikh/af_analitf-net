@@ -396,7 +396,7 @@ namespace AnalitF.Net.Client.Models
 			Configure(user);
 			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
 			RetailMarkup = MarkupConfig.Calculate(markups, this, user, address);
-			RetailCost = GetRetailCost(RetailMarkup.Value);
+			RetailCost = GetRetailCost(RetailMarkup.Value, address);
 		}
 	}
 }

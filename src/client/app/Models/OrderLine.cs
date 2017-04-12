@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.Models
 			Count = count;
 			OptimalFactor = offer.ResultCost - offer.LeaderCost;
 			Junk = offer.Junk;
+			Settings = offer.Settings;
 		}
 
 		public virtual uint Id { get; set; }
@@ -124,7 +125,7 @@ namespace AnalitF.Net.Client.Models
 				if (_retailMarkup != value) {
 					IsEditByUser = true;
 					_retailMarkup = value;
-					_retailCost = GetRetailCost(value.GetValueOrDefault());
+					_retailCost = GetRetailCost(value.GetValueOrDefault(), Order.Address);
 					OnPropertyChanged();
 					OnPropertyChanged(nameof(RetailCost));
 				}
@@ -496,7 +497,7 @@ namespace AnalitF.Net.Client.Models
 			if (!Order.IsAddressExists())
 				return;
 			RetailMarkup = MarkupConfig.Calculate(markups, this, user, Order.Address);
-			RetailCost = GetRetailCost(RetailMarkup.Value);
+			RetailCost = GetRetailCost(RetailMarkup.Value, Order.Address);
 		}
 	}
 }

@@ -12,13 +12,19 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		private OrderLine line;
 		private Order order;
 		private Price price;
+		private User user;
+		private Settings settings;
 
 		[SetUp]
 		public void Setup()
 		{
 			price = new Price("АМП (Основной)");
 			order = new Order(price, new Address("Тестовый адрес"));
+			user = new User();
+			settings = new Settings(order.Address);
+			settings.Waybills.Add(new WaybillSettings(user, order.Address));
 			var offer = new Offer(price, 100) {
+				Settings = settings,
 				ProductSynonym = "ЭХИНАЦЕЯ ТРАВА пачка 50г (18%)",
 				ProducerSynonym = "Камелия-ЛТ ООО",
 			};
@@ -100,14 +106,13 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Calculate_mixed_cost()
 		{
-			var user = new User();
 			line.Order.Price.CostFactor = 1.5m;
-			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), new List<uint>(), user);
+			line.CalculateRetailCost(settings.Markups, new List<uint>(), user);
 			Assert.AreEqual(100, line.MixedCost);
 			Assert.AreEqual(100, line.MixedSum);
 
 			user.IsDelayOfPaymentEnabled = true;
-			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), new List<uint>(), user);
+			line.CalculateRetailCost(settings.Markups, new List<uint>(), user);
 			Assert.AreEqual(150, line.MixedCost);
 			Assert.AreEqual(150, line.MixedSum);
 		}

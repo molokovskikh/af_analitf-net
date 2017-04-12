@@ -387,7 +387,10 @@ where c.Id = ?";
 			if (NeedToCalculateDiff)
 				CalculateDiff(offers);
 
-			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, Address));
+			offers.Each(o => {
+				o.Settings = Settings;
+				o.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, Address);
+			});
 			if (Settings.Value.WarnIfOrderedYesterday) {
 				var addressId = Address.Id;
 				RxQuery(s => s.CreateSQLQuery(@"select ProductId
@@ -440,6 +443,7 @@ group by l.ProductId")
 			var orders = activeOrders.ToLookup(o => o.Price.Id);
 			var lines = ActualAddress.ActiveOrders().SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
 			foreach (var offer in offers) {
+				offer.Settings = Settings;
 				offer.Price.Order = orders[offer.Price.Id].FirstOrDefault();
 				offer.OrderLine = lines[offer.Id].FirstOrDefault();
 			}

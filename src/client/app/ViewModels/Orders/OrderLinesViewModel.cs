@@ -255,6 +255,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.OrderBy(l => l.Id)
 						.ToObservableCollection();
 					lines.Each(l => {
+						l.Settings = Settings;
 						l.Order.CalculateStyle(Address);
 						if (l.Order.IsAddressExists())
 							l.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User);

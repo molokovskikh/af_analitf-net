@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				//тк в модульных тестах сессия не инициализируется все запросы будут "завершаться" моментально в той же нитке
 				QueryScheduler = new CurrentThreadScheduler(),
 				TplUiScheduler = new CurrentThreadScheduler(),
-				Settings = new Settings()
+				Settings = new Settings() { Rounding = Rounding.None }
 			};
 
 			manager = ViewModelFixture.StubWindowManager();
@@ -67,6 +67,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				addresses = new[] { address };
 			}
 			var settings = new Settings(addresses);
+			addresses.Each(r => settings.Waybills.Add(new WaybillSettings(user, r)));
 			shell.CurrentAddress.Value = address;
 			shell.Addresses = addresses.ToList();
 

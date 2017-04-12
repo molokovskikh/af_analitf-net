@@ -195,7 +195,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return;
 			}
 			if (Order.Value is Order) {
-				((Order)Order.Value).Lines.Each(x => x.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User));
+				((Order)Order.Value).Lines.Each(x => {
+					x.Settings = Settings;
+					x.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User);
+				});
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
 				var sentLines = (IList<SentOrderLine>) Order.Value.Lines;

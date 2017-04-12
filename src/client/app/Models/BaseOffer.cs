@@ -6,6 +6,7 @@ using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
+using AnalitF.Net.Client.Config;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -145,6 +146,25 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual bool IsSpecialMarkup { get; set; }
 
+		[Ignore]
+		public virtual WaybillSettings WaybillSettings { get; set; }
+		private decimal TaxFactor =>
+			WaybillSettings.Taxation == Taxation.Envd
+					&& (VitallyImportant && !WaybillSettings.IncludeNdsForVitallyImportant
+						|| !VitallyImportant && !WaybillSettings.IncludeNds)
+				? 1m
+				: (1 + NDS.GetValueOrDefault(10) / 100m);
+
+		public virtual MarkupType GetMarkupType()
+		{
+			if (IsSpecialMarkup)
+				return MarkupType.Special;
+			var markupType = VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			if (NDS == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost.GetValueOrDefault() == 0))
+				markupType = MarkupType.Nds18;
+			return markupType;
+		}
+
 		public virtual void Configure(User user)
 		{
 			HideCost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost;
@@ -168,10 +188,33 @@ namespace AnalitF.Net.Client.Models
 
 		public abstract decimal GetResultCost();
 
-		protected decimal GetRetailCost(decimal markup)
+		private Settings _settings;
+
+		[Ignore]
+		public virtual Settings Settings
 		{
-			var cost = HideCost ? GetResultCost() : Cost;
-			return Math.Round(cost * (1 + markup / 100), 2);
+			get
+			{
+				if (_settings == null)
+					_settings = Env.Current?.Settings;
+				return _settings;
+			}
+			set { _settings = value; }
 		}
+
+		protected decimal GetRetailCost(decimal markup, Address address)
+		{
+			WaybillSettings = Settings.Waybills.FirstOrDefault(r => r.BelongsToAddress == address);
+			var type = GetMarkupType();
+			var cost = HideCost ? GetResultCost() : Cost;
+			var baseCost = type == MarkupType.VitallyImportant && ProducerCost.HasValue ? ProducerCost.Value : cost;
+			var taxFactor = type == MarkupType.VitallyImportant && ProducerCost.HasValue && !HideCost ? TaxFactor : 1m;
+			return Util.Round(Math.Round(cost + baseCost * markup / 100 * taxFactor, 2), Settings.Rounding) ?? 0;
+		}
+
+		[Style("RetailCost", Description = "Расчёт от цены поставщика")]
+		public virtual bool IsVIPriceCalcFromSupplier => VitallyImportant && !ProducerCost.HasValue;
+		[Style("RetailCost", Description = "Расчёт от цены производителя")]
+		public virtual bool IsVIPriceCalcFromProducer => VitallyImportant && ProducerCost.HasValue;
 	}
 }
