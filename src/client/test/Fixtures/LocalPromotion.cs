@@ -37,6 +37,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Console.WriteLine("Создана промоакция для товара {0}", Catalog.FullName);
 			Promotion.Catalogs.Add(Catalog);
 			session.Save(Promotion);
+			Promotion.Name += Promotion.Id;
+			session.Save(Promotion);
 			if (!String.IsNullOrEmpty(file)) {
 				if (!File.Exists(file)) {
 					file = FileHelper.MakeRooted(Path.Combine(GetRoot(".."), file));

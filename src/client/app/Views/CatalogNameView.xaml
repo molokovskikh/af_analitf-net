@@ -30,7 +30,7 @@
 
 		<c:DataGrid2 x:Name="CatalogNames" Grid.Row="1" Grid.RowSpan="3" Grid.Column="0"
 								cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
-								SelectionMode="Single" VerticalAlignment="Top" HorizontalScrollBarVisibility="Disabled">
+								SelectionMode="Single" HorizontalScrollBarVisibility="Disabled">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 														Header="Наименование"
@@ -49,7 +49,7 @@
 
 		<c:DataGrid2 x:Name="Catalogs" Grid.Row="1" Grid.Column="2"
 								cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]"
-								SelectionMode="Single" VerticalAlignment="Top">
+								SelectionMode="Single">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 														Header="Форма выпуска"
@@ -58,14 +58,8 @@
 		</c:DataGrid2>
 
 
-		<Grid Grid.Column="2" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
-			</Grid.RowDefinitions>
-			<ContentControl Name="Promotions" Width="auto" Grid.Row="0" HorizontalAlignment="Stretch" />
-			<ContentControl x:Name="ProducerPromotions" Width="auto" Grid.Row="1" HorizontalAlignment="Stretch" />
-		</Grid>
+		<ContentControl Name="Promotions" Grid.Column="2" Grid.Row="2" MinHeight="100"
+			Visibility="{Binding Promotions.Visible.Value, Converter={StaticResource BoolToCollapsed}}" />
 
 		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2"
 										caliburn:QuickSearchBehavior.GridRef="{x:Reference Catalogs}" />

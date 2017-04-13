@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -13,6 +14,11 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
+			Promotions.SetBinding(MaxHeightProperty, new Binding("ActualHeight") {
+				Mode = BindingMode.OneWay,
+				Source = Catalogs,
+				Converter = new LambdaConverter<double>(x => x / 2)
+			});
 			SizeChanged += (sender, args) => {
 				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;
 			};

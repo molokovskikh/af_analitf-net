@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 		public ExpSelector()
 		{
 			InitializeComponent();
+			OK.Focus();
 		}
 	}
 }
