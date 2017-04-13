@@ -560,48 +560,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public void ProducerPromotion()
-		{
-			session.DeleteEach<ProducerPromotion>();
-			var fixture = new LocalProducerPromotion("assets/Валемидин.JPG");
-
-			Fixture(fixture);
-
-			StartWait();
-
-			Click("ShowCatalog");
-
-			OpenOffers(fixture.ProducerPromotion.Catalogs.First());
-
-			AdvanceScheduler(500);
-
-			dispatcher.Invoke(() => {
-				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
-				Assert.IsTrue(producerPromotions.IsVisible);
-				Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
-
-				var presenter = producerPromotions.Descendants<ContentPresenter>()
-					.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
-
-				var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
-				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
-			});
-
-			WaitWindow(fixture.ProducerPromotion.DisplayName);
-			dispatcher.Invoke(() => {
-
-				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
-
-				var image = viewer.Document.Descendants<Image>().First();
-
-				Assert.IsNotNull(image);
-
-				Assert.That(image.Source.Height, Is.GreaterThan(0));
-
-			});
-		}
-
-		[Test]
 		public void Promotion()
 		{
 			session.DeleteEach<Promotion>();
@@ -615,7 +573,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var promotions = activeWindow.Descendants<PromotionPopup>().First();
 				Assert.IsTrue(promotions.IsVisible);
-				Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
+				Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Annotation));
 				var presenter = promotions.Descendants<ContentPresenter>()
 					.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
 				var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
