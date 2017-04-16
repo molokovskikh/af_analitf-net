@@ -158,7 +158,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(stock.Quantity, 2);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
-			Assert.AreEqual(dstStock.SupplyQuantity, 5);
+			Assert.AreEqual(dstStock.SupplyQuantity, 0);
 			Assert.AreEqual(doc.Status, DisplacementDocStatus.NotPosted);
 
 			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве
