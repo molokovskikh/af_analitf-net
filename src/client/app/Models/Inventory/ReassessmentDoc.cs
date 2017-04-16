@@ -94,6 +94,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 				line.DstStock.Timestamp = DateTime.Now;
 				line.DstStock.Quantity += line.Quantity;
+				line.DstStock.SupplyQuantity = line.DstStock.Quantity;
 				session.Save(line.DstStock);
 				session.Save(new StockAction(ActionType.Stock, ActionTypeChange.Plus, line.DstStock, this, line.DstStock.Quantity));
 			}
