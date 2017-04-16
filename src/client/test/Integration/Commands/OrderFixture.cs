@@ -167,6 +167,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var order = MakeOrderClean();
 			order.Price.CostFactor = 1.5m;
 			order.Price.VitallyImportantCostFactor = 1.5m;
+			order.Price.SupplementCostFactor = 1.5m;
 			Assert.AreEqual(UpdateResult.OK, Run(new SendOrders(address)));
 
 			var sentOrder = localSession.Query<SentOrder>().First(o => o.SentOn >= begin);

@@ -40,12 +40,14 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal VitallyImportantDelay { get; set; }
 
+		public virtual decimal SupplementDelay { get; set; }
+
 		//todo! приводит к ошибке сериализации
 		public virtual Price Price { get; set; }
 
 		public override string ToString()
 		{
-			return $"{DayOfWeek} - {OtherDelay} | {VitallyImportantDelay}";
+			return $"{DayOfWeek} - {OtherDelay} | {VitallyImportantDelay} | {SupplementDelay}";
 		}
 	}
 
@@ -149,6 +151,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			CostFactor = 1;
 			VitallyImportantCostFactor = 1;
+			SupplementCostFactor = 1;
 		}
 
 		public virtual PriceComposedId Id { get; set; }
@@ -205,6 +208,9 @@ namespace AnalitF.Net.Client.Models
 
 		//корректировка цен применяемая аптекой, для жизненно важных препаратов
 		public virtual decimal VitallyImportantCostFactor { get; set; }
+
+		//корректировка цен применяемая аптекой, для БАД
+		public virtual decimal SupplementCostFactor { get; set; }
 
 		//экспортировался ли прайс-лист при последнем обновлении
 		public virtual bool IsSynced { get; set; }

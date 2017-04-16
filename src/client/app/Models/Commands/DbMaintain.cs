@@ -15,7 +15,8 @@ namespace AnalitF.Net.Client.Models.Commands
 update Prices p
 	join DelayOfPayments d on d.PriceId = p.PriceId and p.RegionId = d.RegionId and d.DayOfWeek = :dayOfWeek
 set p.CostFactor = ifnull(1 + d.OtherDelay / 100, 1),
-	p.VitallyImportantCostFactor = ifnull(1 + d.VitallyImportantDelay / 100, 1);
+	p.VitallyImportantCostFactor = ifnull(1 + d.VitallyImportantDelay / 100, 1),
+	p.SupplementCostFactor = ifnull(1 + d.SupplementDelay / 100, 1);
 
 drop temporary table if exists Leaders;
 create temporary table Leaders (
@@ -31,7 +32,11 @@ insert into Leaders(ProductId, CatalogId, RegionId, Cost)
 select o.ProductId,
 	o.CatalogId,
 	o.RegionId,
-	min(round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2)) as Cost
+	min(round(o.Cost * CASE
+		WHEN o.VitallyImportant THEN p.VitallyImportantCostFactor
+		WHEN o.CategoryId = 1 THEN p.SupplementCostFactor
+		ELSE p.CostFactor
+	END, 2)) as Cost
 from Offers o
 	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 where o.Junk = 0
@@ -41,7 +46,11 @@ update Leaders l
 	join Offers o on o.RegionId = l.RegionId and o.ProductId = l.ProductId
 	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 set l.PriceId = o.PriceId
-where l.Cost = round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2);
+where l.Cost = round(o.Cost * CASE
+	WHEN o.VitallyImportant THEN p.VitallyImportantCostFactor
+	WHEN o.CategoryId = 1 THEN p.SupplementCostFactor
+	ELSE p.CostFactor
+END, 2);
 
 update Offers o
 	join Leaders l on o.ProductId = l.ProductId and o.RegionId = l.RegionId
@@ -60,13 +69,21 @@ create temporary table NextMinCosts (
 ) engine = memory;
 
 insert into NextMinCosts(NextCost, ProductId, RegionId)
-select min(round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2)),
+select min(round(o.Cost * CASE
+	WHEN o.VitallyImportant THEN p.VitallyImportantCostFactor
+	WHEN o.CategoryId = 1 THEN p.SupplementCostFactor
+	ELSE p.CostFactor
+END, 2)),
 	m.ProductId,
 	m.RegionId
 from Offers o
 	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 	join MinCosts m on m.ProductId = o.ProductId and m.RegionId = o.RegionId
-where round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2) > m.Cost
+where round(o.Cost * CASE
+	WHEN o.VitallyImportant THEN p.VitallyImportantCostFactor
+	WHEN o.CategoryId = 1 THEN p.SupplementCostFactor
+	ELSE p.CostFactor
+END, 2) > m.Cost
 	and o.Junk = 0
 group by m.ProductId, m.RegionId;
 

@@ -80,7 +80,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			command = new UpdateCommand {Clean = false};
 			Assert.AreEqual(UpdateResult.OK, Run(command));
 			//тк ничего не изменило мы должны передать только метаданные
-			totalSize = new DirectoryInfo(clientConfig.UpdateTmpDir).GetFiles().Sum(x => x.Length);
+			var files = new DirectoryInfo(clientConfig.UpdateTmpDir).GetFiles();
+			totalSize = files.Sum(x => x.Length);
 			Assert.That(totalSize, Is.LessThan(20*1024));
 		}
 

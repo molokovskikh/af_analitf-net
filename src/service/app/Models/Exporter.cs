@@ -55,6 +55,7 @@ namespace AnalitF.Net.Service.Models
 		public string ProductSynonym;
 		public string ProducerSynonym;
 		public string Properties;
+		public uint? CategoryId;
 	}
 
 	//результат подготовки может включать как файлы которые должны быть включен в архив
@@ -478,6 +479,7 @@ select
 	p.RegionCode as RegionId,
 	if(d.DayOfWeek = 7, 0, d.DayOfWeek + 1) as DayOfWeek,
 	if(?delayOfPaymentEnabled, d.VitallyImportantDelay, 0) as VitallyImportantDelay,
+	if(?delayOfPaymentEnabled, d.SupplementDelay, 0) as SupplementDelay,
 	if(?delayOfPaymentEnabled, d.OtherDelay, 0) as OtherDelay
 from (Usersettings.DelayOfPayments d, UserSettings.Prices p)
 	join UserSettings.PriceIntersections pi on pi.Id = d.PriceIntersectionId and pi.PriceId = p.PriceCode
@@ -537,7 +539,8 @@ where
 	if(k.Id is null or k.Date < at.PriceDate, core.OptimizationSkip, 1) as OptimizationSkip,
 	core.Exp,
 	products.Properties,
-	Core.Nds
+	Core.Nds,
+	catalog.CategoryId
 ";
 			sql += offersQueryParts.Select + "\r\n";
 			var query = SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false);
@@ -594,8 +597,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 						Exp = reader.GetNullableDateTime(35),
 						Properties = reader.GetNullableString(36),
 						Nds = reader.GetNullableUInt32(37),
+						CategoryId = reader.GetNullableUInt32(38),
 
-						BuyingMatrixType = reader.GetUInt32(38),
+						BuyingMatrixType = reader.GetUInt32(39),
 					});
 				}
 			}
@@ -648,6 +652,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"BarCode",
 				"Properties",
 				"Nds",
+				"CategoryId",
 				"OriginalJunk",
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
@@ -685,7 +690,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.EAN13,
 				o.Properties,
 				o.Nds,
-				o.Junk
+				o.CategoryId,
+				o.Junk,
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -732,6 +738,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	p.MainFirm as BasePrice,
 	(p.OtherDelay + 100) / 100 as CostFactor,
 	(p.VitallyImportantDelay + 100) / 100 as VitallyImportantCostFactor,
+	(p.SupplementDelay + 100) / 100 as SupplementCostFactor,
 	p.CostCode as CostId,
 	pc.CostName
 from (Usersettings.Prices p, Customers.Users u)
@@ -948,7 +955,7 @@ select
   c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where c.Hidden = 0";                                       
+where c.Hidden = 0";
 				CachedExport(Result, sql, "catalogs");
 			}
 			else {
@@ -969,10 +976,10 @@ select
   c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where c.UpdateTime > ?lastSync";                           
+where c.UpdateTime > ?lastSync";
 				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
-			
+
 			if (cumulative){
 				sql = @"
 select
@@ -1494,10 +1501,13 @@ where a.MailId in ({ids.Implode()})";
 					productIds = productIds.Concat(BatchItems.Where(x => x.Item != null).Select(i => i.Item.ProductId));
 				productIds = productIds.Distinct().ToArray();
 
-				var productLookup = connection
-					.Read(String.Format("select Id, CatalogId, Properties from Catalogs.Products where Id in ({0})",
+				var productLookup = connection.Read(String.Format(@"
+select p.Id, p.CatalogId, p.Properties, ct.CategoryId
+from Catalogs.Products p
+join Catalogs.catalog ct on ct.Id = p.CatalogId
+where p.Id in ({0})",
 						productIds.DefaultIfEmpty(0u).Implode()))
-					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Tuple.Create(r["CatalogId"], r["Properties"]));
+					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Tuple.Create(r["CatalogId"], r["Properties"], r["CategoryId"]));
 
 				var orderbatchLookup = (from batch in (BatchItems ?? new List<OrderBatchItem>())
 					where batch.Item != null
@@ -1541,6 +1551,7 @@ where a.MailId in ({ids.Implode()})";
 						"ExportBatchLineId",
 						"Junk",
 						"BarCode",
+						"CategoryId",
 						"OriginalJunk",
 					},
 					items
@@ -1581,6 +1592,7 @@ where a.MailId in ({ids.Implode()})";
 							//уценка с учтом клиентских настроек, будет пересчитана на клиенте
 							i.Junk,
 							i.EAN13,
+							productLookup[i.ProductId].Select(x => x.Item3).FirstOrDefault(),
 							//оригинальная уценка
 							i.Junk,
 						}), truncate: false);
@@ -1714,11 +1726,13 @@ select l.ExportId as ExportOrderId,
 	ol.Cost,
 	oh.RegionCode as RegionId,
 	ol.CoreId as OfferId,
+	ct.CategoryId,
 	ol.Junk as OriginalJunk
 from Logs.PendingOrderLogs l
 	join Orders.OrdersList ol on ol.OrderId = l.OrderId
 		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
 		join Catalogs.Products p on p.Id = ol.ProductId
+		join Catalogs.catalog ct on ct.Id = p.CatalogId
 		left join farm.synonymArchive st on st.SynonymCode = ol.SynonymCode
 		left join farm.synonymFirmCr si on si.SynonymFirmCrCode = ol.SynonymFirmCrCode
 		left join Catalogs.Producers pr on pr.Id = ol.CodefirmCr
@@ -1809,12 +1823,14 @@ select ol.RowId as ServerId,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
 	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
+	ct.CategoryId,
 	ol.Junk as OriginalJunk,
 	ol.RetailCost,
 	ol.RetailMarkup
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
+		join Catalogs.catalog ct on ct.Id = p.CatalogId
 		left join farm.synonymArchive st on st.SynonymCode = ol.SynonymCode
 		left join farm.synonymFirmCr si on si.SynonymFirmCrCode = ol.SynonymFirmCrCode
 		left join Catalogs.Producers pr on pr.Id = ol.CodefirmCr
@@ -2938,7 +2954,7 @@ where a.Enabled = 1
  				sa.SourceStockVersion,
  				sa.Quantity,
  				sa.RetailCost,
-	
+
  				sa.RetailMarkup,
  				sa.DiscountSum,
  				sa.Version

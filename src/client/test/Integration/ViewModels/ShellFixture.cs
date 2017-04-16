@@ -399,6 +399,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				?? new DelayOfPayment(-99.999m, offer.Price);
 			delay.OtherDelay = -99.999m;
 			delay.VitallyImportantDelay = -99.999m;
+			delay.SupplementDelay = -99.999m;
 			session.Save(delay);
 			session.Flush();
 
