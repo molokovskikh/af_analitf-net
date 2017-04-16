@@ -118,7 +118,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 				line.Stock.Incoming(line.Quantity);
 				// если сток создан вместе со строкой - меняется статус, иначе - остаётся какой был
 				if (line.StockIsNew)
+				{
 					line.Stock.Status = StockStatus.Available;
+					line.Stock.Timestamp = DateTime.Now;
+				}
 			}
 		}
 

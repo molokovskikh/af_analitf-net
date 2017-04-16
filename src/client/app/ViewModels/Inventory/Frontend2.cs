@@ -131,6 +131,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 							s.Insert("AnalitF.Net.Client.Models.Inventory.Stock", uline.DstStock);
 							s.Update("AnalitF.Net.Client.Models.Inventory.Stock", uline.SrcStock);
 							s.Insert(uline);
+							UnPackDoc.PostStockActions();
+							s.Insert(uline.SrcStockAction);
+							s.Insert(uline.DstStockAction);
 						}
 						s.Insert(UnPackDoc);
 					}

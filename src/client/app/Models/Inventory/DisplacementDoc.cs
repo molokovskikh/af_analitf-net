@@ -133,6 +133,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Timestamp = DateTime.Now;
 			foreach (var line in Lines) {
 				session.Save(line.SrcStock.DisplacementTo(this, line.Quantity));
+				line.DstStock.Timestamp = DateTime.Now;
+				line.DstStock.Address = DstAddress;
+				session.Save(line.DstStock);
 				session.Save(line.DstStock.DisplacementFrom(this, line.Quantity));
 			}
 		}

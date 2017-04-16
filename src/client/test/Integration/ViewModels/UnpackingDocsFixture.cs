@@ -77,22 +77,22 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsFalse(line.Moved); // не было движения
 
 			//Если снова откроем документ, то получим что было до закрытия
-			doc.UnPost();
-			session.Save(doc);
-			session.Flush();
-			Assert.AreEqual(stock.Quantity, 4);
-			Assert.AreEqual(stock.ReservedQuantity, 1);
-			Assert.AreEqual(dstStock.Quantity, 0);
-			Assert.AreEqual(dstStock.ReservedQuantity, 10);
+			//doc.UnPost();
+			//session.Save(doc);
+			//session.Flush();
+			//Assert.AreEqual(stock.Quantity, 4);
+			//Assert.AreEqual(stock.ReservedQuantity, 1);
+			//Assert.AreEqual(dstStock.Quantity, 0);
+			//Assert.AreEqual(dstStock.ReservedQuantity, 10);
 
 			//Если документ будет удален то на складе получим - Папаверин 5 шт
-			doc.BeforeDelete();
-			session.Delete(doc);
-			session.Flush();
-			Assert.AreEqual(stock.Quantity, 5);
-			Assert.AreEqual(stock.ReservedQuantity, 0);
-			Assert.AreEqual(dstStock.Quantity, 0);
-			Assert.AreEqual(dstStock.ReservedQuantity, 0);
+			//doc.BeforeDelete();
+			//session.Delete(doc);
+			//session.Flush();
+			//Assert.AreEqual(stock.Quantity, 5);
+			//Assert.AreEqual(stock.ReservedQuantity, 0);
+			//Assert.AreEqual(dstStock.Quantity, 0);
+			//Assert.AreEqual(dstStock.ReservedQuantity, 0);
 		}
 	}
 }

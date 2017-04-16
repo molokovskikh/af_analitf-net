@@ -284,7 +284,8 @@ namespace AnalitF.Net.Client.Models
 		DisplacementFrom,
 		CancelDisplacementFrom,
 		EndDisplacement,
-		CheckReturn
+		CheckReturn,
+		UnpackingDoc
 	}
 
 	public enum ActionTypeChange

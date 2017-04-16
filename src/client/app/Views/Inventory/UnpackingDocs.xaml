@@ -26,7 +26,6 @@
 		<WrapPanel Grid.Row="0" Style="{StaticResource FilterWrapPanel}">
 			<Button Name="Delete" Style="{StaticResource FilterElement}" ToolTip="Удалить (Delete)">Удалить</Button>
 			<Button Name="Post" Style="{StaticResource FilterElement}" ToolTip="Провести (F1)">Провести</Button>
-			<Button Name="UnPost" Style="{StaticResource FilterElement}" ToolTip="Распровести (F2)">Распровести</Button>
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>

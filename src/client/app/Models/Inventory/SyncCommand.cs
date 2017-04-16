@@ -34,7 +34,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 				var lastSync = Settings.LastSync.ToUniversalTime();
 
 				using (var zip = new ZipFile()) {
-						var actions = Session.Connection
+					var stocks = Session.Query<Stock>()
+						.Fetch(x => x.Address)
+						.Where(x => x.Timestamp > lastSync && x.ServerId == null)
+						.ToArray();
+					if (stocks.Length > 0)
+					{
+						zip.AddEntry("stocks", JsonConvert.SerializeObject(stocks), System.Text.Encoding.UTF8);
+					}
+					var actions = Session.Connection
 							.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
 								new { lastSync })
 							.ToArray();

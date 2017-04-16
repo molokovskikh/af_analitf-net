@@ -1,4 +1,5 @@
 ﻿using System;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -64,6 +65,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock SrcStock { get; set; }
 		public virtual Stock DstStock { get; set; }
+		[Ignore]
+		public virtual StockAction SrcStockAction { get; set; }
+		[Ignore]
+		public virtual StockAction DstStockAction { get; set; }
 
 		private decimal getPriceForUnit(decimal price, int multiplicity)
 		{
