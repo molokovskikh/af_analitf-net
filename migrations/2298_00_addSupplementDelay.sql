@@ -1,9 +1,5 @@
 ﻿use customers;
 
-alter table usersettings.DelayOfPayments
-add column SupplementDelay DECIMAL(5,3) NOT NULL DEFAULT '0.000' COMMENT 'Значение отсрочки платежа для БАД' after VitallyImportantDelay;
-
-
 DROP PROCEDURE Customers.BaseGetPrices;
 
 CREATE DEFINER=`RootDBMS`@`127.0.0.1` PROCEDURE `BaseGetPrices`(IN `UserIdParam` INT UNSIGNED, IN `AddressIdParam` INT UNSIGNED)
