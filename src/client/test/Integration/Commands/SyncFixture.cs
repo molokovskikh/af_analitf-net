@@ -200,15 +200,17 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			DisplacementDoc.Post(localSession);
 			localSession.Save(DisplacementDoc);
 
-			stockCount = session.Connection.Query<object>("select * from inventory.Stocks").ToArray();
-			actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
 			Run(new SyncCommand());
 			stockCount = session.Connection.Query<object>("select * from inventory.Stocks").ToArray();
 			actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
 			Assert.AreEqual(36, stockCount.Length);
 			Assert.AreEqual(43, actions.Length);
-			
 
+			Run(new SyncCommand());
+			stockCount = session.Connection.Query<object>("select * from inventory.Stocks").ToArray();
+			actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
+			Assert.AreEqual(36, stockCount.Length);
+			Assert.AreEqual(43, actions.Length);
 		}
 	}
 }
