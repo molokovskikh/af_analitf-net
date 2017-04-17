@@ -111,13 +111,20 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(33, stockCount);
 		}
 
-		[Test Ignore("НЕ Доработан")]
+		[Test]
 		public void Exchange()
 		{
 			localSession.Connection.Execute(@"delete from Stocks; delete from StockActions;");
 			session.Connection.Execute(@"delete from inventory.Stocks;");
 			session.Connection.Execute(@"delete from inventory.StockActions;");
+			session.Connection.Execute(@"delete from  Documents.DocumentHeaders;");
+			var stockCount = session.Connection.Query<object>("select * from inventory.Stocks").ToArray();
+			var actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
+			stockCount = localSession.Connection.Query<object>("select * from Stocks").ToArray();
+			actions = localSession.Connection.Query<object>("select * from StockActions").ToArray();
+
 			Run(new SyncCommand());
+
 			var fixture = new CreateWaybill();
 			Fixture(fixture);
 
@@ -130,28 +137,78 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				y.Stock = map.GetValueOrDefault(y.StockId);
 			});
 			waybill.Stock(localSession);
-
+			// чек +0 сток = 33  +1 стокакшин = 34
 			var check = new Check(localSession.Query<User>().First(), address, new[] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
 			check.Lines.Each(x => x.Doc = check);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);
 			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock, CheckType.SaleBuyer)));
 
+			// распаковка +1 сток = 34  +2 стокакшин = 36
 			var unpackingDoc = new UnpackingDoc(address, localSession.Query<User>().First());
 			var unpackingLine = new UnpackingLine(waybill.Lines[1].Stock, 10);
+			unpackingDoc.Lines.Add(unpackingLine);
 			unpackingDoc.Post();
 			unpackingDoc.PostStockActions();
-			unpackingDoc.Lines.Add(unpackingLine);
 			localSession.Save(unpackingDoc);
-			localSession.SaveEach(unpackingDoc.Lines);
-			localSession.SaveEach(unpackingDoc.Lines.Select(x => x.SrcStockAction));
-			localSession.SaveEach(unpackingDoc.Lines.Select(x => x.DstStockAction));
+			foreach (var line in unpackingDoc.Lines)
+			{
+				localSession.Save(line);
+			}
+			unpackingDoc.PostStockActions();
+			foreach (var line in unpackingDoc.Lines)
+			{
+				localSession.Save(line.SrcStockAction);
+				localSession.Save(line.DstStockAction);
+			}
 
+			// Списание +0 сток = 34  +1 стокакшин = 37
+			var writeoffDoc = new WriteoffDoc(address, localSession.Query<User>().First());
+			var writeoffLine = new WriteoffLine(waybill.Lines[2].Stock, 1);
+			writeoffDoc.Lines.Add(writeoffLine);
+			writeoffDoc.Post(localSession);
+			localSession.Save(writeoffDoc);
+
+			//Возврат +0 сток = 34  +1 стокакшин = 38
+			var ReturnDoc = new ReturnDoc(address, localSession.Query<User>().First());
+			ReturnDoc.Supplier = waybill.Supplier;
+			var ReturnLine = new ReturnLine(waybill.Lines[3].Stock, 1);
+			ReturnDoc.Lines.Add(ReturnLine);
+			ReturnDoc.Post(localSession);
+			localSession.Save(ReturnDoc);
+
+			//переоценка +1 сток = 35  +2 стокакшин = 40
+			var ReassessmentDoc = new ReassessmentDoc(address, localSession.Query<User>().First());
+			var stock = waybill.Lines[4].Stock.Copy();
+			stock.RetailCost += 10;
+			var ReassessmentLine = new ReassessmentLine(waybill.Lines[4].Stock, stock);
+			ReassessmentDoc.Lines.Add(ReassessmentLine);
+			ReassessmentDoc.Post(localSession);
+			localSession.Save(ReassessmentDoc);
+
+			//переоценка +0 сток = 35  +1 стокакшин = 41
+			var InventoryDoc = new InventoryDoc(address, localSession.Query<User>().First());
+			var InventoryLine = new InventoryLine(InventoryDoc, waybill.Lines[5].Stock, 5, localSession);
+			InventoryDoc.Lines.Add(InventoryLine);
+			InventoryDoc.Post();
+			localSession.Save(InventoryDoc);
+
+			//Перемещение +1 сток = 36  +2 стокакшин = 43
+			var DisplacementDoc = new DisplacementDoc(address, localSession.Query<User>().First());
+			var DisplacementLine = new DisplacementLine(waybill.Lines[6].Stock, waybill.Lines[6].Stock.Copy(), 5);
+			DisplacementDoc.Lines.Add(DisplacementLine);
+			DisplacementDoc.Post(localSession);
+			localSession.Save(DisplacementDoc);
+
+			stockCount = session.Connection.Query<object>("select * from inventory.Stocks").ToArray();
+			actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
 			Run(new SyncCommand());
-			var stockCount = session.Query<Service.Models.Inventory.Stock>().Count();
-			var actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
-			Assert.AreEqual(34, stockCount);
-			Assert.AreEqual(36, actions.Length);
+			stockCount = session.Connection.Query<object>("select * from inventory.Stocks").ToArray();
+			actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
+			Assert.AreEqual(36, stockCount.Length);
+			Assert.AreEqual(43, actions.Length);
+			
+
 		}
 	}
 }
