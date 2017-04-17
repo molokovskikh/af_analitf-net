@@ -260,9 +260,9 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			});
 			mapper.Class<UnpackingDoc>(m => {
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
-				m.Bag(o => o.Lines, c => {
-					c.Cascade(Cascade.All | Cascade.DeleteOrphans);
-				});
+				//m.Bag(o => o.Lines, c => {
+					//c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				//});
 			});
 			mapper.Class<UnpackingLine>(m => {
 				m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All));

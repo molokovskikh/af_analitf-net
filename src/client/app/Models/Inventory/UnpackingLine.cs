@@ -40,9 +40,17 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SrcRetailCost = srcStock.RetailCost;
 			srcStock.Reserve(1);
 			SrcStock = srcStock;
+			Quantity = DstStock.Multiplicity;
+			if (srcStock.RetailCost.HasValue)
+				RetailCost = dstStock.RetailCost = getPriceForUnit(srcStock.RetailCost.Value, DstStock.Multiplicity);
+
+			if (srcStock.SupplierCost.HasValue)
+				dstStock.SupplierCost = getPriceForUnit(srcStock.SupplierCost.Value, DstStock.Multiplicity);
 		}
 
 		public virtual uint Id { get; set; }
+
+		public virtual uint? UnpackingDocId { get; set; }
 
 		public virtual uint? ServerDocId { get; set; }
 

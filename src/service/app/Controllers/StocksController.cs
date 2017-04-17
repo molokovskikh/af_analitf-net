@@ -93,8 +93,10 @@ namespace AnalitF.Net.Service.Controllers
 					var columnMap = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
 						{ "Id", "ClientPrimaryKey" }
 					};
-					if (item.FileName == "check-lines")	{
+					if (item.FileName == "check-lines") {
 						columnMap.Add("CheckId", "ClientDocId");
+					} else if (item.FileName == "unpacking-lines") {
+						columnMap.Add("UnpackingDocId", "ClientDocId");
 					} else if (item.FileName.EndsWith("Lines"))	{
 						var name = item.FileName.Replace("Lines", "");
 						columnMap.Add($"{name}DocId", "ClientDocId");
@@ -116,6 +118,18 @@ join Inventory.Checks d on d.ClientPrimaryKey = l.ClientDocId and d.UserId = l.U
 set l.CheckId = d.Id
 where l.CheckId is null
 	and d.UserId = ?userId");
+					} else if (item.FileName == "Unpacking") {
+						cmd = new MySqlCommand($"insert into Inventory.UnpackingDocs (UserId, {columns}) values (?userId, {parametersSql});");
+					}
+					else if (item.FileName == "unpacking-lines")
+					{
+						cmd = new MySqlCommand($"insert into Inventory.UnpackingLines (UserId, {columns}) values (?userId, {parametersSql});");
+						postProcessing.Add(@"
+update Inventory.UnpackingLines l
+join Inventory.UnpackingDocs d on d.ClientPrimaryKey = l.ClientDocId and d.UserId = l.UserId
+set l.UnpackingDocId = d.Id
+where l.UnpackingDocId is null
+and d.UserId = ?userId");
 					} else if (item.FileName.EndsWith("Docs")) {
 						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} (UserId, {columns}) values (?userId, {parametersSql});");
 					} else if (item.FileName.EndsWith("Lines"))	{

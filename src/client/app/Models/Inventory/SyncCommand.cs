@@ -92,12 +92,12 @@ from WriteoffLines l
 	join WriteoffDocs d on d.Id = l.WriteoffDocId
 where d.Timestamp > @lastSync");
 
-					WriteModel(zip, disposable, typeof(UnpackingDoc));
-					WriteSql(zip, disposable, "UnpackingLines", @"
+					WriteSql(zip, disposable, "unpacking-lines", @"
 select l.*
 from UnpackingLines l
-	join UnpackingDocs d on d.Id = l.UnpackingDocId
-where d.Timestamp > @lastSync");
+	join UnpackingDocs c on c.Id = l.UnpackingDocId
+where c.Timestamp > @lastSync");
+					WriteSql(zip, disposable, "Unpacking", "select * from UnpackingDocs where Timestamp > @lastSync");
 
 					WriteSql(zip, disposable, "Waybills", @"
 select Id, Timestamp
