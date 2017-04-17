@@ -20,6 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Subscribe(x => {
 				CanDelete.Value = CanPost.Value = x != null;
 			});
+			Session.FlushMode = FlushMode.Never;
 			TrackDb(typeof(Stock));
 		}
 
@@ -27,12 +28,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<DefectusLine> CurrentItem { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
+		public NotifyValue<object> UpdateToken { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 			Bus.Listen<string>("reload").Cast<object>()
-				.Merge(DbReloadToken)
+				.Merge(UpdateToken)
 				.SelectMany(_ => RxQuery(LoadItems))
 				.Subscribe(Items, CloseCancellation.Token);
 		}
@@ -40,7 +42,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override async void OnDeactivate(bool close)
 		{
 			await Env.Query(s => s.UpdateEach(Items.Value.Where(x => x.IsDirty)));
+			Items.Value.ForEach(x => x.IsDirty = false);
 			base.OnDeactivate(close);
+		}
+
+		public override void Update()
+		{
+			UpdateToken.Value = new object();
 		}
 
 		public List<DefectusLine> LoadItems(IStatelessSession session)
