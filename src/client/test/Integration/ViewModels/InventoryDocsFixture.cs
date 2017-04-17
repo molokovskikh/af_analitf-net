@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 0);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 3);
 		}
 	}
 }
