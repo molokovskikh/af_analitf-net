@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 				line.SrcStock.ReservedQuantity -= line.SrcQuantity;
 				line.DstStock.SupplyQuantity = line.DstStock.Quantity;
 				line.DstStock.Timestamp = DateTime.Now;
-				line.DstStock.Incoming(line.Quantity);
+				line.DstStock.ReservedQuantity -= line.DstStock.Quantity;
 			}
 		}
 		public virtual void PostStockActions()

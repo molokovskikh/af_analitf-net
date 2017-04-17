@@ -20,7 +20,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Sync_command()
 		{
 			settings.LastSync = DateTime.MinValue;
-			var stock = new Stock {
+			var stock = new Stock
+			{
 				Product = "Папаверин",
 				Status = StockStatus.Available,
 				Address = address,
@@ -64,7 +65,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
 			var stockids = waybill.Lines.Where(x => x.StockId != null).Select(x => x.StockId).ToArray();
 			var map = localSession.Query<Stock>().Where(x => stockids.Contains(x.ServerId)).ToDictionary(x => x.ServerId);
-			waybill.Lines.Each(y => {
+			waybill.Lines.Each(y =>
+			{
 				y.Stock = map.GetValueOrDefault(y.StockId);
 			});
 
@@ -73,7 +75,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var actions = localSession.Connection.Query<StockAction>("select * from StockActions").ToArray();
 			Assert.AreEqual(33, actions.Length);
 
-			var check = new Check(localSession.Query<User>().First(), address, new [] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
+			var check = new Check(localSession.Query<User>().First(), address, new[] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
 			check.Lines.Each(x => x.Doc = check);
 			localSession.Save(check);
 			localSession.SaveEach(check.Lines);
@@ -87,7 +89,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(34, actions.Length);
 			Assert.AreEqual(0, updatedStock.Quantity, $"stock id = {updatedStock.Id}");
 			Assert.AreEqual(33, stocks.Count);
-			foreach (var stock in stocks) {
+			foreach (var stock in stocks)
+			{
 				Assert.AreEqual(Service.Models.Inventory.StockStatus.Available, stock.Status, $"stock id = {stock.Id}");
 			}
 			waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
@@ -106,6 +109,49 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(34, actions.Length);
 			Assert.AreEqual(0, updatedStock.Quantity, $"stock id = {updatedStock.Id}");
 			Assert.AreEqual(33, stockCount);
+		}
+
+		[Test Ignore("НЕ Доработан")]
+		public void Exchange()
+		{
+			localSession.Connection.Execute(@"delete from Stocks; delete from StockActions;");
+			session.Connection.Execute(@"delete from inventory.Stocks;");
+			session.Connection.Execute(@"delete from inventory.StockActions;");
+			Run(new SyncCommand());
+			var fixture = new CreateWaybill();
+			Fixture(fixture);
+
+			Run(new UpdateCommand("Waybills"));
+			var waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
+			var stockids = waybill.Lines.Where(x => x.StockId != null).Select(x => x.StockId).ToArray();
+			var map = localSession.Query<Stock>().Where(x => stockids.Contains(x.ServerId)).ToDictionary(x => x.ServerId);
+			waybill.Lines.Each(y =>
+			{
+				y.Stock = map.GetValueOrDefault(y.StockId);
+			});
+			waybill.Stock(localSession);
+
+			var check = new Check(localSession.Query<User>().First(), address, new[] { new CheckLine(waybill.Lines[0].Stock, 1), }, CheckType.SaleBuyer);
+			check.Lines.Each(x => x.Doc = check);
+			localSession.Save(check);
+			localSession.SaveEach(check.Lines);
+			localSession.SaveEach(check.Lines.Select(x => x.UpdateStock(x.Stock, CheckType.SaleBuyer)));
+
+			var unpackingDoc = new UnpackingDoc(address, localSession.Query<User>().First());
+			var unpackingLine = new UnpackingLine(waybill.Lines[1].Stock, 10);
+			unpackingDoc.Post();
+			unpackingDoc.PostStockActions();
+			unpackingDoc.Lines.Add(unpackingLine);
+			localSession.Save(unpackingDoc);
+			localSession.SaveEach(unpackingDoc.Lines);
+			localSession.SaveEach(unpackingDoc.Lines.Select(x => x.SrcStockAction));
+			localSession.SaveEach(unpackingDoc.Lines.Select(x => x.DstStockAction));
+
+			Run(new SyncCommand());
+			var stockCount = session.Query<Service.Models.Inventory.Stock>().Count();
+			var actions = session.Connection.Query<object>("select * from inventory.StockActions").ToArray();
+			Assert.AreEqual(34, stockCount);
+			Assert.AreEqual(36, actions.Length);
 		}
 	}
 }

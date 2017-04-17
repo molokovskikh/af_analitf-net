@@ -49,6 +49,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			// кратность 10
 			var line = new UnpackingLine(stock, 10);
 			doc.Lines.Add(line);
+			session.Save(line);
 			session.Save(doc);
 			session.Flush();
 			// после создания распаковки - распакованная упаковка в резерве
@@ -58,7 +59,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(line.Quantity, 10);
 			var dstStock = line.DstStock;
 			Assert.AreEqual(dstStock.ReservedQuantity, 10);
-			Assert.AreEqual(dstStock.Quantity, 0);
+			Assert.AreEqual(dstStock.Quantity, 10);
 			Assert.AreEqual(line.RetailCost, 1.26m);
 			Assert.AreEqual(dstStock.RetailCost, 1.26m);
 			Assert.AreEqual(line.Delta, -0.07m);

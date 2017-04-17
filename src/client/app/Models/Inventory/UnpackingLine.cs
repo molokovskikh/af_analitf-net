@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			var quantity = 1m;
 			Stock.Copy(srcStock, this);
 			var dstStock = srcStock.Copy();
-			dstStock.Quantity = 0;
+			dstStock.Quantity = multiplicity;
 			dstStock.Unpacked = true;
 			Quantity = dstStock.ReservedQuantity = dstStock.Multiplicity = multiplicity;
 			DstStock = dstStock;
