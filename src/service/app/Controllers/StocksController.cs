@@ -211,7 +211,7 @@ where l.{name}DocId is null
 					throw new Exception($"Не удалось найти запись {action.ClientStockId}");
 			}
 			if (action.ActionType == ActionType.Stock
-				 || action.ActionType == ActionType.InventoryDoc)
+				 || action.ActionType == ActionType.DisplacementFrom)
 			{
 				source.ClientPrimaryKey = action.ClientStockId;
 				source.CreatedByUser = CurrentUser;

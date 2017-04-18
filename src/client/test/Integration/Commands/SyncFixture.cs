@@ -192,10 +192,10 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			InventoryDoc.Lines.Add(InventoryLine);
 			InventoryDoc.Post();
 			localSession.Save(InventoryDoc);
-
+			
 			//Перемещение +1 сток = 36  +2 стокакшин = 43
 			var DisplacementDoc = new DisplacementDoc(address, localSession.Query<User>().First());
-			var DisplacementLine = new DisplacementLine(waybill.Lines[6].Stock, waybill.Lines[6].Stock.Copy(), 5);
+			var DisplacementLine = new DisplacementLine(waybill.Lines[6].Stock, waybill.Lines[6].Stock.Copy(), 1);
 			DisplacementDoc.Lines.Add(DisplacementLine);
 			DisplacementDoc.Post(localSession);
 			localSession.Save(DisplacementDoc);
