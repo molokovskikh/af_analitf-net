@@ -333,5 +333,29 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.ToEditable();
 			Assert.IsTrue(model.Waybill.IsReadOnly);
 		}
+
+		[Test]
+		public void BarcodeScanned()
+		{
+			BarcodeProducts BarcodeProduct = new BarcodeProducts()
+			{
+				Product = session.Query<Product>().First(),
+				Producer = session.Query<Producer>().First(),
+				Barcode = "30"
+			};
+			model.User.IsStockEnabled = true;
+			model.Waybill.IsCreatedByUser = true;
+			session.Save(BarcodeProduct);
+			var result = model.BarcodeScanned("30").GetEnumerator();
+			result.MoveNext();
+			var dialog = ((AddWaybillLineFromCatalog)((DialogResult)result.Current).Model);
+			dialog.SupplierCost.Value = 10;
+			dialog.Quantity.Value = 3;
+			dialog.OK();
+			result.MoveNext();
+
+			Assert.AreEqual(BarcodeProduct.Producer.Id, model.CurrentWaybillLine.Value.ProducerId);
+			Assert.AreEqual(BarcodeProduct.Product.Id, model.CurrentWaybillLine.Value.ProductId);
+		}
 	}
 }

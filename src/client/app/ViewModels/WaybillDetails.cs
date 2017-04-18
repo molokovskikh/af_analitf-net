@@ -682,5 +682,35 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentLine.Value = Lines.Value.AddNewItem(line);
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
 		}
+
+		public IEnumerable<IResult> BarcodeScanned(string barcode)
+		{
+			if (!User.IsStockEnabled || !CanAddFromCatalog)
+				yield break;
+
+			BarcodeProducts BarcodeProduct = Session.Query<BarcodeProducts>()
+				.Where(x => x.Barcode == barcode).FirstOrDefault();
+			if (BarcodeProduct != null)
+			{
+				var dlg = new AddWaybillLineFromCatalog(BarcodeProduct);
+				yield return new DialogResult(dlg);
+				if (dlg.WasCancelled)
+					yield break;
+				var line = new WaybillLine(Waybill)
+				{
+					CatalogId = dlg.CurrentCatalog.Value.Id,
+					ProductId = Session.Query<Product>().FirstOrDefault(r => r.CatalogId == dlg.CurrentCatalog.Value.Id)?.Id,
+					Product = dlg.CurrentCatalog.Value.FullName,
+					ProducerId = dlg.CurrentProducer.Value.Id,
+					Producer = dlg.CurrentProducer.Value.Name,
+					SupplierCost = dlg.SupplierCost.Value,
+					Quantity = dlg.Quantity.Value
+				};
+				CurrentLine.Value = Lines.Value.AddNewItem(line);
+				CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
+			}
+			else
+				Manager.Notify("Товар по штрихкоду не найден");
+		}
 	}
 }
