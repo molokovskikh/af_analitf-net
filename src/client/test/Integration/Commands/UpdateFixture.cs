@@ -404,6 +404,14 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			localSession.Refresh(settings);
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
+
+			// #68427 Корректировка цены БАД
+			var delay = localSession.Query<DelayOfPayment>().First();
+			var price = delay.Price;
+			Assert.AreEqual(price.SupplementCostFactor, 1.02m);
+			var offer = localSession.Query<Offer>().First(x => x.Price == price);
+			offer.CategoryId = 1;
+			Assert.AreEqual(offer.ResultCost, Math.Round(offer.Cost * price.SupplementCostFactor, 2));
 		}
 
 		[Test]
