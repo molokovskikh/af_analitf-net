@@ -30,6 +30,27 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => IsOkEnabled.Value = CurrentCatalog.Value != null && CurrentProducer.Value != null && SupplierCost.Value > 0 && Quantity.Value > 0);
 		}
 
+		public AddWaybillLineFromCatalog(BarcodeProducts barcodeProducts)
+		{
+			InitFields();
+			DisplayName = "Добавление из каталога";
+			CurrentCatalog = new NotifyValue<Catalog>();
+			CatalogTerm = new NotifyValue<string>();
+			ProducerTerm = new NotifyValue<string>();
+			CurrentProducer = new NotifyValue<Producer>();
+			WasCancelled = true;
+			IsOkEnabled.Value = false;
+			CurrentCatalog.Value = Session.Get<Catalog>(barcodeProducts.Product.CatalogId);
+			CatalogTerm.Value = Session.Get<Catalog>(barcodeProducts.Product.CatalogId).FullName;
+			CurrentProducer.Value = Session.Get<Producer>(barcodeProducts.Producer.Id);
+			ProducerTerm.Value = Session.Get<Producer>(barcodeProducts.Producer.Id).Name;
+			CurrentCatalog.Changed()
+				.Merge(CurrentProducer.Changed())
+				.Merge(SupplierCost.Changed())
+				.Merge(Quantity.Changed())
+				.Subscribe(_ => IsOkEnabled.Value = CurrentCatalog.Value != null && CurrentProducer.Value != null && SupplierCost.Value > 0 && Quantity.Value > 0);
+		}
+
 		public bool WasCancelled { get; private set; }
 		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 		public NotifyValue<Catalog> CurrentCatalog { get; set; }

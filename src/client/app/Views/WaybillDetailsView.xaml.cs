@@ -14,6 +14,8 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
+using System.Collections.Generic;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -66,6 +68,13 @@ namespace AnalitF.Net.Client.Views
 			binding.Converter = new ComboBoxSelectedItemConverter();
 			binding.ConverterParameter = items;
 			BindingOperations.SetBinding(element, Selector.SelectedItemProperty, binding);
+
+			DataContextChanged += (sender, args) => {
+				if (model == null)
+					return;
+				var handler = new BarcodeHandler(this, model.Settings);
+				handler.Barcode.Subscribe(x => Execute(model.BarcodeScanned(x)));
+			};
 		}
 
 		private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs args)
@@ -296,11 +305,18 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
+
+
 		}
 
 		public void ApplyStyles()
 		{
 			StyleHelper.ApplyStyles(typeof(WaybillLine), lines, Application.Current.Resources, Legend);
+		}
+
+		private void Execute(IEnumerable<IResult> enumerable)
+		{
+			Coroutine.BeginExecute(enumerable.GetEnumerator(), new ActionExecutionContext { View = this });
 		}
 	}
 }
