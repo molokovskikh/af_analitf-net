@@ -214,9 +214,11 @@ namespace AnalitF.Net.Service.Test
 				" ReturnDocs.txt, ReturnLines.meta.txt, ReturnLines.txt, UnpackingDocs.meta.txt, UnpackingDocs.txt," +
 				" UnpackingLines.meta.txt, UnpackingLines.txt, WriteoffDocs.meta.txt, WriteoffDocs.txt," +
 				" WriteoffLines.meta.txt, WriteoffLines.txt," +
+				" MarkupGlobalConfigs.meta.txt, MarkupGlobalConfigs.txt," +
 				$" Waybills/{Path.GetFileName(waybillFile)}, Waybills.meta.txt, Waybills.txt," +
 				" WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt," +
-				" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
+				" OrderRejects.meta.txt, OrderRejects.txt,"+
+				" OrderRejectLines.meta.txt, OrderRejectLines.txt," +
 				" LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
 		}
 
@@ -252,10 +254,12 @@ namespace AnalitF.Net.Service.Test
 				" ReturnDocs.txt, ReturnLines.meta.txt, ReturnLines.txt, UnpackingDocs.meta.txt, UnpackingDocs.txt," +
 				" UnpackingLines.meta.txt, UnpackingLines.txt, WriteoffDocs.meta.txt, WriteoffDocs.txt," +
 				" WriteoffLines.meta.txt, WriteoffLines.txt," +
+				" MarkupGlobalConfigs.meta.txt, MarkupGlobalConfigs.txt," +
 				" Waybills.meta.txt, Waybills.txt," +
 				" WaybillLines.meta.txt, WaybillLines.txt," +
 				" WaybillOrders.meta.txt, WaybillOrders.txt," +
-				" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
+				" OrderRejects.meta.txt, OrderRejects.txt,"+
+				" OrderRejectLines.meta.txt, OrderRejectLines.txt," +
 				" LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				files);
 		}
@@ -586,6 +590,51 @@ namespace AnalitF.Net.Service.Test
 		{
 			exporter.ExportDb();
 			file = exporter.Compress(file);
+		}
+		[Test]
+		public void Export_GlobalMarkups()
+		{
+			session.Flush();
+			if (session.Transaction.IsActive) {
+				session.Transaction.Commit();
+			}
+			session.BeginTransaction();
+			session.CreateSQLQuery($"UPDATE customers.clients SET MarkupsSynchronization = 1 WHERE Id = {user.Client.Id}")
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(
+				$"INSERT INTO usersettings.MarkupGlobalConfig (ClientId, Type, Markup, MaxMarkup, MaxSupplierMarkup, Begin, End) VALUES ({user.Client.Id}, {1}, 10, 20, 20, 0, 50) ")
+				.ExecuteUpdate();
+			session.CreateSQLQuery(
+				$"INSERT INTO usersettings.MarkupGlobalConfig (ClientId, Type, Markup, MaxMarkup, MaxSupplierMarkup, Begin, End) VALUES ({user.Client.Id}, {1}, 10, 20, 20, 50, 500) ")
+				.ExecuteUpdate();
+			session.CreateSQLQuery(
+				$"INSERT INTO usersettings.MarkupGlobalConfig (ClientId, Type, Markup, MaxMarkup, MaxSupplierMarkup, Begin, End) VALUES ({user.Client.Id}, {1}, 10, 20, 20, 500, 1000000) ")
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(
+				$"INSERT INTO usersettings.MarkupGlobalConfig (ClientId, Type, Markup, MaxMarkup, MaxSupplierMarkup, Begin, End) VALUES ({user.Client.Id}, {0}, 10, 20, 20, 0, 1000000) ")
+				.ExecuteUpdate();
+			session.CreateSQLQuery(
+				$"INSERT INTO usersettings.MarkupGlobalConfig (ClientId, Type, Markup, MaxMarkup, MaxSupplierMarkup, Begin, End) VALUES ({user.Client.Id}, {2}, 10, 20, 20, 0, 1000000) ")
+				.ExecuteUpdate();
+			session.CreateSQLQuery(
+				$"INSERT INTO usersettings.MarkupGlobalConfig (ClientId, Type, Markup, MaxMarkup, MaxSupplierMarkup, Begin, End) VALUES ({user.Client.Id}, {3}, 10, 20, 20, 0, 1000000) ")
+				.ExecuteUpdate();
+
+			session.Transaction.Commit();
+			session.BeginTransaction();
+
+			exporter.Export();
+			var files = ListResult();
+			var result = exporter.Result.First(r => r.ArchiveFileName == "MarkupGlobalConfigs.txt");
+			var doc = File.ReadAllLines(result.LocalFileName);
+			Assert.IsTrue(doc.Count(s => s.IndexOf("1	0.00	50.00	10.00	20.00	20.00") != -1) == 1);
+			Assert.IsTrue(doc.Count(s => s.IndexOf("1	50.00	500.00	10.00	20.00	20.00") != -1) == 1);
+			Assert.IsTrue(doc.Count(s => s.IndexOf("1	500.00	999999.99	10.00	20.00	20.00") != -1) == 1);
+			Assert.IsTrue(doc.Count(s => s.IndexOf("0	0.00	999999.99	10.00	20.00	20.00") != -1) == 1);
+			Assert.IsTrue(doc.Count(s => s.IndexOf("2	0.00	999999.99	10.00	20.00	20.00") != -1) == 1);
+			Assert.IsTrue(doc.Count(s => s.IndexOf("3	0.00	999999.99	10.00	20.00	20.00") != -1) == 1);
 		}
 	}
 }

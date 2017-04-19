@@ -939,9 +939,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> MicroUpdate()
 		{
-			return Sync(new UpdateCommand {
+			var result = Sync(new UpdateCommand {
 				SyncData = "Waybills"
 			});
+			var settings = session.Query<Settings>().FirstOrDefault();
+			if (settings != null) {
+				var markupGlobalConfigList = session.Query<MarkupGlobalConfig>().ToList();
+				var addresses = session.Query<Address>().ToList();
+				settings.SetGlobalMarkupsSettingsForAddress(addresses, markupGlobalConfigList);
+				session.Save(settings);
+			}
+			return result;
 		}
 
 		public IEnumerable<IResult> CleanSync()

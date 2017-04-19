@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -112,6 +113,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Printers = PrintHelper.GetPrinters().Select(x => x.Name).ToArray();
 			if (Session != null)
 				WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
+
+			MarkupsReadonly.Value = Settings.Value.HasMarkupGlobalConfig;
+			MarkupsReadonlyInverce.Value = !Settings.Value.HasMarkupGlobalConfig;
+			
+			MarkupsReadonlyHref.Value = ConfigurationManager.AppSettings.Get("UriOfClientMarkupConfigurator");
 		}
 
 		public string[] Printers { get; set; }
@@ -163,6 +169,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<IList<MarkupConfig>> Markups { get; set; }
 		public bool OverwriteVitallyImportant { get; set; }
 		public NotifyValue<IList<MarkupConfig>> VitallyImportantMarkups { get; set; }
+
+		public NotifyValue<bool> MarkupsReadonly { get; set; }
+		public NotifyValue<bool> MarkupsReadonlyInverce { get; set; }
+		public NotifyValue<string> MarkupsReadonlyHref { get; set; }
 
 		public NotifyValue<string> SpecialMarkupSearchText { get; set; }
 		public NotifyValue<bool> SpecialMarkupSearchEverywhere { get; set; }
