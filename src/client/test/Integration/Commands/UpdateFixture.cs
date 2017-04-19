@@ -411,6 +411,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(price.SupplementCostFactor, 1.02m);
 			var offer = localSession.Query<Offer>().First(x => x.Price == price);
 			offer.CategoryId = 1;
+			offer.VitallyImportant = false;
 			Assert.AreEqual(offer.ResultCost, Math.Round(offer.Cost * price.SupplementCostFactor, 2));
 		}
 
