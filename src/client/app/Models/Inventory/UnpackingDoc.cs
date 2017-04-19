@@ -103,16 +103,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		}
 
-		//public virtual void UnPost()
-		//{
-		//	CloseDate = null;
-		//	Status = DocStatus.NotPosted;
-		//	foreach (var line in Lines)
-		//	{
-		//		line.SrcStock.ReservedQuantity += line.SrcQuantity;
-		//		line.DstStock.CancelIncoming(line.Quantity);
-		//	}
-		//}
+		public virtual void UnPost()
+		{
+			CloseDate = null;
+			Status = DocStatus.NotPosted;
+			foreach (var line in Lines)
+			{
+				line.SrcStock.ReservedQuantity += line.SrcQuantity;
+				line.DstStock.CancelIncoming(line.Quantity);
+			}
+		}
 
 		public virtual void BeforeDelete()
 		{

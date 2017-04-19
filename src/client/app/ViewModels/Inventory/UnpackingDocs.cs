@@ -112,15 +112,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			CurrentItem.Refresh();
 		}
 
-		//public void UnPost()
-		//{
-		//	if (!Confirm("Распровести выбранный документ?"))
-		//		return;
-		//	CurrentItem.Value.UnPost();
-		//	Session.Flush();
-		//	Update();
-		//	CurrentItem.Refresh();
-		//}
+		public void UnPost()
+		{
+			if (!Confirm("Распровести выбранный документ?"))
+				return;
+			CurrentItem.Value.UnPost();
+			Session.Flush();
+			Update();
+			CurrentItem.Refresh();
+		}
 
 		public void EnterItem()
 		{
