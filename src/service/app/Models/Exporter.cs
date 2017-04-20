@@ -948,7 +948,7 @@ select
   c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where c.Hidden = 0";                                       
+where c.Hidden = 0";
 				CachedExport(Result, sql, "catalogs");
 			}
 			else {
@@ -969,10 +969,10 @@ select
   c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where c.UpdateTime > ?lastSync";                           
+where c.UpdateTime > ?lastSync";
 				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
-			
+
 			if (cumulative){
 				sql = @"
 select
@@ -1174,10 +1174,11 @@ where PublicationDate < curdate() + interval 1 day
 					Content = String.Format(template, news[1])
 				});
 			}
-
+			
 			ExportPromotions();
 			ExportProducerPromotions();
 			ExportMails();
+			//ExportDocs происходит выгрузка MarkupGlobalConfig
 			ExportDocs();
 			ExportOrders();
 			//выбираем sql запросы которые будут выполнены на клиенте что бы в случае аварии починить базу клиента
@@ -2269,6 +2270,16 @@ where d.Timestamp > ?lastSync
 				.SetParameter("userId", user.Id)
 				.ExecuteUpdate();
 
+			
+			sql = @"
+select mkgc.Id, mkgc.Type, TRUNCATE(mkgc.Begin, 2) as Begin, TRUNCATE(mkgc.End, 2) as End, TRUNCATE(mkgc.Markup, 2) as Markup, TRUNCATE(mkgc.MaxMarkup, 2) as MaxMarkup, TRUNCATE(mkgc.MaxSupplierMarkup, 2) as MaxSupplierMarkup
+from usersettings.MarkupGlobalConfig as mkgc
+INNER JOIN customers.clients as cl ON cl.Id = mkgc.ClientId
+where mkgc.ClientId = ?clientId AND cl.MarkupsSynchronization = 1";
+			Export(Result, sql, "MarkupGlobalConfigs", true, new { clientId = user.Client.Id });
+
+
+
 			var logs = session.Query<DocumentSendLog>()
 				.Where(l => !l.Committed && l.User.Id == user.Id && l.Document.Address.Enabled)
 				.OrderByDescending(x => x.Document.LogTime)
@@ -2938,7 +2949,7 @@ where a.Enabled = 1
  				sa.SourceStockVersion,
  				sa.Quantity,
  				sa.RetailCost,
-	
+
  				sa.RetailMarkup,
  				sa.DiscountSum,
  				sa.Version

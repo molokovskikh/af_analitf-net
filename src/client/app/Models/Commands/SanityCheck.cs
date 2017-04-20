@@ -108,7 +108,10 @@ namespace AnalitF.Net.Client.Models.Commands
 						session.Query<WaybillSettings>().Each(settings.Waybills.Add);
 				}
 
+				var markupGlobalConfigList = session.Query<MarkupGlobalConfig>().ToList();
 				var addresses = session.Query<Address>().ToList();
+				settings.SetGlobalMarkupsSettingsForAddress(addresses, markupGlobalConfigList);
+
 				var mainAddress = addresses.FirstOrDefault();
 				foreach (var address in addresses.Except(new [] { mainAddress }))
 					settings.CopyMarkups(mainAddress, address);

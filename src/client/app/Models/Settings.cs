@@ -101,6 +101,7 @@ namespace AnalitF.Net.Client.Models
 		private string _proxyHost;
 		private int? _barCodePrefix;
 		private int? _barCodeSufix;
+		private bool _hasMarkupGlobalConfig;
 
 		public Settings(int token = 0, params Address[] addresses)
 			: this(addresses)
@@ -234,7 +235,11 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged();
 			}
 		}
-
+		public virtual bool HasMarkupGlobalConfig
+		{
+			get { return _hasMarkupGlobalConfig; }
+		}
+		
 		public virtual bool UseProxy
 		{
 			get { return _useProxy; }
@@ -520,7 +525,7 @@ namespace AnalitF.Net.Client.Models
 				return String.IsNullOrEmpty(ReportDir) ? Path.Combine(root, "Отчеты") : ReportDir;
 			return null;
 		}
-
+		
 		public virtual string InitAndMap(string name)
 		{
 			var dir = MapPath(name);
@@ -660,6 +665,26 @@ namespace AnalitF.Net.Client.Models
 			Markups.AddEach(Markups
 				.Where(x => x.Address == src)
 				.Select(x => new MarkupConfig(x, dst)));
+		}
+
+		public virtual void SetGlobalMarkupsSettingsForAddress(List<Address> addressList,
+			List<MarkupGlobalConfig> markupGlobalConfigList)
+		{
+			if (markupGlobalConfigList.Count == 0) {
+				_hasMarkupGlobalConfig = false;
+				return;
+			}
+			Markups.Clear();
+			_hasMarkupGlobalConfig = true;
+			foreach (var address in addressList) {
+				markupGlobalConfigList.Select(
+					s =>
+						new MarkupConfig(address, s.Begin, s.End, s.Markup, s.Type) {
+							MaxMarkup = s.MaxMarkup,
+							MaxSupplierMarkup = s.MaxSupplierMarkup
+						})
+					.Each(AddMarkup);
+			}
 		}
 
 		public virtual HttpClient GetHttpClient(Config.Config config,

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -582,6 +583,11 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			loadable.IsDownloading = false;
 			loadable.RequstCancellation.Dispose();
+		}
+
+		public virtual void OpenLink(string url)
+		{
+			Process.Start(new ProcessStartInfo(url));
 		}
 
 		public virtual IEnumerable<IResult> Open(Loadable loadable)

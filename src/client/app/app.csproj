@@ -320,6 +320,7 @@
     <Compile Include="Models\Inventory\WriteoffDoc.cs" />
     <Compile Include="Models\Inventory\WriteoffLine.cs" />
     <Compile Include="Models\Inventory\WriteoffReason.cs" />
+    <Compile Include="Models\MarkupGlobalConfig.cs" />
     <Compile Include="Models\Print\CheckDetailsDocument.cs" />
     <Compile Include="Models\Print\CheckDocument.cs" />
     <Compile Include="Models\Print\ShelfLifeDocument.cs" />
