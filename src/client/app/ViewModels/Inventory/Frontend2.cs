@@ -29,6 +29,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			OnCloseDisposable.Add(SearchBehavior = new SearchBehavior(Env));
 			SearchBehavior.ActiveSearchTerm.Where(x => !String.IsNullOrEmpty(x))
 				.Subscribe(x => Coroutine.BeginExecute(Enter().GetEnumerator()));
+			CurrentCatalog.Select(x => x?.Name?.Description != null)
+				.Subscribe(CanShowDescription);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -41,6 +43,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 		public NotifyValue<decimal> CheckSum { get; set; }
 		public NotifyValue<decimal> DiscontSum { get; set; }
+		public NotifyValue<bool> CanShowDescription { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -145,7 +148,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 							s.Update(stock);
 						}
 						s.Insert(line);
-						
+
 					}
 					trx.Commit();
 				}
@@ -264,7 +267,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						yield return new DialogResult(inputQuantity, resizable: false);
 						if (!inputQuantity.WasCancelled)
 						{
-							AddBarcodeProduct(inputQuantity.BarcodeProduct.Value, 
+							AddBarcodeProduct(inputQuantity.BarcodeProduct.Value,
 								(uint)inputQuantity.Quantity.Value, (decimal)inputQuantity.RetailCost.Value);
 							yield break;
 						}
@@ -390,7 +393,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void ShowDescription()
 		{
-			if (!(CurrentCatalog.Value.Name?.Description != null))
+			if (!CanShowDescription)
 				return;
 			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}

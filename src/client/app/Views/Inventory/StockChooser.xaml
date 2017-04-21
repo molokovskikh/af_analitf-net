@@ -19,7 +19,16 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Label Grid.Row="0" x:Name="Name" Style="{StaticResource HeaderLabel}" />
+		<Grid Grid.Row="0" Margin="3">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Label Grid.Row="0" x:Name="Name" Style="{StaticResource HeaderLabel}" Padding="0" />
+			<Label Grid.Row="1" x:Name="Message" Style="{StaticResource HeaderLabel}" Padding="0" />
+			<CheckBox Grid.Row="2" x:Name="ShowEquivalents" Content="Показать эквиваленты" />
+		</Grid>
 		<controls:DataGrid2 Grid.Row="1" Grid.Column="0" x:Name="Items" FontSize="20" behaviors:Editable.Editor="{Binding .}">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Штрих-Код" Binding="{Binding Barcode}" Width="*" />

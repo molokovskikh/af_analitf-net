@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 			var lastEdit = DateTime.MinValue;
 			var edit = textInput
-				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Text) != null)
+				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Text) != null && grid.SelectedItem != null)
 				.Do(e => e.EventArgs.Handled = true)
 				.Select(e => new Func<string, string>(v => {
 					var text = e.EventArgs.Text;
@@ -60,11 +60,11 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 					}
 				}));
 
-			var backspace = keydown.Where(e => e.EventArgs.Key == Key.Back)
+			var backspace = keydown.Where(e => e.EventArgs.Key == Key.Back && grid.SelectedItem != null)
 				.Do(e => e.EventArgs.Handled = true)
 				.Select(e => new Func<string, string>(v => v.Slice(0, -2)));
 
-			var delete = keydown.Where(e => e.EventArgs.Key == Key.Delete)
+			var delete = keydown.Where(e => e.EventArgs.Key == Key.Delete && grid.SelectedItem != null)
 				.Do(e => e.EventArgs.Handled = true)
 				.Select(e => new Func<string, string>(v => ""));
 

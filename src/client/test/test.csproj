@@ -158,7 +158,6 @@
     <Compile Include="Integration\ViewModels\ShelfLifeFixture.cs" />
     <Compile Include="Fixtures\CreateUser.cs" />
     <Compile Include="Integration\ViewModels\EditInventoryDocFixture.cs" />
-    <Compile Include="Integration\ViewModels\FrontendFixture.cs" />
     <Compile Include="Integration\ViewModels\UnpackingDocsFixture.cs" />
     <Compile Include="Integration\ViewModels\InventoryDocsFixture.cs" />
     <Compile Include="Integration\ViewModels\DisplacementFixture.cs" />

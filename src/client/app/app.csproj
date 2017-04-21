@@ -491,7 +491,6 @@
     <Compile Include="ViewModels\Inventory\EditInventoryDoc.cs" />
     <Compile Include="ViewModels\Inventory\EditWriteoffDoc.cs" />
     <Compile Include="ViewModels\Inventory\ProductSearch.cs" />
-    <Compile Include="ViewModels\Inventory\Frontend.cs" />
     <Compile Include="ViewModels\Inventory\Help.cs" />
     <Compile Include="ViewModels\Inventory\InventoryDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReassessmentDocs.cs" />
@@ -747,9 +746,6 @@
     </Compile>
     <Compile Include="Views\Inventory\EditWriteoffDoc.xaml.cs">
       <DependentUpon>EditWriteoffDoc.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Inventory\Frontend.xaml.cs">
-      <DependentUpon>Frontend.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Help.xaml.cs">
       <DependentUpon>Help.xaml</DependentUpon>
@@ -1175,10 +1171,6 @@
     <Page Include="Views\Inventory\EditWriteoffDoc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Inventory\Frontend.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\Help.xaml">
       <SubType>Designer</SubType>

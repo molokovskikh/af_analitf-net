@@ -47,6 +47,11 @@
 					Binding="{Binding Form}"
 					HighlightStyle="{StaticResource DataGridHighlight}"
 					CanUserSort="False" />
+				<controls:SearchableDataGridColumn
+					Width="*"
+					Header="Мин. цена"
+					Binding="{Binding MinCost}"
+					CanUserSort="False" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 

@@ -945,7 +945,8 @@ select
 	c.Toxic,
 	c.Combined,
 	c.Other,
-  c.CategoryId
+	cf.Type,
+	c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.Hidden = 0";
@@ -966,7 +967,8 @@ select
 	c.Toxic,
 	c.Combined,
 	c.Other,
-  c.CategoryId
+	cf.Type,
+	c.CategoryId
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
@@ -1005,7 +1007,7 @@ where p.Hidden = 0";
 select p.Id, p.CatalogId, p.Hidden, substr(concat_ws(' ', c.Name, p.Properties), 1, 255) as Name
 from Catalogs.Products p
 inner join Catalogs.Catalog c on c.Id = p.CatalogId
-where p.Hidden = 0 and p.UpdateTime > ?lastSync";
+where p.UpdateTime > ?lastSync";
 				Export(Result, sql, "Products", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 

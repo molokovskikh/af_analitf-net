@@ -48,6 +48,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
 
+		public virtual uint? Type { get; set; }
+
 		public virtual string PKU
 		{
 			get
