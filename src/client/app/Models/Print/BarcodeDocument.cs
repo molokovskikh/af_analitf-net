@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models.Print
 			BitmapImage result = null;
 			if (barcode?.Length != 13)
 				return result;
-			// не любая строка из 13 цифр является валидным штрихкодом, как валидировать - неизвестно				
+			// не любая строка из 13 цифр является валидным штрихкодом, как валидировать - неизвестно
 			try
 			{
 				using (var barcodeImage = Barcode.DoEncode(TYPE.EAN13, barcode, false, width, height)) {
@@ -102,13 +102,13 @@ namespace AnalitF.Net.Client.Models.Print
 			{
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
-				VerticalAlignment = VerticalAlignment.Center,
 				FontSize = 8,
 				Text = line.Product,
-				Margin = new Thickness(0),
+				Margin = new Thickness(0, 2, 0, 0),
 				Padding = new Thickness(0),
 				LineHeight = 8,
 				LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+				Height = 24,
 			};
 			label1.SetValue(Grid.RowProperty, 1);
 			label1.SetValue(Grid.ColumnSpanProperty, 2);
