@@ -18,7 +18,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var factors = Generator.RandomDouble();
 			session.DeleteEach<DelayOfPayment>();
 			session.SaveEach(session.Query<Price>().Select(p => new DelayOfPayment((decimal)factors.First(), p) {
-				VitallyImportantDelay = (decimal)factors.First()
+				VitallyImportantDelay = (decimal)factors.First(),
+				SupplementDelay = (decimal)factors.First(),
 			}));
 		}
 

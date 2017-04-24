@@ -80,7 +80,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			command = new UpdateCommand {Clean = false};
 			Assert.AreEqual(UpdateResult.OK, Run(command));
 			//тк ничего не изменило мы должны передать только метаданные
-			totalSize = new DirectoryInfo(clientConfig.UpdateTmpDir).GetFiles().Sum(x => x.Length);
+			var files = new DirectoryInfo(clientConfig.UpdateTmpDir).GetFiles();
+			totalSize = files.Sum(x => x.Length);
 			Assert.That(totalSize, Is.LessThan(20*1024));
 		}
 
@@ -403,6 +404,15 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			localSession.Refresh(settings);
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
+
+			// #68427 Корректировка цены БАД
+			var delay = localSession.Query<DelayOfPayment>().First();
+			var price = delay.Price;
+			Assert.AreEqual(price.SupplementCostFactor, 1.02m);
+			var offer = localSession.Query<Offer>().First(x => x.Price == price);
+			offer.CategoryId = 1;
+			offer.VitallyImportant = false;
+			Assert.AreEqual(offer.ResultCost, Math.Round(offer.Cost * price.SupplementCostFactor, 2));
 		}
 
 		[Test]

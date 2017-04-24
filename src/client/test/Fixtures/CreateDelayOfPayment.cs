@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			foreach (var delay in delays) {
 				delay.OtherDelay = generator.First();
 				delay.VitallyImportantDelay = generator.First();
+				delay.SupplementDelay = 2m;
 			}
 		}
 

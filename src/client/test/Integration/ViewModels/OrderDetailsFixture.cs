@@ -131,6 +131,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = MakeOrder();
 			order.Price.CostFactor = 1.5m;
 			order.Price.VitallyImportantCostFactor = 1.5m;
+			order.Price.SupplementCostFactor = 1.5m;
 			var model = Open(new OrderDetailsViewModel(order));
 
 			var cost = Math.Round(1.5m * order.Lines[0].Cost, 2);

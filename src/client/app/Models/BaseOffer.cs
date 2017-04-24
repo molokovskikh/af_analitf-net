@@ -36,6 +36,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint CatalogId { get; set; }
 
+		public virtual uint? CategoryId { get; set; }
+
 		[JsonProperty("SynonymCode")]
 		public virtual uint ProductSynonymId { get; set; }
 
@@ -175,15 +177,24 @@ namespace AnalitF.Net.Client.Models
 			if (price == null)
 				return Cost;
 
-			return Math.Round(VitallyImportant ? Cost * price.VitallyImportantCostFactor : Cost * price.CostFactor, 2);
+			var factor = price.CostFactor;
+			if (VitallyImportant)
+				factor = price.VitallyImportantCostFactor;
+			else if (CategoryId == 1)
+				factor = price.SupplementCostFactor;
+			return Math.Round(Cost * factor, 2);
 		}
 
 		protected virtual decimal GetResultCost(Price price, decimal? cost)
 		{
 			if (price == null || cost == null)
 				return Cost;
-
-			return Math.Round(cost.Value * (VitallyImportant ? price.VitallyImportantCostFactor : price.CostFactor), 2);
+			var factor = price.CostFactor;
+			if (VitallyImportant)
+				factor = price.VitallyImportantCostFactor;
+			else if (CategoryId == 1)
+				factor = price.SupplementCostFactor;
+			return Math.Round(cost.Value * factor, 2);
 		}
 
 		public abstract decimal GetResultCost();
