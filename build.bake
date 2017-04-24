@@ -415,23 +415,18 @@ task "git:tag":
 
 task "test:binary":
 	return unless Globals.Environment == @Production
+
+	proj = "src/service/app/app.csproj"
+	name, output, _ = GetBuildConfig(Globals, proj)
+	bin = FileSet("**/$name.dll", BaseDirectory: output).First()
+	assembly = AssemblyDefinition.ReadAssembly(bin)
+	version = assembly.Name.Version.ToString()
 	try:
 		testId = "26307"
 		testPassword = "TkGJEQUX"
 		if Globals.Maybe.testRelease:
 			unless Globals.Maybe.CheckUrl:
-				proj = "src/service/app/app.csproj"
-				name, output, _ = GetBuildConfig(Globals, proj)
-				bin = FileSet("**/$name.dll", BaseDirectory: output).First()
-				assembly = AssemblyDefinition.ReadAssembly(bin)
-				version = assembly.Name.Version.ToString()
 				Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
-			proj = "src/service/app/app.csproj"
-			name, output, _ = GetBuildConfig(Globals, proj)
-
-			bin = FileSet("**/$name.dll", BaseDirectory: output).First()
-			assembly = AssemblyDefinition.ReadAssembly(bin)
-			version = assembly.Name.Version.ToString()
 			done = false
 			count = 0
 			while not done:
