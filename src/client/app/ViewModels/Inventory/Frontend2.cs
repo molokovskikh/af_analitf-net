@@ -129,13 +129,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				using (var trx = s.BeginTransaction()) {
 					if (Lines.Where(x => x.SourceStock != null).Count() > 0)
 					{
+						s.Insert(UnPackDoc);
+						UnPackDoc.Lines.Each(x => x.UnpackingDocId = UnPackDoc.Id);
 						foreach (var uline in UnPackDoc.Lines)
 						{
 							s.Insert("AnalitF.Net.Client.Models.Inventory.Stock", uline.DstStock);
 							s.Update("AnalitF.Net.Client.Models.Inventory.Stock", uline.SrcStock);
 							s.Insert(uline);
+							UnPackDoc.PostStockActions();
+							s.Insert(uline.SrcStockAction);
+							s.Insert(uline.DstStockAction);
 						}
-						s.Insert(UnPackDoc);
 					}
 					s.Insert(check);
 					Lines.Each(x => x.CheckId = check.Id);

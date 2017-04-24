@@ -18,7 +18,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = quantity;
 			StockIsNew = stockIsNew;
 			Doc = doc;
-			session.Save(Stock.InventoryDoc(Doc, quantity));
+			if (stockIsNew)
+			{
+				Stock.ReservedQuantity += quantity;
+				session.Save(new StockAction(ActionType.Stock, ActionTypeChange.Plus, Stock, Doc, Quantity));
+			}
+			else
+				session.Save(Stock.InventoryDoc(Doc, quantity));
 		}
 
 		public virtual uint Id { get; set; }

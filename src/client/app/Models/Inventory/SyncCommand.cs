@@ -34,7 +34,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 				var lastSync = Settings.LastSync.ToUniversalTime();
 
 				using (var zip = new ZipFile()) {
-						var actions = Session.Connection
+					var stocks = Session.Query<Stock>()
+						.Fetch(x => x.Address)
+						.Where(x => x.Timestamp > lastSync && x.ServerId == null)
+						.ToArray();
+					if (stocks.Length > 0)
+					{
+						zip.AddEntry("stocks", JsonConvert.SerializeObject(stocks), System.Text.Encoding.UTF8);
+					}
+					var actions = Session.Connection
 							.Query<StockAction>("select * from StockActions where Timestamp > @lastSync",
 								new { lastSync })
 							.ToArray();
@@ -84,12 +92,12 @@ from WriteoffLines l
 	join WriteoffDocs d on d.Id = l.WriteoffDocId
 where d.Timestamp > @lastSync");
 
-					WriteModel(zip, disposable, typeof(UnpackingDoc));
-					WriteSql(zip, disposable, "UnpackingLines", @"
+					WriteSql(zip, disposable, "unpacking-lines", @"
 select l.*
 from UnpackingLines l
-	join UnpackingDocs d on d.Id = l.UnpackingDocId
-where d.Timestamp > @lastSync");
+	join UnpackingDocs c on c.Id = l.UnpackingDocId
+where c.Timestamp > @lastSync");
+					WriteSql(zip, disposable, "Unpacking", "select * from UnpackingDocs where Timestamp > @lastSync");
 
 					WriteSql(zip, disposable, "Waybills", @"
 select Id, Timestamp

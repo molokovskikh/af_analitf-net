@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string FromIn
 		{ get { return string.Empty; } }
 		public virtual string OutTo
-		{ get { return "Покупатель"; } }
+		{ get { return string.Empty; } }
 
 		public virtual uint? ServerId { get; set; }
 		public virtual DateTime Timestamp { get; set; }
@@ -88,8 +88,19 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Timestamp = DateTime.Now;
 			foreach (var line in Lines){
 				line.SrcStock.ReservedQuantity -= line.SrcQuantity;
-				line.DstStock.Incoming(line.Quantity);
+				line.DstStock.SupplyQuantity = line.DstStock.Quantity;
+				line.DstStock.Timestamp = DateTime.Now;
+				line.DstStock.ReservedQuantity -= line.DstStock.Quantity;
 			}
+		}
+		public virtual void PostStockActions()
+		{
+			foreach (var line in Lines)
+			{
+				line.SrcStockAction = new StockAction(ActionType.UnpackingDoc, ActionTypeChange.Minus, line.SrcStock, this, line.SrcQuantity);
+				line.DstStockAction = new StockAction(ActionType.Stock, ActionTypeChange.Plus, line.DstStock, this, line.DstStock.Quantity);
+			}
+
 		}
 
 		public virtual void UnPost()

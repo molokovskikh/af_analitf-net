@@ -1,4 +1,5 @@
 ﻿using System;
+using AnalitF.Net.Client.Config.NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -14,7 +15,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			var quantity = 1m;
 			Stock.Copy(srcStock, this);
 			var dstStock = srcStock.Copy();
-			dstStock.Quantity = 0;
+			dstStock.Quantity = multiplicity;
 			dstStock.Unpacked = true;
 			Quantity = dstStock.ReservedQuantity = dstStock.Multiplicity = multiplicity;
 			DstStock = dstStock;
@@ -39,9 +40,17 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SrcRetailCost = srcStock.RetailCost;
 			srcStock.Reserve(1);
 			SrcStock = srcStock;
+			Quantity = DstStock.Multiplicity;
+			if (srcStock.RetailCost.HasValue)
+				RetailCost = dstStock.RetailCost = getPriceForUnit(srcStock.RetailCost.Value, DstStock.Multiplicity);
+
+			if (srcStock.SupplierCost.HasValue)
+				dstStock.SupplierCost = getPriceForUnit(srcStock.SupplierCost.Value, DstStock.Multiplicity);
 		}
 
 		public virtual uint Id { get; set; }
+
+		public virtual uint? UnpackingDocId { get; set; }
 
 		public virtual uint? ServerDocId { get; set; }
 
@@ -64,6 +73,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock SrcStock { get; set; }
 		public virtual Stock DstStock { get; set; }
+		[Ignore]
+		public virtual StockAction SrcStockAction { get; set; }
+		[Ignore]
+		public virtual StockAction DstStockAction { get; set; }
 
 		private decimal getPriceForUnit(decimal price, int multiplicity)
 		{

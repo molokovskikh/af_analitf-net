@@ -36,13 +36,34 @@ namespace AnalitF.Net.Service.Controllers
 			var serverTimestamp = DateTime.Now;
 			var lastSync = DateTime.MinValue;
 			var postProcessing = new List<string>();
-			using (var zip = ZipFile.Read(input)) {
-				foreach (var item in zip) {
-					if (item.FileName == "stock-actions") {
+			using (var zip = ZipFile.Read(input))
+			{
+				foreach (var item in zip)
+				{
+					if (item.FileName == "stocks")
+					{
+						var reader = new JsonTextReader(new StreamReader(item.OpenReader()));
+						var serializer = new JsonSerializer();
+						var stocks = serializer.Deserialize<Stock[]>(reader);
+						foreach (var stock in stocks)
+						{
+							try
+							{
+								CreateNewStock(stock);
+							}
+							catch (Exception ex)
+							{
+								log.Error(ex);
+							}
+						}
+						continue;
+					}
+					else if (item.FileName == "stock-actions")
+					{
 						var reader = new JsonTextReader(new StreamReader(item.OpenReader()));
 						var serializer = new JsonSerializer();
 						var actions = serializer.Deserialize<StockActionAttrs[]>(reader);
-						foreach (var action in actions) {
+						foreach (var action in actions)	{
 							try {
 								HandleStockAction(action);
 							} catch (Exception ex) {
@@ -50,7 +71,7 @@ namespace AnalitF.Net.Service.Controllers
 							}
 						}
 						continue;
-					} else if (item.FileName == "server-timestamp") {
+					} else if (item.FileName == "server-timestamp")	{
 						var stream = item.OpenReader();
 						var buffer = new byte[stream.Length];
 						stream.Read(buffer, 0, buffer.Length);
@@ -69,12 +90,14 @@ namespace AnalitF.Net.Service.Controllers
 						table.Columns.Remove("Timestamp");
 
 					MySqlCommand cmd;
-					var columnMap = new Dictionary<string ,string>(StringComparer.InvariantCultureIgnoreCase) {
+					var columnMap = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
 						{ "Id", "ClientPrimaryKey" }
 					};
 					if (item.FileName == "check-lines") {
 						columnMap.Add("CheckId", "ClientDocId");
-					} else if (item.FileName.EndsWith("Lines")) {
+					} else if (item.FileName == "unpacking-lines") {
+						columnMap.Add("UnpackingDocId", "ClientDocId");
+					} else if (item.FileName.EndsWith("Lines"))	{
 						var name = item.FileName.Replace("Lines", "");
 						columnMap.Add($"{name}DocId", "ClientDocId");
 					}
@@ -95,9 +118,21 @@ join Inventory.Checks d on d.ClientPrimaryKey = l.ClientDocId and d.UserId = l.U
 set l.CheckId = d.Id
 where l.CheckId is null
 	and d.UserId = ?userId");
+					} else if (item.FileName == "Unpacking") {
+						cmd = new MySqlCommand($"insert into Inventory.UnpackingDocs (UserId, {columns}) values (?userId, {parametersSql});");
+					}
+					else if (item.FileName == "unpacking-lines")
+					{
+						cmd = new MySqlCommand($"insert into Inventory.UnpackingLines (UserId, {columns}) values (?userId, {parametersSql});");
+						postProcessing.Add(@"
+update Inventory.UnpackingLines l
+join Inventory.UnpackingDocs d on d.ClientPrimaryKey = l.ClientDocId and d.UserId = l.UserId
+set l.UnpackingDocId = d.Id
+where l.UnpackingDocId is null
+and d.UserId = ?userId");
 					} else if (item.FileName.EndsWith("Docs")) {
 						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} (UserId, {columns}) values (?userId, {parametersSql});");
-					} else if (item.FileName.EndsWith("Lines")) {
+					} else if (item.FileName.EndsWith("Lines"))	{
 						var name = item.FileName.Replace("Lines", "");
 						cmd = new MySqlCommand($"insert into Inventory.{item.FileName} (UserId, {columns}) values (?userId, {parametersSql});");
 						postProcessing.Add($@"
@@ -125,14 +160,15 @@ where l.{name}DocId is null
 					foreach (var row in table.AsEnumerable()) {
 						foreach (DataColumn column in table.Columns) {
 							var value = row[column];
-							if (value is DateTime) {
+							if (value is DateTime)
+							{
 								value = ((DateTime)value).ToLocalTime();
 							}
 							cmd.Parameters[columnMap[column.ColumnName]].Value = value;
 						}
-						try {
+						try	{
 							cmd.ExecuteNonQuery();
-						} catch(Exception e) {
+						} catch (Exception e) {
 							throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
 						}
 					}
@@ -140,7 +176,7 @@ where l.{name}DocId is null
 			}
 
 			Stock.CreateInTransitStocks(Session, CurrentUser);
-			foreach (var sql in postProcessing) {
+			foreach (var sql in postProcessing)	{
 				Session.Connection.Execute(sql, new { userId = CurrentUser.Id });
 			}
 			var memory = new MemoryStream();
@@ -174,21 +210,25 @@ where l.{name}DocId is null
 				if (source == null)
 					throw new Exception($"Не удалось найти запись {action.ClientStockId}");
 			}
-			if (action.ActionType == ActionType.Sale)
-				source.Quantity -= action.Quantity;
-			else if (action.ActionType == ActionType.CheckReturn)
-				source.Quantity += action.Quantity;
-			else if (action.ActionType == ActionType.Stock) {
+			if (action.ActionType == ActionType.Stock
+				 || action.ActionType == ActionType.DisplacementFrom)
+			{
 				source.ClientPrimaryKey = action.ClientStockId;
 				source.CreatedByUser = CurrentUser;
 				source.RetailCost = action.RetailCost;
 				source.RetailMarkup = action.RetailMarkup;
 				source.Status = StockStatus.Available;
 				source.CreatedByUser = CurrentUser;
-				Session.Save(source);
-			} else {
+			}
+			else if (action.TypeChange == ActionTypeChange.Plus)
+				source.Quantity += action.Quantity;
+			else if (action.TypeChange == ActionTypeChange.Minus)
+				source.Quantity -= action.Quantity;
+			else
+			{
 				throw new Exception($"Неизвестная операция {action.ActionType} над строкой {action.SourceStockId}");
 			}
+			Session.Save(source);
 
 			string sql = @"insert into Inventory.stockactions " +
 		"(UserId, Timestamp, DisplayDoc, NumberDoc, FromIn, OutTo, ActionType, TypeChange, " +
@@ -207,8 +247,8 @@ where l.{name}DocId is null
 			cmd.Parameters.AddWithValue("ActionType", (int)action.ActionType);
 			cmd.Parameters.AddWithValue("TypeChange", (int)action.TypeChange);
 			cmd.Parameters.AddWithValue("ClientStockId", action.ClientStockId);
-			cmd.Parameters.AddWithValue("SourceStockId", action.SourceStockId);
-			cmd.Parameters.AddWithValue("SourceStockVersion", action.SourceStockVersion);
+			cmd.Parameters.AddWithValue("SourceStockId", source.Id);
+			cmd.Parameters.AddWithValue("SourceStockVersion", source.Version);
 			cmd.Parameters.AddWithValue("Quantity", action.Quantity);
 			cmd.Parameters.AddWithValue("RetailCost", action.RetailCost);
 			cmd.Parameters.AddWithValue("RetailMarkup", action.RetailMarkup);
@@ -223,6 +263,21 @@ where l.{name}DocId is null
 			{
 				throw new Exception($"Не удалось выполнить запрос {cmd.CommandText}", e);
 			}
+		}
+
+		private void CreateNewStock(Stock stock)
+		{
+			Stock source;
+			source = Session.Query<Stock>().OrderByDescending(x => x.Id)
+				.FirstOrDefault(x => x.CreatedByUser == CurrentUser && x.ClientPrimaryKey == stock.Id);
+			if (source == null)
+			{
+				stock.ClientPrimaryKey = (uint)stock.Id;
+				stock.CreatedByUser = CurrentUser;
+				stock.Quantity = stock.SupplyQuantity;
+				Session.Save(stock);
+			}
+
 		}
 	}
 }

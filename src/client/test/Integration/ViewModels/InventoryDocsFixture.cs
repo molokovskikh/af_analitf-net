@@ -112,7 +112,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 3);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 			Assert.AreEqual(stock.Status, StockStatus.Available);
 
@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 0);
 			Assert.AreEqual(stock.ReservedQuantity, 3);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 3);
 			Assert.AreEqual(line.Quantity, 3);
 			Assert.AreEqual(stock.Status, StockStatus.InTransit);
 
@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 			Assert.AreEqual(stock.Quantity, 0);
 			Assert.AreEqual(stock.ReservedQuantity, 0);
-			Assert.AreEqual(stock.SupplyQuantity, 0);
+			Assert.AreEqual(stock.SupplyQuantity, 3);
 		}
 	}
 }

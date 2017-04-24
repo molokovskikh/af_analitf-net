@@ -80,6 +80,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Stock(ISession session, Product product, Address address, StockStatus status, decimal? retailCost = null)
 		{
+			Timestamp = DateTime.Now;
 			Product = session.Load<Catalog>(product.CatalogId).FullName;
 			Address = address;
 			ProductId = product.Id;
@@ -94,6 +95,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Stock(Waybill waybill, WaybillLine line, ISession session)
 		{
+			Timestamp = DateTime.Now;
 			WaybillId = waybill.Id;
 			WaybillLineId = line.Id;
 			Status = StockStatus.Available;
@@ -139,6 +141,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual ulong? ServerId { get; set; }
 		public virtual int? ServerVersion { get; set; }
 
+		public virtual DateTime Timestamp { get; set; }
 		public virtual Address Address { get; set; }
 		public virtual StockStatus Status { get; set; }
 
@@ -177,6 +180,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			get
 			{
+				if (SupplierCost == null || SupplierCostWithoutNds == null)
+					return null;
 				if ((SupplierCost == SupplierCostWithoutNds) && (Nds == null || Nds == 0))
 					return Nds;
 				return Math.Round(((SupplierCost - SupplierCostWithoutNds) * Quantity).Value, 2);

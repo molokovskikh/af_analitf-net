@@ -3,14 +3,20 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate;
 using ReactiveUI;
+using NHibernate.Linq;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class EditUnpackingDoc : BaseScreen2
 	{
+
+		private uint id;
+
 		private EditUnpackingDoc()
 		{
-			Lines = new ReactiveCollection<UnpackingLine>();
+			Lines = new NotifyValue<IList<UnpackingLine>>();
 			Session.FlushMode = FlushMode.Never;
 		}
 
@@ -19,11 +25,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			DisplayName = "Детализация распаковки";
 			InitDoc(Session.Load<UnpackingDoc>(id));
-			Lines.AddRange(Doc.Lines);
+			//Lines.AddRange(Doc.Lines);
+			this.id = id;
 		}
 
 		public UnpackingDoc Doc { get; set; }
-		public ReactiveCollection<UnpackingLine> Lines { get; set; }
+		public NotifyValue<IList<UnpackingLine>> Lines { get; set; }
 		public NotifyValue<UnpackingLine> CurrentLine { get; set; }
 		public NotifyValue<bool> CanPost { get; set; }
 		public NotifyValue<bool> CanUnPost { get; set; }
@@ -34,6 +41,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			if (Doc.Id == 0)
 				Doc.Address = Address;
+			RxQuery(x => {
+				return x.Query<UnpackingLine>()
+					.Fetch(y => y.DstStock)
+					.Where(y => y.UnpackingDocId == id)
+					.ToList()
+					.ToObservableCollection();
+			})
+				.Subscribe(Lines);
 		}
 
 		protected override void OnDeactivate(bool close)
