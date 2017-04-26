@@ -480,6 +480,8 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				return "'" + ((DateTime)defaultValue).ToString(MySqlConsts.MySQLDateFormat) + "'";
 			if (defaultValue is TimeSpan)
 				return new TimeSpanType().ObjectToSQLString(defaultValue, dialect);
+			if (defaultValue is Guid)
+				return new GuidType().ObjectToSQLString(defaultValue, dialect);
 			if (Util.IsNumeric(defaultValue))
 				return ((IFormattable)defaultValue).ToString(null, CultureInfo.InvariantCulture);
 			throw new Exception(propertyInfo.PropertyType.ToString());

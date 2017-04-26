@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			RegisterCastType(DbType.Decimal, "DECIMAL(19,5)");
 			RegisterCastType(DbType.Double, "DECIMAL(19,5)");
 			RegisterCastType(DbType.Single, "DECIMAL(19,5)");
+			RegisterColumnType(DbType.Guid, "CHAR(36)");
 		}
 
 		public override IDataBaseSchema GetDataBaseSchema(DbConnection connection)
