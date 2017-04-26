@@ -5,7 +5,6 @@ using Common.Models.Repositories;
 using NHibernate;
 using SmartOrderFactory;
 using SmartOrderFactory.Repositories;
-using With = Common.MySql.With;
 
 namespace AnalitF.Net.Service.Config.Initializers
 {
@@ -13,7 +12,6 @@ namespace AnalitF.Net.Service.Config.Initializers
 	{
 		public void Init(ISessionFactory factory)
 		{
-			With.DefaultConnectionStringName = "local";
 			IoC.Initialize(new WindsorContainer()
 				.Register(
 					Component.For<ISessionFactoryHolder>().Instance(new SessionFactoryHolder(factory)),
