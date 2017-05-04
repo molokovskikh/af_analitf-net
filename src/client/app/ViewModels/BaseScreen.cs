@@ -344,7 +344,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (docSettings != null) {
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+
+			var printResult = new PrintResult(name, doc);
+			var model = new PrintPreviewViewModel(printResult);
+			yield return new DialogResult(model, fullScreen: true);
 		}
 
 		private void SaveSettingWithReopenScreen()

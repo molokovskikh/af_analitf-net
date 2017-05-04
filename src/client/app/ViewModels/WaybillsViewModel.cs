@@ -12,14 +12,11 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
-using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 using Caliburn.Micro;
-using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
-using System.Collections.Specialized;
 using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
@@ -403,12 +400,12 @@ namespace AnalitF.Net.Client.ViewModels
 				foreach (var item in printItems) {
 					if ((string)item.Header == DisplayName)
 						docs.Add(new WaybillsDoc(Waybills.Value.ToArray()));
-				}
+				}				
 				return new PrintResult(DisplayName, docs, PrinterName);
 			}
 
-			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)
-				Coroutine.BeginExecute(PrintPreview().GetEnumerator());
+			if (String.IsNullOrEmpty(LastOperation) || LastOperation == DisplayName)		
+				 Coroutine.BeginExecute(PrintPreview().GetEnumerator());		
 			return null;
 		}
 

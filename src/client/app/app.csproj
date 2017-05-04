@@ -446,6 +446,7 @@
     <Compile Include="ViewModels\Dialogs\PrintSetting.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementNegotiationProtocol.cs" />
     <Compile Include="ViewModels\Dialogs\RequirementWaybill.cs" />
+    <Compile Include="ViewModels\Dialogs\PrintProgressViewModel.cs" />
     <Compile Include="ViewModels\Inventory\AddDefectusLine.cs" />
     <Compile Include="ViewModels\Inventory\CatalogChooser.cs" />
     <Compile Include="ViewModels\Inventory\ExpSelector.cs" />
@@ -543,6 +544,7 @@
     <Compile Include="ViewModels\Offers\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\Dialogs\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\Parts\TabNavigator.cs" />
+    <Compile Include="ViewModels\PrintAsync.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\Sbis\Index.cs" />
@@ -561,6 +563,9 @@
     </Compile>
     <Compile Include="Views\AddWaybillLineFromCatalog.xaml.cs">
       <DependentUpon>AddWaybillLineFromCatalog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\PrintProgressView.xaml.cs">
+      <DependentUpon>PrintProgressView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\AddDefectusLine.xaml.cs">
       <DependentUpon>AddDefectusLine.xaml</DependentUpon>
@@ -967,6 +972,10 @@
     <Page Include="Views\Diadok\Sign.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\PrintProgressView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\AddDefectusLine.xaml">
       <Generator>MSBuild:Compile</Generator>

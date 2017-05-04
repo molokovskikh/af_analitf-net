@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -38,12 +37,10 @@ using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Util;
 using ReactiveUI;
-using Xceed.Wpf.Toolkit;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
@@ -615,6 +612,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool IsView { get; set; }
 		public static RoutedCommand PrintStockRoutedCommand = new RoutedCommand();
 
+
+		
+
 		public IResult Print()
 		{
 			if (!CanPrint.Value)
@@ -622,7 +622,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var printable = (IPrintable)ActiveItem;
 			printable.IsView = IsView;
 			printable.PrinterName = PrinterName;
-			return printable.Print();
+			return new PrintAsync(this.windowManager, printable.Print);	
 		}
 
 		public IResult Preview()
